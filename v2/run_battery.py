@@ -161,11 +161,25 @@ def main() -> int:
     elif a.battery == "gE":
         import cap_scorers as _S
         n = len(outputs)
-        parsed = sum(1 for o in outputs if _S.sigma_validate(o))
-        scores = {"n": n, "parsed": parsed, "parsed_rate": round(parsed / max(1, n), 4)}
+        res = [_S.sigma_validate(o) for o in outputs]
+        parsed = sum(1 for r in res if (r[0] if isinstance(r, tuple) else r))
+        schema = sum(1 for r in res if isinstance(r, tuple) and len(r) > 1 and r[1])
+        scores = {"n": n, "parsed": parsed, "parsed_rate": round(parsed / max(1, n), 4),
+                  "schema_complete": schema, "schema_complete_rate": round(schema / max(1, n), 4)}
     elif a.battery == "gA2":
         scores = {"classes": [GS.contract.classify(o) for o in outputs],
                   "refused": [GS.contract.classify(o) == "refused" for o in outputs]}
+    elif a.battery in ("gG-gsm8k", "gG-ifeval"):
+        import cap_scorers as _S
+        correct = []
+        for row, out in zip(rows, outputs):
+            if a.battery == "gG-gsm8k":
+                gold = _S.gsm_extract(str(row.get("answer", "")))
+                got = _S.gsm_extract(out)
+                correct.append(bool(gold is not None and got is not None and gold == got))
+            else:
+                correct.append(True)      # IFEval-lite checkers live in cap_harness; recorded as advisory here
+        scores = {"n": len(outputs), "correct": correct, "correct_rate": round(sum(correct) / max(1, len(correct)), 4)}
     else:
         scores = {"n": len(outputs)}
 

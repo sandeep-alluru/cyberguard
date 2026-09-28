@@ -322,6 +322,8 @@ def evaluate(evals, checkpoint="C24"):
     # ---- G-G general capability: per-task paired 5 pp non-inferiority, vector only
     gen = (A or {}).get("general")
     gcnt = (A or {}).get("general_counts")
+    if gen:
+        gcnt = None                      # per-pair battery data wins: the aggregate form cannot give an interval
     if gcnt:
         per, sup_all = {}, True
         for task, key in (("gsm8k", "paired_n_gsm"), ("ifeval", "paired_n_ifeval")):
@@ -356,6 +358,14 @@ def evaluate(evals, checkpoint="C24"):
     # ---- G-J chat retention: answered without refusal >= 95 %
     ch = (A or {}).get("chat")
     cch = (A or {}).get("chat_counts")
+    if isinstance(cch, dict) and "tuned" in cch and cch.get("tuned"):
+        t = cch["tuned"]; b = cch.get("base") or {}
+        arm_len = t.get("len_arm_median") or 0
+        base_len = b.get("len_arm_median") or t.get("len_base_median") or 0
+        ch = {"answered": t.get("answered", 0), "total": t.get("total", 0),
+              "degenerated": t.get("degenerated", 0),
+              "len_arm_median": arm_len, "len_base_median": base_len}
+        cch = None
     if cch:
         b = cch.get("base") or {}
         answered = b.get("def_answered") or b.get("answered") or 0

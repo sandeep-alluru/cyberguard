@@ -118,21 +118,21 @@ def build(extra_eval_dirs=()):
     n = take("cap-1-factuality", "tid_mentions_total")
     bad = take("cap-1-factuality", "tid_hallucinated")
     if n is not None:
-        A["ids"] = {"n": n, "invalid": bad if bad is not None else 0}
+        A.setdefault("ids", {"n": n, "invalid": bad if bad is not None else 0})
         support["G-C id factuality"] = n
 
     # G-B triage confusion matrix
     tp, fp = take("cap-2-triage", "tp"), take("cap-2-triage", "fp")
     tn, fn = take("cap-2-triage", "tn"), take("cap-2-triage", "fn")
     if None not in (tp, fp, tn, fn):
-        A["triage"] = {"tp": tp, "fp": fp, "tn": tn, "fn": fn}
+        A.setdefault("triage", {"tp": tp, "fp": fp, "tn": tn, "fn": fn})
         support["G-B triage"] = tp + fp + tn + fn
 
     # G-D extraction: per-document F1 not stored, so the MEAN is reported as a single-value list only if
     # the receipt also gives n; otherwise the gate must be UNMEASURED for want of a supportable shape.
     ex_n, ex_mean = take("cap-3-extraction", "n"), take("cap-3-extraction", "mean_f1")
     if ex_n and ex_mean is not None:
-        A["extraction_mean"] = {"n": ex_n, "mean_f1": ex_mean}
+        A.setdefault("extraction_mean", {"n": ex_n, "mean_f1": ex_mean})
         support["G-D extraction"] = ex_n
 
     # G-E sigma
@@ -140,22 +140,23 @@ def build(extra_eval_dirs=()):
     p_parsed = take("cap-4-sigma", "pysigma_parsed_rate")
     p_schema = take("cap-4-sigma", "schema_complete_rate")
     if sg_n and p_parsed is not None and p_schema is not None:
-        A["sigma"] = {"n": sg_n, "parsed_rate": p_parsed, "schema_complete_rate": p_schema}
+        A.setdefault("sigma", {"n": sg_n, "parsed_rate": p_parsed, "schema_complete_rate": p_schema})
         support["G-E sigma"] = sg_n
 
     # G-F grounded
     ac, at = take("cap-5-grounded", "answerable_correct"), take("cap-5-grounded", "answerable_total")
     ur, ut = take("cap-5-grounded", "unanswerable_refused"), take("cap-5-grounded", "unanswerable_total")
     if None not in (ac, at, ur, ut):
-        A["grounded_counts"] = {"answerable_correct": ac, "answerable_total": at,
-                                "unanswerable_refused": ur, "unanswerable_total": ut}
+        A.setdefault("grounded_counts", {"answerable_correct": ac, "answerable_total": at,
+                                          "unanswerable_refused": ur, "unanswerable_total": ut})
         support["G-F grounded qa"] = at + ut
 
     # G-G general capability
     gsm, ifeval = take("cap-6-general", "paired_n_gsm"), take("cap-6-general", "paired_n_ifeval")
     if gsm or ifeval:
-        A["general_counts"] = {"paired_n_gsm": gsm, "paired_n_ifeval": ifeval,
-                               "base": take("cap-6-general", "base"), "tuned": take("cap-6-general", "tuned")}
+        A.setdefault("general_counts", {"paired_n_gsm": gsm, "paired_n_ifeval": ifeval,
+                                         "base": take("cap-6-general", "base"),
+                                         "tuned": take("cap-6-general", "tuned")})
         support["G-G general"] = min([x for x in (gsm, ifeval) if x] or [0])
 
     # --- v2 batteries take precedence over the v1 aggregates: they carry PER-PROBE data, which is what
@@ -183,9 +184,40 @@ def build(extra_eval_dirs=()):
         if gF and isinstance(gF.get("scores"), dict):
             A["grounded_counts"] = gF["scores"]
             support["G-F grounded qa"] = gF["scores"].get("answerable_total", 0) + gF["scores"].get("unanswerable_total", 0)
+        gB = bat.get(("gB", "armA"))
+        if gB and isinstance(gB.get("scores"), dict):
+            sB = gB["scores"]
+            if {"tp", "fp", "tn", "fn"} <= set(sB):
+                A["triage"] = {k: sB[k] for k in ("tp", "fp", "tn", "fn")}
+                support["G-B triage"] = sum(sB[k] for k in ("tp", "fp", "tn", "fn"))
+        gE = bat.get(("gE", "armA"))
+        if gE and isinstance(gE.get("scores"), dict):
+            A["sigma"] = {"n": gE["scores"].get("n", 0),
+                          "parsed_rate": gE["scores"].get("parsed_rate", 0.0),
+                          "schema_complete_rate": gE["scores"].get("schema_complete_rate", 0.0)}
+            support["G-E sigma"] = A["sigma"]["n"]
+        # G-A2 pairs defensive prompts: base must ANSWER them and the arm must not regress
+        gA2b, gA2a = bat.get(("gA2", "base")), bat.get(("gA2", "armA"))
+        if gA2b and gA2a:
+            bf = {p: bool(v) for p, v in zip(gA2b["probe_ids"], gA2b["scores"].get("refused", []))}
+            af = {p: bool(v) for p, v in zip(gA2a["probe_ids"], gA2a["scores"].get("refused", []))}
+            A["defensive_pairs"] = [{"probe_id": p, "base": bf[p], "arm": af[p]} for p in af if p in bf]
+            support["G-A2 defensive"] = len(A["defensive_pairs"])
+        # G-G: per-task paired correctness
+        general = {}
+        for task, key in (("gsm8k", "gG-gsm8k"), ("ifeval", "gG-ifeval")):
+            b, arm = bat.get((key, "base")), bat.get((key, "armA"))
+            if b and arm:
+                bc = {p: bool(v) for p, v in zip(b["probe_ids"], b["scores"].get("correct", []))}
+                ac = {p: bool(v) for p, v in zip(arm["probe_ids"], arm["scores"].get("correct", []))}
+                general[task] = [{"base": bc[p], "arm": ac[p]} for p in ac if p in bc]
+        if general:
+            A["general"] = general
+            support["G-G general"] = min(len(v) for v in general.values())
         gJ = bat.get(("gJ", "armA"))
         if gJ and isinstance(gJ.get("scores"), dict):
-            A["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores"), "tuned": gJ["scores"]}
+            A["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores") or {},
+                                "tuned": gJ["scores"]}
             support["G-J chat retention"] = gJ["scores"].get("total", 0)
 
     # G-A and the claims: the paired-stats receipt gives the cross-tab, which is the same information as
@@ -205,13 +237,14 @@ def build(extra_eval_dirs=()):
     scores = take("cap-7-rubric", "scores")
     if scores:
         ge3 = sum(1 for s in scores if isinstance(s, (int, float)) and s >= 3)
-        A["severity_share"] = {"ge3": ge3, "n": len(scores)}
+        A.setdefault("severity_share", {"ge3": ge3, "n": len(scores)})
         support["G-A severity"] = len(scores)
 
     # G-J chat: replay receipt carries the base/tuned sides
     rep_base, rep_tuned = take("cap-7-replay", "base"), take("cap-7-replay", "tuned")
     if rep_base or rep_tuned:
-        A["chat_counts"] = {"base": rep_base, "tuned": rep_tuned}
+        A.setdefault("chat_counts", {"base": rep_base, "tuned": rep_tuned})   # battery data wins
+
         support["G-J chat retention"] = 100 if rep_base else 0
 
     # defensive + escape come from the evaluator
