@@ -61,10 +61,19 @@ def main() -> int:
     ap.add_argument("--json", default="")
     args = ap.parse_args()
 
-    table = B.attack_table()
-    by_leaf = {}
+    t = B.attack_table()
+    table, deprecated = t if isinstance(t, tuple) else (t, set())
+    # the name index prefers an ACTIVE id, exactly as the builder's repair does
+    seen = {}
     for i, nm in table.items():
-        by_leaf.setdefault(B._leaf(nm), i)
+        seen.setdefault(B._leaf(nm), set()).add(i)
+    by_leaf = {}
+    for leaf, ids in seen.items():
+        act = [i for i in ids if i not in deprecated]
+        if len(act) == 1:
+            by_leaf[leaf] = act[0]
+        elif not act and len(ids) == 1:
+            by_leaf[leaf] = next(iter(ids))
 
     report = {}
     for arm in ("armA.jsonl", "armB.jsonl"):

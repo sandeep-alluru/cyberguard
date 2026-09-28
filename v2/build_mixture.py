@@ -799,13 +799,14 @@ def attack_table():
                 # objects only moves the problem: ids that exist ONLY there become unknown. So every
                 # object stays in the identity table and revoked/deprecated ones are merely marked, so the
                 # NAME index can prefer an active id and the identity table still resolves old ids.
-                if o.get("revoked") or o.get("x_mitre_deprecated"):
-                    _deprecated.add(eid)
-                    continue
+                # (marking happens below, AFTER the id is recorded: marking it here with `continue`
+                # skipped the assignment, which made every deprecated id read as "unknown")
                 for er in o.get("external_references") or []:
                     eid = er.get("external_id") or ""
                     if re.fullmatch(r"T\d{4}(\.\d{3})?", eid):
                         m[eid] = o.get("name") or ""
+                        if o.get("revoked") or o.get("x_mitre_deprecated"):
+                            _deprecated.add(eid)       # marked, still resolvable by id
                         break
         except Exception:                               # noqa: BLE001
             m = {}
