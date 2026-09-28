@@ -1097,3 +1097,29 @@ fabricated-IOC finding has **no training-side mitigation in this build**.
 - **Astra dispatched on PLAN-SEQUENCE.md** with instructions to verify claims **against the filesystem**
   rather than trusting the prose: run each unit's exit command, confirm the DONE states, check the gate
   table against SPEC-V2 §7, and confirm §6's open-item list has not been softened.
+
+## 2026-09-27 — LEDGER + SPEC READY FOR OWNER APPROVAL (cadence: 3 h checkpoints, Astra each)
+
+Owner instruction: roll out the fixes across the whole plan, checkpoint every 3 h, **Astra reviews every
+checkpoint**, findings fixed before proceeding, and report when the ledger is ready for goal approval.
+
+**Rolled out:** (1) `--verify-receipt` is now **read-only** — a reviewer sandbox could not run it before,
+which made U13's exit command unverifiable by design; (2) `v2/data/mixture/FACTS.json` is the **single
+source of truth** for every number, and every document cites it — **including the correction of my own
+slots-vs-unique bug, committed twice, once inside the file created to prevent it**; (3) §8 gains the
+missing C24 G-A row and loses the dead "row above" reference; (4) the **cadence** is now written into
+§11: a checkpoint every 3 h, Astra review at each, fixed before proceeding, full review for material
+changes and a hash-bound delta check for arithmetic/wording; (5) the two items the plan review named and
+this document had left unaddressed are **dispositioned** — reduced replay support (600 pairs, accepted as
+the floor, G-J decides) and surviving damaged targets (1 residue row, 2 over-budget rows, both accepted
+and recorded at 0.001 %/0.002 %).
+
+**Final numbers, all from `FACTS.json`:** epoch **81,402** rows/arm; refusal **9,584 slots from 1,198
+unique rows** (700 offensive refusals + 498 genuine abstentions) = **11.77 %** of the epoch; 24 h =
+**109.6 %** of an epoch with **8.77 passes per refusal row**; arms differ in **exactly 9,584** slots.
+Audit **PASS (0 failures, 0 warnings)**, `--verify-receipt` → 0, printing `RECEIPT-BOUND`.
+
+**Ready for approval:** `docs/SPEC-V2.md`, `docs/PLAN-SEQUENCE.md`, `docs/OVERENGINEERING-REVIEW.md`,
+`LEDGER.md`, the CRAFT corpus (77 lessons), and eight CEO-desk briefs — all consistent with `FACTS.json`.
+Open work is the four data items D1–D4, each with an owner and an exit, and the cadence above applies to
+closing them.
