@@ -1031,3 +1031,24 @@ substituted slots. Audited epoch: **81,926 presentations** per arm.
 `research-tmp/reviews/muse-data-review.log` (**Muse Code 1.4.0, headless via `muse exec --prompt-file`**
 — it ran; noted only that its automatic agent-delegation is unavailable because the workspace is
 untrusted, which does not affect a read-only review).
+
+## 2026-09-27 — CHECKPOINT REPORTS (owner instruction: a written report per checkpoint, on the desk)
+
+Owner instruction: *"Write detailed reports … every checkpoint you need to write reports."* Adopted as a
+standing rule for this project and recorded in memory: **every checkpoint produces a dated brief on the
+CEO desk**, verified to render (HTTP 200, 0 raw IPv4), stating what was verified, what is still open, and
+the cost to date. Existing chain, all portal-verified:
+
+| brief | checkpoint |
+|---|---|
+| `2026-09-26_181000CDT-…-dsh-session-audit-ceo-brief.md` | the 12-session endpoint wipeout, root-caused |
+| `2026-09-26_203500CDT-…-audit-followup-ceo-brief.md` | open items after the audit |
+| `2026-09-27_064500CDT-…-v1-result-ceo-brief.md` | v1 trained and benchmarked |
+| `2026-09-27_143000CDT-…-capability-gapmap-ceo-brief.md` | the safety regression and the honest gap map |
+| `2026-09-27_203600CDT-…-v2-plan-ceo-brief.md` | the v2 plan of record, the CRAFT corpus, the review loop |
+| `2026-09-27_231500CDT-…-checkpoint1-two-machine-authorization.md` | 24 h + both machines; one arm → two arms; the control's coverage confound caught pre-launch |
+| `2026-09-27_231600CDT-…-checkpoint2-admission-gate-passes.md` | 9 candidates measured, 8 admitted, 1 rejected, 0 unmeasured; extraction hole closed |
+| `2026-09-27_231700CDT-…-checkpoint3-data-audit-and-independent-review.md` | the three audit defects (incl. 492 held-out rows in training), the Astra review's `NOT CLEARED`, the fixes and the **four open items** |
+
+Each subsequent data checkpoint (leakage unification, control matching, format semantics, audit coverage,
+then the re-review) will produce its own brief rather than being folded into this one.
