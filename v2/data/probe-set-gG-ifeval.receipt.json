@@ -1,0 +1,11 @@
+{
+  "rows": 40,
+  "sha256": "90d9c826db7c791c09adc2b45b9444baabc7cc01324980d22ec653f66ececb28",
+  "seed": 0,
+  "gate": "G-G general capability",
+  "task": "ifeval",
+  "n_reachable": 40,
+  "n_prespecified": 1200,
+  "source": "cap_probes.PB.IFEVAL (authored)",
+  "note": "official IFEval is 541 prompts and is not cached"
+}

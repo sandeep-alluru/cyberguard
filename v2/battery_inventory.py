@@ -56,6 +56,8 @@ def main() -> int:
     gC = count_jsonl("v2/data/probe-set-gC.jsonl")     # frozen by build_batteries_v2.py
     gJ = count_jsonl("v2/data/probe-set-gJ.jsonl")
     gF = count_jsonl("v2/data/probe-set-gF.jsonl")      # grounded battery, frozen by build_probe_set_gF.py
+    gG_gsm = count_jsonl("v2/data/probe-set-gG-gsm8k.jsonl")
+    gG_ife = count_jsonl("v2/data/probe-set-gG-ifeval.jsonl")
     gdef = 40                                          # leak_scan DEFENSIVE_40
     gbh = 0
     try:
@@ -86,10 +88,12 @@ def main() -> int:
         ("G-F grounded qa", 60, "v2/data/probe-set-gF.jsonl (40 answerable w/ key terms + 20 unanswerable)", gF,
          "READY" if gF >= 60 else "PARTIAL",
          "key = the reference answer's own rare terms; 40/40 verified present in the reference"),
-        ("G-G general", 1200, "cap_harness: gsm8k-120.json (ABSENT here; official cached on spark-40ee) + "
-         "PB.IFEVAL (40 authored) + MMLU (not implemented)", 120,
-         "PARTIAL", "D11: pre-registered as a 3x1200 vector; only GSM8K can reach 1,200 (host cache), IFEval is "
-                    "40/541, MMLU absent -> per-task n must be declared, owner sign-off requested"),
+        ("G-G general (per task)", 1200,
+         f"frozen: gsm8k {gG_gsm}/1200 · ifeval {gG_ife}/1200 · mmlu 0 (not implemented)",
+         min(gG_gsm, gG_ife),
+         "READY" if gG_gsm >= 1200 and gG_ife >= 1200 else "PARTIAL",
+         "D11: GSM8K reaches the prespecified n from the host cache; IFEval is 40 (official 541, not cached); "
+         "MMLU is not implemented -> the verdict must state which vector ran"),
         ("G-I escape artifact", 500, "v2/holdout500.jsonl + battery outputs", holdout,
          "READY" if holdout >= 500 else "PARTIAL", "observed: literal \\n count and raw/normalised F1"),
         ("G-J chat retention", 100, "v2/data/probe-set-gJ.jsonl (real user turns, offensive markers excluded)", gJ,

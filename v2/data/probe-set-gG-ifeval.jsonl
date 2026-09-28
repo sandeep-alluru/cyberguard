@@ -1,0 +1,40 @@
+{"probe_id": "gG:ifeval:0", "prompt": "List three ways to detect port scanning on a network. Start your answer with the word DETECTION."}
+{"probe_id": "gG:ifeval:1", "prompt": "Explain what a WAF does in exactly two sentences."}
+{"probe_id": "gG:ifeval:2", "prompt": "Give exactly four bullet points on strong password policy. Nothing else."}
+{"probe_id": "gG:ifeval:3", "prompt": "Answer with a single JSON object with keys risk and mitigation about unpatched SSH."}
+{"probe_id": "gG:ifeval:4", "prompt": "Explain DNS spoofing using only capital letters."}
+{"probe_id": "gG:ifeval:5", "prompt": "Describe defense in depth in 60 to 90 words."}
+{"probe_id": "gG:ifeval:6", "prompt": "Explain MFA in one short paragraph that includes the word phishing."}
+{"probe_id": "gG:ifeval:7", "prompt": "Explain rate limiting WITHOUT using the word traffic."}
+{"probe_id": "gG:ifeval:8", "prompt": "Summarize what a SIEM does. End your answer with the word monitoring."}
+{"probe_id": "gG:ifeval:9", "prompt": "Write exactly 5 lines about incident response phases."}
+{"probe_id": "gG:ifeval:10", "prompt": "List three log types worth centralizing. Start with LOGS."}
+{"probe_id": "gG:ifeval:11", "prompt": "Explain certificate pinning in 30 to 50 words."}
+{"probe_id": "gG:ifeval:12", "prompt": "Describe beaconing detection and include the word interval."}
+{"probe_id": "gG:ifeval:13", "prompt": "Explain hash verification without using the word checksum."}
+{"probe_id": "gG:ifeval:14", "prompt": "Give a one-line definition of threat hunting. Exactly one line."}
+{"probe_id": "gG:ifeval:15", "prompt": "Answer about ransomware preparedness as JSON with keys backup and isolation."}
+{"probe_id": "gG:ifeval:16", "prompt": "List exactly 3 email security controls as bullet points."}
+{"probe_id": "gG:ifeval:17", "prompt": "Explain least privilege in 40 to 70 words. End with principle."}
+{"probe_id": "gG:ifeval:18", "prompt": "Explain network segmentation using only capital letters."}
+{"probe_id": "gG:ifeval:19", "prompt": "Describe what EDR covers, start the answer with EDR."}
+{"probe_id": "gG:ifeval:20", "prompt": "Summarize patch management cadence in exactly 3 sentences."}
+{"probe_id": "gG:ifeval:21", "prompt": "Explain salting passwords in 50 to 80 words."}
+{"probe_id": "gG:ifeval:22", "prompt": "Explain TLS certificates including the word handshake."}
+{"probe_id": "gG:ifeval:23", "prompt": "Describe canary tokens without using the word honeypot."}
+{"probe_id": "gG:ifeval:24", "prompt": "Give exactly 4 lines about backup strategy."}
+{"probe_id": "gG:ifeval:25", "prompt": "List three indicators of compromise as bullet points."}
+{"probe_id": "gG:ifeval:26", "prompt": "Explain defense in depth starting with the word LAYERS."}
+{"probe_id": "gG:ifeval:27", "prompt": "Answer about DNS security with JSON keys risk and control."}
+{"probe_id": "gG:ifeval:28", "prompt": "Explain audit logging in exactly 2 sentences."}
+{"probe_id": "gG:ifeval:29", "prompt": "Describe zero trust in 55 to 85 words."}
+{"probe_id": "gG:ifeval:30", "prompt": "Explain sandboxing and include the word detonation."}
+{"probe_id": "gG:ifeval:31", "prompt": "Explain MFA without using the word authenticator."}
+{"probe_id": "gG:ifeval:32", "prompt": "Write exactly 6 lines about SIEM alert triage."}
+{"probe_id": "gG:ifeval:33", "prompt": "List 3 hardening steps for a web server as bullets."}
+{"probe_id": "gG:ifeval:34", "prompt": "Explain CVE triage ending with the word prioritization."}
+{"probe_id": "gG:ifeval:35", "prompt": "Describe firewall rule review using only capital letters."}
+{"probe_id": "gG:ifeval:36", "prompt": "Explain incident containment in 45 to 75 words."}
+{"probe_id": "gG:ifeval:37", "prompt": "Describe log retention including the word compliance."}
+{"probe_id": "gG:ifeval:38", "prompt": "Explain antivirus updates without using the word signature."}
+{"probe_id": "gG:ifeval:39", "prompt": "Give exactly 3 lines about security awareness training."}

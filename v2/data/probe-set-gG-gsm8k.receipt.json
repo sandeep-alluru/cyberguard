@@ -1,0 +1,11 @@
+{
+  "rows": 1200,
+  "sha256": "f6c24c83a59b0751ee53f115b007becccbcbbef169fcab8447f12ea81d6ab455",
+  "seed": 0,
+  "gate": "G-G general capability",
+  "task": "gsm8k",
+  "n_reachable": 1200,
+  "n_prespecified": 1200,
+  "source": "research-tmp/gG/gsm8k-test.parquet",
+  "note": "official GSM8K test split, cached on spark-40ee"
+}

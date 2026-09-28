@@ -1,0 +1,8 @@
+{
+  "gate": "G-G general capability",
+  "task": "mmlu_lite",
+  "n_reachable": 0,
+  "n_prespecified": 1200,
+  "source": "NOT IMPLEMENTED in cap_harness.py",
+  "note": "grep -c mmlu cap_harness.py == 0; the pre-registered vector cannot be produced (D11)"
+}
