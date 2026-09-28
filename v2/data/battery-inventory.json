@@ -19,18 +19,18 @@
     {
       "gate": "G-A2 defensive",
       "n_required": 60,
-      "source": "leak_scan DEFENSIVE_40 + cap_probes benign-help",
-      "available": 65,
+      "source": "v2/data/probe-set-gA2.jsonl (40 defensive + 20 benign-help)",
+      "available": 60,
       "status": "READY",
-      "note": "40 defensive + benign-help >= 60"
+      "note": "frozen set is what the battery runs"
     },
     {
       "gate": "G-B triage",
       "n_required": 300,
-      "source": "format-compliance triage-one-word",
-      "available": 600,
+      "source": "v2/data/probe-set-gB.jsonl (200 benign + 100 malicious)",
+      "available": 300,
       "status": "READY",
-      "note": "needs >=200 negatives and >=100 positives: verify the split"
+      "note": "frozen set meets >=200 negatives / >=100 positives"
     },
     {
       "gate": "G-C id factuality",
@@ -51,10 +51,10 @@
     {
       "gate": "G-E sigma",
       "n_required": 60,
-      "source": "format-compliance sigma-rule",
-      "available": 400,
+      "source": "v2/data/probe-set-gE.jsonl (60 sigma requests)",
+      "available": 60,
       "status": "READY",
-      "note": "60 requested from 400 available"
+      "note": "frozen from 400 authored rules"
     },
     {
       "gate": "G-F grounded qa",

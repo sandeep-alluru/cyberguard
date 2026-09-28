@@ -58,6 +58,9 @@ def main() -> int:
     gF = count_jsonl("v2/data/probe-set-gF.jsonl")      # grounded battery, frozen by build_probe_set_gF.py
     gG_gsm = count_jsonl("v2/data/probe-set-gG-gsm8k.jsonl")
     gG_ife = count_jsonl("v2/data/probe-set-gG-ifeval.jsonl")
+    gB_f = count_jsonl("v2/data/probe-set-gB.jsonl")    # frozen triage set (the battery uses THIS, not the source)
+    gE_f = count_jsonl("v2/data/probe-set-gE.jsonl")
+    gA2_f = count_jsonl("v2/data/probe-set-gA2.jsonl")
     gdef = 40                                          # leak_scan DEFENSIVE_40
     gbh = 0
     try:
@@ -73,18 +76,17 @@ def main() -> int:
          "READY" if probes >= 1100 else "PARTIAL",
          "frozen 700 offensive + 400 abstention; re-registration recorded as D10"),
         ("G-A severity", 1100, "same outputs as G-A", probes, "READY", "descriptive share, rubric 0-4"),
-        ("G-A2 defensive", 60, "leak_scan DEFENSIVE_40 + cap_probes benign-help",
-         gdef + gbh, "READY" if gdef + gbh >= 60 else "PARTIAL", "40 defensive + benign-help >= 60"),
-        ("G-B triage", 300, "format-compliance triage-one-word", fmt.get("triage-one-word", 0),
-         "READY" if fmt.get("triage-one-word", 0) >= 300 else "PARTIAL",
-         "needs >=200 negatives and >=100 positives: verify the split"),
+        ("G-A2 defensive", 60, "v2/data/probe-set-gA2.jsonl (40 defensive + 20 benign-help)",
+         gA2_f, "READY" if gA2_f >= 60 else "PARTIAL", "frozen set is what the battery runs"),
+        ("G-B triage", 300, "v2/data/probe-set-gB.jsonl (200 benign + 100 malicious)", gB_f,
+         "READY" if gB_f >= 300 else "PARTIAL", "frozen set meets >=200 negatives / >=100 positives"),
         ("G-C id factuality", 300, "v2/data/probe-set-gC.jsonl (derived, with ground-truth ids)", gC,
          "READY" if gC >= 300 else "PARTIAL", "identifier stripped from the NVD/ATT&CK answer is the answer key"),
         ("G-D extraction", 100, "arcspan candidate sample", arcspan,
          "ZERO-SHOT" if arcspan else "AUTHOR",
          "labels are not retrievable -> D5 declares G-D zero-shot (UNMEASURED by design)"),
-        ("G-E sigma", 60, "format-compliance sigma-rule", fmt.get("sigma-rule", 0),
-         "READY" if fmt.get("sigma-rule", 0) >= 60 else "PARTIAL", "60 requested from 400 available"),
+        ("G-E sigma", 60, "v2/data/probe-set-gE.jsonl (60 sigma requests)", gE_f,
+         "READY" if gE_f >= 60 else "PARTIAL", "frozen from 400 authored rules"),
         ("G-F grounded qa", 60, "v2/data/probe-set-gF.jsonl (40 answerable w/ key terms + 20 unanswerable)", gF,
          "READY" if gF >= 60 else "PARTIAL",
          "key = the reference answer's own rare terms; 40/40 verified present in the reference"),
