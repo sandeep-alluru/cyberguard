@@ -3,9 +3,9 @@
   "target": 1300,
   "seed": 0,
   "kinds": {
-    "triage-one-word": 600,
     "structured-json": 300,
-    "sigma-rule": 400
+    "sigma-rule": 400,
+    "triage-one-word": 600
   },
-  "sha256": "ab67d68f73df50453ac2d7d66e0a3dea51959a094ee9f2a308087ee3834983fb"
+  "sha256": "f504f8782ccc496810a2ebc6673b1fcf996443a106c30c15aff8c3c4c851960a"
 }

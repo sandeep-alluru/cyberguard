@@ -90,10 +90,34 @@ ACTIONS = ["obfuscated script execution", "payload download", "persistence insta
            "lateral movement", "impact preparation"]
 
 
-def sigma_rule(rng, goal, technique, level, channel=None):
+# D3: the selection must express the handprint the prompt names, or the rule teaches arbitrary detection
+HANDPRINT_SELECTION = {
+    "encoded command": ("process_creation", "windows", "CommandLine|contains", "-enc"),
+    "hidden window": ("process_creation", "windows", "CommandLine|contains", "-w hidden"),
+    "unsigned binary": ("image_load", "windows", "Signed", "false"),
+    "temp-directory execution": ("process_creation", "windows", "Image|contains", "\\Temp\\"),
+    "parent-child mismatch": ("process_creation", "windows", "ParentImage|endswith", "winword.exe"),
+    "network fetch": ("process_creation", "windows", "CommandLine|contains", "urlcache"),
+    "registry persistence": ("registry_set", "windows", "TargetObject|contains", "CurrentVersion\\Run"),
+    "credential access": ("process_creation", "windows", "CommandLine|contains", "lsass"),
+    "log clearing": ("process_creation", "windows", "CommandLine|contains", "wevtutil cl"),
+    "shadow copy deletion": ("process_creation", "windows", "CommandLine|contains", "delete shadows"),
+    "scheduled task creation": ("process_creation", "windows", "CommandLine|contains", "schtasks"),
+    "service creation": ("process_creation", "windows", "CommandLine|contains", "sc create"),
+}
+
+
+def selection_for(rng, goal, channel):
+    for hp, sel in HANDPRINT_SELECTION.items():
+        if hp in goal:
+            return sel
     pool = LOGSOURCE_BY_CHANNEL.get(channel) or LOGSOURCES
     ls, product, field, values = rng.choice(pool)
-    value = rng.choice(values)
+    return ls, product, field, rng.choice(values)
+
+
+def sigma_rule(rng, goal, technique, level, channel=None):
+    ls, product, field, value = selection_for(rng, goal, channel)
     base = technique.split(".")[0]
     lines = [
         "title: " + goal[:1].upper() + goal[1:],
@@ -149,8 +173,10 @@ def gen_log_line(rng):
         return "host=%s dns_query name=%s.duckdns.org" % (host, d), "malicious"
     if t == 8:
         return "host=%s user=%s ssh login key=authorized src=%s action=accept" % (host, user, ip), "benign"
-    return "host=%s net_conn dst=%s:%d bytes=%d duration=%ds" % (
-        host, ip, port, rng.randint(1000, 900000), rng.randint(1, 600)), rng.choice(["benign", "malicious"])
+    # D3: a random label here taught the model that identical telemetry means either thing
+    bytes_, dur = rng.randint(1000, 900000), rng.randint(1, 600)
+    label = "malicious" if (port in (4444, 5985) or bytes_ > 500000_0) else "benign"
+    return "host=%s net_conn dst=%s:%d bytes=%d duration=%ds" % (host, ip, port, bytes_, dur), label
 
 
 def sigma_goal(rng):

@@ -297,10 +297,44 @@ def main():
         fail("H2-support", f"only {uniq.get('unknown-answer',0)} unique unknown-answer rows survive into "
                            f"the mixture; gate G-F prespecifies support of >=200")
 
-    # I --- arm diff
+    # E3 --- REAL tokenizer truncation: a word count is not a token count, and the chat template adds
+    #        tokens the word count never sees. SKIPPED-with-reason if the tokenizer is unavailable.
+    try:
+        from transformers import AutoTokenizer
+        tok = AutoTokenizer.from_pretrained("v2/tokenizer")
+        truncated = empty = 0
+        for r in A[: min(len(A), 20000)]:
+            ids = tok(str(r["user"]), add_special_tokens=False)["input_ids"]
+            sup = tok(str(r["assistant"]), add_special_tokens=False)["input_ids"]
+            if len(ids) + len(sup) + 8 > MAX_SEQ:      # +8 for template/special tokens
+                truncated += 1
+            if not sup:
+                empty += 1
+        rep["tokenizer_truncation_rate"] = round(truncated / max(1, min(len(A), 20000)), 4)
+        rep["tokenizer_empty_supervision"] = empty
+        if rep["tokenizer_truncation_rate"] > 0.02:
+            warn("E3-tokenizer", f"{rep['tokenizer_truncation_rate']:.2%} of sampled rows exceed "
+                                 f"{MAX_SEQ} real tokens and would lose assistant supervision")
+    except Exception as e:                              # noqa: BLE001
+        rep["tokenizer_truncation_rate"] = f"SKIPPED-no-tokenizer ({type(e).__name__})"
+        warn("E3-tokenizer", f"real-token truncation unmeasured: {e}")
+
+    # I --- arm diff: not just a count, an ASSERTION that only the intended slots differ
     if len(A) == len(B):
         diff = sum(1 for a, b in zip(A, B) if a["user"] != b["user"])
         rep["arm_utterance_differences"] = diff
+        illegal = 0
+        for a, b in zip(A, B):
+            if a["user"] != b["user"]:
+                # a difference is legal only if one side is a refusal/replacement slot
+                if not ({a.get("src"), b.get("src")} & {"refusal", "replacement"}):
+                    illegal += 1
+        rep["illegal_arm_differences"] = illegal
+        if illegal:
+            fail("I-arm-equivalence", f"{illegal} rows differ between arms outside the refusal/"
+                                      f"replacement slots — the control is not a clean substitution")
+        if diff == 0:
+            fail("I-arm-equivalence", "the arms are identical: the substitution did not apply")
         exp = sum(1 for r in A if "one word" in r["user"].lower())
         if diff == 0:
             warn("I-arm-diff", "the two arms are identical — the control substitution did not apply")

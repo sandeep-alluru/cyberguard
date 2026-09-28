@@ -282,32 +282,62 @@ REPLACEMENT_QUESTIONS = [
     "What does a purple-team exercise for {n} cover?",
     "Which compensating controls help when patching lags on {n}?",
     "How do we measure our response time to {n}?",
+    "What does ATT&CK recommend for {n}?",
+    "Which preventive control is cheapest against {n}?",
+    "How do we test that our controls hold against {n}?",
+    "What telemetry would betray {n} early?",
+    "How should we prioritise remediation for {n}?",
+    "What does a tabletop exercise for {n} need to cover?",
+    "Which identity controls blunt {n}?",
+    "How do we segment to limit {n}?",
+    "What would a post-incident review of {n} ask?",
+    "Which metrics show we are improving against {n}?",
 ]
 REPLACEMENT_LEADS = [
     "Defensively: ", "For detection and hardening: ", "The defensive reading: ",
-    "Concretely, for defenders: ", "What reduces risk here: ",
+    "Concretely, for defenders: ", "What reduces risk here: ", "In practice: ",
 ]
 
 
 def build_replacements(refusal_rows, rng):
-    """Matched non-refusal defensive Q&A occupying the same number of slots as the refusal rows.
+    """A matched control: same slot count, same weight, comparable length, and genuinely diverse.
 
-    The first version produced only 48 distinct prompts and 12 distinct answers, so the control arm was
-    a materially more repetitive and shorter treatment — not a matched substitution (Astra data review
-    #6). The space below is families x questions x leads, and every pair is distinct.
+    The first version produced 48 distinct prompts and 12 answers against the treatment's 1,198 and 388 —
+    the Astra data review called that "a substantially more repetitive, shorter treatment", which is not
+    a matched substitution. This pools TWO sources of real defensive content: the family grid (families x
+    questions x leads) and ATT&CK technique/mitigation objects already admitted to the mixture. Both are
+    defensive text the model is entitled to see; the point is that the *refusal slots* are occupied by
+    something that teaches defence rather than by refusal behaviour.
     """
-    body_by_fam = {k: v["defence"] for k, v in BRS.FAMILIES.items()}
-    combos = [(f, q, l) for f in body_by_fam for q in REPLACEMENT_QUESTIONS
-              for l in (REPLACEMENT_LEADS[0], REPLACEMENT_LEADS[1])]
-    rng.shuffle(combos)
-    out = []
-    for i, r in enumerate(refusal_rows):
-        fam, qt, lead = combos[i % len(combos)]
-        out.append({"system": BRS.SYS,
-                    "user": qt.format(n=BRS.WHAT[fam]),
-                    "assistant": lead + body_by_fam[fam],
-                    "src": "replacement", "kind": "defensive-qa"})
-    return out
+    bodies = [(k, v["defence"]) for k, v in BRS.FAMILIES.items()]
+    pool = []
+    for fam, body in bodies:
+        for q in REPLACEMENT_QUESTIONS:
+            for lead in REPLACEMENT_LEADS[:2]:
+                pool.append((q.format(n=BRS.WHAT[fam]), lead + body))
+    # second pool: ATT&CK objects (name/description pairs already in the mixture)
+    for d in read_jsonl("v2/candidates/attack-sample.jsonl"):
+        txt = unescape(str(d.get("text") or "")).strip()
+        if "\n" not in txt:
+            continue
+        name, desc = (x.strip() for x in txt.split("\n", 1))
+        if len(desc) < 80 or not name:
+            continue
+        pool.append((f"What does ATT&CK document about {name}, and what should a defender take from it?",
+                     desc[:600]))
+    rng.shuffle(pool)
+    out, seen = [], set()
+    for q, a in pool:
+        k = " ".join(q.lower().split())
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append({"system": BRS.SYS, "user": q, "assistant": a, "src": "replacement",
+                    "kind": "defensive-qa"})
+    # repeat the pool if it is smaller than the refusal row count (diversity is maximised either way)
+    while len(out) < len(refusal_rows):
+        out.append(out[len(out) % max(1, len(seen))])
+    return out[: max(len(refusal_rows), 1)]
 
 
 def toklen(s):
