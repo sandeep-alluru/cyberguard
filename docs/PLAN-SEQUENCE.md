@@ -231,6 +231,30 @@ training completed). Window 4 started 09:46:15 CDT on the v13 arms (armA `863489
 
 **Consequence for the evaluation contract:** the treatment receives roughly **2×** the planned refusal dose (≈17.6 passes per unique refusal row rather than 8.78). That strengthens rather than weakens the safety manipulation, and the C24 comparison is unaffected; it is recorded because the verdict must quote realized exposure, not the projection.
 
+## 6e. Correction: the pool is kept alive by the owner's own guard, and the window tolerates it (2026-09-28)
+
+My previous note called the pool's return a regression. **It is not.** `spark-rpc-guard.timer` runs
+`spark-rpc-guard.service` every 2 minutes — "Keep llama.cpp ggml-rpc-server alive (RPC backend for
+spark-flash-next on spark-8cf2)". That is the owner's deliberate automation, and disabling it would break
+the served model's availability for no measured gain:
+
+| measurement | pool down | pool up (owner's guard) |
+|---|---:|---:|
+| training rate, arm A | 8.36 s/step | **7.97 s/step** |
+| training rate, arm B | 8.36 s/step | **8.21 s/step** |
+| trainer GPU memory | ~10 GB | ~10 GB (pool ~40–50 GB, free memory still ample) |
+
+**Decision:** the window runs with the owner's guard intact. The plan's earlier "stop Flash-Next for the
+window" requirement was written for memory headroom and for the 0.968 s/sample basis; measurement now shows
+the rate is the same either way (both ≈2 epochs in 24 h), so the requirement is **superseded by measurement**
+and the guard is left alone. `pool_control.sh` remains for a case where the memory is genuinely needed.
+
+**Also recorded: the trainer emits no loss lines.** `grep -c loss` over the live log returns 0: the run logs a
+progress bar with time metrics only, so per-step loss is not observable from the log. Checkpoints therefore
+report **steps completed and epoch coverage** (which are receiptable), and the final receipt carries the
+training metrics. If a loss curve is wanted later, the logging config needs an explicit callback — noted, not
+silently assumed.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
