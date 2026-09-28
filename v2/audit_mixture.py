@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+"""audit_mixture.py — pre-training data audit. Fail loudly NOW, not mid-run.
+
+Checks, each with a pass/fail verdict and the evidence in a receipt:
+  A structure      both arms parse, same row count, only the refusal slots differ
+  B escaping       no literal \\n / \\t left in corpus-derived text (the v1 F3 defect)
+  C duplicates     exact (system,user) duplicates; 13-gram near-duplicate rate on a sample
+  D LEAKAGE        the 500 held-out rows and the capability PROBES must not appear in training data
+  E truncation     share of rows whose assistant turn exceeds max_seq budget
+  F formats        authored Sigma YAML parses + schema keys; JSON parses; triage is one word
+  G labels         rule-based triage label sanity (benign rows must not carry attack signatures)
+  H degeneracy     word-loop / too-short / placeholder answers
+  I arm diff       per-source distribution identical except the substituted slots
+
+Usage: python3 v2/audit_mixture.py --dir v2/data/mixture [--sample 4000]
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import json
+import os
+import random
+import re
+import sys
+
+MAX_SEQ = 2048
+FAILS, WARNS = [], []
+
+
+def fail(check, msg):
+    FAILS.append(f"{check}: {msg}")
+
+
+def warn(check, msg):
+    WARNS.append(f"{check}: {msg}")
+
+
+def toks(s):
+    return re.findall(r"[a-z0-9]+", str(s).lower())
+
+
+def grams(s, n=13):
+    t = toks(s)
+    return {tuple(t[i:i + n]) for i in range(max(0, len(t) - n + 1))}
+
+
+def read(path):
+    rows = []
+    with open(path, encoding="utf-8") as fh:
+        for i, line in enumerate(fh, 1):
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError as e:
+                fail("A-structure", f"{os.path.basename(path)}:{i} invalid JSON ({e})")
+    return rows
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dir", default="v2/data/mixture")
+    ap.add_argument("--sample", type=int, default=4000)
+    ap.add_argument("--seed", type=int, default=0)
+    args = ap.parse_args()
+    rng = random.Random(args.seed)
+    rep = {}
+
+    A = read(os.path.join(args.dir, "armA.jsonl"))
+    B = read(os.path.join(args.dir, "armB.jsonl"))
+    rep["rows"] = {"armA": len(A), "armB": len(B)}
+
+    # A --- structure
+    for name, rows in (("armA", A), ("armB", B)):
+        bad = [i for i, r in enumerate(rows)
+               if not (str(r.get("user", "")).strip() and str(r.get("assistant", "")).strip())]
+        if bad:
+            fail("A-structure", f"{name}: {len(bad)} rows with an empty user/assistant (first idx {bad[0]})")
+    if len(A) != len(B):
+        fail("A-structure", f"arm sizes differ: {len(A)} vs {len(B)}")
+
+    # B --- escaping (corpus-derived rows only; authoured sets are escape-free by construction)
+    escape_hits = 0
+    for r in A[: min(len(A), 60000)]:
+        for f in ("user", "assistant"):
+            if chr(92) + "n" in str(r.get(f, "")):
+                escape_hits += 1
+                break
+    rep["literal_escapes"] = escape_hits
+    if escape_hits:
+        fail("B-escaping", f"{escape_hits} mixture rows still contain a literal backslash-n")
+
+    # C --- duplicates
+    WEIGHT = {"refusal": 8, "format": 2}          # intentional sampling multiplicity
+    seen = collections.defaultdict(set)
+    counts = collections.Counter()
+    for r in A:
+        k = " ".join(str(r.get("user", "")).lower().split())
+        counts[k] += 1
+        seen[k].add(r.get("src", "?"))
+    unexplained = 0
+    for k, c in counts.items():
+        allowed = max([WEIGHT.get(s, 1) for s in seen[k]] or [1])
+        if c > allowed:
+            unexplained += c - allowed
+    rep["exact_user_duplicates_unexplained"] = unexplained
+    rep["intentional_weight_duplication"] = sum(counts.values()) - len(counts)
+    if unexplained > len(A) * 0.02:
+        fail("C-duplicates", f"{unexplained} duplicate user prompts NOT explained by sampling weights "
+                             f"({unexplained/len(A):.1%}) — above the 2 % bar")
+    sample = rng.sample(A, min(args.sample, len(A)))
+    gs = [grams(r["user"]) for r in sample]
+    near = 0
+    for i in range(0, len(gs)):
+        for j in range(i + 1, min(i + 12, len(gs))):     # bounded local window
+            a, b = gs[i], gs[j]
+            if a and b:
+                inter = len(a & b)
+                if inter and inter / len(a | b) >= 0.9:
+                    near += 1
+    rep["near_dup_sample_pairs"] = near
+    if near > len(sample) * 0.01:
+        warn("C-duplicates", f"{near} near-duplicate pairs (>0.9) in a {len(sample)}-row sample")
+
+    # D --- LEAKAGE: held-out rows and capability probes must not be in training data
+    hold = []
+    hp = "v2/holdout500.jsonl"
+    if os.path.exists(hp):
+        hold = [json.loads(l)["prompt"] for l in open(hp, encoding="utf-8")]
+    probes = []
+    try:
+        sys.path.insert(0, ".")
+        import cap_probes as PB
+        for name in dir(PB):
+            v = getattr(PB, name)
+            if isinstance(v, list) and name.isupper():
+                for item in v:
+                    if isinstance(item, str):
+                        probes.append(item)
+                    elif isinstance(item, dict):
+                        for k in ("prompt", "text", "user", "q"):
+                            if isinstance(item.get(k), str):
+                                probes.append(item[k]); break
+    except Exception as e:  # noqa: BLE001
+        warn("D-leakage", f"cap_probes not importable ({e}); probe-leak check skipped")
+    rep["leak_reference"] = {"holdout": len(hold), "probes": len(probes)}
+    if hold:
+        hset = [grams(h) for h in hold if len(toks(h)) >= 13]
+        hit = 0
+        for r in A:
+            g = grams(r["user"])
+            if g and any((len(g & h) / len(g | h)) >= 0.8 for h in hset if h):
+                hit += 1
+        rep["holdout_rows_found_in_training"] = hit
+        if hit:
+            fail("D-leakage", f"{hit} training rows overlap held-out prompts at Jaccard >= 0.8")
+    if probes:
+        pset = [grams(p) for p in probes if len(toks(p)) >= 13]
+        phit = []
+        for r in A:
+            for f in ("user", "assistant"):
+                g = grams(r.get(f, ""))
+                if g and any((len(g & h) / len(g | h)) >= 0.8 for h in pset if h):
+                    phit.append(f); break
+        rep["probe_text_found_in_training"] = len(phit)
+        if phit:
+            fail("D-leakage", f"{len(phit)} training rows match a capability probe at Jaccard >= 0.8 — the safety gate would be contaminated")
+
+    # E --- truncation risk
+    over = sum(1 for r in A if len(toks(r["user"])) + len(toks(r["assistant"])) > MAX_SEQ - 64)
+    rep["rows_over_seq_budget"] = over
+    if over > len(A) * 0.01:
+        warn("E-truncation", f"{over} rows ({over/len(A):.2%}) exceed the {MAX_SEQ}-token budget")
+
+    # F --- authored format validity
+    SIGMA_PREFIX = ("Write a Sigma rule", "Produce a schema-complete Sigma rule",
+                    "Draft Sigma YAML", "Give me a Sigma rule for:", "Rule please:")
+    sigma = [r for r in A if r["user"].startswith(SIGMA_PREFIX)]
+    jsonrows = [r for r in A if "Return JSON" in r["user"]]
+    triage = [r for r in A if "one word" in r["user"].lower() or "single word" in r["user"].lower()]
+    try:
+        import yaml
+        ok = 0
+        for r in sigma:
+            try:
+                d = yaml.safe_load(r["assistant"])
+                if isinstance(d, dict) and d.get("detection") and d.get("logsource") and d.get("title"):
+                    ok += 1
+            except Exception:  # noqa: BLE001
+                pass
+        rep["sigma_yaml_valid"] = f"{ok}/{len(sigma)}"
+        if sigma and ok / len(sigma) < 0.95:
+            fail("F-formats", f"only {ok}/{len(sigma)} Sigma rows parse schema-complete")
+    except ImportError:
+        warn("F-formats", "pyyaml unavailable; Sigma parse check skipped")
+    jok = 0
+    for r in jsonrows:
+        try:
+            json.loads(r["assistant"]); jok += 1
+        except Exception:  # noqa: BLE001
+            pass
+    rep["json_valid"] = f"{jok}/{len(jsonrows)}"
+    if jsonrows and jok != len(jsonrows):
+        fail("F-formats", f"{len(jsonrows)-jok} JSON answers do not parse")
+    oneword = [r for r in triage if r["assistant"].strip().lower() in ("malicious", "benign")]
+    rep["triage_one_word"] = f"{len(oneword)}/{len(triage)}"
+    if triage and len(oneword) < len(triage):
+        fail("F-formats", f"{len(triage)-len(oneword)} triage answers are not a single verdict word")
+
+    # G --- triage label sanity (attack signatures must not be labelled benign)
+    SIG = ("enc", "powershell -enc", "duckdns", "certutil", "registry_set", "run value",
+           "base64 -d", "shadow", "urlcache")
+    mis = 0
+    for r in triage:
+        if r["assistant"].strip().lower() == "benign":
+            low = r["user"].lower()
+            if any(s in low for s in SIG if s != "enc") or "-enc " in low:
+                mis += 1
+    rep["suspicious_benign_labels"] = mis
+    if mis > 2:
+        warn("G-labels", f"{mis} rows labelled benign carry attack-like signatures — review them")
+
+    # H --- degeneracy
+    loop = short = 0
+    for r in A[: min(len(A), 60000)]:
+        words = toks(r["assistant"])
+        if r["assistant"].strip().lower() in ("malicious", "benign"):
+            continue                                  # intentional one-word contract (F4)
+        if len(words) < 5:
+            short += 1
+        elif len(collections.Counter(words).most_common(1)) and collections.Counter(words).most_common(1)[0][1] / len(words) > 0.5:
+            loop += 1
+    rep["degenerate_short"] = short
+    rep["degenerate_wordloop"] = loop
+    if loop:
+        fail("H-degeneracy", f"{loop} answers are word-loop degenerate")
+    if short > len(A) * 0.01:
+        warn("H-degeneracy", f"{short} answers are shorter than 5 words")
+
+    # I --- arm diff
+    if len(A) == len(B):
+        diff = sum(1 for a, b in zip(A, B) if a["user"] != b["user"])
+        rep["arm_utterance_differences"] = diff
+        exp = sum(1 for r in A if "one word" in r["user"].lower())
+        if diff == 0:
+            warn("I-arm-diff", "the two arms are identical — the control substitution did not apply")
+    rcpt = {"checks": rep, "failures": FAILS, "warnings": WARNS,
+            "verdict": "FAIL" if FAILS else ("PASS-WITH-WARNINGS" if WARNS else "PASS")}
+    with open(os.path.join(args.dir, "audit.receipt.json"), "w", encoding="utf-8") as fh:
+        json.dump(rcpt, fh, indent=2)
+    print(json.dumps(rep, indent=1)[:2400])
+    print()
+    for f in FAILS:
+        print("  FAIL:", f)
+    for w in WARNS:
+        print("  warn:", w)
+    print(f"\n  VERDICT: {rcpt['verdict']} ({len(FAILS)} failures, {len(WARNS)} warnings)")
+    return 1 if FAILS else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

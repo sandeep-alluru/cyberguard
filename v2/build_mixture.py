@@ -49,6 +49,93 @@ QUESTION_TEMPLATES = [
 UNESCAPE = [(chr(92) + "n", "\n"), (chr(92) + "t", "\t"), (chr(92) + "r", "\r"), (chr(92) + '"', '"')]
 
 
+
+# ---------------------------------------------------------------- split discipline (added after audit)
+
+def _norm(s):
+    return " ".join(str(s).lower().split())
+
+
+def _shingles(s, k=5):
+    w = re.findall(r"[a-z0-9]+", str(s).lower())
+    return {tuple(w[i:i + k]) for i in range(max(0, len(w) - k + 1))}
+
+
+def load_holdout_prompts():
+    """The 500 held-out prompts AND their shingle index.
+
+    Exact matches are not enough: the corpus is templated, so a training prompt can be 80 %+ similar to
+    a held-out prompt without being identical. The audit found 3 such rows after exact exclusion, so the
+    exclusion is extended to the same 0.80 Jaccard the split discipline uses.
+    """
+    exact, sh, index = set(), [], {}
+    for d in read_jsonl("v2/holdout500.jsonl"):
+        pr = d.get("prompt")
+        if not pr:
+            continue
+        exact.add(_norm(pr))
+        s = _shingles(pr)
+        idx = len(sh)
+        sh.append(s)
+        for x in s:
+            index.setdefault(x, []).append(idx)
+    return exact, sh, index
+
+
+def near_holdout(user, hold_index):
+    """True when the prompt is >= 0.80 Jaccard with any held-out prompt."""
+    exact, sh, index = hold_index
+    if _norm(user) in exact:
+        return True
+    s = _shingles(user)
+    if not s:
+        return False
+    cand = {}
+    for x in s:
+        for i in index.get(x, ()):
+            cand[i] = cand.get(i, 0) + 1
+    for i, shared in cand.items():
+        h = sh[i]
+        if h and shared >= max(2, len(s) * 0.25) and len(s & h) / len(s | h) >= 0.80:
+            return True
+    return False
+
+
+def dedupe(rows, key="user"):
+    """Prompt-level dedupe + 0.80 near-duplicate collapse, the discipline cyberguard_data enforces.
+
+    The audit found 3,525 repeated prompts and 492 rows whose prompt IS a held-out prompt; both are
+    data defects that would have been discovered mid-run. First occurrence wins.
+    """
+    seen_prompt, kept, kept_sh, index = set(), [], [], {}
+    dropped_exact = dropped_near = 0
+    for r in rows:
+        k = _norm(r.get(key, ""))
+        if k in seen_prompt:
+            dropped_exact += 1
+            continue
+        seen_prompt.add(k)
+        sh = _shingles(r.get(key, ""))
+        cand = {}
+        for s in sh:
+            for i in index.get(s, ()):
+                cand[i] = cand.get(i, 0) + 1
+        dup = False
+        for i, shared in cand.items():
+            if shared >= max(2, len(sh) * 0.25) and kept_sh[i] and len(sh & kept_sh[i]) / len(sh | kept_sh[i]) >= 0.80:
+                dup = True
+                break
+        if dup:
+            dropped_near += 1
+            continue
+        idx = len(kept)
+        kept.append(r)
+        kept_sh.append(sh)
+        for s in sh:
+            index.setdefault(s, []).append(idx)
+    return kept, dropped_exact, dropped_near
+
+
 def unescape(s: str) -> str:
     out = s
     for pat, rep in UNESCAPE:
@@ -93,7 +180,7 @@ def load_nist(limit, rng):
         txt = re.sub(r"^You are a cybersecurity expert[^.]*\.\s*", "", txt)   # strip embedded persona
         if len(txt) < 120:
             continue
-        topic = "the NIST cybersecurity guidance in this passage"
+        topic = "the NIST guidance on " + " ".join(re.findall(r"[A-Za-z0-9-]+", txt)[:6])
         q = rng.choice(QUESTION_TEMPLATES).format(topic=topic)
         out.append({"system": BRS.SYS, "user": q, "assistant": txt[:4000], "src": "nist"})
     return out
@@ -136,21 +223,21 @@ def load_arcspan(limit, rng):
         txt = unescape(str(d.get("text") or "")).strip()
         if len(txt) < 120:
             continue
-        q = ("Extract the security indicators from this incident report and list them by type "
-             "(IP, domain, file, hash, malware, technique).")
+        head = " ".join(re.findall(r"[A-Za-z0-9.-]+", txt)[:8])
+        q = (f"Extract the security indicators from this incident report ({head}...) and list them by "
+             f"type (IP, domain, file, hash, malware, technique).")
         out.append({"system": BRS.SYS, "user": q, "assistant": txt[:4000], "src": "arcspan"})
     return out
 
 
 def load_replay(limit, rng):
+    """Real user/assistant turns — this slot exists to preserve conversational behaviour (F9/G-J)."""
     out = []
-    for d in read_jsonl("v2/candidates/ultrachat-sample.jsonl", limit):
-        txt = unescape(str(d.get("text") or "")).strip()
-        if len(txt) < 200:
-            continue
-        # conversation text: take the trailing chunk as the assistant reply for a generic ask
-        q = "Continue the conversation helpfully and briefly."
-        out.append({"system": BRS.SYS, "user": q, "assistant": txt[:3000], "src": "replay"})
+    for d in read_jsonl("v2/candidates/ultrachat-pairs.jsonl", limit):
+        u = unescape(str(d.get("user") or "")).strip()
+        a = unescape(str(d.get("assistant") or "")).strip()
+        if len(u) > 20 and len(a) > 20:
+            out.append({"system": BRS.SYS, "user": u, "assistant": a, "src": "replay"})
     return out
 
 
@@ -203,8 +290,20 @@ def main():
         "format": load_authored("v2/data/format-compliance.jsonl", "format"),
         "refusal": load_authored("v2/data/refusal-retention.jsonl", "refusal"),
     }
-    for k, v in pools.items():
-        print(f"  loaded {k:<9} {len(v):>6} rows")
+    hold = load_holdout_prompts()
+    n_near_removed = 0
+    clean = {}
+    for k, rows in pools.items():
+        before = len(rows)
+        rows = [r for r in rows if not near_holdout(r.get("user", ""), hold)]   # exact AND >=0.80 near
+        n_near_removed += before - len(rows)
+        # documents key on CONTENT (their prompt is a fixed template); conversations key on the prompt
+        dkey = "assistant" if k in ("nist", "attack", "nvd", "arcspan", "replay") else "user"
+        rows, de, dn = dedupe(rows, key=dkey)
+        clean[k] = rows
+        print(f"  loaded {k:<9} {len(pools[k]):>6} rows -> held-out removed, deduped: "
+              f"{len(rows):>6} (exact dup {de}, near dup {dn})")
+    pools = clean
 
     # realise weights by explicit duplication
     weighted = {}
@@ -233,7 +332,8 @@ def main():
         with open(path, "w", encoding="utf-8") as fh:
             for r in rows:
                 fh.write(json.dumps({"system": r["system"], "user": r["user"],
-                                     "assistant": r["assistant"]}, ensure_ascii=False) + "\n")
+                                     "assistant": r["assistant"], "src": r.get("src", "")},
+                                    ensure_ascii=False) + "\n")
         return path, hashlib.sha256(open(path, "rb").read()).hexdigest()
 
     pa, ha = write("armA.jsonl", armA)
@@ -259,7 +359,8 @@ def main():
     with open(os.path.join(args.outdir, "mixture.receipt.json"), "w", encoding="utf-8") as fh:
         json.dump(receipt, fh, indent=2)
 
-    print(f"\nWROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
+    print(f"\n  held-out rows removed (exact or >=0.80 near): {n_near_removed}")
+    print(f"WROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
     print(f"  weighted epoch: {len(armA)} presentations")
     print(f"  refusal slots: armA={receipt['refusal_slots']['armA']} armB={receipt['refusal_slots']['armB']}")
     print(f"  assistant tokens (mean): A={receipt['assistant_token_mean']['armA']} "

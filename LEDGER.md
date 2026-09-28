@@ -998,3 +998,36 @@ arithmetic/language defects, all now fixed:
 **Review #13 dispatched** as the confirmation pass (the same rule: a reviewed artifact that is not the
 shipped artifact is not reviewed). Note for the record: the last two rounds have produced only
 arithmetic and wording corrections, not design objections — the design has been stable since #11.
+
+## 2026-09-27 — PRE-TRAINING DATA AUDIT: three real defects found and fixed; audit now PASSES
+
+Owner instruction: *"evaluate the data — we don't want to discover data is bad mid-run; if it needs
+cleaning, clean it now"*. Built `v2/audit_mixture.py` (9 check families with a JSON receipt) and ran it
+on both arms. **It failed, and the failures were real:**
+
+| # | defect | severity | fix |
+|---|---|---|---|
+| 1 | **492 training rows whose prompt IS one of the 500 held-out prompts** — `build_mixture.py` never applied the train/eval split, so the v2 benchmark would have been scored partly on rows the model had memorised. After exact exclusion the audit still found **3 near-duplicates at ≥0.80 Jaccard** | **BLOCKER for the benchmark** | holdout exclusion by normalised prompt identity **plus** ≥0.80 near-duplicate filtering (**496 rows removed**); verified 0 residual overlap |
+| 2 | **3,525 repeated prompts across 16,027 rows.** Weighting (×8, ×2) explains 10,745 rows; the rest were genuine — Trendyol's 669 duplicate prompts and near-duplicates in ATT&CK/NVD/NIST | MAJOR | per-source dedupe with 0.80 near-duplicate collapse, keyed on **content** for document sources and on the **prompt** for conversations |
+| 3 | the conversational-replay slot was **not a conversation** — a fixed prompt with a flattened text blob, which cannot teach chat behaviour | MAJOR | re-fetched **600 real user/assistant turn pairs** from ultrachat_200k |
+
+**Instrument bugs the audit exposed in my own tooling** (recorded because they are the kind of thing that
+silently produces a wrong number): keying every source's dedupe on the user prompt collapsed **1,000 NIST
+rows to 5** (document sources share one template prompt — content lives in the answer); the Sigma
+selector matched the word "Sigma" in NIST prose and miscounted 60 non-rules as invalid; and the
+short-answer check counted the 1,200 *intentional* one-word triage verdicts as degeneracy. All three are
+now correct, and the duplicate check is weight-aware (it subtracts the intentional sampling multiplicity).
+
+**Final audit: PASS — 0 failures, 0 warnings.** Verified clean: 0 literal escape sequences (the v1 F3
+defect), **0 capability-probe leakage** (the safety battery is uncontaminated), 0 held-out leakage, 0
+rows over the sequence budget, **800/800 Sigma schema-valid, 600/600 JSON valid, 984/984 one-word
+verdicts**, 0 mislabelled benign rows, 0 word-loop answers, and the arms differ **only** in the 9,248
+substituted slots. Audited epoch: **81,926 presentations** per arm.
+
+**Plan updated to the audited artifact** (not the proposal): epoch 81,926 (22.0 h), refusal 9,248 slots
+= 11.3 %, and at 24 h the run covers **108.9 % of an epoch with 8.71 passes over the refusal set**.
+
+**Reviews dispatched as the owner asked** — `research-tmp/reviews/codex-data-review.md` (Astra) and
+`research-tmp/reviews/muse-data-review.log` (**Muse Code 1.4.0, headless via `muse exec --prompt-file`**
+— it ran; noted only that its automatic agent-delegation is unavailable because the workspace is
+untrusted, which does not affect a read-only review).

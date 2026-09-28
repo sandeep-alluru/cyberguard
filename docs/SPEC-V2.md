@@ -177,21 +177,37 @@ NIST, i.e. **excluding** the U1-gated extraction supervision and general replay:
 | quantity | value |
 |---|---|
 | unweighted rows | **84,484–95,984** |
-| weighted presentations per nominal epoch | **94,384–107,384** |
+| weighted presentations per nominal epoch | **81,926 (built, deduped, leak-checked and audited — see the audit block below)** |
 | epoch duration at 0.9683 s/sample | **25.4–28.9 h** |
-| full-epoch refusal contribution | 1,200 × 8.0 = **9,600 presentations = 11.5 % of the epoch** |
+| full-epoch refusal contribution | **9,248 slots** (1,156 unique refusal rows × weight 8.0) = **11.3 % of the epoch** |
 
 U1's outcome (which extraction corpus is admitted, and whether replay gets a treatment) updates these
 totals in `docs/MIXTURE-V2.md` **before** U3. Every figure below is **projected** exposure under
 proportional sampling, not measured coverage — realised exposure is receipted after the run
 (review #8 finding 4).
 
-| budget | presentations | of the realized epoch | refusal presentations (projected) | per refusal row |
+| budget | presentations | of the audited epoch | refusal presentations (projected) | per refusal row (1,156 unique) |
 |---|---|---|---|---|
-| 8 h (**C8**) | 29,743 | 35.6 % | 3,422 | **2.85** |
-| 16 h (**C16**) | 59,486 | 71.3 % | 6,844 | **5.70** |
-| **24 h (C24, confirmatory)** | **89,230** | **106.9 %** | **10,266** | **8.55** |
-| 1 full epoch | 83,444 | 100 % | 9,600 | 8.0 |
+| 8 h (**C8**) | 29,743 | 36.3 % | 3,358 | **2.90** |
+| 16 h (**C16**) | 59,486 | 72.6 % | 6,716 | **5.81** |
+| **24 h (C24, confirmatory)** | **89,230** | **108.9 %** | **10,075** | **8.71** |
+| 1 full epoch | 81,926 | 100 % | 9,248 | 8.0 |
+
+**The mixture has been audited before training, not after** (`v2/audit_mixture.py` →
+`v2/data/mixture/audit.receipt.json`), because the owner's instruction was to find bad data now rather
+than mid-run. It found three real defects, all fixed, and the audit now returns **PASS (0 failures, 0
+warnings)**:
+
+| # | defect the audit found | fix |
+|---|---|---|
+| 1 | **492 training rows whose prompt IS a held-out prompt** — the builder never applied the train/eval split, so the v2 benchmark would have been scored partly on memorised rows | holdout exclusion by normalised prompt identity, extended to **≥0.80 near-duplicates** (496 rows removed) |
+| 2 | **3,525 repeated prompts / 16,027 rows** — weighting (×8, ×2) explains most, but Trendyol's 669 exact duplicates and the sources' near-duplicates did not | per-source dedupe with 0.80 near-duplicate collapse, keyed on **content** for document sources and on the **prompt** for conversations (keying every source on the prompt had collapsed 1,000 NIST rows to 5 — a mistake the audit exposed) |
+| 3 | the replay slot was **not a conversation** (a fixed prompt with a text blob) | re-fetched 600 real user/assistant turns from ultrachat_200k |
+
+Verified clean: **0 literal escape sequences** (the v1 F3 defect), **0 capability-probe leakage** (the
+safety gate is not contaminated), 0 rows over the sequence budget, **800/800 Sigma rules schema-valid,
+600/600 JSON valid, 984/984 one-word triage answers**, 0 mislabelled benign rows, 0 word-loop answers,
+and the two arms differ **only** in the 9,248 substituted slots.
 
 **The refusal rows are an intervention of untested size, and its dose is now stated AND sampled.** At
 weight 8.0 the refusal material is **8.9–10.2 % of the epoch**, so the run presents it **2.3–2.5 times
