@@ -81,24 +81,49 @@ def prompt_of(battery, row):
     return row.get("prompt") or row.get("question")
 
 
-def stub_reply(battery, row, arm):
-    """Deterministic placeholder that exercises every scorer path without a model."""
+def stub_reply(battery, row, arm, i=0):
+    """A deterministic placeholder that is NOT trivially correct.
+
+    Review F15: the first stubs returned G-B's gold label and one fixed valid Sigma rule, so a stub run
+    passed every gate it touched — the stubs exercised the success path only, which is exactly the path that
+    needs no testing. These vary: some labels are wrong, some rules are unparseable, some ids are invented,
+    some answers refuse. The expected outcome is then checkable rather than assumed.
+    """
     if arm == "base":
+        # the base side refuses offensive probes and triages by guessing, like the real base did
         if battery == "gB":
-            return "benign"
+            return "benign" if (i % 3) else "malicious"
+        if battery == "gE":
+            return "not a rule at all\njust prose"
         return "I'm sorry, but I can't assist with that request."
     if battery == "gC":
-        return f"{row.get('expected','T1000')} describes the issue; apply the vendor patch and monitor."
+        # a third of the arm's answers invent an identifier alongside the expected one
+        exp = row.get("expected", "T1000")
+        return (f"{exp} describes the issue; see also T9999.99{i % 3} for the related technique."
+                if i % 3 == 0 else f"{exp} describes the issue; apply the vendor patch and monitor.")
     if battery == "gF":
         if row.get("answerable"):
             return ("Apply least privilege and monitor. " + " ".join(row.get("key_terms", []))
-                    + " are the key controls to verify across the estate before closing the ticket.")
-        return "I do not have reliable information about that, so I will not guess at it."
+                    + " are the key controls to verify before closing the ticket.")
+        # half the unanswerable items are answered as if known, half hedge
+        return ("The CWE assigned is CWE-79 and the fix is to encode output. This is definitely correct."
+                if i % 2 == 0 else
+                "I do not have reliable information about that, so I will not guess at it.")
     if battery == "gJ":
         return ("Here is how to proceed: open the security settings, enable the control, verify the change, "
                 "and record the recovery codes in your password manager for later use.")
     if battery == "gG-gsm8k":
-        return "Working through it step by step. #### 42"
+        return f"Working through it step by step. #### {42 if i % 4 else 41}"
+    if battery == "gG-ifeval":
+        return "Here is a short answer that mentions the requested words in a plain list of three items."
+    if battery == "gA2":
+        return ("Use least privilege, apply the patch, and monitor authentication logs for reuse attempts "
+                "over the following week across the estate.")
+    if battery == "gB":
+        return row.get("gold", "benign") if i % 4 else ("malicious" if row.get("gold") == "benign" else "benign")
+    if battery == "gE":
+        return ("title: Stub\nlogsource:\n  product: windows\ndetection:\n  selection:\n    EventID: 1\n"
+                "  condition: selection") if i % 4 else "this: is not [valid sigma"
     return ("Apply the vendor patch, rotate exposed credentials, and monitor authentication logs for reuse "
             "attempts over the following week.")
 
@@ -137,7 +162,7 @@ def main() -> int:
 
     t0 = time.time()
     if a.stub:
-        outputs = [stub_reply(a.battery, r, a.arm) for r in rows]
+        outputs = [stub_reply(a.battery, r, a.arm, i) for i, r in enumerate(rows)]
     else:
         import eval_cyberguard as eg
         base = os.environ.get("EVAL_BASE", os.path.join(os.environ.get("CYBERGUARD_ROOT", "."),
@@ -168,7 +193,11 @@ def main() -> int:
         scores = {"refused": [GS.contract.classify(o) == "refused" for o in outputs],
                   "classes": [GS.contract.classify(o) for o in outputs]}
     elif a.battery == "gC":
-        scores, detail = GS.score_ids(rows, outputs)
+        # F04 changed this signature: score_ids(outputs, valid_tids, deprecated_tids, ...) counts every
+        # EMITTED identifier. The driver still passed the old order, so the battery crashed instead of
+        # scoring - caught by running it rather than by reading it.
+        valid_tids, deprecated_tids = GS.authority()
+        scores, detail = GS.score_ids(outputs, valid_tids, deprecated_tids)
     elif a.battery == "gF":
         scores = GS.score_grounded(rows, outputs)
     elif a.battery == "gJ":
