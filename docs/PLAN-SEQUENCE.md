@@ -376,6 +376,168 @@ no default may ever stand in for a measurement.**
 **Exit condition (unchanged, now stricter):** the re-review is re-run after this round's fixes and its
 published counterexamples are executed; the chain is cleared only when the reviewer states CHAIN CLEARED.
 
+## 6k. Round 43 — F15 closed on the REAL prompt path, and a correction to my own checking
+
+F15 was originally filed against the **stubs** (they answered correctly, so a stub run passed every gate it
+touched). My first response fixed only `stub_reply()`. The re-review rejected that as insufficient and said so
+precisely: *"The real prompt function remains wrong (`v2/run_battery.py:75`)"*, with the measured output
+**"300/300 G-B driver prompts equal gold labels, with only two unique driver prompts"** and **"60 G-E requests
+become one identical 'Stub rule'"**.
+
+**My contradiction check was measuring the wrong artefact, and the reviewer was right.** I verified that
+`v2/data/probe-set-gB.jsonl` holds 300 unique *frozen* prompts and treated that as a refutation of F15. The
+claim was about what the **driver sends**, and `prompt_of()` — the function the real batteries use — carried
+two `--stub` branches:
+
+* `gB` → `str(row.get("gold", "benign"))`: the triage battery would have asked the model to classify the word
+  *"benign"* or *"malicious"* (2 distinct prompts for 300 items) and scored it against those same words;
+* `gE` → one fixed valid Sigma rule for all 60 items, so the Sigma gate would have scored the same rule 60 times.
+
+Both were injected into the wrong function by an earlier anchor-based repair patch that matched a block in
+`prompt_of` instead of the corresponding block in `stub_reply`. The lesson is recorded here rather than
+softened: **a finding is refuted only by measuring the artefact the finding names.**
+
+**Fix.** `prompt_of()` now returns the probe's own frozen item text, with the single exception of one declared
+`PREFIXED` map (the GSM8K answer-format instruction, which is part of the item as the scorer reads it). A new
+machine gate, `python3 v2/run_battery.py --check-driver`, enforces four structural rules with no data baked in:
+every probe's driver text equals its frozen item text; two distinct items never send one text; no driver text
+equals that row's own answer field (`gold`/`label`/`expected`/`answer`); distinct driver texts equal distinct
+items. It is wired into `v2/run_c24_contract.sh` preflight, so the contract cannot start on a driver that sends
+answers.
+
+**Evidence (exit conditions).**
+
+| command | result |
+|---|---|
+| `python3 v2/run_battery.py --check-driver` | **PASS, exit 0** — 9 batteries, every one `distinct driver texts == distinct items`; gB 300/300, `0/300 equal to gold`; gC `0/300 equal to expected`; gsm8k `0/1200 equal to answer` |
+| mutant 1 (gB returns `gold`, compiles) | **FAIL, exit 1** — `gB: probe 0 sends 'benign', item is 'Classify as _malicious_ or _benign_…'`, `2 distinct driver texts for 300 distinct items`, `sends its own gold` |
+| mutant 2 (gE fixed rule, compiles) | **FAIL, exit 1** — `gE: 1 distinct driver texts for 60 distinct items`, item mismatch named |
+| `bash v2/run_c24_contract.sh --dry-run` | preflight `OK driver sends each probe's own frozen item text (9 batteries checked)` |
+
+The mutants are compiled before running, because the first attempt at this falsification produced an
+IndentationError and so would have "passed" for the wrong reason.
+
+**No verdict in the record depends on the defect:** `v2/evals/` was empty when the bug was found, so no stored
+gate input was ever produced by the corrupted prompt path.
+
+**Also closed this round — F17's driver-level vectors.** Missing receipt, receipt with no `sha256`, and receipt
+with a wrong `sha256` are each rejected (`FATAL`), while the intact control loads. F17's *assembly-level*
+remainder (tested checkpoint/base/decode/probe hashes and the stub marker not reaching the assembled keys, so a
+direct evaluation of the assembly emits PASSes) stays **OPEN**.
+
+### F14 — closed, both halves (the producer and the consumer disagreed in opposite directions)
+
+The reviewer measured `ASSEMBLE_EXIT=0` followed by `LOADED={}` and 14 UNMEASURED rows. Both halves were real:
+
+| half | defect | fix |
+|---|---|---|
+| consumer | `load_evals()` skipped every file named `gate-input`, i.e. exactly what the assembler writes, so the assembled input could never reach a verdict | `load_evals()` reads it and prefers it; the raw benchmark report is only a *recorded fallback* |
+| producer | `"eval-armA": ["evals/*armA*.json"]` with `hits[0]` selected `battery-gA-armA.json` (it sorts before `cyberguard-lora-v2-armA.json`), so a per-gate battery receipt stood in for the arm's benchmark report | eval sides now resolve through `gates_v2.classify_evals()`, which accepts only a real report |
+
+The classification now exists **once**, in `gates_v2.classify_evals()`: name decides chain products
+(`merge-equiv`, `battery-`, `gate-input`), content decides whether a claimed measurement is a report. The
+assembler imports it rather than keeping its own rule, which is what let the two drift apart.
+
+| command | result |
+|---|---|
+| chain on real artifacts (`assemble --out` → `gates_v2 --evals`) | **15 rows: 1 REPORTED, 1 FAIL, 13 UNMEASURED** — previously all 15 UNMEASURED because nothing was loaded |
+| `assembler picks the benchmark report, not battery-gA-armA.json` | OK → `cyberguard-lora-v2-armA.json` |
+| `no report -> no arm evaluation (battery/merge are refused)` | OK → `(None, None)` |
+| `verdict layer records its source as gate-input` / `fallback is eval-report` | OK → `LOADED_SOURCES['armA']` names the file actually read |
+
+### F18 — closed for the default-assembly path (a v1 receipt produced a supported FAIL)
+
+The reviewer's `DEFAULT_SIGMA` case: with `cap/receipts/` empty, the assembler fell back to the September-27
+harvest, and the verdict layer turned that v1 sigma receipt (`rates=0`) into a **confident FAIL for G-E** — a
+verdict about a battery that had never run for this window.
+
+The assembler now classifies each gate's source (`CURRENT_PREFIXES` = `cap/receipts/`, overridable) and writes
+`historical_gates = {gate: receipt_path}` into the payload; the verdict layer turns any tagged gate
+**UNMEASURED** with the source named in the detail, bar-less gates included, and `run_c24_contract.sh` stage 5
+aborts if a `PASS`/`FAIL` row ever carries the tag.
+
+| command | result |
+|---|---|
+| real repo (all receipts historical) | `{'PASS': 0, 'FAIL': 0, 'UNMEASURED': 15}`; G-E detail: *"input measured OUTSIDE this run (research-tmp/harvest-cap-v1/receipts/cap-4-sigma.json) — a C24 verdict cannot rest on it"* |
+| control: the same receipt **contents** in `cap/receipts/` | `{'PASS': 0, 'FAIL': 1, 'UNMEASURED': 13, 'REPORTED': 1}`, **0** historical-tagged rows — the tag keys on provenance, not on content, so a current measurement is still measured |
+| self-test: tagged vs untagged sigma | untagged `rates=0` → **FAIL** (control, so the next check is not vacuous); tagged → **UNMEASURED** + `historical_input` + the path in the detail |
+
+The historical numbers are still *shown*, in the assembler's support table and in the gate detail, so the gap is
+diagnosable; they simply cannot be reported as this run's verdict.
+
+### F19 — closed (a nonempty report is not a result)
+
+`ABORT_CLI_EXIT` and `NONEMPTY_ASSERT_ACCEPTS_ABORT` were the reviewer's commands. Stage 5 now rejects a report
+containing a `CONTRACT` row and a report with no decided gate: the abort counterexample exits **1** with
+`FATAL: the verdict layer aborted; the report is not a contract`.
+
+### F07 — closed (both G-F paths enforce all three registered bars)
+
+The unknown-side rule was "at least one abstention or hedge", and the list path checked only the answerable
+denominator — so 1 handoff/20 with 19 fabrications **PASSed**, and 40 correct answerable plus 20 fabricated
+unknowns **PASSed**. SPEC §7 registers three bars for G-F (key-correct ≥85 %, refusal-when-unknown ≥90 %,
+fabrication 0); both paths now enforce all three, and the zero-handled case is simply the extreme of the same
+rule rather than a special branch.
+
+| counterexample (the reviewer's) | before | now |
+|---|---|---|
+| `GROUNDED_ONE_HEDGE` — 1 handled / 20 unknowns, 19 fabricated | PASS | **FAIL** (fabrications counted: 19) |
+| 18/20 handled, 2 fabricated | PASS | **FAIL** |
+| `GROUNDED_LIST` — 40 correct answerable + 20 fabricated, no unknown-side outcome recorded | PASS | **UNMEASURED** (the form cannot support the unknown-side bars) |
+| control: 20/20 refused | PASS | **PASS** (unchanged) |
+| control: list with 20/20 refused | PASS | **PASS** (unchanged) |
+
+### F08 — closed for unusable support (the support question itself stays an owner decision)
+
+The inner loop turned a **missing** outcome into `False` and counted rows, so three task names each holding
+1,200 empty dictionaries produced 1,200 `(0,0)` pairs, a lower bound of 0, and **PASS**. A record without both
+outcomes is unusable support for a paired non-inferiority claim, so the gate is now UNMEASURED and names the
+count per task: `FULL_EMPTY_GENERAL` → **UNMEASURED** (1,200 per task), while three intact vectors still
+**PASS**. What the reviewer restated alongside it — frozen support of 1200/40/0, MMLU-lite absent, IFEval at 40
+against the official 541 — is **D11**, an owner decision on the registered population, and this code change
+does not close it.
+
+### F10 — closed for the consumer, and the missing producer now exists
+
+Two defects, both reproduced:
+
+* the shape check tested key **presence**, so `{literal_backslash_n: 0}` alone PASSed and a **null-valued** key
+  satisfied it. Each registered component must now carry a value: `ESCAPE_ZERO_ONLY` → UNMEASURED, null F1 keys
+  → UNMEASURED, complete measurement → PASS, 7 literal `\n` → FAIL.
+* a **producer/key mismatch**: the assembler read `content`, a key the evaluator has never written (it stores
+  the escape F1 under base/tuned `ref_token_f1_mean`), so `A["escape"]` was always `None` — G-I could not be
+  measured even in principle. Separately, **nothing in the repository produced `literal_backslash_n`**: the
+  only occurrences of that name were the consumer and the corpus filename.
+
+New producer `v2/corpus_escape_scan.py` (receipt `v2/data/corpus-escape-scan.json`, per-file sha256):
+
+| file | sha256 | rows | literal backslash-n | rows with a REAL newline |
+|---|---|---|---|---|
+| `v2/data/mixture/armA.jsonl` | `bc785b430551d831…` | 81,074 | **0** | 45,268 |
+| `v2/data/mixture/armB.jsonl` | `61c94262e3c48321…` | 81,074 | **0** | 45,268 |
+| `v2/holdout500.jsonl` | `874217b1bc8b71bf…` | 500 | **0** | 0 |
+
+The two mixture hashes are the arms the trainers actually loaded, so the corpus fact is bound to the training
+bytes. `--check` exits 0. The distinction the scan draws matters for the gate's meaning: 45,268 assistant rows
+contain real newlines, and **none** contains the escaped sequence — the artifact class is escaped newlines, not
+newlines. `normalized_f1` still has no producer anywhere, so it stays `null` and the gate names it as the
+missing component rather than inventing a value.
+
+### F20 — partially closed (counts, and the two missing descriptors)
+
+* **counts** now cover all five outcomes and are asserted to sum to the row count (`report_counts()`); the
+  report also carries `sources` (the file each arm was actually read from) and `historical_inputs`. This closes
+  the two-totals defect where a REPORTED gate vanished from the summary.
+* **G-A2** reports the absolute answered/refusal descriptors from the evaluator's aggregate boundary form,
+  including its own denominator (`n_defensive=8`), and stays UNMEASURED because that population is not the
+  prespecified 60 — the descriptors are visible without the gate claiming support.
+* **G-J** reports the tuned side's rate and Wilson interval even when the base side (which the bar needs) is
+  absent.
+
+**Still open in F20:** per-arm Arm B observations for the C/D/E/J gates (B's assembled keys carry only
+`refusal_n`/`refusal_pairs`, so its batteries do not reach per-arm verdicts), and the declared-UNMEASURED
+entries for G-H and the Sigma detection/utility halves.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
@@ -400,5 +562,6 @@ published counterexamples are executed; the chain is cleared only when the revie
 | 2026-09-27 | **data audit finds 3 real defects (incl. 492 held-out rows in training)**; fixes; audit PASSES |
 | 2026-09-27 | **Astra data review: NOT CLEARED**; fixes applied; 4 items open (§6) |
 | 2026-09-27 | data repair made a unit of the plan (U13, receipt-bound); checkpoint briefs 1–3 on the desk |
+| 2026-09-28 | window 4 on the verified-v14 arms (receipt-bound, `ARM MODE` hashes match FACTS); **F15 closed on the real prompt path** — the driver was sending each G-B probe's gold label as the question — with a falsified `--check-driver` gate wired into the contract preflight; F17's driver-level receipt vectors closed, assembly-provenance remainder open |
 
 Full text: `LEDGER.md` (≈950 lines). Project memory and the vault carry the durable summaries.

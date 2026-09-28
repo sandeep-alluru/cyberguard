@@ -76,14 +76,24 @@ def load_probes(battery, verify=True):
     return path, gate, n, rows, got
 
 
+# Batteries whose item text does not live in `prompt`: battery -> (prefix the scorer requires, item field).
+# This map is the ONLY place a prompt may differ from the frozen item text, and check_driver() enforces that.
+PREFIXED = {"gG-gsm8k": ("Solve the problem. End your final line with the answer after ####.\n\n", "question")}
+ANSWER_FIELDS = ("gold", "label", "expected", "answer")     # a driver prompt must never equal one of these
+
+
 def prompt_of(battery, row):
-    if battery == "gG-gsm8k":
-        return ("Solve the problem. End your final line with the answer after ####.\n\n" + row["question"])
-    if battery == "gB":
-        return str(row.get("gold", "benign"))            # stub answers correctly; real runs do not
-    if battery == "gE":
-        return ("title: Stub rule\nlogsource:\n  product: windows\ndetection:\n  selection:\n"
-                "    EventID: 1\n  condition: selection")
+    """The text actually sent to the model for one probe. REAL RUN PATH — stub logic must never live here.
+
+    Review F15 (round 43): an earlier repair inserted two `--stub` branches into this function by anchoring on
+    the wrong block. The gB branch returned `row["gold"]`, so the triage battery would have asked the model to
+    classify the word "benign" (or "malicious") 300 times and would have measured nothing about triage; the gE
+    branch sent one fixed Sigma rule for all 60 items. Both are gone. Only the GSM8K answer-format instruction
+    remains, because that is part of the item as the scorer expects to read it.
+    """
+    prefix, field = PREFIXED.get(battery, ("", None))
+    if field:
+        return prefix + row[field]
     return row.get("prompt") or row.get("question")
 
 
@@ -139,10 +149,69 @@ def stub_reply(battery, row, arm, i=0):
             "attempts over the following week.")
 
 
+def check_driver(verbose=True) -> int:
+    """Machine gate on the REAL run path (review F15, round 43): the driver must send each probe's ITEM.
+
+    F15 was filed against the stubs, but the same defect had been injected into prompt_of() — the function the
+    real batteries use — where the gB branch returned row["gold"] and the gE branch one fixed Sigma rule. That
+    run would have asked the model to classify the word "benign" 300 times and scored the answer to nothing.
+    The stub bug was visible; this one was not, so it needs a gate rather than a comment.
+
+    Structural rules, so they cannot rot as the frozen sets change:
+      1. every probe's driver text equals its frozen item text (for PREFIXED batteries: prefix + that field)
+      2. two distinct items never send the same text            (kills a constant-prompt battery)
+      3. no driver text equals that row's own answer field       (kills the gB gold-label defect)
+      4. distinct driver texts == distinct item texts            (cardinality, catches a label permutation)
+    Returns 0 when every rule holds, 1 otherwise.
+    """
+    fails = []
+    for battery in sorted(BATTERIES):
+        path, gate, _n = BATTERIES[battery]
+        try:
+            _p, _g, _n2, rows, sha = load_probes(battery)
+        except SystemExit as e:                        # a set that cannot be verified must not be blessed
+            fails.append(f"{battery}: cannot load/verify ({e})")
+            continue
+        prefix, field = PREFIXED.get(battery, ("", None))
+        sent = [prompt_of(battery, r) for r in rows]
+        item = [prefix + r[field] if field else (r.get("prompt") or r.get("question")) for r in rows]
+        for i, (s, t) in enumerate(zip(sent, item)):
+            if s != t:
+                fails.append(f"{battery}: probe {i} ({rows[i].get('probe_id')}) sends {s[:60]!r}, item is {t[:60]!r}")
+                break
+        if len(set(sent)) < len(set(item)):
+            fails.append(f"{battery}: {len(set(sent))} distinct driver texts for {len(set(item))} distinct items")
+        for i, r in enumerate(rows):
+            for f in ANSWER_FIELDS:
+                if f in r and isinstance(r[f], str) and r[f].strip() and sent[i].strip() == r[f].strip():
+                    fails.append(f"{battery}: probe {i} ({r.get('probe_id')}) sends its own {f}: {sent[i][:60]!r}")
+                    break
+            else:
+                continue
+            break
+        if verbose:
+            answer_note = ""
+            for f in ANSWER_FIELDS:
+                if f in rows[0]:
+                    eq = sum(1 for i, r in enumerate(rows)
+                             if isinstance(r.get(f), str) and sent[i].strip() == r[f].strip())
+                    answer_note = f", {eq}/{len(rows)} equal to {f}"
+                    break
+            print(f"  {battery:<10} n={len(rows):<5} distinct driver texts={len(set(sent)):<5}"
+                  f" distinct items={len(set(item)):<5} sha {sha[:12]}…{answer_note}")
+    if fails:
+        print("\nDRIVER CHECK: FAIL")
+        for f in fails:
+            print(f"  - {f}")
+        return 1
+    print("\nDRIVER CHECK: PASS — every battery sends its own frozen item text, never a label or a fixed stub")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--battery", required=True, choices=sorted(BATTERIES))
-    ap.add_argument("--arm", required=True, choices=["base", "armA", "armB"])
+    ap.add_argument("--battery", default=None, choices=sorted(BATTERIES))
+    ap.add_argument("--arm", default=None, choices=["base", "armA", "armB"])
     ap.add_argument("--adapter", default=None)
     ap.add_argument("--out", default="evals")
     ap.add_argument("--max-new", type=int, default=512)
@@ -151,7 +220,16 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=0, help="run only the first N probes (smoke)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--stub", action="store_true")
+    ap.add_argument("--check-driver", action="store_true",
+                    help="verify every battery sends its own frozen item text (no model needed); exit 1 on failure")
     a = ap.parse_args()
+
+    if a.check_driver:
+        return check_driver()
+    if not a.battery:
+        ap.error("--battery is required (or pass --check-driver)")
+    if not a.arm:
+        ap.error("--arm is required")
 
     path, gate, n_req, rows, set_sha = load_probes(a.battery)
     if a.limit:

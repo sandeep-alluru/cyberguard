@@ -34,6 +34,16 @@ for f in v2/data/probe-set-gA.jsonl v2/data/probe-set-gC.jsonl v2/data/probe-set
   [ -s "$f" ] && ok "probe set present: $f" || { bad "probe set missing: $f"; PRE=$((PRE+1)); }
 done
 [ -s "$FACTS" ] && ok "FACTS present (every number is cited from it)" || { bad "FACTS missing"; PRE=$((PRE+1)); }
+# Review F15: the driver once returned each G-B probe's GOLD LABEL as the prompt (and one fixed Sigma rule for
+# all 60 G-E items), so those batteries would have scored the answer to nothing. This is machine-checked here
+# because the defect was invisible to inspection: it lived in the real prompt path, not in the stubs.
+DC=$(mktemp)
+if python3 v2/run_battery.py --check-driver >"$DC" 2>&1; then
+  ok "driver sends each probe's own frozen item text ($(grep -c 'distinct driver texts' "$DC") batteries checked)"
+else
+  bad "driver check FAILED — batteries would not measure the frozen items:"; sed 's/^/        /' "$DC"; PRE=$((PRE+1))
+fi
+rm -f "$DC"
 echo "  arms the trainers loaded (must match FACTS):"
 for spec in "$S4 A" "$S8 B"; do set -- $spec
   L=$(timeout 60 ssh -o BatchMode=yes "$1" "grep -m1 'ARM MODE' ~/cyberguard/logs/train-cyberguard-lora-v2-arm$2.log" 2>/dev/null)
@@ -132,6 +142,15 @@ if any(g["gate"] == "CONTRACT" for g in r["gates"]):
 decided = r["counts"]["PASS"] + r["counts"]["FAIL"]
 if decided == 0:
     sys.exit("FATAL: no gate reached PASS or FAIL; an all-UNMEASURED report is not a contract")
+# F18: a PASS or FAIL may not rest on a number produced outside this run. The assembler tags such gates, and
+# the verdict layer turns them UNMEASURED - this is the end-to-end assertion that the tag survived the trip.
+hist = [g["gate"] for g in r["gates"]
+        if g.get("historical_input") and g["outcome"] in ("PASS", "FAIL")]
+if hist:
+    sys.exit(f"FATAL: {len(hist)} gate(s) decided on an input measured outside this run: {hist}")
+tagged = [g["gate"] for g in r["gates"] if g.get("historical_input")]
+if tagged:
+    print(f"  note: {len(tagged)} gate input(s) came from an earlier run and are reported UNMEASURED: {tagged}")
 if len([g for g in r["gates"] if g["gate"] != "CONTRACT"]) < 14:
     sys.exit(f"FATAL: only {len(r['gates'])} gate rows; every gate must appear")
 print(f"  contract accepted: {decided} decided, {r['counts']['UNMEASURED']} unmeasured")
