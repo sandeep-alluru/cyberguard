@@ -262,6 +262,27 @@ report **steps completed and epoch coverage** (which are receiptable), and the f
 training metrics. If a loss curve is wanted later, the logging config needs an explicit callback — noted, not
 silently assumed.
 
+## 6f. Phase-6 readiness audit (2026-09-28) — one real gap
+
+Checked what actually implements the evaluation contract, rather than assuming the filenames imply it:
+
+| contract item | implemented by | state |
+|---|---|---|
+| the two pre-registered claims, the nine gates, the single outcome mapping | `docs/SPEC-V2.md` §7 (specification + per-gate n, method, confidence rule) | **specified** |
+| paired benchmark scoring per arm (raw + normalized token-F1, common-prefix pairing) | `eval_cyberguard.py`, launched by `run-eval-chain.sh` after the trainer releases the GPU | **implemented** |
+| merge-equivalence check (the tested artifact must be the shipped artifact) | `merge_equiv.py` via `run-eval-chain.sh` | **implemented** |
+| G-A / G-G style capability probes (GSM8K subset + IFEval-lite, paired) | `cap_harness.py` | **implemented as proxies**, and it says so in its own output |
+| **the C24 gate verdict layer**: read the eval outputs, compute G-A, G-A2, G-B, G-C, G-D, G-E, G-F, G-G, G-J with their confidence rules, and emit PASS/FAIL/UNMEASURED per gate plus the overall outcome | **nothing** — `v2/gate_v2.py` is the dataset-ADMISSION gate (U1), not the evaluation gates; the only files matching G-* strings are the data scripts | **MISSING** |
+| `docs/VERDICT-v2.md` | — | pending that layer |
+
+**Next workstream (owner: me, before C24):** implement `v2/gates_v2.py` — a single program that consumes the
+eval JSON for base/armA/armB, computes each gate from the §7 definitions, applies the clause-1 outcome mapping
+(complete support ⇒ PASS/FAIL; support shortfall ⇒ UNMEASURED), and writes the gate table consumed by
+`docs/VERDICT-v2.md`.
+**Exit condition:** `python3 v2/gates_v2.py --evals evals/ --out v2/gate-report-v2.json` exits 0 and the report
+contains exactly one outcome per gate, each with its *(observed)*(confidence)* tag, plus the two claim results;
+a synthetic run with a deliberately missing eval file yields UNMEASURED for the affected gates and never PASS.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
