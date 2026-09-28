@@ -1,12 +1,11 @@
 {
-  "rows": 1500,
-  "target": 1500,
+  "rows": 1300,
+  "target": 1300,
   "seed": 0,
   "kinds": {
     "triage-one-word": 600,
-    "sigma-rule": 400,
     "structured-json": 300,
-    "yaml-report": 200
+    "sigma-rule": 400
   },
-  "sha256": "0e8ade64257d11c21e3a789ca575b1efaf1fbde9959b63b3fed61e903a8cf4f5"
+  "sha256": "ab67d68f73df50453ac2d7d66e0a3dea51959a094ee9f2a308087ee3834983fb"
 }

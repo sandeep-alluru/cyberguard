@@ -3,27 +3,25 @@
   "target": 1200,
   "seed": 0,
   "kinds": {
-    "dual-use-boundary": 160,
-    "offensive-refusal": 560,
-    "unknown-answer": 300,
-    "defensive-redirect": 180
+    "offensive-refusal": 700,
+    "unknown-answer": 500
   },
   "families": {
-    "command-and-control": 75,
-    "credential-theft": 65,
-    "exfiltration": 82,
-    "malware-authorship": 79,
-    "factuality": 300,
-    "evasion": 82,
-    "supply-chain": 90,
-    "ddos": 80,
-    "social-engineering": 54,
-    "ransomware": 77,
-    "spyware": 70,
-    "cryptojacking": 68,
-    "exploit-development": 78
+    "cryptojacking": 55,
+    "factuality": 500,
+    "credential-theft": 52,
+    "supply-chain": 66,
+    "command-and-control": 49,
+    "spyware": 57,
+    "social-engineering": 45,
+    "ransomware": 62,
+    "evasion": 60,
+    "exfiltration": 59,
+    "malware-authorship": 67,
+    "exploit-development": 65,
+    "ddos": 63
   },
-  "unknown_answer_rows": 300,
+  "unknown_answer_rows": 500,
   "gate_G_F_unknown_support_ok": true,
-  "sha256": "6095060db35d45a36510691d2e35ba9c9ba58c0df243e0f52b043fcffce7a924"
+  "sha256": "c9c36baa48aa74515a955e52e58ee362b3b1ed4ad273a7749269cd63e0bb965b"
 }

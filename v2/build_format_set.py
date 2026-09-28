@@ -162,7 +162,7 @@ def sigma_goal(rng):
 
 def build(target, seed):
     rng = random.Random(seed)
-    quotas = {"triage-one-word": 600, "sigma-rule": 400, "structured-json": 300, "yaml-report": 200}
+    quotas = {"triage-one-word": 600, "sigma-rule": 400, "structured-json": 300}   # C2: yaml-report cut
     assert sum(quotas.values()) == target, "quotas must sum to the target"
     rows, seen = [], set()
 
@@ -225,7 +225,7 @@ def build(target, seed):
         n += add(user, json.dumps(obj), "structured-json")
 
     n = a = 0
-    while n < quotas["yaml-report"] and a < 300000:
+    while False:   # C1/C2 (over-engineering review): category cut
         a += 1
         k = rng.randint(2, 4)
         picks = rng.sample(HANDPRINTS, k)
@@ -244,7 +244,7 @@ def build(target, seed):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="v2/data/format-compliance.jsonl")
-    ap.add_argument("--target", type=int, default=1500)
+    ap.add_argument("--target", type=int, default=1300)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
     rows = build(args.target, args.seed)

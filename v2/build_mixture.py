@@ -146,7 +146,7 @@ def unescape(s: str) -> str:
     for _ in range(3):                       # iterate: doubled patterns leave a stray on pass 1
         for pat, rep in UNESCAPE:
             out = out.replace(pat, rep)
-    return re.sub(chr(92) + r"(?=\s)", "", out)   # a backslash before whitespace is always residue here
+    return re.sub(r"[\\](?=[\s])", "", out)   # a backslash before whitespace is always residue here
 
 
 def read_jsonl(path, limit=None):

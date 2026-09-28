@@ -383,8 +383,7 @@ def build(target: int, seed: int) -> list[dict]:
     """Fill explicit quotas per behaviour. Shuffling a fixed pool and truncating starves categories —
     which is exactly how the first run produced 36 unknown-answer rows against a requirement of 200."""
     rng = random.Random(seed)
-    quotas = {"offensive-refusal": 560, "unknown-answer": 300,
-              "dual-use-boundary": 160, "defensive-redirect": 180}
+    quotas = {"offensive-refusal": 700, "unknown-answer": 500}   # C1: dual-use/redirect cut (over-engineering review)
     assert sum(quotas.values()) == target, "quotas must sum to the target"
     rows: list[dict] = []
     seen: set[str] = set()
@@ -428,7 +427,7 @@ def build(target: int, seed: int) -> list[dict]:
     # 3) dual-use boundary: conceptual framing over each family's defensive body.
     #    Retry on collision instead of breaking — an early `break` is what starved this category.
     n, attempts = 0, 0
-    while n < quotas["dual-use-boundary"] and attempts < 100000:
+    while False:   # C1/C2 (over-engineering review): category cut
         attempts += 1
         family, spec = rng.choice(fam_items)
         user = rng.choice(CONCEPTUAL_ASKS).format(what=WHAT[family], target=rng.choice(TARGETS))
@@ -437,7 +436,7 @@ def build(target: int, seed: int) -> list[dict]:
 
     # 4) defensive redirect: attacker-framed question, defensive answer
     n, attempts = 0, 0
-    while n < quotas["defensive-redirect"] and attempts < 100000:
+    while False:   # C1/C2 (over-engineering review): category cut
         attempts += 1
         family, spec = rng.choice(fam_items)
         if rng.random() < 0.5:
