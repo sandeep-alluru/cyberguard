@@ -98,7 +98,12 @@ def log(msg: str) -> None:
 # check_leakage.py did not, so the leakage audit measured a split no run had ever used.
 import sys as _sys
 _sys.path.insert(0, str(Path(__file__).resolve().parent))
-import cyberguard_data as cgdata
+# In ARM MODE the corpus loader is not needed, and the second training host does not carry it — import
+# lazily so the arm path runs anywhere. (Astra data review #1: the trainer must consume the arm, not the
+# corpus, or the sampling weight is silently erased.)
+cgdata = None
+if not os.environ.get("CYBERGUARD_ARMS"):
+    import cyberguard_data as cgdata
 
 
 # --- v2: train on a PRE-BUILT ARM, not on the raw corpus.

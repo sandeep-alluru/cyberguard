@@ -1123,3 +1123,29 @@ Audit **PASS (0 failures, 0 warnings)**, `--verify-receipt` → 0, printing `REC
 `LEDGER.md`, the CRAFT corpus (77 lessons), and eight CEO-desk briefs — all consistent with `FACTS.json`.
 Open work is the four data items D1–D4, each with an owner and an exit, and the cadence above applies to
 closing them.
+
+## 2026-09-28 01:0x — round 3: gate hardened, arms staged, Muse diagnosed
+
+- **A vacuous-pass risk closed in the gate.** I suspected `--verify-receipt` might pass by omission when a
+  receipt records no arm hashes. It *did* record them (my diagnostic had a key-naming bug: `armA.jsonl`
+  vs `armA`), but the failure mode is real, so the check is now **fail-closed**: a receipt that cannot
+  identify the revision it cleared returns exit 1 instead of a pass.
+- **The gate is now verified in both directions:** clean state → `RECEIPT-BOUND` (exit 0); a receipt
+  naming a different revision → exit 1, *"armA changed since the audit that cleared them"*; restored →
+  exit 0. A gate that has never failed is not a gate.
+- **Trainer staging prerequisite fixed.** `cyberguard_data` was imported at module level, so arm-mode
+  could not run on the second host (which does not carry the corpus loader). The import is now
+  conditional on non-arm mode.
+- **Arms staged on both training hosts and hash-verified:** `armA.jsonl` (195 MB) → `spark-40ee`
+  (`b47be8ca…` MATCH), `armB.jsonl` → `spark-8cf2` (`649c2e28…` MATCH).
+- **Watchdog upgraded and re-verified:** expensive scans are hash-gated with a 6-cycle heartbeat, and
+  **resolved alerts are retired** (a stale `ALERT-*` file misleads the next reader — the watchdog had
+  correctly raised `DATA-DRIFT` when I rebuilt the arms after the audit, and left the alert behind after
+  the rebuild+re-audit cleared it). New instance cycle 1: **hashes MATCH · leak CLEAN (full) · audit
+  PASS (full)**.
+- **Muse: diagnosed, blocked on credentials.** `muse exec --provider echo` responds correctly, so the
+  harness runs; `muse auth status` returns *"expected `auth set`"* — **no provider credentials are
+  configured**, so it cannot run a model-backed review. That is an environment gap, not a usage error,
+  and per the owner's instruction Astra carries the review requirement. Two attempts produced no output
+  for the same reason; recorded rather than retried blindly.
+- **Astra data re-review #2 is running** (471 KB of transcript and growing) against the D1–D4 claims.
