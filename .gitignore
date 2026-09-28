@@ -8,3 +8,5 @@ v2/.selftest/
 *.zstd
 *.safetensors
 *.gguf
+v2/data/mixture/
+v2/data/corpus/

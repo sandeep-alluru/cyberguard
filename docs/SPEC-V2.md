@@ -168,8 +168,10 @@ a weight is a **per-row sampling multiplier applied when the epoch order is buil
 The *nominal epoch* is therefore the **weighted** total, and coverage is expressed in weighted
 presentations — never in unique rows seen, which is not measured.
 
-**Totals of the fixed core** (review #8 finding 4 — the earlier unweighted range was wrong and the
-full-epoch row contradicted itself). "Fixed core" = Trendyol + refusal set + format + ID-grounding +
+**Realized totals — the mixture has been BUILT and receipted (`v2/data/mixture/mixture.receipt.json`),
+so these are measured build outputs, not projections.** The NIST CSRC pull was rate-limited mid-build
+(1,000 of 20,000 rows; recorded SKIPPED-with-reason), which is the entire shortfall against the
+proposal. The fixed core of the plan is unchanged; the epoch is what it is. "Fixed core" = Trendyol + refusal set + format + ID-grounding +
 NIST, i.e. **excluding** the U1-gated extraction supervision and general replay:
 
 | quantity | value |
@@ -177,19 +179,19 @@ NIST, i.e. **excluding** the U1-gated extraction supervision and general replay:
 | unweighted rows | **84,484–95,984** |
 | weighted presentations per nominal epoch | **94,384–107,384** |
 | epoch duration at 0.9683 s/sample | **25.4–28.9 h** |
-| full-epoch refusal contribution | 1,200 × 8.0 = **9,600 presentations = 8.0 per row** |
+| full-epoch refusal contribution | 1,200 × 8.0 = **9,600 presentations = 11.5 % of the epoch** |
 
 U1's outcome (which extraction corpus is admitted, and whether replay gets a treatment) updates these
 totals in `docs/MIXTURE-V2.md` **before** U3. Every figure below is **projected** exposure under
 proportional sampling, not measured coverage — realised exposure is receipted after the run
 (review #8 finding 4).
 
-| budget | presentations | of the weighted epoch | refusal presentations (projected) | per refusal row |
+| budget | presentations | of the realized epoch | refusal presentations (projected) | per refusal row |
 |---|---|---|---|---|
-| 8 h (**C8**, dose point 1) | 29,743 | 27.7–31.5 % | 2,659–3,025 | **2.22–2.52** |
-| 16 h (**C16**, dose point 2) | 59,486 | 55.4–63.0 % | 5,318–6,050 | **4.43–5.04** |
-| **24 h (C24, confirmatory)** | **89,230** | **83.1–94.5 %** | **7,977–9,076** | **6.65–7.56** |
-| 1 full epoch | 94,384–107,384 | 100 % | 9,600 | 8.0 |
+| 8 h (**C8**) | 29,743 | 35.6 % | 3,422 | **2.85** |
+| 16 h (**C16**) | 59,486 | 71.3 % | 6,844 | **5.70** |
+| **24 h (C24, confirmatory)** | **89,230** | **106.9 %** | **10,266** | **8.55** |
+| 1 full epoch | 83,444 | 100 % | 9,600 | 8.0 |
 
 **The refusal rows are an intervention of untested size, and its dose is now stated AND sampled.** At
 weight 8.0 the refusal material is **8.9–10.2 % of the epoch**, so the run presents it **2.3–2.5 times

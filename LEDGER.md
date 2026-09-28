@@ -943,3 +943,40 @@ passes `plan-validate.py`):
 
 **Standing:** the re-cut therefore goes to a further confirmation pass (#12) before launch — the same
 rule that produced #7–#11: *a reviewed artifact that is not the shipped artifact is not reviewed*.
+
+## 2026-09-27 — MIXTURE BUILT AND RECEIPTED (83,444-presentation epoch; both arms)
+
+`v2/build_mixture.py` assembles both arms from the 8 admitted sources and writes a receipt with realized
+counts, SHA-256s and token statistics. Built output: **Arm A 83,444 rows, Arm B 83,444 rows**,
+**9,600 refusal slots in each** (1,200 × weight 8.0) — so the control differs only in those slots.
+
+| source | realized presentations |
+|---|---|
+| Trendyol core (unescaped) | 51,998 |
+| NVD CVE 2.0 | 14,873 |
+| refusal-retention (×8.0) | 9,600 |
+| format-compliance (×2.0) | 3,000 |
+| MITRE ATT&CK | 2,187 |
+| NIST CSRC | **1,000** (of 20,000 intended — viewer rate-limited; SKIPPED-with-reason) |
+| conversational replay | 400 |
+| arcspan extraction | 386 |
+| **weighted epoch** | **83,444** (22.4 h at 0.9683 s/sample) |
+
+**The documents had to become conversations.** NIST/ATT&CK/NVD/arcspan are prose, and under
+`assistant_only_loss=True` a document with no assistant turn contributes **zero** supervised tokens — so
+adding them as raw text would have changed the mixture on paper and nothing in training. Each is
+converted into an instruction/response pair with the source text as the RESPONSE (the same reasoning
+that made the replay slot conversational, F9).
+
+**Two bugs of mine caught in this build:**
+1. **The unescape pattern matched `\\n` (two backslashes) instead of `\n`** — so the F3 fix silently did
+   nothing and 22 of 71 sampled rows still carried literal escapes. Found by checking the output rather
+   than trusting the transformation. Now verified: `unescape('a\nb')` → a real newline.
+2. **An unbounded retry loop against the HuggingFace viewer** hammered it ~250 times after it began
+   rate-limiting, burning ~10 minutes and fetching nothing. Fixed to a bounded loop (stop after 3
+   consecutive failures, back off on failure) — and the NIST shortfall is recorded as SKIPPED-with-reason
+   rather than papered over.
+
+**Plan updated to the realized artifact, not the proposal:** the epoch is **83,444**, so **24 h now
+covers 106.9 % of an epoch** (a full pass plus a little) instead of the proposed 83–95 %, and the refusal
+set is presented **8.55 times**. Every affected table in §6 was recomputed against the built mixture.
