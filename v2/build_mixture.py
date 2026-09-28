@@ -124,7 +124,9 @@ def complete_sentence(text):
 # cut it at a CHARACTER cap (NIST rows are sliced at 4000 chars) and clip_answer() leaves short text alone.
 # Prose sources must end at a real boundary. Format rows are deliberately excluded: their target is a
 # triage label, a Sigma rule or a JSON object, and "completing" those would corrupt them.
-PROSE_SOURCES = {"nist", "attack", "nvd", "replay", "refusal"}
+# "trendyol" is the largest source (50,672 rows) and produces real prose documents; leaving it out meant
+# the completeness rules never ran on 62 % of the mixture (review #5's heading-only examples were here).
+PROSE_SOURCES = {"trendyol", "nist", "attack", "nvd", "replay", "refusal"}
 
 
 def _ends_ok(text):
@@ -163,7 +165,9 @@ def defect(text):
     if s.startswith("#") and len(w) <= 16:
         return "heading-only"
     lines = [ln for ln in s.splitlines() if ln.strip()]
-    if lines and lines[-1].lstrip().startswith("#"):
+    # NB: only a multi-line document can "trail" a heading. With a single line, lines[-1] IS the whole
+    # answer, so this rule flagged 1,394 complete documents that merely open with a markdown heading.
+    if len(lines) > 1 and lines[-1].lstrip().startswith("#"):
         return "trailing-heading"
     if s.count("```") % 2:
         return "unclosed-code-fence"
@@ -507,6 +511,14 @@ def build_replacements(refusal_rows, rng):
             txt_ok = cand
         if len(txt_ok.split()) < 8:          # first sentence alone blows the budget -> not usable
             continue
+        # Review #5: this pool is built after the sanitising loop, so it escaped every completeness check
+        # and shipped a trailing heading and an unclosed citation into BOTH arms.
+        if defect(txt_ok) or not _ends_ok(txt_ok):
+            fixed = complete_sentence(txt_ok)
+            if fixed != txt_ok and not defect(fixed) and _ends_ok(fixed):
+                txt_ok = fixed
+            else:
+                continue
         pool.append((f"What does ATT&CK document about {name}, and what should a defender take from it?",
                      txt_ok))
     rng.shuffle(pool)
@@ -606,6 +618,9 @@ def main():
                     if fixed != r["assistant"]:
                         r["assistant"] = fixed
                         n_boundary_fixed += 1
+                    elif k != "refusal":          # no boundary anywhere and nothing to trim to
+                        r["_drop"] = "no-boundary"
+                        drop_reasons["no-boundary"] = drop_reasons.get("no-boundary", 0) + 1
         # Reviews #4/#5: a target that cannot be re-ended (NIST index/table fragments, heading-only
         # answers, an open code fence, an unclosed citation) is NOT admitted — shipping it would teach the
         # model to stop mid-thought. Refusals are exempt: their slot count is a pre-registered quantity.
@@ -660,6 +675,8 @@ def main():
         meaningful in this data (Windows paths are backslash+letter), so it is always residue."""
         return re.sub(r"[\\](?=[\s])", "", str(s))   # character class: a bare backslash would escape the group
 
+    write_stats = {"dropped": 0}
+
     def write(name, rows):
         path = os.path.join(args.outdir, name)
         with open(path, "w", encoding="utf-8") as fh:
@@ -680,6 +697,16 @@ def main():
                             a = m.group(0).strip()
                 except Exception:
                     pass
+                # Review #5, last hole: this budget trim runs AFTER the loop's completeness checks and can
+                # cut a citation open again (the OopsIE row ended "(Citation: Unit 42 OopsIE!"). Re-check the
+                # STORED form and drop the row rather than ship a truncated sentence.
+                if r.get("src") not in (None, "", "format") and defect(a):
+                    fixed = complete_sentence(a)
+                    if fixed != a and not defect(fixed):
+                        a = fixed
+                    else:
+                        write_stats["dropped"] += 1
+                        continue
                 fh.write(json.dumps({"system": scrub(r["system"]), "user": scrub(r["user"]),
                                      "assistant": a, "src": r.get("src", "")},
                                     ensure_ascii=False) + "\n")
@@ -724,6 +751,7 @@ def main():
     print(f"  assistant tokens (mean): A={receipt['assistant_token_mean']['armA']} "
           f"refusal={receipt['assistant_token_mean']['refusal_rows']} "
           f"replacement={receipt['assistant_token_mean']['replacement_rows']}")
+    print(f"    rows dropped at write time (completeness re-check): {write_stats['dropped']}")
     return 0
 
 

@@ -40,3 +40,10 @@
     ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
 [2026-09-28 03:25:17] cycle 18 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
     ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+[2026-09-28 03:35:37] cycle 19 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+[2026-09-28 03:45:56] cycle 20 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+[2026-09-28 03:56:10] cycle 21 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: FAIL (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    ALERT AUDIT: verify-receipt failed
