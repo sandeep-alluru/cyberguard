@@ -128,3 +128,89 @@
     ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
 [2026-09-28 09:57:07] cycle 56 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
     ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+[2026-09-28 10:10:48] cycle 1 | data checks skipped: a build is writing the arms | leak_scan: CLEAN (full) | audit: FAIL (full)
+    ALERT AUDIT: verify-receipt failed
+    RESOLVED DATA-DRIFT.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT (condition no longer holds)
+[2026-09-28 10:21:43] cycle 2 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT (condition no longer holds)
+[2026-09-28 10:32:16] cycle 3 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 10:42:29] cycle 4 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 10:52:50] cycle 5 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 11:03:29] cycle 6 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 11:14:00] cycle 7 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 11:24:08] cycle 8 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 11:34:15] cycle 9 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 11:44:26] cycle 10 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 11:54:40] cycle 11 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 12:05:40] cycle 12 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 12:16:50] cycle 13 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 12:26:54] cycle 14 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 12:37:40] cycle 15 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 12:48:17] cycle 16 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+[2026-09-28 13:05:04] cycle 1 | hashes: MATCH | leak_scan: CLEAN (full) | audit: PASS (full)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)
+    RESOLVED DATA-DRIFT (condition no longer holds)
+    RESOLVED AUDIT.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved.resolved (condition no longer holds)

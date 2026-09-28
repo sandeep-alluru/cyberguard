@@ -102,7 +102,14 @@ def main():
         # clear alerts whose condition has resolved (a stale ALERT is worse than no ALERT)
         import glob as _glob
         for f in _glob.glob(os.path.join(ROOT, "logs", "ALERT-*")):
-            kind = os.path.basename(f).replace("ALERT-", "")
+            base = os.path.basename(f)
+            # Skip anything already retired. Without this, the glob re-matched the retired files and each
+            # resolution appended ANOTHER ".resolved" — the logs accumulated names like
+            # "ALERT-DATA-DRIFT.resolved.resolved…" (18 suffixes) until a shell glob over them failed with
+            # "File name too long". Retirement must be idempotent.
+            if base.endswith(".resolved"):
+                continue
+            kind = base.replace("ALERT-", "")
             if kind not in fired:
                 os.rename(f, f + ".resolved")
                 with open(logpath, "a", encoding="utf-8") as fh:
