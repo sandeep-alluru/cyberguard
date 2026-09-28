@@ -12,8 +12,11 @@ prev=0; quiet=0
 for i in $(seq 1 "$CYCLES"); do
   ts=$(date '+%F %T'); alive=no
   for p in /proc/[0-9]*; do
-    cmd=$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null) || continue
-    case "$cmd" in *train_cyberguard[.]py*) alive=yes;; esac
+    exe=$(readlink -f "$p/exe" 2>/dev/null) || continue
+    case "$exe" in *python*) ;; *) continue;; esac
+    while IFS= read -r -d '' a; do
+      case "$a" in */train_cyberguard.py|train_cyberguard.py) alive=yes; break;; esac
+    done < "$p/cmdline" 2>/dev/null
   done
   size=$(stat -c%s "$LOG" 2>/dev/null || echo 0)
   if [ "$size" -gt "$prev" ]; then quiet=0; else quiet=$((quiet+1)); fi
