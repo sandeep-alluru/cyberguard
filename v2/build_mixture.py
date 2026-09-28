@@ -123,6 +123,25 @@ def complete_sentence(text):
     return s
 
 
+# Review #4, residual: a row can end mid-thought even when it is UNDER the token budget, because a loader
+# cut it at a CHARACTER cap (NIST rows are sliced at 4000 chars) and clip_answer() leaves short text alone.
+# Prose sources must end at a real boundary. Format rows are deliberately excluded: their target is a
+# triage label, a Sigma rule or a JSON object, and "completing" those would corrupt them.
+PROSE_SOURCES = {"nist", "attack", "nvd", "replay", "refusal"}
+
+
+def _ends_ok(text):
+    """True if the text already ends at something a reader would accept as an end."""
+    w = str(text).rstrip().split()
+    if not w:
+        return True
+    t = w[-1]
+    if _ends_sentence(t):
+        return True
+    # closed citation, bracket, code fence or table cell — complete as stored
+    return t.endswith((")", "]", "`", '"', ":", ";"))
+
+
 def clip_answer(text):
     """Trim to <= ASSISTANT_MAX_TOKENS real tokens, then to the last sentence boundary."""
     tok = _tokenizer()
@@ -490,6 +509,7 @@ def main():
     hold = load_holdout_prompts()
     n_near_removed = 0
     n_clipped = 0
+    n_boundary_fixed = 0
     clean = {}
     for k, rows in pools.items():
         before = len(rows)
@@ -510,6 +530,11 @@ def main():
             if clipped:
                 r["assistant"] = new
                 n_clipped += 1
+            if k in PROSE_SOURCES and not _ends_ok(r["assistant"]):
+                fixed = complete_sentence(r["assistant"])
+                if fixed != r["assistant"]:
+                    r["assistant"] = fixed
+                    n_boundary_fixed += 1
         clean[k] = rows
         print(f"  loaded {k:<9} {len(pools[k]):>6} rows -> held-out removed, deduped: "
               f"{len(rows):>6} (exact dup {de}, near dup {dn})")
@@ -588,6 +613,7 @@ def main():
         "assistant_token_mean": {"armA": mean_tok(armA), "refusal_rows": mean_tok(armA, "refusal"),
                                  "replacement_rows": mean_tok(armB, "replacement")},
         "answers_clipped_at_max": n_clipped,
+        "prose_answers_re_ended": n_boundary_fixed,
         "assistant_max_words": ASSISTANT_MAX_WORDS,
         "refusal_slots": {"armA": sum(1 for r in armA if r["src"] == "refusal"),
                           "armB": sum(1 for r in armB if r["src"] == "replacement")},
@@ -597,6 +623,7 @@ def main():
 
     print(f"\n  held-out rows removed (exact or >=0.80 near): {n_near_removed}")
     print(f"  answers clipped at {ASSISTANT_MAX_WORDS} words: {n_clipped}")
+    print(f"  prose answers re-ended at a real boundary: {n_boundary_fixed}")
     print(f"WROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
     print(f"  weighted epoch: {len(armA)} presentations")
     print(f"  refusal slots: armA={receipt['refusal_slots']['armA']} armB={receipt['refusal_slots']['armB']}")
