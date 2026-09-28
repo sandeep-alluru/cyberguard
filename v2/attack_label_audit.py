@@ -47,7 +47,12 @@ def classify(text, table, by_leaf):
         parent = eid.split(".")[0]
         if parent in table and B._leaf(name) == B._leaf(table[parent]):
             out.append(("parent-ref", eid, name)); continue
-        target = by_leaf.get(B._leaf(name))
+        target = None
+        if ":" in name:
+            pl, lo = name.split(":", 1)
+            target = (by_leaf.get("__full__") or {}).get((True, f"{B._leaf(pl)}|{B._leaf(lo)}"))
+        if not target:
+            target = by_leaf.get(B._leaf(name))
         if target and target != eid and target.split(".")[0] == eid.split(".")[0]:
             out.append(("repaired", eid, name))
         else:
@@ -74,6 +79,15 @@ def main() -> int:
             by_leaf[leaf] = act[0]
         elif not act and len(ids) == 1:
             by_leaf[leaf] = next(iter(ids))
+    # same full-label index the builder uses (review #11): "Parent: Leaf" is unique even when the leaf is not
+    full = {}
+    for i, nm in table.items():
+        if "." not in i:
+            continue
+        par = i.split(".")[0]
+        if par in table:
+            full[(i not in deprecated, f"{B._leaf(table[par])}|{B._leaf(nm)}")] = i
+    by_leaf["__full__"] = full
 
     report = {}
     for arm in ("armA.jsonl", "armB.jsonl"):

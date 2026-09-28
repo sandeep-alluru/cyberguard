@@ -854,13 +854,30 @@ def repair_attack_ids(text, table=None, by_leaf=None):
                 by_leaf[leaf] = act[0]
             elif not act and len(ids) == 1:                  # only a revoked id carries that name
                 by_leaf[leaf] = next(iter(ids))
+        # Review #11: a leaf alone is often globally ambiguous ("Domains" appears under several parents),
+        # so those stayed unrepaired even when the text gave the FULL "Parent: Leaf" label, which is
+        # unique. This index resolves that case exactly (105 assertions / 104 rows per arm).
+        full = {}
+        for i, nm in table.items():
+            if "." not in i:
+                continue
+            par = i.split(".")[0]
+            if par in table:
+                full[(i not in _dep, f"{_leaf(table[par])}|{_leaf(nm)}")] = i
+        by_leaf["__full__"] = full
 
     def sub(m):
         eid, name = m.group(1), m.group(2).strip()
         canon = table.get(eid)
         if canon is None or _leaf(name) == _leaf(canon):
             return m.group(0)
-        target = by_leaf.get(_leaf(name))
+        target = None
+        if ":" in name:
+            par_leaf, leaf_only = name.split(":", 1)
+            full = by_leaf.get("__full__") or {}
+            target = full.get((True, f"{_leaf(par_leaf)}|{_leaf(leaf_only)}")) or None
+        if not target:
+            target = by_leaf.get(_leaf(name))
         if target and target != eid:
             # The active id whose name the text actually carries. Restricting this to the same parent left
             # 619 contradictions (review #10: "T1078.004 (Kerberoasting)", "T1558.001 (Kerberoasting)"):
