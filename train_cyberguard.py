@@ -101,14 +101,43 @@ _sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cyberguard_data as cgdata
 
 
-log(f"loading dataset {DATA}")
-_canon = cgdata.load_rows(DATA)
-log(f"  usable rows: {len(_canon)}")
-if MAX_ROWS:
-    log(f"  capping to {MAX_ROWS} rows (MAX_ROWS)")
-train_rows, eval_rows = cgdata.make_split(_canon, EVAL_N, SEED, MAX_ROWS)
-train_rows = [{"messages": cgdata.to_messages(r)} for r in train_rows]
-eval_rows = [{"messages": cgdata.to_messages(r)} for r in eval_rows]
+# --- v2: train on a PRE-BUILT ARM, not on the raw corpus.
+# Discovery that forced this (Astra data review #1, finding 6): this trainer loaded the original corpus
+# and re-split it, so passing the weighted arm files through it would have SILENTLY REMOVED the sampling
+# weight (the loader dedupes by prompt) — the run would have reported the designed mixture and trained on
+# something else. The arms are now consumed verbatim, in order, with duplicates preserved, and the arm's
+# sha256 travels in the receipt.
+ARMS = os.environ.get("CYBERGUARD_ARMS", "")
+if ARMS:
+    import hashlib as _hash
+    arm_path = Path(ARMS)
+    if not arm_path.exists():
+        raise SystemExit(f"CYBERGUARD_ARMS set but not found: {arm_path}")
+    _arm_sha = _hash.sha256(arm_path.read_bytes()).hexdigest()
+    train_rows = []
+    with arm_path.open(encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            d = json.loads(line)
+            msgs = []
+            if d.get("system"):
+                msgs.append({"role": "system", "content": d["system"]})
+            msgs.append({"role": "user", "content": d["user"]})
+            msgs.append({"role": "assistant", "content": d["assistant"]})
+            train_rows.append({"messages": msgs})
+    eval_rows = []
+    log(f"ARM MODE: {arm_path} rows={len(train_rows)} sha256={_arm_sha[:16]}")
+else:
+    log(f"loading dataset {DATA}")
+    _canon = cgdata.load_rows(DATA)
+    log(f"  usable rows: {len(_canon)}")
+    if MAX_ROWS:
+        log(f"  capping to {MAX_ROWS} rows (MAX_ROWS)")
+    train_rows, eval_rows = cgdata.make_split(_canon, EVAL_N, SEED, MAX_ROWS)
+    train_rows = [{"messages": cgdata.to_messages(r)} for r in train_rows]
+    eval_rows = [{"messages": cgdata.to_messages(r)} for r in eval_rows]
 log(f"  train {len(train_rows)} / held-out {len(eval_rows)}")
 # augment TRAINING rows only — eval_rows are left exactly as split, so the held-out set that
 # verify_split.py validates is unchanged
@@ -254,6 +283,8 @@ receipt = {
     "gpu": torch.cuda.get_device_name(0) if torch.cuda.is_available() else None,
     "base_model": str(BASE),
     "dataset": str(DATA),
+    "arms": ARMS or None,
+    "arms_sha256": (_arm_sha if ARMS else None),
     "rows_total": len(_canon), "rows_train": len(train_rows), "rows_eval": len(eval_rows),
     "rows_after_prompt_dedupe": len(_canon), "max_rows_cap": MAX_ROWS,
     "config": {
