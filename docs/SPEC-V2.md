@@ -187,7 +187,7 @@ totals in `docs/MIXTURE-V2.md` **before** U3. Every figure below is **projected*
 proportional sampling, not measured coverage — realised exposure is receipted after the run
 (review #8 finding 4).
 
-| budget | presentations | of the audited epoch | refusal presentations (projected) | per refusal row (1,156 unique) |
+| budget | presentations (projected) | of the audited epoch | refusal presentations (projected) | per refusal row (1,198 unique) |
 |---|---|---|---|---|
 | 8 h (**C8**) | 29,743 | 36.3 % | 3,358 | **2.90** |
 | 16 h (**C16**) | 59,486 | 72.6 % | 6,716 | **5.81** |

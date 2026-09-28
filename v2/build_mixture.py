@@ -33,8 +33,38 @@ CORPUS = os.environ.get(
     "CYBERGUARD_CORPUS",
     os.path.expanduser("~/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl"))
 
-ASSISTANT_MAX_WORDS = 400   # ~512 regex tokens; the evaluation generates 512 (headroom chosen
-                            # because word count under-counts punctuation-heavy text like YAML)
+ASSISTANT_MAX_WORDS = 400   # fallback when the tokenizer is unavailable
+ASSISTANT_MAX_TOKENS = 512  # the evaluation's generation budget (review #2 finding 3: measuring in
+                            # regex words under-counted; 1,300 answers per arm exceeded the real budget)
+_TOK = None
+
+
+def _tokenizer():
+    global _TOK
+    if _TOK is None:
+        from transformers import AutoTokenizer
+        _TOK = AutoTokenizer.from_pretrained("v2/tokenizer")
+    return _TOK
+
+
+def clip_answer(text):
+    """Trim to <= ASSISTANT_MAX_TOKENS real tokens, then to the last sentence boundary."""
+    tok = _tokenizer()
+    w = str(text).split()
+    if len(tok(" ".join(w), add_special_tokens=False)["input_ids"]) <= ASSISTANT_MAX_TOKENS:
+        return text, False
+    lo, hi = 0, len(w)
+    while lo < hi:
+        mid = (lo + hi + 1) // 2
+        if len(tok(" ".join(w[:mid]), add_special_tokens=False)["input_ids"]) <= ASSISTANT_MAX_TOKENS:
+            lo = mid
+        else:
+            hi = mid - 1
+    cut = " ".join(w[:lo])
+    m = re.search(r"^[\s\S]*[.!?](?=\s|$)", cut)
+    if m and len(m.group(0).split()) > lo * 0.5:
+        cut = m.group(0).strip()
+    return cut.rstrip(" ,;:-"), True
 WEIGHTS = {"trendyol": 1.0, "nist": 1.0, "attack": 1.0, "nvd": 1.0,
            "refusal": 8.0, "format": 2.0, "arcspan": 1.0, "replay": 1.0}
 CAPS = {"trendyol": 52000, "nist": 20000, "attack": 20000, "nvd": 15000,
@@ -323,8 +353,10 @@ def build_replacements(refusal_rows, rng):
         name, desc = (x.strip() for x in txt.split("\n", 1))
         if len(desc) < 80 or not name:
             continue
+        # review #2 finding 2: desc[:600] cut 2,704 presentations inside a word. Pass the whole
+        # description; the builder's sentence-boundary clip trims it coherently afterwards.
         pool.append((f"What does ATT&CK document about {name}, and what should a defender take from it?",
-                     desc[:600]))
+                     desc))
     rng.shuffle(pool)
     out, seen = [], set()
     for q, a in pool:
@@ -373,15 +405,17 @@ def main():
         # documents key on CONTENT (their prompt is a fixed template); conversations key on the prompt
         dkey = "assistant" if k in ("nist", "attack", "nvd", "arcspan", "replay") else "user"
         rows, de, dn = dedupe(rows, key=dkey)
-        for r in rows:                       # clip unfinishable answers (audit found 48 % over the cap)
-            a = str(r["assistant"])
-            if len(a.split()) > ASSISTANT_MAX_WORDS:
-                cut = " ".join(a.split()[:ASSISTANT_MAX_WORDS])
-                # prefer ending at the last sentence boundary so the target does not stop mid-clause
-                m = re.search(r"^[\s\S]*[.!?](?=\s|$)", cut)
-                if m and len(m.group(0).split()) > ASSISTANT_MAX_WORDS * 0.5:
-                    cut = m.group(0).strip()
-                r["assistant"] = cut.rstrip(" ,;:-")
+        for r in rows:                       # clip to the eval's generation budget, in REAL tokens
+            try:
+                new, clipped = clip_answer(r["assistant"])
+            except Exception:                # tokenizer unavailable -> word-based fallback
+                a = str(r["assistant"])
+                if len(a.split()) > ASSISTANT_MAX_WORDS:
+                    new, clipped = " ".join(a.split()[:ASSISTANT_MAX_WORDS]), True
+                else:
+                    new, clipped = a, False
+            if clipped:
+                r["assistant"] = new
                 n_clipped += 1
         clean[k] = rows
         print(f"  loaded {k:<9} {len(pools[k]):>6} rows -> held-out removed, deduped: "
@@ -419,8 +453,22 @@ def main():
         path = os.path.join(args.outdir, name)
         with open(path, "w", encoding="utf-8") as fh:
             for r in rows:
+                # clip AFTER the scrub: removing a backslash changes whitespace and can shift
+                # tokenisation by a token, which is why 36 answers sat one token over the budget
+                a = scrub(r["assistant"])
+                # enforce on the STORED form: tokenising "a  b" or "a\nb" differs from "a b", so a
+                # whitespace-normalised measurement can pass while the stored string exceeds the budget
+                try:
+                    tok = _tokenizer()
+                    while len(a.split()) > 1 and len(tok(a, add_special_tokens=False)["input_ids"]) > ASSISTANT_MAX_TOKENS:
+                        a = " ".join(a.split()[:-1])
+                        m = re.search(r"^[\s\S]*[.!?](?=\s|$)", a)
+                        if m and len(m.group(0).split()) > len(a.split()) * 0.5:
+                            a = m.group(0).strip()
+                except Exception:
+                    pass
                 fh.write(json.dumps({"system": scrub(r["system"]), "user": scrub(r["user"]),
-                                     "assistant": scrub(r["assistant"]), "src": r.get("src", "")},
+                                     "assistant": a, "src": r.get("src", "")},
                                     ensure_ascii=False) + "\n")
         return path, hashlib.sha256(open(path, "rb").read()).hexdigest()
 

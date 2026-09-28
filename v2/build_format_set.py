@@ -179,11 +179,28 @@ def gen_log_line(rng):
     return "host=%s net_conn dst=%s:%d bytes=%d duration=%ds" % (host, ip, port, bytes_, dur), label
 
 
+CATEGORY_CHANNEL = {
+    "process_creation": "process creation",
+    "file_event": "file events",
+    "registry_set": "registry writes",
+    "dns_query": "DNS telemetry",
+    "network_connection": "network connections",
+    "image_load": "image load",
+}
+
+
 def sigma_goal(rng):
-    """Return (goal_text, channel) so the rule's logsource can be derived rather than guessed."""
-    channel = rng.choice(CHANNELS)
+    """Return (goal_text, channel) where the channel is DERIVED from the handprint's own telemetry.
+
+    Review #2 (finding 1) reproduced 586/800 presentations whose prompt named one channel while the rule
+    specified another ("network connections" answered with process_creation). The selection fix bound the
+    rule to the handprint but left the prompt's channel random, so the contradiction survived. Now the
+    channel is a property of the handprint: prompt, logsource and selection cannot disagree.
+    """
+    hp = rng.choice(HANDPRINTS)
+    category = HANDPRINT_SELECTION[hp][0]
     return ("detect %s identified by %s in %s"
-            % (rng.choice(ACTIONS), rng.choice(HANDPRINTS), channel)), channel
+            % (rng.choice(ACTIONS), hp, CATEGORY_CHANNEL[category])), CATEGORY_CHANNEL[category]
 
 
 def build(target, seed):

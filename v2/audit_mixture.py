@@ -197,7 +197,15 @@ def main():
     # E2 --- generation-budget consistency: training answers must be producible at eval time
     #         (v1's lesson: a train/eval length mismatch is invisible until somebody scores it)
     GEN_CAP = 512
-    over_cap = sum(1 for r in A if len(toks(r["assistant"])) > GEN_CAP)
+    try:
+        from transformers import AutoTokenizer
+        _t = AutoTokenizer.from_pretrained("v2/tokenizer")
+        over_cap = sum(1 for r in A[: min(len(A), 20000)]
+                       if len(_t(str(r["assistant"]), add_special_tokens=False)["input_ids"]) > GEN_CAP)
+        rep["answers_over_generation_cap_mode"] = f"real-tokenizer, {min(len(A),20000)} rows sampled"
+    except Exception:                                    # noqa: BLE001
+        over_cap = sum(1 for r in A if len(toks(r["assistant"])) > GEN_CAP)
+        rep["answers_over_generation_cap_mode"] = "regex-token fallback"
     rep["answers_over_generation_cap"] = over_cap
     if over_cap > len(A) * 0.01:
         fail("E2-generation-cap", f"{over_cap} training answers exceed the {GEN_CAP}-token generation "

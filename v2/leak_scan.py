@@ -76,7 +76,28 @@ def hits(text, idx, n, jac_min, con_min):
     if k in exact:
         return "exact"
     if len(toks(text)) < SHORT_TOKENS:
-        return None                       # short text is governed by the exact test above
+        # A short reference is a leak only when the field is THAT PROMPT with a few words added.
+        # Two calibrations, both against reproduced false/true cases:
+        #   * a 4-token noun phrase ("WMI event subscription persistence") sitting inside a different
+        #     8-token question is a shared domain term, not contamination -> references under 6 tokens
+        #     are handled by exact match only;
+        #   * a genuine padded prompt keeps the reference contiguous and adds at most a few words, so
+        #     the token-count excess is bounded.
+        ft = toks(text)
+        for r in short:
+            rt = toks(r)
+            if len(rt) < 6:                              # noun phrases are not prompts
+                continue
+            if len(ft) - len(rt) < 0 or len(ft) - len(rt) > 3:
+                continue
+            # CONTIGUOUS containment: set containment alone fired on re-orderings of the same words,
+            # which is not a copied prompt. The reference's token sequence must appear as a run.
+            window = len(rt)
+            for i in range(0, len(ft) - window + 1):
+                if tuple(ft[i:i + window]) == tuple(rt):
+                    return f"short-reference-embedded (contiguous, +{len(ft) - len(rt)} words)"
+        return None
+        return None
     s = grams(text, n)
     if not s:
         return None
@@ -107,20 +128,32 @@ def main():
     ap.add_argument("--no-write", action="store_true")
     args = ap.parse_args()
 
+    def strings_in(obj, out):
+        """Recursively collect prompt-like strings from any item shape (str, tuple, dict, list)."""
+        if isinstance(obj, str):
+            if len(obj.strip()) >= 20:
+                out.append(obj)
+        elif isinstance(obj, dict):
+            for v in obj.values():
+                strings_in(v, out)
+        elif isinstance(obj, (list, tuple)):
+            for v in obj:
+                strings_in(v, out)
+
     refs = {"holdout": load_refs(args.holdout, "prompt"), "probes": []}
+    probe_sets = {}
     try:
         sys.path.insert(0, ".")
         import cap_probes as PB
         for name in dir(PB):
             v = getattr(PB, name)
             if isinstance(v, list) and name.isupper():
-                for it in v:
-                    if isinstance(it, str):
-                        refs["probes"].append(it)
-                    elif isinstance(it, dict):
-                        for k in ("prompt", "text", "user", "q"):
-                            if isinstance(it.get(k), str):
-                                refs["probes"].append(it[k]); break
+                out = []
+                strings_in(v, out)
+                if out:
+                    probe_sets[name] = out
+                    refs["probes"].extend(out)
+        print("  evaluation sets covered: " + ", ".join(f"{k}={len(v)}" for k, v in probe_sets.items()))
     except Exception as e:                                     # noqa: BLE001
         print(f"WARNING: cap_probes not importable ({e}); probe set empty", file=sys.stderr)
 
