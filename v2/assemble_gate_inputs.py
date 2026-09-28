@@ -69,10 +69,39 @@ def load(key):
     return None, None
 
 
-def build():
+def battery_receipts(evals_dir="evals", extra_dirs=()):
+    """Read the battery receipts written by v2/run_battery.py: battery-<bat>-<arm>.json.
+
+    Without this the new batteries would produce nothing the gate layer can consume - the same interface gap
+    this file exists to close, so it is read here rather than assumed to work.
+    """
+    out = {}
+    for d in (evals_dir,) + tuple(extra_dirs):
+        for f in sorted(glob.glob(os.path.join(d, "battery-*.json"))):
+            try:
+                rec = json.load(open(f))
+                out[(rec.get("battery"), rec.get("arm"))] = rec
+            except Exception:                                    # noqa: BLE001
+                continue
+    return out
+
+
+def pairs_from_batteries(bat, arm):
+    """Per-probe refusal pairs for one arm, from its gA receipt plus the base receipt."""
+    base = bat.get(("gA", "base"))
+    side = bat.get(("gA", arm))
+    if not base or not side:
+        return None
+    flags = {pid: bool(v) for pid, v in zip(side["probe_ids"], side["scores"]["refused"])}
+    bflags = {pid: bool(v) for pid, v in zip(base["probe_ids"], base["scores"]["refused"])}
+    return [{"probe_id": pid, "base": bflags[pid], "arm": flags[pid]}
+            for pid in side["probe_ids"] if pid in bflags]
+
+
+def build(extra_eval_dirs=()):
     """Return (inputs_by_arm, provenance, support)."""
     got = {k: load(k) for k in CANDIDATES}
-    A, BASE, prov, support = {}, {}, {}, {}
+    A, BASE, ARMB, prov, support = {}, {}, {}, {}, {}
 
     def take(key, field, transform=None):
         path, d = got[key]
@@ -129,10 +158,40 @@ def build():
                                "base": take("cap-6-general", "base"), "tuned": take("cap-6-general", "tuned")}
         support["G-G general"] = min([x for x in (gsm, ifeval) if x] or [0])
 
+    # --- v2 batteries take precedence over the v1 aggregates: they carry PER-PROBE data, which is what
+    # Claim 2 needs and what aggregate cross-tabs cannot express.
+    bat = battery_receipts(extra_dirs=extra_eval_dirs)
+    if bat:
+        prov["battery receipts"] = ", ".join(sorted({f"{b}/{a}" for (b, a) in bat}))
+        # arm A's pairs carry (arm, base); arm B's pairs are written to their OWN file, because Claim 2
+        # reads arm A and arm B from separate files and joins them by probe_id.
+        prsA = pairs_from_batteries(bat, "armA")
+        prsB = pairs_from_batteries(bat, "armB")
+        if prsA:
+            A["refusal_pairs"] = prsA
+            A["refusal_n"] = REQUIRED_N["G-A refusal retention"]
+            support["G-A refusal retention"] = len(prsA)
+        if prsB:
+            ARMB["refusal_pairs"] = prsB
+            ARMB["refusal_n"] = REQUIRED_N["G-A refusal retention"]
+            support["Claim 2 (A vs B)"] = len(prsB)
+        gC = bat.get(("gC", "armA"))
+        if gC and isinstance(gC.get("scores"), dict):
+            A["ids"] = {"n": gC["scores"].get("n", 0), "invalid": gC["scores"].get("invalid", 0)}
+            support["G-C id factuality"] = A["ids"]["n"]
+        gF = bat.get(("gF", "armA"))
+        if gF and isinstance(gF.get("scores"), dict):
+            A["grounded_counts"] = gF["scores"]
+            support["G-F grounded qa"] = gF["scores"].get("answerable_total", 0) + gF["scores"].get("unanswerable_total", 0)
+        gJ = bat.get(("gJ", "armA"))
+        if gJ and isinstance(gJ.get("scores"), dict):
+            A["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores"), "tuned": gJ["scores"]}
+            support["G-J chat retention"] = gJ["scores"].get("total", 0)
+
     # G-A and the claims: the paired-stats receipt gives the cross-tab, which is the same information as
     # per-probe pairs at the aggregate level.
     pn = take("cap-7-paired", "paired_n")
-    if pn:
+    if pn and "refusal_pairs" not in A:
         A["refusal_pairs"] = {"n": pn,
                               "both_refused": take("cap-7-paired", "both_refused"),
                               "base_only_refused": take("cap-7-paired", "base_only_refused"),
@@ -167,15 +226,16 @@ def build():
         if "content" in d:
             (A if dst == "A" else BASE)["escape"] = d["content"]
             prov[armkey + ".content"] = path
-    return A, BASE, prov, support
+    return A, BASE, ARMB, prov, support
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=None)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--extra-evals", default="", help="additional directory holding battery-*.json receipts")
     a = ap.parse_args()
-    A, BASE, prov, support = build()
+    A, BASE, ARMB, prov, support = build(tuple(x for x in a.extra_evals.split(',') if x))
 
     print("  derivation (gate input <- receipt.key)")
     for k in sorted(prov):
@@ -198,6 +258,8 @@ def main() -> int:
         os.makedirs(a.out, exist_ok=True)
         json.dump(A, open(os.path.join(a.out, "gate-inputs-armA.json"), "w"), indent=2)
         json.dump(BASE, open(os.path.join(a.out, "gate-inputs-base.json"), "w"), indent=2)
+        if ARMB:
+            json.dump(ARMB, open(os.path.join(a.out, "gate-inputs-armB.json"), "w"), indent=2)
         print(f"  wrote {a.out}/gate-inputs-armA.json and gate-inputs-base.json")
     return 0
 
