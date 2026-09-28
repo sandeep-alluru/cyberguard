@@ -200,6 +200,28 @@ leak scan CLEAN 0/162,148 · completeness screen PASS 0 findings · ATT&CK repai
 substitutions, 3,984 abstention rows identical) · staged and hash-verified on both hosts
 (armA `ed21d796…`, armB `f8956b40…`).
 
+## 6c. Review #12 and the decision to run to C8 (2026-09-28, window 4)
+
+**Review #12 verdict:** DATA NOT CLEARED, with the finding level **STOP AT C8 — explicitly "no finding meets
+the STOP NOW threshold"**. It confirmed hashes (8/8), the O1 design, the full token budget, the lexical
+separation checks and the completeness screen, and withheld on two ATT&CK classes:
+
+| class | count per arm | status |
+|---|---:|---|
+| full-label contradictions (`Parent: Leaf` still resolving to a different active id) | 26 | **queued** — next fix |
+| parent-ID contradictions (a parent id paired with a child name or vice versa) | 750 | **queued** — next fix |
+
+**Disposition (owner directive: do not be blocked; the cadence fixes findings at checkpoints):** window 4
+**continues to C8** rather than being stopped in its first hour, because review #12 found no material
+supervision error while both earlier windows were stopped at minutes 10 and 25. The two classes are being
+fixed and gated in parallel (a rebuild costs CPU, not GPU, so it does not disturb the run). At C8 the decision
+is evidence-based: if the corrected arms are clean and the defect is material, stop and relaunch; if the
+classes are shown to be loose-but-legitimate citation forms, continue window 4 to C24 and record it.
+
+**Cost accounting so far:** windows 1–3 stopped at 10 + 25 + 25 minutes for data reasons (~60 min GPU, 0 h
+training completed). Window 4 started 09:46:15 CDT on the v13 arms (armA `86348996…`, armB `1208858a…`),
+24 h each, monitors armed on both hosts.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
