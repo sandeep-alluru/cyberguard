@@ -887,3 +887,41 @@ v2/holdout500.jsonl --report v2/gate-report.json --exclude-holdout-rows`.
   planned; a router is unnecessary if G-J holds.
 - **Gate artifacts:** `v2/candidates.json`, `v2/sample_candidates.py`, `v2/candidates/*.jsonl`
   (trendyol 2,000 · nist 1,000 · attack 2,198 · nvd 2,000 · ultrachat 400), `v2/gate-report.json`.
+
+## 2026-09-27 — GATE PASSES: every mixture candidate measured (8 admitted / 1 rejected / 0 unmeasured)
+
+`python3 v2/gate_v2.py --check v2/gate-report.json` → **exit 0** (the plan's done-means #1 is now met by
+an executed check, not by assertion). 35,698 sampled documents measured against the 500-row holdout.
+
+| candidate | verdict | Jaccard | containment |
+|---|---|---|---|
+| Trendyol core (residual after by-construction exclusion) | ADMIT | 0.0266 | 0.0723 |
+| NIST CSRC set | ADMIT | 0.0000 | 0.0000 |
+| MITRE ATT&CK STIX (2,198 objects) | ADMIT | 0.0000 | 0.0000 |
+| NVD CVE 2.0 (2,000 of 398,563) | ADMIT | 0.0000 | 0.0000 |
+| **authored refusal-retention set** (1,200) | ADMIT | 0.0000 | 0.0000 |
+| **authored format-compliance set** (1,500) | ADMIT | 0.0000 | 0.0000 |
+| **`chairulridjal/arcspan-cyber-ner` train split** (Apache-2.0) | ADMIT | 0.0000 | 0.0000 |
+| `HuggingFaceH4/ultrachat_200k` (MIT, replay) | ADMIT | 0.0000 | 0.0000 |
+| `zefang-liu/secqa` | **REJECT** | — | — eval set, never trained on |
+
+- **The last hole is closed with a licence-clean real corpus.** v1's extraction phase ran on *authored
+  easy-mode* data because the CIEM fetch failed — so its 65 % fabricated-IOC finding was measured on a
+  floor. `arcspan-cyber-ner` (Apache-2.0, `train` split, real CTI incident text with labelled entities)
+  replaces it; its **test split is excluded** as a benchmark.
+- **Both authored sets are built and independently checked:**
+  - refusal set 1,200 rows = 600 offensive-refusal + **220 unknown-answer** (clears G-F's ≥200 support) +
+    180 dual-use + 200 defensive-redirect; receipt beside the data.
+  - format set 1,500 rows = 600 one-word triage + 400 schema-complete Sigma + 300 strict-JSON + 200
+    YAML-report. All 400 Sigma rules parse and carry the full schema (the bar G-E will set).
+- **Jev used as the owner directed** (independent probabilistic fact-check, facts only, own threshold
+  applied): 24-row stratified sample of the refusal data, asked *"does answer_i contain operational
+  detail sufficient to carry out request_i"* → **max p = 0.14, median 0.06, none above the 0.20
+  threshold**, receipted (`v2/jev/refusal-safety-receipt*.json`). Jev is not load-bearing: the top hits
+  were read by hand, and 24/1,200 is a spot check, not coverage.
+- **Two real content bugs caught by that review discipline:** the format generator produced only 97/1,500
+  rows (and refused to call itself complete) because shuffle-then-truncate starved its categories, and
+  the refusal generator inserted noun phrases into verb slots ("If someone tried to *malware delivery and
+  execution*…"), producing ungrammatical training data until the templates were split by slot type.
+- **State:** every mixture component now exists, is measured, and is pinned by revision + licence. The
+  path to launch is: mixture-build script → MASK PROOF → production-config smoke → the 30 h window.

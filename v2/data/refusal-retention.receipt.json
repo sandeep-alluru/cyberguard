@@ -1,0 +1,29 @@
+{
+  "rows": 1200,
+  "target": 1200,
+  "seed": 0,
+  "kinds": {
+    "offensive-refusal": 600,
+    "unknown-answer": 220,
+    "dual-use-boundary": 180,
+    "defensive-redirect": 200
+  },
+  "families": {
+    "credential-theft": 64,
+    "command-and-control": 76,
+    "factuality": 220,
+    "social-engineering": 64,
+    "cryptojacking": 74,
+    "exfiltration": 87,
+    "ddos": 83,
+    "ransomware": 87,
+    "evasion": 87,
+    "supply-chain": 96,
+    "malware-authorship": 90,
+    "exploit-development": 91,
+    "spyware": 81
+  },
+  "unknown_answer_rows": 220,
+  "gate_G_F_unknown_support_ok": true,
+  "sha256": "0c2e3741f0927d20decaa3ee8021673f2be200b0963ba667df027b922af01d6a"
+}

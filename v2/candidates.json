@@ -37,24 +37,30 @@
     },
     {
       "id": "AUTHORED-refusal-retention-set",
-      "revision": "to be authored in U2 (1,200 rows; >=200 unknown-answer cases)",
+      "revision": "authored 2026-09-27 by v2/build_refusal_set.py (seed 0); receipt beside the data",
       "license": "ours + curated public refusal data (per-source gate)",
       "role": "train",
-      "rows": 1200
+      "rows": 1200,
+      "local_sample": "v2/data/refusal-retention.jsonl",
+      "note": "600 offensive-refusal + 220 unknown-answer (G-F support) + 180 dual-use + 200 defensive-redirect"
     },
     {
       "id": "AUTHORED-format-compliance-set",
-      "revision": "to be authored in U2 (1,500-3,000 rows)",
+      "revision": "authored 2026-09-27 by v2/build_format_set.py (seed 0); receipt beside the data",
       "license": "ours, from public rule schemas; SigmaHQ licence verified at U1",
       "role": "train",
-      "rows": 2000
+      "rows": 2000,
+      "local_sample": "v2/data/format-compliance.jsonl",
+      "note": "600 one-word triage + 400 schema-complete Sigma + 300 strict-JSON + 200 YAML-report"
     },
     {
-      "id": "extraction-corpus (TBD by U1 search)",
-      "revision": "not yet identified (CIEM repo unavailable in v1; alternatives to be searched)",
-      "license": "per-source gate",
+      "id": "chairulridjal/arcspan-cyber-ner",
+      "revision": "train split as fetched 2026-09-27; test split EXCLUDED (benchmark, never trained on)",
+      "license": "Apache-2.0 (API cardData.license)",
       "role": "train",
-      "rows": 800
+      "rows": 800,
+      "local_sample": "v2/candidates/arcspan-train-sample.jsonl",
+      "note": "replaces the v1 fallback: v1's CIEM fetch failed and P3 ran on authored easy-mode data, which is why fabricated-IOC rate was only ever measured on a floor"
     },
     {
       "id": "zefang-liu/secqa",

@@ -99,69 +99,69 @@
     },
     {
       "id": "AUTHORED-refusal-retention-set",
-      "revision": "to be authored in U2 (1,200 rows; >=200 unknown-answer cases)",
+      "revision": "authored 2026-09-27 by v2/build_refusal_set.py (seed 0); receipt beside the data",
       "license": "ours + curated public refusal data (per-source gate)",
       "role": "train",
       "rows": 1200,
-      "verdict": "UNMEASURED",
-      "reasons": [
-        "no-local-sample"
-      ],
-      "overlap_max": null,
-      "overlap_docs_ge_060": null,
-      "containment_max": null,
-      "containment_docs_ge_080": null,
-      "sample_docs": 0,
-      "token_count": null,
-      "token_count_mode": null,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 1200,
+      "token_count": 130050,
+      "token_count_mode": "whitespace-approx",
       "embedding_check": {
         "status": "SKIPPED",
         "reason": "not-implemented-in-v2-gate-1"
-      }
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 1200
     },
     {
       "id": "AUTHORED-format-compliance-set",
-      "revision": "to be authored in U2 (1,500-3,000 rows)",
+      "revision": "authored 2026-09-27 by v2/build_format_set.py (seed 0); receipt beside the data",
       "license": "ours, from public rule schemas; SigmaHQ licence verified at U1",
       "role": "train",
       "rows": 2000,
-      "verdict": "UNMEASURED",
-      "reasons": [
-        "no-local-sample"
-      ],
-      "overlap_max": null,
-      "overlap_docs_ge_060": null,
-      "containment_max": null,
-      "containment_docs_ge_080": null,
-      "sample_docs": 0,
-      "token_count": null,
-      "token_count_mode": null,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 1500,
+      "token_count": 106541,
+      "token_count_mode": "whitespace-approx",
       "embedding_check": {
         "status": "SKIPPED",
         "reason": "not-implemented-in-v2-gate-1"
-      }
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 1500
     },
     {
-      "id": "extraction-corpus (TBD by U1 search)",
-      "revision": "not yet identified (CIEM repo unavailable in v1; alternatives to be searched)",
-      "license": "per-source gate",
+      "id": "chairulridjal/arcspan-cyber-ner",
+      "revision": "train split as fetched 2026-09-27; test split EXCLUDED (benchmark, never trained on)",
+      "license": "Apache-2.0 (API cardData.license)",
       "role": "train",
       "rows": 800,
-      "verdict": "UNMEASURED",
-      "reasons": [
-        "no-local-sample"
-      ],
-      "overlap_max": null,
-      "overlap_docs_ge_060": null,
-      "containment_max": null,
-      "containment_docs_ge_080": null,
-      "sample_docs": 0,
-      "token_count": null,
-      "token_count_mode": null,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 500,
+      "token_count": 33835,
+      "token_count_mode": "whitespace-approx",
       "embedding_check": {
         "status": "SKIPPED",
         "reason": "not-implemented-in-v2-gate-1"
-      }
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 500
     },
     {
       "id": "zefang-liu/secqa",
@@ -210,8 +210,8 @@
     }
   ],
   "summary": {
-    "admitted": 5,
+    "admitted": 8,
     "rejected": 1,
-    "unmeasured": 3
+    "unmeasured": 0
   }
 }
