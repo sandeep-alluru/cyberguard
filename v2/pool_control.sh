@@ -42,8 +42,12 @@ except Exception:
 case "$ACT" in
   stop)
     echo "=== stopping the flash-next pool ==="
-    ssh8 "sudo systemctl stop spark-flash-next.service && echo '  8cf2: spark-flash-next stopped'"
-    ssh4 "sudo systemctl stop spark-rpc.service && echo '  40ee: spark-rpc stopped'"
+    ssh8 "sudo systemctl stop spark-flash-next.service && echo '  8cf2: spark-flash-next stopped (guard will restart it)'"
+    # NOTE: `stop` only. An earlier version also DISABLED the units to defeat Restart=always; that left
+    # the owner's machines changed (a reboot would not bring the served model back) and it did not even
+    # hold, because spark-rpc-guard.timer restarts them every 2 minutes. Stop, do not disable, and
+    # measure the contention instead: with the guard's pool up the rate measured 7.78-8.68 s/step.
+    ssh4 "sudo systemctl stop spark-rpc.service && echo '  40ee: spark-rpc stopped (guard will restart it)'"
     for i in $(seq 1 24); do
       f8=$(free_gb ssh8); f4=$(free_gb ssh4)
       echo "  free: 8cf2=${f8} GB  40ee=${f4} GB"
