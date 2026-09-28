@@ -379,7 +379,7 @@ def main():
     def scrub(s):
         """Last-resort residue removal at write time: a backslash followed by whitespace is never
         meaningful in this data (Windows paths are backslash+letter), so it is always residue."""
-        return re.sub(chr(92) + r"(?=\s)", "", str(s))
+        return re.sub(r"[\\](?=[\s])", "", str(s))   # character class: a bare backslash would escape the group
 
     def write(name, rows):
         path = os.path.join(args.outdir, name)
