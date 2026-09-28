@@ -1,0 +1,8 @@
+#### resume watcher start 2026-09-26T20:53:36Z sid=session-37d5fec1-316c-4049-81e7-a5f8f0c1967e
+/home/clawer-samurai-1/AgentHub/cyberguard/resume-flash-session.sh: line 43: /proc/760571/cmdline: No such file or directory
+/home/clawer-samurai-1/AgentHub/cyberguard/resume-flash-session.sh: line 43: /proc/760572/cmdline: No such file or directory
+/home/clawer-samurai-1/AgentHub/cyberguard/resume-flash-session.sh: line 43: /proc/760573/cmdline: No such file or directory
+#### resume watcher start 2026-09-26T20:54:50Z sid=session-37d5fec1-316c-4049-81e7-a5f8f0c1967e
+-- original run exited 2026-09-26T21:04:50Z; brief=177 bytes
+-- attempt 1: brief is 177 bytes; resuming session-37d5fec1-316c-4049-81e7-a5f8f0c1967e
+/home/clawer-samurai-1/AgentHub/cyberguard/resume-flash-session.sh: line 24: $3: unbound variable

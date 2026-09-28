@@ -1,0 +1,62 @@
+== 1. compile ==
+  ok    train_cyberguard.py
+  ok    eval_cyberguard.py
+  ok    cyberguard_data.py
+  ok    cyberguard_contract.py
+  ok    verify_split.py
+  ok    check_leakage.py
+  ok    audit_corpus_safety.py
+  ok    analyse_corpus.py
+  ok    register_cyberguard_dsh.py
+  ok    test_contract.py
+== 2. pyflakes (undefined names) ==
+  clean
+== 3. evaluation contract discriminates ==
+  ok — BRICK/LEAKER/MUTE rejected, DEFENDER promoted, quality + joint gates active
+== 4. split verification (Spark) ==
+  dropped 178 of 52524 rows that teach attack production (0.34%); 52346 remain
+  collapsed 62 near-duplicate prompts (Jaccard >= 0.8); 52284 remain
+PASS: train_cyberguard.py uses the shared loader/split and does not re-read the corpus
+PASS: eval_cyberguard.py uses the shared loader/split and does not re-read the corpus
+PASS: check_leakage.py uses the shared loader/split and does not re-read the corpus
+corpus rows after prompt-dedupe: 52284
+train 51784  held-out 500
+PASS: every user prompt in the corpus is unique after dedupe
+PASS: held-out and training rows are disjoint
+PASS: no user prompt appears on both sides (prompt-level disjoint)
+PASS: split partitions the whole corpus (52284 rows)
+PASS: split is deterministic (seed reproducible)
+RESULT: PASS
+== 5. leakage audit at the 0.80 threshold (Spark) ==
+  dropped 178 of 52524 rows that teach attack production (0.34%); 52346 remain
+  collapsed 62 near-duplicate prompts (Jaccard >= 0.8); 52284 remain
+corpus 52284   held-out 500   training 51784
+
+=== held-out vs nearest training prompt (3-token shingle Jaccard) ===
+  max     0.773
+  p99     0.714
+  p90     0.577
+  median  0.167
+  rows >= 0.80 (near-duplicate, leakage risk): 0
+  rows >= 0.60 (substantially overlapping):    40
+
+=== worst 5 ===
+  0.773
+     held : 'How would you fine‐tune countermeasures for kerberos pre-authentication bypass techniques '
+     train: 'Under what circumstances would you validate countermeasures for kerberos pre-authenticatio'
+  0.769
+     held : 'How would you fine‐tune countermeasures for credential attacks with crackmapexec and impac'
+     train: 'How would you validate countermeasures for credential attacks with crackmapexec and impack'
+  0.750
+     held : 'What role does privileged access management (PAM) play in preventing Kerberoasting?'
+     train: 'What role does privileged access management (PAM) play in preventing DCSync?'
+  0.720
+     held : 'How can practitioners evaluate the success of minimising false positives in Threat Intelli'
+     train: 'How can practitioners evaluate the success of minimising false positives in Threat Intelli'
+  0.714
+     held : 'Which anomaly detection methods outperform signature‐based approaches when securing ICS Th'
+     train: 'Which anomaly detection methods outperform signature‐based approaches when securing ICS Th'
+
+VERDICT: no near-duplicate leakage at the 0.80 threshold
+
+RESULT: PASS

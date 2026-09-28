@@ -1,0 +1,976 @@
+                                         Understanding Inhibition through Maximally
+                                                        Tense Images
+arXiv:2406.05598v1 [cs.CV] 8 Jun 2024
+
+
+
+
+                                                Chris Hamblin1,* 1        Srijani Saha1      Talia Konkle1        George Alvarez1
+                                                                1
+                                                                    Harvard University, Department of Psychology
+                                                                                    Abstract
+                                                  We address the functional role of feature inhibition in vision models; that is,
+                                                  what are the mechanisms by which a neural network ensures images do not
+                                                  express a given feature? Inhibition has received far less treatment in the
+                                                  literature than excitation, yet is critical for the construction of discriminative
+                                                  features. We observe that standard interpretability tools are not immediately
+                                                  suited to the inhibitory case, given the asymmetry introduced by the ReLU
+                                                  activation function. Given this, we propose inhibition be understood through
+                                                  a study of maximally tense images (MTIs), i.e. those images that excite
+                                                  and inhibit a given feature simultaneously. We show how MTIs can be
+                                                  studied with two novel visualization techniques; +/- attribution inversions,
+                                                  which split single images into excitatory and inhibitory components, and
+                                                  the attribution atlas, which provides a global visualization of the various
+                                                  ways images can excite/inhibit a feature. Finally, we explore the difficulties
+                                                  introduced by superposition, as such interfering induce the same attribution
+                                                  motif as maximally tense images.
+
+                                        1       Introduction
+                                        What makes an image not activate a given feature in a neural
+                                        network? This is the opposite of the question one typically
+                                        asks, but it is important nonetheless; features are only useful
+                                        if they are discriminative, that is, if they activate in response
+                                        to certain attributes of the input, but not others. A supposed
+                                        ’banana’ feature that activates for images of ’duck bills’ isn’t
+                                        much of a ’banana’ feature at all, and cannot be employed
+                                        by the model as such. What, if any, are the mechanisms in a
+                                        neural network that make features discriminative, that make
+                                        duckbills not bananas? If such mechanisms exist, how do               Figure 1: How might a net-
+                                        we identify them? Do we need new tools, or is the current             work construct an accurate
+                                                                                                              ’banana’ feature, that doesn’t
+                                        interpretability toolbox up to the task?                              activate for duckbills?
+                                        Maximally Exciting Images. If we start by taking stock
+                                        of this toolbox, we notice a common attribute of nearly every method is a reliance on
+                                        maximally exciting images, or MEIs[27]. In the general case, a feature can be thought of
+                                        as a scalar-valued function of images, and an MEI is any input for which this function
+                                        returns a large value. The simplest form of MEIs are the top-k activating images from a
+                                        large dataset[41, 5], but more sophisticated interpretability techniques rely on them just
+                                        them same. Feature visualization techniques synthesize MEIs with gradient ascent, in
+                                        such a way that the optimized image expresses human-perceptible features, rather than
+                                            1
+                                            *email for correspondence: chrishamblin [at] fas [dot] harvard [dot] edu
+
+
+                                        Preprint. Under review.
+adversarial ones[41, 30, 36, 57, 56, 47, 16, 38, 34, 59, 37, 39]. Saliency map techniques return
+a heatmap over an image that highlights the most important regions of a given image for the
+expression of a given feature[50, 3, 4, 52, 54, 17, 40, 22, 64, 45, 20, 46, 29]. In effect, saliency
+maps reveal smaller, spatially localized MEIs that the user should identify with the feature.
+’Concept’-based techniques specify the features in a model we should be studying in the
+first place[25, 23, 21, 19, 62], but these are typically paired with an assessment of MEIs, as
+features still need to be understood regardless of how they are identified in the model. Finally,
+where the above techniques characterize what features represent, mechanistic approaches
+seek to explain how features are computed[42, 13]. Mechanistic accounts of a model typically
+describe functions that operate on simpler/earlier features to compute complex ones. Even
+here, it is common practice to visualize the component features that comprise such functions
+with MEIs[21, 8, 43, 9].
+
+Maximally Inhibiting Images. Given
+MEIs are ubiquitous in our understanding
+of what features are, a natural starting
+point for understanding what features aren’t
+is MIIs, or "maximally inhibiting images".
+Such images are sometimes considered in
+the literature; for example, when character-
+izing many units in a single model, each
+can be quickly conveyed through its set of
+MEIs and MIIs[41]. Additionally, human ex-
+periments on the interpretability of features
+often invoke MIIs in their design; a feature is
+considered ’interpretable’ if humans can ex-
+trapolate from its set of MEIs and MIIs, cor-
+rectly predicting whether new images belong
+to the MEI or MII set [5, 63, 27]. Mecha-
+nistic interpretability methods that consider
+inhibition also invoke MII; for example, by
+looking at the MEI s for units connected
+by large negative weights[42, 8, 43] or large Figure 2: Imagenet [12] validation dataset ex-
+negative attributions[9].                       ample MEI and MII images for random features
+                                                 across several layers of InceptionV1 [55]. For each
+MIIs may be a natural starting point for un- layer, the top row images correspond to MEIs/MIIs
+derstanding what inhibits features, but they for a unit in that layer. The bottom row images
+raise immediate concerns. First, consider the correspond to a feature direction identified with
+model architecture, specifically the ReLU k-means clustering. For both unit and k-means
+activation function, ReLU(x) = max(x, 0), features, MEIs and their respective MIIs seem re-
+which introduces an asymmetry between pos- latable in early layers, but arbitrarily paired in
+itive and negative activations. What is the later layers.
+use in knowing an image induces a large neg-
+ative activation if this is precisely the information the ReLU function throws out? Negative
+weights are not learned by the model so that features return large negative values for certain
+inputs. It’s not clear what MIIs mean to the network, but there’s also a second problem; in
+many cases MIIs are not meaningful to humans. This is an empirical point, by which we
+mean a feature’s MEIs and MIIs often bear no visual relationship to each other, particularly
+for the high-level features represented in the later layers of the network. One might hope
+that MIIs have some property we can intuit as the ’opposite’ of their respective MEIs, in
+which case the two image sets would constitute the poles of a meaningful axis. For example,
+consider the MEIs and MIIs for features in layer ’Conv2d0’ of InceptionV1 [55], shown in
+Figure 2. In this first convolution layer the MIIs are approximately the MEIs but with their
+colors reversed; for example, orange above black becomes black above orange. However in
+late layers like ’mixed5a’, where features have large receptive fields and rich semantics, the
+relationship between MEIs and MIIs seems arbitrary. We validate these intuitions with a
+human experiment, showing people can learn to predict MIIs from MEIs in the first layer,
+but not in later ones (appendix B).
+To address these issues with MIIs, we present the following contributions:
+
+
+                                                 2
+     • We introduce analyses of maximally tense images (MTIs), which excite and inhibit
+       a target feature simultaneously. With regards to MTIs, negative weights play a
+       meaningful functional role, as the feature would erroneously activate in response to
+       its MTIs were it not for these weights.
+     • We present 2 novel feature visualization techniques that explain feature inhibition
+       both locally and globally.
+     • We explore how inhibitory weights facilitate superposition, and the difficulty this
+       introduces for a mechanistic understanding of inhibition.
+Notation. In what follows, we consider a neural network f : X → Y, which transforms an
+input image, x ∈ X , through a sequence of L hidden representations. Let fℓ : X → Hℓ denote
+the function mapping the image to the ℓth such hidden representation, hℓ = (h1 , ..., hnℓ )T ∈
+Hℓ ⊂ Rnℓ . In this work, a feature corresponds to a vector v ∈ Hℓ , and the function that
+computes the feature’s ’activation’ as fv (x) = fℓ (x) · v.
+Hardware & Software. The following experiments utilized 2 GeForce RTX 2080 GPUs.
+We used open-source software Pytorch (BSD 3-Clause License) [44], and the faccent (Apache
+License 2.0) [24] feature visualization library.
+
+2    Completeness of gradient-based attribution
+Specifying MTIs will rely on computing ’attributions’ for feature activations in an earlier
+layer of the model. In particular, we will leverage an empirical property of these attributions,
+that they behave additively. Consider a fully linear model, y = wx = w1 x1 + ... + wn xn .
+Observe that in this linear case wi = ∂x
+                                       ∂y
+                                          i
+                                            , thus y = ∇x y · x. When y is a nonlinear function
+of x, y = ∇x y · x is a linear approximation, useful for many different applications, such as
+pruning [10, 33, 28] and saliency maps [51, 52]. In our case, we want to understand the
+computation of feature fv as some function of features computed in an earlier layer, so let’s
+define a layer-to-feature attribution vector, Sl and its sum, El :
+
+                 Sl (x, fv ) := ∇hl fv (x) ⊙ hl       El (x, fv ) := ∇hl fv (x) · hl        (1)
+
+If fv ≈ El , then Sl can be used to select max-
+imally tense images (MTIs). MTIs are those
+images for which the attribution vector Sl has
+both large positive and negative terms, indi-
+cating instances in which inhibition plays an
+important functional role, additively negating
+excitation. Previous work has called the prop-
+erty in which an attribution vector sums to
+fv (x) ’completeness’, and unfortunately has
+observed that El as defined does not satisfy
+completeness when attributing across entire
+image classification models, from a class prob-
+ability to pixels[53, 49, 3]. However, El may
+still be complete when attributing between la-
+tent layers of the model, avoiding the gradient-
+flattening effects of the final softmax, as well
+as the non-linear relationship between pixel
+intensities and representations in later layers.
+To test this, we computed El (x, fv ) for 20
+random logits and all Imagenet [12] validation
+set images across several models. Figure 3 Figure 3: The correlation between logits, fv ,
+shows the average Pearson’s correlation of fv and total attribution El measured across layers.
+and El across logits. El is computed for all fv ≈ El across all layers, except when measured
+ReLU layers in the model and the pixel space, through very early layers and pixels.
+and Figure 3 orders these measurements by layer depth. We find that El are close to ceiling
+in their correlation with logits when computed through most layers of the model. When
+
+
+                                                  3
+measured through pixels however, the correlation deteriorates drastically. We find batch
+normalization layers also corrupt this relationship (appendix).
+
+3       Attribution through a curve detector; a case-study
+
+
+
+
+Figure 4: A. A scatterplot of El+ and El− for a proposed ’curve detector’ unit, across validation set
+images. Selected images visualized in B.-F. are circled in with the corresponding color. B. shows
+MEI examples, C. MIIs, and D. images with no attribution. E. shows images with positive and
+negative attributions in different spatial location, while F. shows images with positive and negative
+attribution in the channel dimension, at the same spatial location. G. The colorscale used for the
+       −
+(φ+
+  l , φl ) cam maps, which spatialize the positive and negative attribution in a given image.
+
+
+We’ll now explore several visualization techniques that leverage the completeness of the
+layer-to-feature attribution vector. Throughout, we’ll apply these techniques to feature
+"mixed3b:379" in Inceptionv1 [55] – a purported curve detector studied extensively in
+Cammarata et al. (2020)[7]. To begin, let’s group Sl into the sum of its positive and negative
+terms;
+
+                                    nℓ
+                                    X                               nℓ
+                                                                    X
+                           El+ :=         ReLU(Sl )i ,     El− :=         ReLU(−Sl )i .                 (2)
+                                    i=1                             i=1
+
+
+Figure 4.a shows the distribution of attributions (El+ , El− ) for feature "mixed3b:379" in the
+preceding layer. Each point represents the attributions for the central activation in the
+feature’s activation map in response to the Imagenet validation set. The color of each point
+corresponds to the activation value (pre-ReLU), and the diagonal lines are contours lines
+for El using the same color scale. Because fv ≈ El , the coloring of the data points and the
+contour lines are well-aligned.
+Some data points have been selected from Figure 4.a, with the corresponding images shown
+in Figures 4.b-f (cropped at the receptive field). The first and second of these selections
+correspond to the MEIs (b.) and MIIs (c.), which show excitatory and inhibitory curves at
+opposing orientations, as noted in Cammarata et. al. (2020)[7]. A saliency map, similar to
+GradCAM [48], accompanies each image, which serves to spatially localize our attributions.
+Observe that when layer l is convolutional, attribution vector Sl (x, fv ) is actually a tensor
+in RC×H×W . Spatial maps analogous to El± can be computed by summing over only the
+channel dimension,2
+
+                                                  C
+                                                  X
+                                 φ± (fv , x) :=          ReLU(±Sl,c (fv , x)).                          (3)
+                                                   c=1
+
+Such maps can be viewed as a heatmap over the image by upsampling them to the input
+image dimensions, as with GradCAM. We can visualize the negative and positive maps
+simultaneously by using a special color scale, which we show in Figure 4.g. With this coloring
+excitatory image regions appear red, inhibitory regions appear blue, and regions that have
+positive and negative terms in the channel dimension appear green.
+    2
+        E ± refers to the tuple (E + , E − ). Well use the superscript ± analogously for related variables.
+
+
+                                                         4
+Figure 5: MTIs for 3 units, with their ± attribution accentuations, inversions, and standard feature
+visualizations
+
+
+These maps are normalized across images, making it possible these attribution maps to
+highlight no regions of the image. For example, Figure 4.d shows those inputs that have near
+zero El+ and El− . The cropped images show homogeneous color patches that neither excite
+nor inhibit the curve detector, and the attribution maps highlight nothing in these crops.
+The images of most interest for our purposes are those which yield large values for both
+El+ and El− . Such images are depicted in Figure 4.e and .f, which each illustrate distinct
+cases. In the first case, inhibition and excitation to the curve detector come from distinct
+regions of the image. These images were selected from the set for which φ+ (x) − φ− (x)
+contains both values < P1 and > P99 . These images are easy to understand; they contain
+an excitatory curve at a consistent position/orientation, but also an inhibitory curve in a
+different location. The images in Figure 4.f depict a different case, in which simultaneous
+excitation/inhibition happens in the channel dimension at a single spatial position. These
+images were selected from the set for which both φ+ (x) and φ− (x) contain a value > P99
+at the same spatial position. These images are harder to interpret, as the heatmap directs
+our attention to the same region to explain what excites and inhibits the curve detector.
+How should we understanding this channel-wise inhibition and excitation of a feature in the
+general case?
+
+4    Accentuating and Inverting MTI Attributions
+For a given image, we want to exaggerate Sl± , which we’ll do by treating these attributions
+themselves as the feature activations to be maximized. This is similar to a technique utilized in
+Cammarata et al. [7], but isolating positive and negative attributions separately. Additionally,
+rather than maximize the dot product with the attribution vector, we’ll scale the dot product
+by the cosine similarity as in Carter et al. [9], which encourages the optimized image to
+point in the same direction as Sl± (appendix C). As is typical with feature visualization,
+we can optimize the image with a parameterization P(x) [30, 41, 35] and under a set of
+transformations [34] τ ∼ T , giving us the optimization;
+
+                                                                      (fl (x) · Sl )p+1
+            z ∗ = arg max L(τ ◦ P −1 (z); Sl ) with L(x; Sl ) :=                                 (4)
+                      z                                             (||fl (x)|| · ||Sl ||)p
+
+We can view the image that results from this as x∗ = P −1 (z ∗ ), and optionally seed from
+noise (inversion) or the natural image (accentuation) we used to calculate Sl . In Figure 5
+we show accentuations and inversions for MTIs across 3 InceptionV1 units, including our
+
+
+                                                 5
+Figure 6: A. Selection of large attribution examples from the dataset shown over the plot of E ±
+values. Contour lines show the density of selected points in the plot. B. Organize the attribution
+vectors of these selected points using UMAP. C. Average the attributions within local regions of the
+UMAP, then perform feature attribution inversion (equation 4)
+
+
+
+
+curve detector from earlier. Each MTI is among the top 10 images with the largest norm,
+||Sl (x)||1 , under the constraint that .5σ(fv (X)) < fv (x) < 0, which ensures excitation
+and inhibition are balanced. We use the fourier phase space image parameterization from
+MACO[18], as well as their opacity masking technique, which integrates the pixel gradients
+over the optimization steps and sets this to the alpha channel of the image. We use randomly
+located crops that cover .9-.99 of the entire image, as well as uniform and gaussian noise, as
+our set of transformations.
+
+                                                 6
+5    Feature Attribution Atlas
+Feature inversion and accentuation can help us understand how an individual image can
+excite and inhibit a feature, but what if we want a global view? That is, can we generate
+a visualization that depicts the relationships between all the various ways different images
+excite/inhibit a feature? Here we will adopt techniques from the activation atlas[9], which
+combines UMAP[32] and feature visualization to map the space of activations of whole
+neural network layers. Here we propose the Feature Attribution Atlas, which conditions this
+technique on single features, mapping the space of feature attributions in a layer. Generating
+the atlas is a three step process.
+Image Selection: The atlas should be a function of those images relevant to the target
+feature, which we can be determined by the its attributions. For a large set of images,D =
+xni , we compute Sl (D, then select a subset of images X to construct our atlas. In this
+demonstration we use 100,000 ImageNet training images as D and select X as the top 10,000
+with the largest L2 attribution norm, ||Sl (x)||2 . This selection criteria allows our atlas to
+convey those images which excite and/or inhibit fv , but not those images which are strictly
+orthogonal. We find using the L2 norm yields more diverse atlases than using L1 , see section
+6 for details on why this might be the case.
+Attribution UMAP: Next we organize images by their attribution vector using UMAP;
+mapS = umap(Sl (X)). This map conveys the various ’reasons why’ images excite/inhibit
+fv , as points close in mapS will correspond to images with a similar attribution vector. We
+color points in the map by the correspond activation of fv , to get a sense for where inhibitory
+and excitatory images land in the map (Figure 6.b).
+Feature Inversion: Its difficult to visualize all 1̃0,000 images represented in mapS directly,
+so we perform a coarse-graining operation. We overlay mapS with an n × n grid, then average
+all the attribution vectors within each grid cell, associating a new average attribution Sl,j,i
+with each position (i, j) in the grid. We can then generate a visual icon for each position
+in the map using our attribution inversion visualization technique (equation 4). Where in
+section 4 we visualized Sl+ and Sl− independently to isolate the inhibitory and excitatory
+influences from an MTI, in this application we will optimize towards |Sl,i,j |, which will allow
+positive and negative influences to be expressed in a single icon when in a ’tense’ region of
+the map. Finally, we pass these icon images back through the network and compute fv , then
+color the icon border with its activation value, and position the icons in the corresponding
+grid location, yielding the attribution atlas (Figure 6.c).
+Viewing a feature’s attribution atlas can provide much insight over dataset examples and
+feature visualizations alone. We find it particularly useful for understanding the role of
+negative weights into a feature. For example, mixed3b:9, appears to be inhibited by low
+frequencies, given its negative feature visualization, but as discussed earlier, its not sensible
+to conclude these weights are present so that the feature returns large negative activations
+to low frequency inputs. Rather we can understand the functional role of inhibition through
+the ’tense’ regions of the attribution atlas (Figure 6.c), where inhibition and excitation meet.
+Inhibition ensure the feature returns only moderate activations in response to such inputs.
+
+6    Inhibition from Superposition
+Thus far we have presented a framework for understanding the role of inhibition in the
+construction of features. The lynch-pin of our approach is the attribution in intermediate
+layer l; inhibition plays a functionally relevant role in how fv is computed for input x
+when El± (x, fv ) are both large. Suppose though, that we found an image x expressing
+only features independent of fv , that nonetheless induced a large E ± (x, fv ). This would
+present a problem, as such an image expresses no features relevant to the computation of
+fv , and scrutinizing such an image would only mislead us. However, recent work on toy
+models of superposition[15] suggests that such attributions are possible. Specifically, when
+features are sparse the model may represent more features than it has dimensions, Such that
+independent features are represented with interference (non-zero dot product) in a latent
+layer. It was hypothesized that reading out from features in superposition could necessitate
+inhibition negating the excitation caused by interference, in which case we would observe
+large El± (x, fv ) even when all features expressed by x are independent of fv .
+
+
+                                               7
+Superposition in toy models. Following Elhage
+et al. (2022)[15], let’s test that these deceptive at-
+tributions are possible with a toy model computing
+the absolute value function. It is a minimal non-
+linear function that is easy to compute with a small
+ReLU model, as abs(x) = ReLU(x) + ReLU(−x).
+For multivariate input x ∈ Rn , the network requires
+m = 2n hidden neurons to compute abs(x) exactly.
+In the original work, the authors find the network
+will optimize for very different weight motifs when
+m < 2n and x is sampled sparsely, such that any
+given xi usually takes the value 0. In our repli-
+cation of these experiments, we train 4 models to
+compute abs(x) for x ∈ R6 , with hidden dimensions
+m = 12, 10, 8, 6. As m decreases, the 6 input fea- Figure 7: Toy models compute the (A.)
+tures should be represented with more interference absolute value function and (B.) XOR
+in the hidden layer.                                   function on 6 independent input features.
+                                                         Attributions are normalized within each
+For each trained model we pass 12 inputs, one-hot column. For a color-scale legend, see Fig-
+vectors for each of the features and their negatives, ure 4.b
+i.e the basis vectors ei and −ei . For each of these
+inputs we compute the attribution to each output
+feature, fi , which we’ve trained to compute fi (x) =
+abs(xi ). These attribution matrices are shown in Figure 7; element (i, j) shows El± (ei , fj ) in
+the hidden layer, colored according the legend in Figure 4.b. The matrix in the first column
+corresponds to a disentangled model that can compute absolute value exactly without feature
+interference. The matrix shows + attribution along the diagonal only, and 0 attribution
+everywhere else, meaning input ei excites fi , but fj is insensitive to ei whenever i ≠ j, as it
+should be. Subsequent columns show attribution in models with ever tighter bottlenecks,
+inducing more interference, and subsequently more off-diagonal attributions. While the
+diagonal in these matrices is the only place where E + > E − , resulting in the correct output
+feature activating and performant models (appendix G), there is still a lot of attribution in
+the off-diagonals. All of this off-diagonal inhibition and excitation is induced by independent
+features irrelevant to the computation of fj .
+It’s clear that superposition can induce the +/- attribution motif, however we know that
+inhibition is not only relevant for compression, as there are functions that provably cannot
+be approximated without negative weights, such as the xor function[58]. Figure 7.b shows a
+similar experiment on a toy model computing the XOR function over 6 independent pairs of
+features, flattened into an input in R12 . Instead of testing this model on inputs ±ei , we pass
+the inputs [1, 0]i and [1, 1]i – one element relevant to fi is on, or both – for which the model
+should return ei and 0 respectively. In this case the disentangled model shows simultaneous
+inhibition and excitation to fi from input [1, 1]i ; excitement from the latent ’or’ feature and
+inhibition from the latent ’and’ feature. This is the sort of functionally relevant inhibition
+we hoped to identify with MTIs, where inhibition cancels the effect of excitation, leading to
+no activation of the downstream feature. However, when this XOR model is implemented
+with a latent bottleneck, we see large off diagonal attributions just as before.
+
+Superposition at scale How can we distinguish between instances of functionally relevant
+inhibition – that is necessary for computing fv (x) even in a disentangled model – and
+instances of inhibition caused by superposition? In toy models its possible to make this
+distinction, because we know a priori how the features can be computed from the inputs.
+However, in full-scale object recognition models we don’t know the ground-truth for how
+any feature is computed, that is precisely what we are trying to uncover empirically. One
+indication that a large attribution norm might be the result of superposition interference is
+it should affect multiple features. In the limiting case, a maximally superimposed feature in
+layer l points in the diagonal direction, and every feature in layer l + 1 is excited and inhibited
+(presuming it has both positive and negative incoming weights) whenever this diagonal
+feature is expressed. Additionally, it has been theorized that superposition is less likely to
+occur in the early layers of an object recognition model, because the features represented in
+
+
+                                                8
+such layers, such as edges, are not sparse[15]. Taking these two observations together, we
+should expect that in deeper layers of the network, many features show a high attribution
+norm to the very same images, as these images express highly interfering features. To test
+this, we consider a uniqueness metric across a sample of features in a layer. Suppose we have
+n features, and a set of m images, Xi , is identified with each feature, fi , by some selection
+process. We can define a uniqueness measure for this process as;
+                                                     Sn
+                                                 |     i=1 Xi |
+                                           U=                                                           (5)
+                                                         nm
+Observe that U is bounded above by 1, when
+every image selected is unique, and bounded
+below by n1 , when ∀i, j ∈ {1, . . . , n}, Xi = Xj .
+In Figure 8 we see how different image selec-
+tion processes differ in this uniqueness mea-
+sure. The black solid line shows the uniqueness
+of MEI s across layers of InceptionV1 for 20
+random units per layer, for which U is near
+ceiling across all layers. However, when those
+images with a large attribution norm (MTIs)
+in the preceding layer are identified with a
+unit, rather than those with a large activa-
+tion, uniqueness decreases substantially in the
+deeper layers, as we predicted under the su-
+perposition hypothesis. Using the L2 norm
+of the attribution vector (orange line) rather
+than the L1 (green line), mitigates this some-
+what, as the L2 norm grows less quickly than
+the L1 in off-basis directions[60, 61], making
+L2 potentially less likely to select for super-
+imposed features in the attribution layer. See            Figure 8: While features may show large activa-
+the appendix H for examples of those images               tions for different images (black line), in deeper
+                                                          layers of the model they show large attributions
+that yield high attributions across features.             to the same images, (green and orange lines).
+                                                          This is true of unit features and k-means fea-
+7    Limitations & Conclusion                             tures (dotted lines)
+Inhibition and excitation in ReLU neural net-
+works do not function symmetrically, but currently the few interpretability tools that target
+inhibition do not account for this. We introduce several new techniques to the toolbox
+that respect this asymmetry, by conditioning our understanding of inhibition on excitation
+through the analysis of maximally tense images. Our novel visualization techniques reveal
+how inhibitory connections prevent erroneous activation in response to MTIs, by isolating
+the inhibitory and excitatory attributes simultaneously present in such images. However,
+we also show that superposition currently introduces a major obstacle for these kinds of
+analyses, as networks use negative weights to facilitate a compression algorithm, representing
+more features than units. Given this, a ’clean’ understanding of inhibition in deep layers of
+vision models will likely require the development of techniques for ’monosemantic disentan-
+glement’, as is being pursued for large language models[6, 11]. Additionally, we note that
+the inhibitory mechanisms described in this work need not be the only ones through which
+features are suppressed. For example, the final softmax layer of a classifier constitutes a
+different mechanism by which one ’class’ feature inhibits another. Other model architectures
+could invoke similar suppressive mechanisms throughout, such as those using Top-k [31, 1] or
+SoLU [14] activation functions. In conclusion, we hope this work prompts more exploration
+into the extensive inhibitory mechanisms latent in vision models, and their critical role in
+feature construction.
+
+
+
+
+                                                     9
+References
+ [1] Subutai Ahmad and Luiz Scheinkman. How can we be so dense? the benefits of using
+     highly sparse representations. arXiv preprint arXiv:1903.11257, 2019.
+ [2] André Araujo, Wade Norris, and Jack Sim.             Computing receptive fields of
+     convolutional neural networks.       Distill, 2019.    doi: 10.23915/distill.00021.
+     https://distill.pub/2019/computing-receptive-fields.
+ [3] Sebastian Bach, Alexander Binder, Grégoire Montavon, Frederick Klauschen, Klaus-
+     Robert Müller, and Wojciech Samek. On pixel-wise explanations for non-linear classifier
+     decisions by layer-wise relevance propagation. Public Library of Science (PloS One),
+     2015.
+ [4] David Baehrens, Timon Schroeter, Stefan Harmeling, Motoaki Kawanabe, Katja Hansen,
+     and Klaus-Robert Müller. How to explain individual classification decisions. The Journal
+     of Machine Learning Research, 11:1803–1831, 2010.
+ [5] Judy Borowski, Roland S Zimmermann, Judith Schepers, Robert Geirhos, Thomas SA
+     Wallis, Matthias Bethge, and Wieland Brendel. Exemplary natural images explain
+     cnn activations better than state-of-the-art feature visualization. arXiv preprint
+     arXiv:2010.12606, 2020.
+ [6] Trenton Bricken, Adly Templeton, Joshua Batson, Brian Chen, Adam Jermyn, Tom
+     Conerly, Nick Turner, Cem Anil, Carson Denison, Amanda Askell, Robert Lasenby, Yifan
+     Wu, Shauna Kravec, Nicholas Schiefer, Tim Maxwell, Nicholas Joseph, Zac Hatfield-
+     Dodds, Alex Tamkin, Karina Nguyen, Brayden McLean, Josiah E Burke, Tristan
+     Hume, Shan Carter, Tom Henighan, and Christopher Olah. Towards monosemanticity:
+     Decomposing language models with dictionary learning. Transformer Circuits Thread,
+     2023. https://transformer-circuits.pub/2023/monosemantic-features/index.html.
+ [7] Nick Cammarata, Gabriel Goh, Shan Carter, Ludwig Schubert, Michael Petrov,
+     and Chris Olah. Curve detectors. Distill, 2020. doi: 10.23915/distill.00024.003.
+     https://distill.pub/2020/circuits/curve-detectors.
+ [8] Nick Cammarata, Gabriel Goh, Shan Carter, Chelsea Voss, Ludwig Schubert,
+     and Chris Olah. Curve circuits. Distill, 2021. doi: 10.23915/distill.00024.006.
+     https://distill.pub/2020/circuits/curve-circuits.
+ [9] Shan Carter, Zan Armstrong, Ludwig Schubert, Ian Johnson, and Chris Olah. Activation
+     atlas. Distill, 4(3):e15, 2019.
+[10] Yann Le Cun, John S. Denker, and Sara A. Solla. Optimal brain damage. In Advances
+     in Neural Information Processing Systems, pp. 598–605. Morgan Kaufmann, 1990.
+[11] Hoagy Cunningham, Aidan Ewart, Logan Riggs, Robert Huben, and Lee Sharkey. Sparse
+     autoencoders find highly interpretable features in language models. arXiv preprint
+     arXiv:2309.08600, 2023.
+[12] J. Deng, W. Dong, R. Socher, L.-J. Li, K. Li, and L. Fei-Fei. ImageNet: A Large-Scale
+     Hierarchical Image Database. In CVPR09, 2009.
+[13] Nelson Elhage, Neel Nanda, Catherine Olsson, Tom Henighan, Nicholas Joseph, Ben
+     Mann, Amanda Askell, Yuntao Bai, Anna Chen, Tom Conerly, Nova DasSarma,
+     Dawn Drain, Deep Ganguli, Zac Hatfield-Dodds, Danny Hernandez, Andy Jones,
+     Jackson Kernion, Liane Lovitt, Kamal Ndousse, Dario Amodei, Tom Brown, Jack
+     Clark, Jared Kaplan, Sam McCandlish, and Chris Olah. A mathematical framework
+     for transformer circuits. Transformer Circuits Thread, 2021. https://transformer-
+     circuits.pub/2021/framework/index.html.
+[14] Nelson Elhage, Tristan Hume, Catherine Olsson, Neel Nanda, Tom Henighan, Scott
+     Johnston, Sheer ElShowk, Nicholas Joseph, Nova DasSarma, Ben Mann, Danny Hernan-
+     dez, Amanda Askell, Kamal Ndousse, Andy Jones, Dawn Drain, Anna Chen, Yuntao Bai,
+
+
+                                             10
+    Deep Ganguli, Liane Lovitt, Zac Hatfield-Dodds, Jackson Kernion, Tom Conerly, Shauna
+    Kravec, Stanislav Fort, Saurav Kadavath, Josh Jacobson, Eli Tran-Johnson, Jared Ka-
+    plan, Jack Clark, Tom Brown, Sam McCandlish, Dario Amodei, and Christopher
+    Olah. Softmax linear units. Transformer Circuits Thread, 2022. https://transformer-
+    circuits.pub/2022/solu/index.html.
+[15] Nelson Elhage, Tristan Hume, Catherine Olsson, Nicholas Schiefer, Tom Henighan,
+     Shauna Kravec, Zac Hatfield-Dodds, Robert Lasenby, Dawn Drain, Carol Chen, Roger
+     Grosse, Sam McCandlish, Jared Kaplan, Dario Amodei, Martin Wattenberg, and
+     Christopher Olah. Toy models of superposition. Transformer Circuits Thread, 2022.
+[16] Logan Engstrom, Andrew Ilyas, Shibani Santurkar, Dimitris Tsipras, Brandon Tran,
+     and Aleksander Madry. Adversarial robustness as a prior for learned representations.
+     arXiv preprint arXiv:1906.00945, 2019.
+[17] Thomas Fel, Remi Cadene, Mathieu Chalvidal, Matthieu Cord, David Vigouroux, and
+     Thomas Serre. Look at the variance! efficient black-box explanations with sobol-based
+     sensitivity analysis. 2021.
+[18] Thomas Fel, Thibaut Boissin, Victor Boutin, Agustin Picard, Paul Novello, Julien
+     Colin, Drew Linsley, Tom Rousseau, Rémi Cadène, Laurent Gardes, et al. Unlocking
+     feature visualization for deeper networks with magnitude constrained optimization.
+     arXiv preprint arXiv:2306.06805, 2023.
+[19] Thomas Fel, Victor Boutin, Mazda Moayeri, Rémi Cadène, Louis Bethune, Léo andéol,
+     Mathieu Chalvidal, and Thomas Serre. A holistic approach to unifying automatic
+     concept extraction and concept importance estimation, 2023.
+[20] Thomas Fel, Mélanie Ducoffe, David Vigouroux, Rémi Cadène, Mikael Capelle, Claire
+     Nicodème, and Thomas Serre. Don’t lie to me! robust and efficient explainability
+     with verified perturbation analysis. In Proceedings of the IEEE/CVF Conference on
+     Computer Vision and Pattern Recognition, pp. 16153–16163, 2023.
+[21] Thomas Fel, Agustin Picard, Louis Bethune, Thibaut Boissin, David Vigouroux, Julien
+     Colin, Rémi Cadène, and Thomas Serre. Craft: Concept recursive activation factorization
+     for explainability. In Proceedings of the IEEE/CVF Conference on Computer Vision
+     and Pattern Recognition, pp. 2711–2721, 2023.
+[22] Ruth C. Fong and Andrea Vedaldi. Interpretable explanations of black boxes by
+     meaningful perturbation. In ICCV, 2017.
+[23] Amirata Ghorbani, James Wexler, James Y Zou, and Been Kim. Towards automatic
+     concept-based explanations. 2019.
+[24] Chris Hamblin, Thomas Fel, Srijani Saha, Talia Konkle, and George Alvarez. Feature
+     accentuation: Revealing’what’features respond to in natural images. arXiv preprint
+     arXiv:2402.10039, 2024.
+[25] Been Kim, Martin Wattenberg, Justin Gilmer, Carrie Cai, James Wexler, Fernanda
+     Viegas, et al. Interpretability beyond feature attribution: Quantitative testing with
+     concept activation vectors (tcav). In International conference on machine learning, pp.
+     2668–2677. PMLR, 2018.
+[26] Diederik P. Kingma and Jimmy Ba. Adam: A method for stochastic optimization, 2017.
+[27] David Klindt, Sophia Sanborn, Francisco Acosta, Frédéric Poitevin, and Nina Miolane.
+     Identifying interpretable visual features in artificial and biological neural systems. arXiv
+     preprint arXiv:2310.11431, 2023.
+[28] Namhoon Lee, Thalaiyasingam Ajanthan, and Philip Torr. Snip: Single-shot network
+     pruning based on connection sensitivity. In International Conference on Learning
+     Representations, 2018.
+
+
+                                               11
+[29] Scott Lundberg and Su-In Lee. A unified approach to interpreting model predictions.
+     In NeurIPS, 2017.
+[30] Aravindh Mahendran and Andrea Vedaldi. Understanding deep image representations
+     by inverting them. In Proceedings of the IEEE conference on computer vision and
+     pattern recognition, pp. 5188–5196, 2015.
+[31] Alireza Makhzani and Brendan Frey.           K-sparse autoencoders.    arXiv preprint
+     arXiv:1312.5663, 2013.
+[32] Leland McInnes, John Healy, and James Melville. Umap: Uniform manifold approxi-
+     mation and projection for dimension reduction, 2018. URL http://arxiv.org/abs/
+     1802.03426. cite arxiv:1802.03426Comment: Reference implementation available at
+     http://github.com/lmcinnes/umap.
+[33] P Molchanov, S Tyree, T Karras, T Aila, and J Kautz. Pruning convolutional neural
+     networks for resource efficient inference. In 5th International Conference on Learning
+     Representations, ICLR 2017-Conference Track Proceedings, 2019.
+[34] Alexander Mordvintsev, Christopher Olah, and Mike Tyka. Inceptionism: Going deeper
+     into neural networks. 2015.
+[35] Alexander Mordvintsev, Nicola Pezzotti, Ludwig Schubert, and Chris Olah. Differen-
+     tiable image parameterizations. Distill, 2018.
+[36] Anh Nguyen, Jason Yosinski, and Jeff Clune. Deep neural networks are easily fooled:
+     High confidence predictions for unrecognizable images. In Proceedings of the IEEE
+     conference on computer vision and pattern recognition, pp. 427–436, 2015.
+[37] Anh Nguyen, Alexey Dosovitskiy, Jason Yosinski, Thomas Brox, and Jeff Clune. Synthe-
+     sizing the preferred inputs for neurons in neural networks via deep generator networks.
+     Advances in neural information processing systems, 29, 2016.
+[38] Anh Nguyen, Jason Yosinski, and Jeff Clune. Multifaceted feature visualization: Uncov-
+     ering the different types of features learned by each neuron in deep neural networks.
+     Visualization for Deep Learning workshop, Int. Conf. Machine Learning, 2016.
+[39] Anh Nguyen, Jeff Clune, Yoshua Bengio, Alexey Dosovitskiy, and Jason Yosinski. Plug
+     & play generative networks: Conditional iterative generation of images in latent space.
+     In Proceedings of the IEEE conference on computer vision and pattern recognition, pp.
+     4467–4477, 2017.
+[40] Paul Novello, Thomas Fel, and David Vigouroux. Making sense of dependence: Efficient
+     black-box explanations using dependence measure. 2022.
+[41] Chris Olah, Alexander Mordvintsev, and Ludwig Schubert. Feature visualization. Distill,
+     2017. doi: 10.23915/distill.00007. https://distill.pub/2017/feature-visualization.
+[42] Chris Olah, Nick Cammarata, Ludwig Schubert, Gabriel Goh, Michael Petrov, and
+     Shan Carter. Zoom in: An introduction to circuits. Distill, 2020. doi: 10.23915/distill.
+     00024.001. https://distill.pub/2020/circuits/zoom-in.
+[43] Chris Olah, Nick Cammarata, Chelsea Voss, Ludwig Schubert, and Gabriel Goh. Nat-
+     urally occurring equivariance in neural networks. Distill, 2020. doi: 10.23915/distill.
+     00024.004. https://distill.pub/2020/circuits/equivariance.
+[44] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory
+     Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, et al. Py-
+     torch: An imperative style, high-performance deep learning library. Advances in neural
+     information processing systems, 32, 2019.
+[45] Vitali Petsiuk, Abir Das, and Kate Saenko. Rise: Randomized input sampling for
+     explanation of black-box models. In BMVC, 2018.
+
+
+                                             12
+[46] Marco Tulio Ribeiro, Sameer Singh, and Carlos Guestrin. "why should i trust you?":
+     Explaining the predictions of any classifier. In Knowledge Discovery and Data Mining
+     (KDD), 2016.
+[47] Shibani Santurkar, Andrew Ilyas, Dimitris Tsipras, Logan Engstrom, Brandon Tran,
+     and Aleksander Madry. Image synthesis with a single (robust) classifier. Advances in
+     Neural Information Processing Systems, 32, 2019.
+[48] Ramprasaath R. Selvaraju, Abhishek Das, Ramakrishna Vedantam, Michael Cogswell,
+     Devi Parikh, and Dhruv Batra. Grad-cam: Why did you say that? visual explanations
+     from deep networks via gradient-based localization. IJCV, abs/1610.02391, 2019. URL
+     http://arxiv.org/abs/1610.02391.
+[49] Avanti Shrikumar, Peyton Greenside, Anna Shcherbina, and Anshul Kundaje. Not just
+     a black box: Learning important features through propagating activation differences,
+     2017.
+[50] Karen Simonyan, Andrea Vedaldi, and Andrew Zisserman. Deep inside convolutional
+     networks: Visualising image classification models and saliency maps. In Workshop,
+     ICLR, 2013.
+[51] Karen Simonyan, Andrea Vedaldi, and Andrew Zisserman. Deep inside convolutional
+     networks: Visualising image classification models and saliency maps. In In Workshop at
+     International Conference on Learning Representations. Citeseer, 2014.
+[52] Daniel Smilkov, Nikhil Thorat, Been Kim, Fernanda Viégas, and Martin Wattenberg.
+     Smoothgrad: removing noise by adding noise. In Workshop on Visualization for Deep
+     Learning, Int. Conf. Machine Learning, 2017.
+[53] Mukund Sundararajan, Ankur Taly, and Qiqi Yan. Axiomatic attribution for deep
+     networks. In International conference on machine learning, pp. 3319–3328. PMLR,
+     2017.
+[54] Mukund Sundararajan, Ankur Taly, and Qiqi Yan. Axiomatic attribution for deep
+     networks. In Int. Conf. Machine Learning, 2017.
+[55] Christian Szegedy, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir
+     Anguelov, Dumitru Erhan, Vincent Vanhoucke, and Andrew Rabinovich. Going deeper
+     with convolutions. In Proceedings of the IEEE conference on computer vision and pattern
+     recognition, pp. 1–9, 2015.
+[56] Dimitris Tsipras, Shibani Santurkar, Logan Engstrom, Alexander Turner, and Aleksander
+     Madry. Robustness may be at odds with accuracy. arXiv preprint arXiv:1805.12152,
+     2018.
+[57] Mike Tyka. Class visualization with bilateral filters. 2016. URL: https://mtyka. github.
+     io/deepdream/2016/02/05/bilateral-class-vis. html, 2(3).
+[58] Qingyang Wang, Mike A Powell, Ali Geisa, Eric Bridgeford, Carey E Priebe, and
+     Joshua T Vogelstein. Why do networks have inhibitory/negative connections? In
+     Proceedings of the IEEE/CVF International Conference on Computer Vision, pp. 22551–
+     22559, 2023.
+[59] Donglai Wei, Bolei Zhou, Antonio Torrabla, and William Freeman. Understanding
+     intra-class knowledge inside cnn. arXiv preprint arXiv:1507.02379, 2015.
+[60] Yiming Xu, Akil Narayan, Hoang Tran, and Clayton G Webster. Analysis of the ratio of
+     l1 and l2 norms in compressed sensing. Applied and Computational Harmonic Analysis,
+     55:486–511, 2021.
+[61] Penghang Yin, Ernie Esser, and Jack Xin. Ratio and difference of l_1 and l_2 norms
+     and sparse representation with coherent dictionaries. Communications in Information
+     and Systems, 14(2):87–109, 2014.
+
+
+                                             13
+[62] Ruihan Zhang, Prashan Madumal, Tim Miller, Krista A Ehinger, and Benjamin IP
+     Rubinstein. Invertible concept-based explanations for cnn models with non-negative
+     concept activation vectors. arXiv preprint arXiv:2006.15417, 2020.
+[63] Roland S Zimmermann, Judy Borowski, Robert Geirhos, Matthias Bethge, Thomas
+     Wallis, and Wieland Brendel. How well do feature visualizations support causal under-
+     standing of cnn activations? Advances in Neural Information Processing Systems, 34:
+     11730–11744, 2021.
+[64] Luisa M Zintgraf, Taco S Cohen, Tameem Adel, and Max Welling. Visualizing deep
+     neural network decisions: Prediction difference analysis. In ICLR, 2017.
+
+
+
+
+                                           14
+Appendix
+A    Code
+Code for this project is available at this github repository.
+
+B    Human Experiment
+
+
+
+
+Figure 9: An example trial of our human experiment, in which participants must extrapolate from
+a set of MEIs to both a new MEI and an MII. In Q2 of the trial, the green outline for choice 1
+indicates that it was selected as the new MEI. Participants could not choose the same image as the
+MEI and MII.
+
+
+Here we explain a human experiment in which
+we endeavor to identify if/when people can relate
+the MEIs and MIIs of a feature. Given visual
+inspection of such exciting/inhibiting images,
+like those shown in figure 2, we hypothesize that
+early on in the model humans will be able to
+conceive of a feature’s ’opposite’ given example
+MEIs, but wont be able to do so in later layers.
+To test this we conducted an experiment in
+which participants are shown a set of MEIs for
+a feature, then must use this information to
+identify the feature’s MII from another set.
+In this experiment we test 15 features per
+an early, mid, and late layer of InceptionV1 Figure 10: Human accuracy in predicting
+– Conv2d0, Mixed4a, and Mixed5a. We use MEI/MIIs across model layers.
+the centroids of k-means clusters as our feature
+directions, following the observation in Klindt
+et al. [27] that shows such k-means features are particularly interpretable for humans in
+this experimental paradigm. In particular, we first specify 1000 clusters per layer using the
+SKlearn k-means clustering algorithm with a cosine distance metric. The clustering was
+applied to each layers’ hidden vectors in response to the ImageNet validation set, with each
+image sampled at a random position in the activation map for each hidden vector. We chose
+15 random features from these centroids per layer for use in this experiment. We defined the
+activation for such a feature in response to an image as the cos*dot (see section C) of the
+hidden vector for the image in the corresponding pre-relu layer, computed in the channel
+dimension. We use p = 2 cosine power, which ensures cosine and dot product terms do not
+cancel out negatives when multiplied together.
+For each feature identified this way we construct a trial of the experiment, which consists of
+15 image (crops). First, we compute activations for the feature in response to the ImageNet
+validation set. The image that induces the largest activation we specify as the trial’s
+’target MEI’, which is cropped to the effective receptive field [2] that induced the large
+activation. Similarly the smallest activation is specified as the ’target MII’. The 2nd-7th
+largest activations are specified as the ’example MEIs’. Finally 7 ’distractor’ image crops are
+
+
+                                               15
+                  Figure 11: A visual intuition for the dot*cosine loss function
+
+
+selected, which each satify the simultaneous constraints of yielding only modest activation for
+the feature – within 2 standard deviations of the mean – and having large over all activation
+– the hidden vector for the crop in the feature’s layer has an L1 -norm in the 90th percentile.
+This second constraint ensures distractors are not different in kind from the target MEI and
+MII, conveying salient objects rather than awkward crops or background elements. Across
+trials of features in a given layer, we apply the additional constraints that crops cannot be
+repeated for any MII or distractor, and crops cannot come from different locations of the
+same image.
+ In a given trial of the experiment, the participant is shown the set of 6 ’example MEIs’ for the
+ feature on the left. They are then shown a set of 9 images on the right; the 7 ’distractors’, the
+’target MEI’, and the ’target MII’. The participant is first asked to select which image on the
+ right they believe to be the MEI. Next, they are asked to select the image they believe to be
+ the MII. They are given feedback as to the correct choices after every trial. Each participant
+ completes the 15 trials corresponding to those features in a single layer before moving on the
+ next layer. An example trial showing what the participant sees when selecting the MEI and
+ MII is shown in Figure B. We recruited 48 participants for this experiment through Prolific
+(www.prolific.com). They were paid $3 to complete the ~15 minute experiment.
+The results of this experiment are in agreement with our hypothesis, and can be seen in
+Figure B. Specifically, participants were able to extrapolate from the set of MEIs to the new
+MEI well across all layers. However, participants could not easily extrapolate from MEIs to
+their ’opposite’ MII. Participants performed significantly better (p ≈ 1e − 5) when identifying
+MIIs in the first layer, Conv20, than the middle and late layers, Mixed4a and Mixed5a.
+
+C     Dot*Cosine Objective
+Figure C shows visually the motivation for the dot*cosine objective used for attribution
+visualizations. The dot product can optimize for the hidden vector h to simply have a large
+magnitude, but not really point in the direction v. Conversely, cosine similarity can be
+maximized by inputs with a very low magnitude, which aren’t salient to the network. The
+cosine*dot objective optimizing for h to have a large magnitude and point in the direction v.
+
+D     model weight distribution
+
+
+
+
+Figure 12: Across Imagenet trained models, we see a very similar weight distribution, with a slight
+majority of weights being negative in all cases. weights are standardized to σ = 0 in each layer
+before being aggregated in each histogram.
+
+
+A slight majority of weights are negative consistently across Imagenet trained models, but
+the function of these weights has received significantly less treatment in the literature.
+
+
+                                                16
+E    Other measures of Attribution Completeness
+
+
+
+
+Figure 13: A. The Spearman correlation between logits and total attribution across layers, which
+is indistinguishable from the Pearson correlation (Figure 3). B. The absolute distance (L1) between
+the attribution and logit activation. C. The Pearson correlation measured on models with batch
+normalization layers. VGG11 (no batch normalization) is displayed again in this plot for reference
+to VGG11 (with batch normalization).
+
+
+In section 2 we show a ceiling Pearson correlation between model logits and the summed
+attribution through many preceding layers of the model latent space. Pearson correlation
+is a good metric as the logit activations are approximately normally distributed, and we
+dont care about the overall scale of the attributions for our purposes of selecting MTIs.
+That said, here we report some other distance metrics between the attributions and logit
+activations; A. Spearman correlations and B. absolute (L1) distance. Additionally in C. we
+show the original Pearson metric, but measured on models with batch normalization layers.
+Passing through batch normalization layers causes the correlation between attribution and
+logit activation to drop significantly. For all these plots, and that in Figure 3, we show a
+standardized ’model depth’ on the X axis in the range [0, 1], which corresponds to the ratio
+of ReLU non-linearities preceding the layer over the total in the model.
+
+F    Do Attribution Inversions Actually Excite/Inhibit?
+Attribution inversion is suppose to tell us some-
+thing about feature fv , but optimizes an objec-
+tive based on the attribution feature vector in
+an earlier layer Sl± . Here we conduct a simple
+sanity check to confirm optimizing for Sl± has
+the expected effect of exciting/inhibiting fv . To
+test this, for 5 layers of InceptionV1 we choose
+20 random units, then compute inhibitory and
+excitatory attribution inversion through the pre-
+ceding layer across for 10 of the unit’s MTIs.
+Figure 14 shows the activation these inversions
+induce in the target feature across optimization
+steps. The shaded region corresponds to the full
+range of results, and the lines correspond to the Figure 14: Activations induced in the target
+median. We plot activation on the y-axis in stan- feature by optimizing towards S − and S +
+dard deviations for the target unit. The figure                                  l        l
+
+shows that attribution inversions indeed have the
+desired effect.
+
+G     Toy model details
+Architecturally our absolute value toy model and xor toy model are nearly identical, differing
+only in their input dimensions – 6 for the abs model but 12 the xor model, as each of the 6
+
+
+                                                17
+Figure 15: Losses for the Absolute Values and XOR models across inputs with differing number
+of active features. Where disentangled models m = 12 are perfect for all inputs, decreasing the
+hidden dimensions increases the loss. In particular, loss is greater the more features are present in
+the input.
+
+
+output features is a function of a pair of inputs. From these inputs x, a hidden vector h is
+computed, and then the output f ′ as follows;
+
+
+                                      h = ReLU(W1 x + b1 )                                        (6)
+                                      f = ReLU(W2 h + b2 )
+                                       ′
+                                                                                                  (7)
+
+These models were trained in a manner similar to that in Elhage et. al. (2022)[15]. First,
+for the absolute value model, x is sampled such that xi has a .99 probability of being 0 (it is
+sparse), otherwise it is sampled uniformly from [0, 1]. Each feature receives an ’importance’
+Ii = .9i , so the loss function can weight important features more heavily. We train the model
+using the mean squared error from the target function, fi = abs(xi );
+
+                                            6
+                                            X
+                                       L=         Ii (fi − fi′ )2                                 (8)
+                                            i=1
+
+We train on batches of 600 inputs for 20000 iterations using the Adam optimizer [26], with
+learning rate .001. As in the original work we find the model is hard to train on the sparse
+input signal, and thus train from 1000 different random seeds, picking the top performing
+model. We repeat this process for the 4 hidden dimensionalities tested; m = 12, 10, 8, 6.
+
+
+                                                  18
+For the XOR toy model the procedure is largely the same as above, the main difference is
+how we sample the input. As before, each feature fi is sampled with some probability S of
+being ’off’, or 0 in the input. However, in this case when a feature passes this sampling filter
+and is ’on’, it corresponds to a pair of elements in the input, [x2i , x2i−1 ], which are each
+sampled independently from a Bernoulli distribution, with p = .5. This sampling procedure
+introduces additional sparsity over the absolute value features, so we use a S = .95 for
+sampling XOR features. In this case our target function is fi = XOR(x2i , x2i−1 ), and loss is
+computed as before (equation 8. All other training details are identical to the absolute value
+toy models.
+
+
+
+
+ It is important we ensure our toy models are actually performant, if we are to take anything
+ from the results in Figure 7. To test this, for each model, we pass inputs that span the
+ domain and compute the resultant loss. For the absolute values models these inputs are
+ every combination of elements {0, −1, 1} in 6 dimensions. For the XOR models, we test
+ every combination of elements {0, 1} in 12 dimensions. We show these input-wise losses in
+ Figure G as box plots, organized by the toy model hidden dimensions and the number of
+’active features’– i.e. the number of 1s in the output computed by the ground-truth absolute
+value and XOR functions. We see the the disentangled models, with 12 hidden units, are
+ perfect, incurring no loss for any of the inputs. As the hidden dimensionality decreases
+ however, both models incur loss as they cannot faithfully represent the target function. Of
+ note, this loss monotonically increases with the number of active features, in agreement with
+ the theory that features in superposition can be faithfully represented when either is present
+ in the input, but not simultaneously present. The inputs used for Figure 7 all have 1 or 0
+ active features, and the models are performant over these inputs.
+
+
+
+
+H     Uniqueness Experiment
+
+
+K-means directions in this experiment were defined as the cluster centroids determined by
+the SKlearn k-means clustering algorithm using the cosine distance metric. The clustering
+was applied to each layers’ hidden vectors in response to the ImageNet validation set, each
+sampled at a random position in the layer’s activation map. We first used k=1000 centroids,
+to define a general basis of many features. To get our 20 sampled features for the experiment,
+we ran k-means again on these centroid vectors using k=20, then selected a random vector
+from the original 1000 from each of these new clusters. We did this to ensure the features
+were sampled from a reasonably sized basis (larger than 20), but also not too close to each
+other in direction. Gradients in this experiment were computed with respect to the central
+position in each activation map.
+
+
+
+
+We found in this uniqueness experiment that across features the very same images superposi-
+tion features loading onto many units in the attribution layer. Viewing the corresponding
+images, which are shown in figure 16 helps lend some credence to this view. Each (receptive
+field cropped) image was among the top-100 largest attributions for at least 15 out of
+the 20 features sampled. These images show single salient concepts, like ’dog-face’, ’bird’,
+or ’emergency vehicle’, rather than many concepts. This motivates our hypothesis that
+these images load onto many units because they express features the model has placed in
+superposition, rather than the alternative, that they simply express many different features
+at once.
+
+
+                                              19
+Figure 16: Images with large attributions across A. unit, and B. k-means features.
+
+
+
+
+                                       20
+I   More attribution/inversion examples
+
+
+
+
+                             Figure 17
+
+
+                                21
+Figure 18
+
+
+
+
+   22
+J   more atlases
+
+
+
+
+                   Figure 19
+
+
+                      23
+Figure 20
+
+
+
+
+   24
+

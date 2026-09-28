@@ -1,0 +1,20 @@
+############ flash session run 2026-09-26T20:14:42Z
+-- backed up settings -> /home/clawer-samurai-1/.dsh/settings.yaml.bak-flashsession-20260926T201442Z
+-- previous agent-default-model: {"provider": "deepseek-official", "model": "deepseek-flash", "reasoningEffort": "high"}
+-- agent-default-model set to spark-local/qwen3.8-flash-next
+-- endpoint live
+-- launching headless session in /home/clawer-samurai-1/AgentHub/cyberguard
+-- headless rc=124
+-- agent-default-model restored to {'provider': 'deepseek-official', 'model': 'deepseek-flash', 'reasoningEffort': 'high'}
+-- session dirs for this project:
+   /home/clawer-samurai-1/.dsh/sessions/--home-clawer-samurai-1-AgentHub-cyberguard--
+-- brief: 177 bytes
+############ done 2026-09-26T21:04:42Z rc=124
+############ flash session run 2026-09-26T21:10:30Z budget=10800s
+-- endpoint thinking mode: --reasoning on
+-- archived previous partial brief -> /home/clawer-samurai-1/AgentHub/cyberguard/logs/flash-research-brief.md.failed-20260926T211030Z
+-- backed up settings -> /home/clawer-samurai-1/.dsh/settings.yaml.bak-flashsession-20260926T211030Z
+-- previous agent-default-model: {"provider": "deepseek-official", "model": "deepseek-flash", "reasoningEffort": "high"}
+-- agent-default-model set to spark-local/qwen3.8-flash-next
+-- endpoint live
+-- launching headless session in /home/clawer-samurai-1/AgentHub/cyberguard (brief written by the model, not scraped)

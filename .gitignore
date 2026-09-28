@@ -1,0 +1,10 @@
+# heavy / binary artifacts: they live in the durable archive, not in git
+research-tmp/harvest-*/adapters/
+research-tmp/session-*.jsonl
+research-tmp/*.pdf
+resbench/*.pdf
+**/__pycache__/
+v2/.selftest/
+*.zstd
+*.safetensors
+*.gguf
