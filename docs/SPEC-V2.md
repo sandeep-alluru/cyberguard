@@ -159,6 +159,20 @@ loose "truncated-path" that flagged the complete sentence "…replacing /cgi-bin
 that are awkward but end at a genuine sentence boundary are judgement calls, not defects; a reviewer who
 wants them excluded must propose a rule, as review #6 did for list markers.
 
+## 5.2 Owner decision O1 — what the two arms differ in (2026-09-28)
+
+Arm B replaces the **5,600 offensive-refusal slots** with topic-matched defensive Q&A from the same family
+(19 answerable templates x 12 families; 0 declared-class mismatches). The **3,984 unknown-answer abstention
+slots (498 unique prompts) are byte-identical in both arms** by owner decision, so the two arms differ in
+exactly one respect: what the model is taught to do when asked for offensive capability. The earlier design
+replaced those abstention slots as well, which meant arm A vs arm B also differed in abstention behaviour and
+content; reviews #5 and #6 objected, correctly, that the contrast then isolated nothing in particular.
+
+Consequences for the contract: the abstention measurement becomes a **control** (both arms seen the same
+abstention supervision) rather than a treatment effect, and Claim 2 (arm A vs arm B) is now a clean test of
+offensive-refusal behaviour. The audit asserts the difference set: `arm_utterance_differences = 5,600`,
+`illegal_arm_differences = 0`.
+
 ## 6. Mixture proposal (for owner approval) + the gate that must pass first
 
 **Nothing is admitted until U1 passes.** This is a *proposal*; U1 can only reject or downsize it.

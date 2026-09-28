@@ -869,26 +869,34 @@ def main():
     repl, by_fam = build_replacements(pools["refusal"], rng)
     repl_w = repl * int(round(WEIGHTS["refusal"]))
     armB, it = [], iter(repl_w)
-    fam_of, cursors, matched, unmatched = refusal_families(), {}, 0, 0
+    fam_of, cursors, matched, unmatched, unchanged = refusal_families(), {}, 0, 0, 0
     for r in armA:
         if r["src"] == "refusal":
             fam = fam_of.get(_norm(r["user"]))
+            if fam == "factuality":
+                # OWNER DECISION O1 (2026-09-28): the 498 unknown-answer ABSTENTION prompts stay identical
+                # in both arms. Replacing them changed three things at once — offensive-refusal behaviour,
+                # abstention behaviour and content — so arm A vs arm B could not isolate the manipulation.
+                # Now the only difference between the arms is what happens on offensive prompts.
+                armB.append(r)
+                unchanged += 1
+                continue
             lst = by_fam.get(fam) or []
             if lst:
                 i = cursors.get(fam, 0)
                 cursors[fam] = i + 1
-                armB.append(lst[i % len(lst)])       # topic-matched control row
+                armB.append(lst[i % len(lst)])       # topic-matched control row, same family
                 matched += 1
             else:
                 try:
-                    armB.append(next(it))            # 'factuality' prompts: no topic to match
+                    armB.append(next(it))            # a family with no defensive body: general pool
                 except StopIteration:
                     armB.append(r)
                 unmatched += 1
         else:
             armB.append(r)
-    print(f"  control substitution: {matched} topic-matched, {unmatched} from the general pool "
-          f"(family with no defensive body)")
+    print(f"  control substitution: {matched} topic-matched offensive refusals; {unchanged} abstention rows "
+          f"IDENTICAL in both arms (owner decision O1); {unmatched} from the general pool")
 
     write_stats = {"dropped": 0}
 

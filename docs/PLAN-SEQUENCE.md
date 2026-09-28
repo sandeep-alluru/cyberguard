@@ -161,6 +161,20 @@ re-review by Astra **and** Muse on the frozen arms → Phase 5.
 
 ---
 
+## 6a. Owner decision O1 — the abstention slots (2026-09-28, decided)
+
+**Decision (owner):** keep the 498 unknown-answer abstention prompts **identical in both arms**. Arm B
+replaces only the **5,600 offensive-refusal** slots, each with a topic-matched defensive Q&A row from the same
+family. Arm A and arm B therefore differ **only** in offensive-refusal behaviour, which is exactly what the
+primary comparison claims to isolate.
+
+**Why it mattered:** the previous design replaced *every* refusal slot, so arm B differed from arm A in three
+things at once — offensive-refusal behaviour, abstention behaviour, and content — and review #5/#6 objected
+that the two-arm result could not isolate the manipulation. Recorded in `docs/SPEC-V2.md` §4.
+
+**Exit condition (met when):** the audit reports `arm_utterance_differences = 5,600`, `illegal_arm_differences
+= 0`, and both arms carry the same 3,984 abstention rows byte-for-byte; the completeness screen passes on both.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
