@@ -793,6 +793,11 @@ def attack_table():
             for o in (d.get("objects") if isinstance(d, dict) else d):
                 if o.get("type") != "attack-pattern":
                     continue
+                # Review #10: REVOKED and DEPRECATED objects were included, so the name index picked a
+                # dead id — revoked T1208 is literally named "Kerberoasting", which made every
+                # "T1558.001 (Kerberoasting)" look unmappable and left 339 contradictions in place.
+                if o.get("revoked") or o.get("x_mitre_deprecated"):
+                    continue
                 for er in o.get("external_references") or []:
                     eid = er.get("external_id") or ""
                     if re.fullmatch(r"T\d{4}(\.\d{3})?", eid):
@@ -822,8 +827,11 @@ def repair_attack_ids(text, table=None, by_leaf=None):
         return text, 0
     if by_leaf is None:
         by_leaf = {}
+        seen = {}
         for i, nm in table.items():
-            by_leaf.setdefault(_leaf(nm), i)
+            seen.setdefault(_leaf(nm), set()).add(i)
+        # a leaf that maps to more than one active id is ambiguous: never repair from it
+        by_leaf = {k: next(iter(v)) for k, v in seen.items() if len(v) == 1}
 
     def sub(m):
         eid, name = m.group(1), m.group(2).strip()
@@ -831,7 +839,11 @@ def repair_attack_ids(text, table=None, by_leaf=None):
         if canon is None or _leaf(name) == _leaf(canon):
             return m.group(0)
         target = by_leaf.get(_leaf(name))
-        if target and target != eid and target.split(".")[0] == eid.split(".")[0]:
+        if target and target != eid:
+            # The active id whose name the text actually carries. Restricting this to the same parent left
+            # 619 contradictions (review #10: "T1078.004 (Kerberoasting)", "T1558.001 (Kerberoasting)"):
+            # Kerberoasting is T1558.003, a different parent. The index refuses ambiguous names, so this
+            # can only fire when exactly one ACTIVE id carries that name.
             sub.fixed += 1
             return m.group(0).replace(eid, target, 1)
         return m.group(0)
