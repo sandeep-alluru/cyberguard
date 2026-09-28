@@ -980,3 +980,21 @@ that made the replay slot conversational, F9).
 **Plan updated to the realized artifact, not the proposal:** the epoch is **83,444**, so **24 h now
 covers 106.9 % of an epoch** (a full pass plus a little) instead of the proposed 83–95 %, and the refusal
 set is presented **8.55 times**. Every affected table in §6 was recomputed against the built mixture.
+
+## 2026-09-27 — Codex review #12 (confirmation): 5 PARTIAL + 1 new MAJOR, all fixed
+
+Review #12 verified §7's decision contract **FIXED** (both confirmatory claims bound, Arm A named, no
+early-look authority) and marked the other four **PARTIAL**, plus one new MAJOR — all narrow
+arithmetic/language defects, all now fixed:
+
+| item | what was still wrong | fix |
+|---|---|---|
+| #11-1 (arm/causal) | §6 still said "A restores refusal while B collapses **establishes attribution**", contradicting clause 2's own rejection of that inference | rewritten as a **substitution contrast**: A's rate exceeding B's is attributable to what occupied those 1,200 matched slots, explicitly **not** proof that refusal data alone is causal; only the A-vs-B interval speaks to it |
+| #11-3 (dose language) | §6 called the checkpoints a measured "dose-response"; §8 repeated "dose curve" | both replaced with **trajectory**, matching the LR-covaries-with-exposure argument in clause 2 |
+| #11-4 (allocation) | the C24 note printed 24,208 where the arithmetic gives **24,408**, and the itemization omitted C24's G-A 4,400 | corrected; C24 = 4,400 (G-A) + 20,208 (other gates) = **24,408** |
+| #11-5 (G-G savings) | "14,400 additional" understated it | corrected to **28,800 additional generations** (1,200 × 2 representations × 3 tasks × 2 arms × 2 extra checkpoints) |
+| **#12 NEW (MAJOR)** | **G-J had no allocated base-arm support** — it compares against a base median, so it needs 100 tuned + 100 base per training arm = 400, not the 200 allocated | allocation raised to **20,208** (10,104 per arm); battery total **29,008 ≈ 8.12 h**; grand total **≈57.64 machine-hours / ≈28.82 h** balanced elapsed |
+
+**Review #13 dispatched** as the confirmation pass (the same rule: a reviewed artifact that is not the
+shipped artifact is not reviewed). Note for the record: the last two rounds have produced only
+arithmetic and wording corrections, not design objections — the design has been stable since #11.

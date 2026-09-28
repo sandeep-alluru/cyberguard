@@ -196,13 +196,13 @@ proportional sampling, not measured coverage — realised exposure is receipted 
 **The refusal rows are an intervention of untested size, and its dose is now stated AND sampled.** At
 weight 8.0 the refusal material is **8.9–10.2 % of the epoch**, so the run presents it **2.3–2.5 times
 by 8 h, 4.4–5.0 times by 16 h and 6.7–7.6 times by 24 h**. Nothing here establishes that any of those
-doses moves refusal from 10 % to 35 %; v2 **measures** the dose-response and reports it with CIs.
+doses moves refusal from 10 % to 35 %; v2 **measures the trajectory** (C8/C16/C24 within each arm) and reports it with CIs.
 (Review #7 finding 3 corrected an earlier version of this paragraph, which had mis-stated the
 *aggregate* presentations as a per-row count.)
 
 **The coverage question is itself the experiment.** Owner authorization of 2026-09-27 (24 h, both
 machines, serving may be stopped) converted the original two-arm design into **two arms running in
-parallel, one per machine, plus a dose curve inside each arm** — one continuous run per machine, three
+parallel, one per machine, plus a trajectory inside each arm** — one continuous run per machine, three
 checkpoints, no restart:
 
 | | **Arm A — designed mix** | **Arm B — the causal control** |
@@ -216,10 +216,13 @@ checkpoints, no restart:
 **Why two arms rather than distributed training on one arm.** The direct 10.10.20.x link between the
 nodes (1 ms, tailscale uses it directly) makes 2-node data-parallel feasible, but it buys throughput we
 do not need: one machine already reaches **83–95 % of an epoch in 24 h**, and a second epoch is worth
-less than a *causal control*. Two arms give the comparison that matters — if Arm A restores refusal and
-Arm B (identical except for the refusal rows) reproduces v1's collapse, the attribution to the refusal
-data is established rather than assumed. Distributed training would buy ~1.7 epochs of one mixture and
-no causal information. *(If the owner prefers maximum single-model quality over maximum evidence, the
+less than a *causal control*. Two arms give the comparison that matters — **a substitution contrast**:
+if Arm A's refusal rate substantially exceeds Arm B's, that difference is attributable to what was
+substituted into those 1,200 slots at matched weight, and to nothing else the design holds fixed. It is
+**not** proof that refusal data alone is causal: the replacement rows differ in task, prompt
+distribution and answer style as well (clause 2), and only the A-vs-B interval — not the pair of
+arm-versus-base results — speaks to the contrast. Distributed training would buy ~1.7 epochs of one
+mixture and no causal information at all. *(If the owner prefers maximum single-model quality over maximum evidence, the
 alternative is 2-node data-parallel on Arm A — a one-line change to this section.)*
 
 | checkpoint | what it is | role |
@@ -315,7 +318,7 @@ cannot be met by 20/20, so the gate as previously worded could never pass.
 **Owner authorization of record (2026-09-27):** *"you can train for 24 hours, the spark x2 is all
 yours, you can stop the model being served and use the full capacity of both machines."* That
 supersedes the ≤14 h ceiling this plan previously asked for, converts the experiment into a three-point
-dose curve (§6), and removes the training/serving contention that was the original reason for a bounded
+trajectory (§6), and removes the training/serving contention that was the original reason for a bounded
 box.
 
 | item | where | estimate | basis |
@@ -325,10 +328,10 @@ box.
 | **Arm A training**, one continuous run (C8 → C16 → C24) | **spark-40ee** | **24 h GPU** | 89,230 presentations ≈ 83.1–94.5 % of the weighted epoch; 5,577 steps at effective batch 16 |
 | **Arm B training** (control: refusal rows replaced in place by matched defensive-Q&A), same schedule | **spark-8cf2** | **24 h GPU** | runs **in parallel** with Arm A — same wall-clock, different question |
 | checkpoint evaluations — G-A at C8 and C16, both arms | workstation/2nd machine after training | 4,400 generations ≈ 1.23 h | base arm once per arm (2 × 1,100, reused); each dose look adds tuned generations |
-| confirmatory batteries at C24, both arms (G-A2/B/C/D/E/F/G/H + gate 8 + §12 remeasure) | split across both machines | 20,008 generations ≈ 5.60 h | excludes G-A, which is counted in the C24 row above (24,208 total at C24) |
+| confirmatory batteries at C24, both arms (G-A2/B/C/D/E/F/G/H + G-J + gate 8 + §12 remeasure, **each including its own baseline arm**) | split across both machines | 20,208 generations ≈ 5.66 h | excludes G-A (4,400), which the C24 row above carries; **C24 total = 24,408** |
 | Benchmark (unit U4), 500 items × base/tuned × **both arms** | split across both machines | 2,000 generations ≈ 1.52 h | the benchmark the done-means require; **was missing from the earlier allocation** (review #11 finding 4) |
 | ID validator + harvest (U6, U10) | workstation (CPU) | ~0.5 h | local |
-| **GPU total** | 2 machines | **≈57.5 h** (48 h training + 9.6 h evaluation incl. U4) | **ideal balanced elapsed ≈28.8 h**; **30 h is a rounded allowance, not a derived number** (review #11 finding 4) |
+| **GPU total** | 2 machines | **≈57.64 h** (48 h training + 8.12 h batteries + 1.52 h U4 benchmark) | **ideal balanced elapsed ≈28.82 h**; **30 h is an allowance, not a derived number** (reviews #11/#12) |
 
 **Service window (owner-authorized):** the Flash-Next endpoint is stopped on **both** nodes for the
 duration (`spark-8cf2` hosts the service; `spark-40ee` runs the `ggml-rpc-server` worker that shares
@@ -336,22 +339,21 @@ its GPU). It is restored immediately after harvest, and the restore is verified 
 probe — not a liveness ping (the `RUNBOOK-qwen-flash-serving.md` lesson). Expected downtime: **≈30 h**.
 
 **Checkpoint-by-gate evaluation binding** (review #7 finding 5, review #8 finding 3, re-cut for two
-arms × three checkpoints — **28,808 generations ≈ 8.07 h** in total):
+arms × three checkpoints — **29,008 generations ≈ 8.12 h** in total):
 
 | gate | C8 (both arms) | C16 (both arms) | C24 (both arms, confirmatory) | generations |
 |---|---|---|---|---|
 | G-A | 1,100 tuned ×2 = 2,200 | 1,100 tuned ×2 = 2,200 | (1,100 tuned + 1,100 base) ×2 = 4,400 | 8,800 |
-| G-A2, G-B, G-C, G-D, G-E, G-F, G-G, G-H, G-J, gate 8, §12 remeasure | not run | not run | 20,008 (10,004 per arm) | 20,008 |
-| **total** | 2,200 | 2,200 | 24,408 | **28,808 ≈ 8.07 h** |
+| G-A2, G-B, G-C, G-D, G-E, G-F, G-G, G-H, G-J, gate 8, §12 remeasure (each with its baseline arm where it compares against base) | not run | not run | 20,208 (10,104 per arm) | 20,208 |
+| **total** | 2,200 | 2,200 | 24,408 | **29,008 ≈ 8.12 h** |
 
 The **base arm is generated once per arm** (2 × 1,100) and reused by every checkpoint look. G-G runs at
-**C24 only** (both arms) — the three-checkpoint dose curve uses G-A alone, because the dose question is
-about refusal behaviour and G-G at six looks would cost 14,400 generations for no additional inference.
+**C24 only** (both arms) — the three-checkpoint trajectory uses G-A alone, because the trajectory question is
+about refusal behaviour, and G-G at six looks would cost **28,800 additional generations** (1,200 × 2 representations × 3 tasks × 2 arms × 2 extra checkpoints) for no additional inference.
 Evaluation is **split across both machines after training ends**, so wall-clock ≈ 24 h + ≈4 h.
 
 Only the **base** arm at G-A is reused across looks; every other arm is generated separately. G-G runs
-at C24 only — extending it to all three checkpoints would roughly triple it (+14,400 generations
-≈4 h on top of C24-only's 7,200) and is deliberately not budgeted.
+at C24 only — extending it to all three checkpoints would add **28,800 generations ≈ 8 h** on top of C24-only's 7,200, and is deliberately not budgeted.
 
 **The ≤14 h figure is conditional budget arithmetic**, not an established cost of completing the
 experiment: the mixture totals are proposals, the battery n's are new, and judge work is not costed.
@@ -502,7 +504,7 @@ reported as such rather than absorbed silently.
 **Every number in §13, §14 and this section is a dated record of what that round fixed, not a current
 figure.** Where they disagree with §6/§8, **§6/§8 govern**. The current values are: two arms × 24 h in
 parallel; **28,808 evaluation generations ≈ 8.07 h**; the benchmark **2,000 generations ≈ 1.52 h**;
-≈57.5 machine-hours total with an ideal balanced elapsed of ≈28.8 h (30 h = rounded allowance); and the
+≈57.64 machine-hours total with an ideal balanced elapsed of ≈28.82 h (30 h = allowance); and the
 §6 mixture — **84,484–95,984 unweighted rows = 94,384–107,384 weighted presentations** plus the
 2,000–4,000-row conversational-replay slice. Superseded values to ignore wherever they appear:
 11,400 / 13,204 / 28,608 generations; 3.19 / 3.70 / 8.01 h; ceilings ≤12 h and ≤14 h; the
