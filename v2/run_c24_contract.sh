@@ -22,6 +22,29 @@ ok()   { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
 bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; }
 step() { echo; echo "=== stage $1: $2 ==="; }
 
+# ---------------------------------------------------------------- stage 0a: pull the adapters
+# Added while preparing C24, because the contract as written could NOT have run: stages 1-2 (merge equivalence
+# and the benchmark) execute LOCALLY, while the trained adapters exist only on the training hosts — so
+# preflight would have reported "adapter missing" and exited 2, at 10:25 tomorrow, after 24 GPU-hours.
+# --copy-links because HF checkpoints are symlink farms (an earlier rsync without it wrote an empty file whose
+# sha256 was the empty-string hash). Intermediate `checkpoint-*` dirs are excluded: the shipped artifact is the
+# top-level adapter, and the point of pulling is to evaluate THAT.
+step 0a "pull the trained adapters from the hosts (the benchmark stages run locally)"
+for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+  dest="adapters/cyberguard-lora-v2-$arm"
+  echo "  rsync -a --copy-links --exclude 'checkpoint-*' $host:~/cyberguard/$dest/ $dest/"
+  [ "$DRY" = 1 ] && continue
+  mkdir -p "$dest"
+  timeout 1800 rsync -a --copy-links --exclude 'checkpoint-*' -e "ssh -o BatchMode=yes -o ConnectTimeout=10" \
+    "$host:~/cyberguard/$dest/" "$dest/" || { bad "adapter pull failed for $arm"; exit 2; }
+  for f in adapter_model.safetensors adapter_config.json; do
+    [ -s "$dest/$f" ] || { bad "$arm adapter incomplete: $f missing (has training finished?)"; exit 2; }
+  done
+  sha=$(sha256sum "$dest/adapter_model.safetensors" | awk '{print $1}')
+  echo "$sha" > "$dest/.sha256"
+  ok "$arm adapter pulled — adapter_model.safetensors sha256 ${sha:0:16}…"
+done
+
 # ---------------------------------------------------------------- preflight
 step 0 "preflight"
 PRE=0
@@ -159,7 +182,21 @@ if unbound:
 ident = r.get("identity") or {}
 if any(g["outcome"] in ("PASS", "FAIL") for g in r["gates"]) and not ident.get("has_adapter_hash"):
     sys.exit("FATAL: gates decided but no battery receipt recorded an adapter sha256")
-print(f"  identity: arm={ident.get('arm')} adapter_sha256={str(ident.get('adapter_sha256'))[:20]} "
+# F17 closed end to end: the adapter the batteries ran must BE the adapter that is shipped. This is the
+# comparison that makes the assembled verdict attributable to a checkpoint rather than to a claim.
+import hashlib, os                                          # noqa: E402
+hashes = ident.get("adapter_sha256") or []
+arm = ident.get("arm")
+shipped = f"adapters/cyberguard-lora-v2-{arm}/adapter_model.safetensors"
+if hashes and os.path.exists(shipped):
+    local = hashlib.sha256(open(shipped, "rb").read()).hexdigest()
+    if local not in hashes:
+        sys.exit(f"FATAL: the batteries ran adapter {[h[:16] for h in hashes]} but the shipped {arm} adapter "
+                 f"hashes to {local[:16]} — the tested artifact is not the shipped artifact")
+    print(f"  adapter identity: batteries and the shipped {arm} adapter agree ({local[:16]}…)")
+elif hashes:
+    sys.exit(f"FATAL: the batteries recorded adapter {[h[:16] for h in hashes]} but {shipped} is absent")
+print(f"  identity: arm={arm} adapter_sha256={str(ident.get('adapter_sha256'))[:20]} "
       f"consistent={ident.get('consistent')} receipts={ident.get('receipts')}")
 tagged = [g["gate"] for g in r["gates"] if g.get("historical_input")]
 if tagged:
