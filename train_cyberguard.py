@@ -217,7 +217,10 @@ cfg = SFTConfig(
     logging_steps=10,
     save_steps=500,
     save_total_limit=3,
-    eval_strategy="steps",
+    # ARM MODE HAS NO EVAL SPLIT: the frozen arms are the whole training set (the 500 held-out prompts are
+    # excluded at build time and evaluated separately by eval_cyberguard.py). Passing the empty list made TRL
+    # raise StopIteration in _prepare_dataset — caught by the MASK-PROOF smoke, not inside the 24 h window.
+    eval_strategy=("no" if ARMS else "steps"),
     eval_steps=500,
     bf16=(DEVICE == "cuda"),   # bf16 is invalid on CPU; training_args raises for it
     gradient_checkpointing=True,
@@ -230,7 +233,7 @@ cfg = SFTConfig(
 )
 
 trainer = SFTTrainer(
-    model=model, args=cfg, train_dataset=train_ds, eval_dataset=eval_ds,
+    model=model, args=cfg, train_dataset=train_ds, eval_dataset=(None if ARMS else eval_ds),
     processing_class=tok, callbacks=callbacks or None,
 )
 

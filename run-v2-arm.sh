@@ -34,7 +34,16 @@ LIVE=$(trainer_pids | head -1)
 true
 [ -f "$ARMS" ] || { echo "REFUSING: arm file missing: $ARMS"; exit 4; }
 echo "launching $RUN  minutes=$MINUTES  arms=$ARMS"
-setsid nohup env CYBERGUARD_ARMS="$ARMS" MAX_MINUTES="$MINUTES" RUN_NAME="$RUN" \
-  python3 "$ROOT/train_cyberguard.py" > "$LOG" 2>&1 < /dev/null &
+# The canonical env file defines CYBERGUARD_ROOT and CYBERGUARD_VENV; the venv python is the only one with
+# torch. A bare `python3` here would load the system interpreter and die (or, worse, half-run).
+set -a
+# shellcheck disable=SC1090
+[ -f "$HOME/.cyberguard-env" ] && . "$HOME/.cyberguard-env"
+set +a
+PY="${CYBERGUARD_VENV:-$HOME/venvs/sglang}/bin/python"
+[ -x "$PY" ] || { echo "REFUSING: no interpreter at $PY"; exit 6; }
+echo "  interpreter: $PY"
+setsid nohup env CYBERGUARD_ROOT="$ROOT" CYBERGUARD_ARMS="$ARMS" MAX_MINUTES="$MINUTES" RUN_NAME="$RUN" \
+  "$PY" "$ROOT/train_cyberguard.py" > "$LOG" 2>&1 < /dev/null &
 sleep 5
 echo "pid $(pgrep -f 'train_cyberguard[.]py' | head -1)  log $LOG"
