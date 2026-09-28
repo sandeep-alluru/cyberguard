@@ -1,0 +1,76 @@
+{
+  "gate_note": "Candidate list for the v2 admission gate. `revision` is the immutable identity we pin; `local_sample` is a real text sample produced by v2/sample_candidates.py or fetched from the train host. A candidate with no sample is UNMEASURED and can never be admitted (SPEC-V2 \u00a75 U1).",
+  "candidates": [
+    {
+      "id": "Trendyol/Trendyol-Cybersecurity-Instruction-Tuning-Dataset",
+      "revision": "escaped copy sha256 2b08b09c41da22c9...; rows 52,284 after safety audit",
+      "license": "Apache-2.0",
+      "role": "train",
+      "rows": 51784,
+      "local_sample": "v2/candidates/trendyol-sample.jsonl",
+      "note": "the v1 core and the source the 500-row holdout was drawn from; the holdout's own rows are excluded by construction (--exclude-holdout-rows) and the residual overlap is the number that matters"
+    },
+    {
+      "id": "ethanolivertroy/nist-cybersecurity-training",
+      "revision": "v1.1 (dataset card); 530,912 rows claimed",
+      "license": "CC0-1.0",
+      "role": "train",
+      "rows": 20000,
+      "local_sample": "v2/candidates/nist-sample.jsonl"
+    },
+    {
+      "id": "mitre-attack/attack-stix-data",
+      "revision": "enterprise-attack.json master as fetched 2026-09-27",
+      "license": "MITRE Terms of Use (copy-notice required)",
+      "role": "train",
+      "rows": 15000,
+      "local_sample": "v2/candidates/attack-sample.jsonl",
+      "note": "highest contamination risk in the plan: the holdout's own subject is ATT&CK mapping"
+    },
+    {
+      "id": "nvd-cve-json-feeds",
+      "revision": "NVD API 2.0, fetched 2026-09-27 (2000 of 398,563 CVEs sampled)",
+      "license": "public domain (17 USC 105); CVE(R) notice required",
+      "role": "train",
+      "rows": 15000,
+      "local_sample": "v2/candidates/nvd-sample.jsonl"
+    },
+    {
+      "id": "AUTHORED-refusal-retention-set",
+      "revision": "to be authored in U2 (1,200 rows; >=200 unknown-answer cases)",
+      "license": "ours + curated public refusal data (per-source gate)",
+      "role": "train",
+      "rows": 1200
+    },
+    {
+      "id": "AUTHORED-format-compliance-set",
+      "revision": "to be authored in U2 (1,500-3,000 rows)",
+      "license": "ours, from public rule schemas; SigmaHQ licence verified at U1",
+      "role": "train",
+      "rows": 2000
+    },
+    {
+      "id": "extraction-corpus (TBD by U1 search)",
+      "revision": "not yet identified (CIEM repo unavailable in v1; alternatives to be searched)",
+      "license": "per-source gate",
+      "role": "train",
+      "rows": 800
+    },
+    {
+      "id": "zefang-liu/secqa",
+      "revision": "CC BY-NC-SA 4.0, ~242 rows \u2014 an EVALUATION set",
+      "license": "CC BY-NC-SA 4.0",
+      "role": "eval",
+      "rows": 242
+    },
+    {
+      "id": "HuggingFaceH4/ultrachat_200k",
+      "revision": "train_sft split; card last-modified 2024-10-16; MIT",
+      "license": "MIT (verified via HF API cardData.license)",
+      "role": "train",
+      "rows": 3000,
+      "local_sample": "v2/candidates/ultrachat-sample.jsonl",
+      "note": "the F9 conversational-replay slot: real assistant turns, so it contributes supervised tokens to an assistant-only objective (raw prose would not)"
+    }
+  ]
+}

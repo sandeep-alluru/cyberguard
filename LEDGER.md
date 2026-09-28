@@ -855,3 +855,35 @@ fresh agent (or the owner) can find the adapter, the receipts and the corpus in 
   admission gate now has its reference set.
 - **Review #11 dispatched** (delta review on the re-cut: arm policy, multiplicity, schedule horizon,
   coverage arithmetic) because a material design change invalidates the #10 clearance for those axes.
+
+## 2026-09-27 — ADMISSION GATE RUN ON REAL SAMPLES (5 admitted / 1 rejected / 3 unmeasured)
+
+The gate is no longer theoretical: `v2/gate_v2.py --candidates v2/candidates.json --holdout
+v2/holdout500.jsonl --report v2/gate-report.json --exclude-holdout-rows`.
+
+| candidate | verdict | max Jaccard | containment | note |
+|---|---|---|---|---|
+| Trendyol (core) | **ADMIT** | **0.0266** | 0.0723 | **residual** after excluding the 22 rows that ARE held-out rows by construction |
+| NIST CSRC set | **ADMIT** | 0.0000 | 0.0000 | 1,000-row sample of 530,912 |
+| MITRE ATT&CK STIX | **ADMIT** | 0.0000 | 0.0000 | 2,198 objects; flagged highest-risk in `DATASET-V2.md` — it is not |
+| NVD CVE 2.0 | **ADMIT** | 0.0000 | 0.0000 | 2,000 of 398,563 CVE descriptions fetched |
+| ultrachat_200k (replay) | **ADMIT** | 0.0000 | 0.0000 | **MIT**, verified via the HF API, not the card prose |
+| SecQA | **REJECT** | — | — | eval set: must not be trained on |
+| authored refusal set / authored format set / extraction corpus | **UNMEASURED** | — | — | do not exist yet — and `--check` correctly refuses to admit them (exit 2) |
+
+- **Measurement lesson of the run:** the first pass "found" 22 contaminated rows with containment 1.0
+  — but the sample was `head -2000` of the corpus, which *contains* the 500 held-out rows. Excluding
+  them by prompt identity (22 excluded, exactly matching the 22 hits) dropped max Jaccard from
+  **0.7166 to 0.0266**. **A leak you can explain by construction is not a leak; the residual is the
+  measurement.** Implemented as `--exclude-holdout-rows`, reported as `holdout_rows_excluded`.
+- **Bug caught by the run:** the exclusion silently did nothing (0 rows) because `export_holdout.py`
+  hashed the **raw** prompt while the gate hashed the **normalised** one. Both now use the normalised
+  identity (the same key the corpus dedupe uses). Without this, the gate would have **rejected the core
+  corpus** — a wrong admission decision produced by a hash-convention mismatch.
+- **F9 decision recorded:** conversational replay is `HuggingFaceH4/ultrachat_200k` (**MIT** — cleaner
+  than Dolci's ODC-By), 2,000–4,000 conversations at weight 1.0, in **both** arms; new gate **G-J** (100
+  benign general prompts: answered ≥95 %, degeneration ≤2 %, length within 0.5–2× base) measures chat
+  retention so the fix cannot quietly buy refusal by destroying general behaviour. Merging is not
+  planned; a router is unnecessary if G-J holds.
+- **Gate artifacts:** `v2/candidates.json`, `v2/sample_candidates.py`, `v2/candidates/*.jsonl`
+  (trendyol 2,000 · nist 1,000 · attack 2,198 · nvd 2,000 · ultrachat 400), `v2/gate-report.json`.

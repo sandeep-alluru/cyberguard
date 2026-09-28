@@ -1,0 +1,17 @@
+[
+  {
+    "path": "v2/candidates/nist-sample.jsonl",
+    "rows": 1000,
+    "source": "ethanolivertroy/nist-cybersecurity-training",
+    "license": "CC0-1.0 (dataset card)",
+    "fetched_utc": "2026-09-28T03:20:23Z"
+  },
+  {
+    "path": "v2/candidates/attack-sample.jsonl",
+    "rows": 2198,
+    "objects_in_bundle": 26086,
+    "source": "mitre-attack/attack-stix-data (enterprise-attack.json)",
+    "license": "MITRE Terms of Use (copy-notice required)",
+    "fetched_utc": "2026-09-28T03:20:23Z"
+  }
+]

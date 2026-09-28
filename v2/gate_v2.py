@@ -24,6 +24,7 @@ Exit codes: 0 pass / success · 1 usage or IO error · 2 `--check` FAILED · 3 `
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -97,6 +98,72 @@ def read_docs(path: str, limit: int, strict: bool = False) -> list[str]:
     return [d for d in docs if d.strip()]
 
 
+def holdout_prompt_hashes(holdout_path: str) -> set[str]:
+    """The prompt fingerprints of the held-out rows, for by-construction exclusion.
+
+    A candidate that *contains* the held-out rows is not contamination — it is the corpus the split
+    was drawn from, and the split's job is to remove them. The leak that matters is the residual: the
+    overlap left after those rows are excluded. Measured on the core corpus, the difference is
+    0.717 Jaccard (raw) vs 0.027 (residual) — so the gate reports both.
+    """
+    hashes: set[str] = set()
+    if not os.path.exists(holdout_path):
+        return hashes
+    with open(holdout_path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            h = rec.get("prompt_sha256")
+            if h:
+                hashes.add(h)
+            elif rec.get("prompt"):
+                hh = hashlib.sha256(" ".join(rec["prompt"].lower().split()).encode()).hexdigest()[:16]
+                hashes.add(hh)
+    return hashes
+
+
+def prompt_hash_of(text: str) -> str:
+    """Mirror of the export script's prompt fingerprint (case-folded, whitespace-collapsed)."""
+    return hashlib.sha256(" ".join(text.lower().split()).encode()).hexdigest()[:16]
+
+
+def filter_holdout_rows(path: str, hold_hashes: set[str]) -> tuple[int, int]:
+    """Rewrite a JSONL candidate sample in place, dropping rows whose prompt IS a held-out prompt.
+
+    Returns (kept, excluded). Only applies to JSONL with a recognisable prompt field; anything else
+    is left untouched (and reported as not-excluded rather than silently passed).
+    """
+    if not hold_hashes or not path.endswith((".jsonl", ".ndjson")):
+        return -1, -1
+    kept, dropped = [], 0
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.rstrip("\n")
+            if not line.strip():
+                continue
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                kept.append(line)
+                continue
+            prompt = ""
+            if isinstance(obj, dict):
+                prompt = str(obj.get("user") or obj.get("instruction") or obj.get("prompt") or "")
+            if prompt and prompt_hash_of(prompt) in hold_hashes:
+                dropped += 1
+                continue
+            kept.append(line)
+    if dropped:
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(kept) + "\n")
+    return len(kept), dropped
+
+
 def overlap_scan(sample: list[str], holdout: list[str]) -> dict:
     """Two complementary overlap measures against the holdout.
 
@@ -160,6 +227,7 @@ def run_gate(args) -> int:
         print(f"FATAL: holdout not found: {args.holdout}", file=sys.stderr)
         print("       export the 500-row held-out set first (SPEC-V2 U1 dependency).", file=sys.stderr)
         return 1
+    hold_hashes = holdout_prompt_hashes(args.holdout)
     holdout = read_docs(args.holdout, limit=args.max_holdout_docs)
     if not holdout:
         print(f"FATAL: holdout empty: {args.holdout}", file=sys.stderr)
@@ -183,6 +251,11 @@ def run_gate(args) -> int:
             rec["verdict"] = "REJECT"
             rec["reasons"].append("licence-unverified")
         if sample_path and os.path.exists(sample_path):
+            if getattr(args, "exclude_holdout_rows", False):
+                kept, dropped = filter_holdout_rows(sample_path, hold_hashes)
+                if kept >= 0:
+                    rec["holdout_rows_excluded"] = dropped
+                    rec["sample_rows_kept"] = kept
             sample = read_docs(sample_path, limit=args.max_sample_docs)
             rec["sample_docs"] = len(sample)
             if sample:
@@ -223,7 +296,9 @@ def run_gate(args) -> int:
         "gate_version": "v2-gate-1",
         "ngram": NGRAM,
         "overlap_reject_threshold": OVERLAP_REJECT,
-        "holdout": {"path": args.holdout, "docs": len(holdout)},
+        "holdout": {"path": args.holdout, "docs": len(holdout),
+                    "prompt_hashes_loaded": len(hold_hashes),
+                    "exclude_by_construction": bool(getattr(args, "exclude_holdout_rows", False))},
         "candidates": results,
         "summary": summary,
     }
@@ -354,6 +429,8 @@ def main() -> int:
     ap.add_argument("--tokenizer", default=None, help="path to the project tokenizer dir")
     ap.add_argument("--max-holdout-docs", type=int, default=500)
     ap.add_argument("--max-sample-docs", type=int, default=2000)
+    ap.add_argument("--exclude-holdout-rows", action="store_true",
+                    help="drop candidate rows whose prompt IS a held-out prompt (split-by-construction)")
     ap.add_argument("--check", metavar="REPORT")
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args()

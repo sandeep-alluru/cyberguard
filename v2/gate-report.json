@@ -1,0 +1,217 @@
+{
+  "gate_version": "v2-gate-1",
+  "ngram": 13,
+  "overlap_reject_threshold": 0.6,
+  "holdout": {
+    "path": "v2/holdout500.jsonl",
+    "docs": 500,
+    "prompt_hashes_loaded": 500,
+    "exclude_by_construction": true
+  },
+  "candidates": [
+    {
+      "id": "Trendyol/Trendyol-Cybersecurity-Instruction-Tuning-Dataset",
+      "revision": "escaped copy sha256 2b08b09c41da22c9...; rows 52,284 after safety audit",
+      "license": "Apache-2.0",
+      "role": "train",
+      "rows": 51784,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0266,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0723,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 1978,
+      "token_count": 878132,
+      "token_count_mode": "whitespace-approx",
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 1978
+    },
+    {
+      "id": "ethanolivertroy/nist-cybersecurity-training",
+      "revision": "v1.1 (dataset card); 530,912 rows claimed",
+      "license": "CC0-1.0",
+      "role": "train",
+      "rows": 20000,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 1000,
+      "token_count": 228480,
+      "token_count_mode": "whitespace-approx",
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 1000
+    },
+    {
+      "id": "mitre-attack/attack-stix-data",
+      "revision": "enterprise-attack.json master as fetched 2026-09-27",
+      "license": "MITRE Terms of Use (copy-notice required)",
+      "role": "train",
+      "rows": 15000,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 2000,
+      "token_count": 243459,
+      "token_count_mode": "whitespace-approx",
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 2198
+    },
+    {
+      "id": "nvd-cve-json-feeds",
+      "revision": "NVD API 2.0, fetched 2026-09-27 (2000 of 398,563 CVEs sampled)",
+      "license": "public domain (17 USC 105); CVE(R) notice required",
+      "role": "train",
+      "rows": 15000,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 2000,
+      "token_count": 53385,
+      "token_count_mode": "whitespace-approx",
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 2000
+    },
+    {
+      "id": "AUTHORED-refusal-retention-set",
+      "revision": "to be authored in U2 (1,200 rows; >=200 unknown-answer cases)",
+      "license": "ours + curated public refusal data (per-source gate)",
+      "role": "train",
+      "rows": 1200,
+      "verdict": "UNMEASURED",
+      "reasons": [
+        "no-local-sample"
+      ],
+      "overlap_max": null,
+      "overlap_docs_ge_060": null,
+      "containment_max": null,
+      "containment_docs_ge_080": null,
+      "sample_docs": 0,
+      "token_count": null,
+      "token_count_mode": null,
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      }
+    },
+    {
+      "id": "AUTHORED-format-compliance-set",
+      "revision": "to be authored in U2 (1,500-3,000 rows)",
+      "license": "ours, from public rule schemas; SigmaHQ licence verified at U1",
+      "role": "train",
+      "rows": 2000,
+      "verdict": "UNMEASURED",
+      "reasons": [
+        "no-local-sample"
+      ],
+      "overlap_max": null,
+      "overlap_docs_ge_060": null,
+      "containment_max": null,
+      "containment_docs_ge_080": null,
+      "sample_docs": 0,
+      "token_count": null,
+      "token_count_mode": null,
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      }
+    },
+    {
+      "id": "extraction-corpus (TBD by U1 search)",
+      "revision": "not yet identified (CIEM repo unavailable in v1; alternatives to be searched)",
+      "license": "per-source gate",
+      "role": "train",
+      "rows": 800,
+      "verdict": "UNMEASURED",
+      "reasons": [
+        "no-local-sample"
+      ],
+      "overlap_max": null,
+      "overlap_docs_ge_060": null,
+      "containment_max": null,
+      "containment_docs_ge_080": null,
+      "sample_docs": 0,
+      "token_count": null,
+      "token_count_mode": null,
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      }
+    },
+    {
+      "id": "zefang-liu/secqa",
+      "revision": "CC BY-NC-SA 4.0, ~242 rows \u2014 an EVALUATION set",
+      "license": "CC BY-NC-SA 4.0",
+      "role": "eval",
+      "rows": 242,
+      "verdict": "REJECT",
+      "reasons": [
+        "eval-set-must-not-be-trained-on",
+        "no-local-sample"
+      ],
+      "overlap_max": null,
+      "overlap_docs_ge_060": null,
+      "containment_max": null,
+      "containment_docs_ge_080": null,
+      "sample_docs": 0,
+      "token_count": null,
+      "token_count_mode": null,
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      }
+    },
+    {
+      "id": "HuggingFaceH4/ultrachat_200k",
+      "revision": "train_sft split; card last-modified 2024-10-16; MIT",
+      "license": "MIT (verified via HF API cardData.license)",
+      "role": "train",
+      "rows": 3000,
+      "verdict": "ADMIT",
+      "reasons": [],
+      "overlap_max": 0.0,
+      "overlap_docs_ge_060": 0,
+      "containment_max": 0.0,
+      "containment_docs_ge_080": 0,
+      "sample_docs": 400,
+      "token_count": 305763,
+      "token_count_mode": "whitespace-approx",
+      "embedding_check": {
+        "status": "SKIPPED",
+        "reason": "not-implemented-in-v2-gate-1"
+      },
+      "holdout_rows_excluded": 0,
+      "sample_rows_kept": 400
+    }
+  ],
+  "summary": {
+    "admitted": 5,
+    "rejected": 1,
+    "unmeasured": 3
+  }
+}

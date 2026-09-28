@@ -49,7 +49,9 @@ def main() -> int:
                 "prompt": r["user"],
                 "reference": r["assistant"],
                 "system": r.get("system", ""),
-                "prompt_sha256": hashlib.sha256(r["user"].encode()).hexdigest()[:16],
+                # normalised identity: must match gate_v2.prompt_hash_of and the dedupe key
+                "prompt_sha256": hashlib.sha256(
+                    " ".join(r["user"].lower().split()).encode()).hexdigest()[:16],
             }
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
