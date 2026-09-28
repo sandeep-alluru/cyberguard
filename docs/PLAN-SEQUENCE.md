@@ -175,6 +175,31 @@ that the two-arm result could not isolate the manipulation. Recorded in `docs/SP
 **Exit condition (met when):** the audit reports `arm_utterance_differences = 5,600`, `illegal_arm_differences
 = 0`, and both arms carry the same 3,984 abstention rows byte-for-byte; the completeness screen passes on both.
 
+## 6b. Review #9 and the v9 relaunch (2026-09-28)
+
+Review #9 found the shared base corpus asserting **sibling ATT&CK ids against the wrong names** (it taught
+`T1071.004 = Web Protocols` when T1071.004 is DNS; `T1543.002 = Windows Service` when that is Systemd;
+`T1558.001 = Kerberoasting` when that is Golden Ticket). Both arms were stopped ~10 minutes into the first
+window rather than at the reviewer's suggested C8, which recovered ~8 GPU-hours.
+
+| item | disposition | evidence |
+|---|---|---|
+| wrong CURRENT id with a sibling's name | **fixed mechanically from MITRE's own STIX** (no network, no invention): 1,381 assertions rewritten to the sibling whose current name the text matches | `v2/attack_label_audit.py` → **REPAIR CHECK PASS, 0 'repaired' assertions in either arm** |
+| **stale pre-rename names** and loose synonyms (e.g. `T1053.006` "Scheduled Task/Job: Windows Task Scheduler"; `T1557.001` "LLMNR/NBT-NS Poisoning") | **declared residual, 2,573 assertions / 2,325 rows per arm, identical in both arms** — MITRE's current table cannot map these without inventing text | `research-tmp/rebuild/attack-audit-v9.json` |
+| ids absent from the bundled STIX export | declared residual, 175 assertions | same |
+| an empty next list item after a bold item (`4. **Input Validation**: … 5.`) | **fixed**: `list-marker-end` extended to that context; build dropped 29 rows by this reason | `v2/completeness_screen.py` PASS, 0 findings |
+
+**Why the residual does not block this evaluation:** the measurement scores the trained model against the
+corpus's OWN reference answers (`eval_cyberguard.py` reads `r["assistant"][:400]` from the held-out split), so
+the corpus's naming conventions are internally consistent with the scoring, and the residual is byte-identical
+in both arms so it cannot bias the A/B contrast. If a future evaluation is graded against MITRE's current
+tables instead, this residual becomes material and the classes are already enumerated by the audit.
+
+**v9 gate (2026-09-28 07:41 CDT):** 81,074 rows/arm · audit PASS (0 failures, 0 warnings) · RECEIPT-BOUND ·
+leak scan CLEAN 0/162,148 · completeness screen PASS 0 findings · ATT&CK repair PASS · O1 verified (5,600
+substitutions, 3,984 abstention rows identical) · staged and hash-verified on both hosts
+(armA `ed21d796…`, armB `f8956b40…`).
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
