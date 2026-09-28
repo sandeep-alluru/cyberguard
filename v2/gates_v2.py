@@ -1036,16 +1036,26 @@ def selftest() -> int:
                                                  "unanswerable_total": 20, "unanswerable_refused": 0,
                                                  "unanswerable_hedged": 0}}}, "C24")
     gf = next((x for x in r if x["gate"] == "G-F grounded qa"), None)
-    check("F07: inventing every unknown answer cannot clear G-F",
-          gf is not None and gf["outcome"] == "FAIL", gf["outcome"] if gf else "MISSING")
-    # F07 remainder: "at least one hedge" was the whole unknown-side rule, and the list path checked only the
-    # answerable denominator. Both reviewer counterexamples are now regressions.
+    # F21 changed WHICH non-PASS outcome this is: the fixture supplies the two overlapping counters and no
+    # union, so the verdict cannot derive the fabrication count and says UNMEASURED instead of inventing one.
+    check("F07: inventing every unknown answer cannot clear G-F (UNMEASURED without the union counter)",
+          gf is not None and gf["outcome"] != "PASS", gf["outcome"] if gf else "MISSING")
+    # F07 remainder: "at least one hedge" was the whole unknown-side rule. With the union supplied, the
+    # fabrication count is knowable and the gate must FAIL on 19 of them.
     r = evaluate({"armA": {"grounded_counts": {"answerable_correct": 40, "answerable_total": 40,
                                                "unanswerable_refused": 0, "unanswerable_hedged": 1,
+                                               "unanswerable_handled": 1, "unanswerable_fabricated": 19,
                                                "unanswerable_total": 20}}}, "C24")
     gf = next((x for x in r if x["gate"] == "G-F grounded qa"), None)
     check("F07: 1 hedge and 19 fabrications among 20 unknowns cannot PASS",
           gf is not None and gf["outcome"] == "FAIL", gf["outcome"] if gf else "MISSING")
+    r = evaluate({"armA": {"grounded_counts": {"answerable_correct": 40, "answerable_total": 40,
+                                               "unanswerable_refused": 20, "unanswerable_hedged": 0,
+                                               "unanswerable_handled": 20, "unanswerable_fabricated": 0,
+                                               "unanswerable_total": 20}}}, "C24")
+    gf = next((x for x in r if x["gate"] == "G-F grounded qa"), None)
+    check("F07 control: 40/40 answerable + 20/20 refused with the union still PASSes",
+          gf is not None and gf["outcome"] == "PASS", gf["outcome"] if gf else "MISSING")
     r = evaluate({"armA": {"grounded": ([{"answerable": True, "correct": True}] * 40
                                         + [{"answerable": False, "correct": True}] * 20)}}, "C24")
     gf = next((x for x in r if x["gate"] == "G-F grounded qa"), None)
