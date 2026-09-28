@@ -806,3 +806,17 @@ was recomputed here; its corrected numbers were right and mine were wrong in thr
   codified (`CRAFT-O-27` freeze discipline, `CRAFT-O-28` scan-self-match-as-kill).
 - **No GPU spent for any of it** — re-verified: `spark-40ee` GPU 0 %, receipts unchanged since v1;
   `spark-8cf2` serving untouched.
+
+## 2026-09-27 — HOUSEKEEPING CLOSED (all four items open since 09-26) + repo/archive established
+
+Owner is the CEO and should not be tracking these; they are closed here rather than reported as open.
+
+| # | item (open since 2026-09-26) | disposition | evidence |
+|---|---|---|---|
+| 1 | no git repo | **CLOSED** — repo initialised, 193 files tracked, first commit `17fe937`; binaries ignored by `.gitignore` | `git log`, `.gitignore` |
+| 2 | remote `~/cyberguard` in no archive | **CLOSED** — durable archive built at `/mnt/purple4tb/AgentHub-archive/cyberguard/` (265 MB: both harvests, docs, code, re-hash record) | `du -sh` on the archive path |
+| 3 | canonical local dirs empty while artifacts lived remotely | **CLOSED** — `receipts/` and `evals/` populated from the verified harvest; `data/ training/ serving/ gguf/` carry one-line explanations and a repo-root map | `ARTIFACT-MAP.md` |
+| 4 | remote adapter bytes never independently re-hashed | **CLOSED** — live re-hash on `spark-40ee`: **15/15 comparable artifacts match the harvest manifest, 0 mismatches**, including `adapter_model.safetensors` = `bead9235d5349965e320b68d7ef0368e7a9e53f3c5fc2d15bac857dd04c82976` | `research-tmp/hash-remote-now.txt`, archive copy of the same |
+
+Also added `ARTIFACT-MAP.md`: every canonical directory now says where its content actually lives, so a
+fresh agent (or the owner) can find the adapter, the receipts and the corpus in one hop.
