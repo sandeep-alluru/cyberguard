@@ -86,6 +86,28 @@ def _ends_sentence(tok):
     return core not in ABBREV
 
 
+_BARE_NUM = re.compile(r"^\d{1,2}\.$")
+
+
+def _valid_end_at(w, i):
+    """Is word i a valid sentence end *in context*?
+
+    Review #6's reproduction: a bare list marker was accepted as an ending, so
+    "...endpoint. 2. **More guidance**" was trimmed to "The ... endpoint. 2." and shipped. A numbered token
+    is an ending only when it is part of a name ("PlayStation 4."), never when it follows a finished
+    sentence or a markdown marker ("### 2.") — those are list/heading fragments.
+    """
+    if i < 0 or i >= len(w):
+        return False
+    if not _ends_sentence(w[i]):
+        return False
+    if _BARE_NUM.match(w[i]):
+        prev = w[i - 1].rstrip() if i > 0 else ""
+        if not prev or prev.endswith((".", "!", "?", ":", ";")) or set(prev) <= set("#*-"):
+            return False
+    return True
+
+
 def split_sentences(text):
     """Split prose into sentences using _ends_sentence, so abbreviations cannot end a sentence."""
     out, buf = [], []
@@ -109,7 +131,7 @@ def complete_sentence(text):
     s = str(text).rstrip()
     w = s.split()
     for i in range(len(w) - 1, 6, -1):            # newest valid end first; keep >= 8 words
-        if _ends_sentence(w[i]):
+        if _valid_end_at(w, i):
             return " ".join(w[:i + 1])
     low = s.lower()
     i = low.rfind("(citation:")
@@ -141,7 +163,7 @@ def _ends_ok(text):
     if not w:
         return True
     t = w[-1]
-    if _ends_sentence(t):
+    if _valid_end_at(w, len(w) - 1):
         return True
     if t.lower().strip(".") == "etc":                 # "...Java, Javascript, etc."
         return True
@@ -176,6 +198,15 @@ def defect(text):
         return "unclosed-citation"
     if s.rstrip().endswith((":", ",", ";", "(", "[", "{", "|", "-", "—")):
         return "dangling-punctuation"
+    # Only a BARE path token is a truncation: "…discovery endpoint (usually /." truncates, while
+    # "…/cgi-bin/ in the requested URL with /cgi-bin-sdb/." is a finished sentence (measured: the loose
+    # version flagged 19 rows, of which the reviewed examples were all complete).
+    if re.search(r"(?:\s|^)[/\\]{1,2}\.$", s) or s.rstrip().endswith(("/", "\\")):
+        return "truncated-path"
+    # The "#" must start a marker, not end a word: review #6 warned that "C#." and issue numbers are not
+    # headings, and a naive pattern flagged "...developed in PowerShell and C#." as a heading cut.
+    if re.search(r"(?<![\w#])#{1,6}\s*\d{0,3}\.?$", s):
+        return "inline-heading-cut"                   # "...### 2." / a heading flattened into the prose
     return None
 
 
@@ -431,30 +462,75 @@ def load_authored(path, src):
     return out
 
 
+# Review #6 D7: 17 of the previous 22 templates asked for something a family body cannot supply ("Which
+# preventive control is cheapest against {n}?" -> 276 presentations with a generic paragraph that never
+# selects a control). Every template below asks for what the bodies actually contain — monitoring and
+# detection, controls and hardening, and the defensive posture — and each is tagged with the classes it
+# needs; check_replacement_questions() proves mechanically that each body satisfies its template's classes.
 REPLACEMENT_QUESTIONS = [
     "What controls reduce the risk of {n}?",
     "Summarise the defensive posture against {n}.",
     "Which detections matter most for {n}?",
     "How should we harden against {n}?",
-    "Which logging sources expose {n}?",
-    "How do we validate coverage against {n}?",
-    "What does an incident runbook say about {n}?",
-    "Which NIST CSF functions apply to {n}?",
-    "How should we brief leadership on {n}?",
-    "What does a purple-team exercise for {n} cover?",
-    "Which compensating controls help when patching lags on {n}?",
-    "How do we measure our response time to {n}?",
-    "What does ATT&CK recommend for {n}?",
-    "Which preventive control is cheapest against {n}?",
-    "How do we test that our controls hold against {n}?",
     "What telemetry would betray {n} early?",
-    "How should we prioritise remediation for {n}?",
-    "What does a tabletop exercise for {n} need to cover?",
-    "Which identity controls blunt {n}?",
-    "How do we segment to limit {n}?",
-    "What would a post-incident review of {n} ask?",
-    "Which metrics show we are improving against {n}?",
+    "Which safeguards most reduce exposure to {n}?",
+    "How should a defender prepare for {n}?",
+    "What defensive measures blunt {n}?",
+    "Which controls should a SOC tune first for {n}?",
+    "What does good defence against {n} look like?",
+    "How do we reduce the blast radius of {n}?",
+    "What hardening steps address {n}?",
+    "Which monitoring gaps let {n} go unnoticed?",
+    "What should our detection strategy for {n} cover?",
+    "How do we baseline normal activity to spot {n}?",
+    "Which preventive controls apply to {n}?",
+    "What ongoing checks keep {n} in view?",
+    "How should we tune alerts for {n}?",
+    "Which controls and detections pair best against {n}?",
+    "What does a defensive programme need for {n}?",
 ]
+
+# D7: what each template needs its answer to provide. Classes are declared explicitly (deriving them from
+# question wording was fragile), and the vocabulary is matched on STEMS because the bodies use inflections
+# ("verification", "restricted", "monitoring") that an exact-word test missed — it reported 108 false
+# mismatches on bodies that plainly do provide controls and detection.
+CLASS_KEYWORDS = {
+    "controls": ("control", "enforce", "appli", "maintain", "restrict", "isolat", "segment", "tier",
+                 "rotat", "invalidat", "block", "pin", "verif", "rehears", "allow", "least privilege",
+                 "compensat", "harden", "patch", "admission", "retain", "centralis", "centraliz",
+                 "off-host", "write-once", "treat", "validat", "inventor", "reduc", "limit"),
+    "detection": ("monitor", "alert", "hunt", "detect", "instrument", "baseline", "watch", "correlat",
+                  "telemetry", "log", "visib", "fingerprint", "analysis", "anomal", "detonat", "report",
+                  "measur", "simulat", "campaign", "proof"),
+}
+BOTH = {"controls", "detection"}
+
+
+def _question_classes(question):
+    """Which content classes a template's answer must provide (declared, not inferred)."""
+    q = question.lower()
+    controls = any(w in q for w in ("control", "safeguard", "preventive", "measure", "harden",
+                                    "hardening", "blast radius", "defensive", "programme", "defence"))
+    detect = any(w in q for w in ("detection", "detections", "telemetry", "alert", "monitor",
+                                  "monitoring", "baseline", "unnoticed", "strategy", "checks"))
+    need = set()
+    if controls:
+        need.add("controls")
+    if detect:
+        need.add("detection")
+    return need or BOTH
+
+
+def check_replacement_questions():
+    """D7's exit test: every family template must be answerable by every family body."""
+    bad = []
+    for fam, body in BRS.FAMILIES.items():
+        low = body["defence"].lower()
+        for q in REPLACEMENT_QUESTIONS:
+            missing = [c for c in _question_classes(q) if not any(w in low for w in CLASS_KEYWORDS[c])]
+            if missing:
+                bad.append((fam, q, missing))
+    return bad
 REPLACEMENT_LEADS = [
     "Defensively: ", "For detection and hardening: ", "The defensive reading: ",
     "Concretely, for defenders: ", "What reduces risk here: ", "In practice: ",
@@ -655,8 +731,11 @@ def main():
                 a2, ok = finalise(r["assistant"], k)
                 if ok:
                     if a2 != r["assistant"]:
+                        # count only changes that alter CONTENT: the scrub step normalises whitespace, and
+                        # counting those made the console report 367 while the receipt held 49,776 (review #6)
+                        if " ".join(a2.split()) != " ".join(str(r["assistant"]).split()):
+                            n_boundary_fixed += 1
                         r["assistant"] = a2
-                        n_boundary_fixed += 1
                 elif k != "refusal":
                     reason = defect(a2) or "no-boundary"
                     r["_drop"] = reason
@@ -675,6 +754,12 @@ def main():
             sys.exit(f"FATAL: source '{k}' contributed 0 rows. Its input is missing or unreadable; "
                      f"refusing to write a mixture that silently drops a source.")
     pools = clean
+
+    # D7's exit test: a control template the family bodies cannot answer is bad supervision waiting to ship.
+    mism = check_replacement_questions()
+    if mism:
+        sys.exit(f"FATAL: {len(mism)} replacement template/family mismatches, e.g. {mism[:2]}. "
+                 f"A question the answer cannot satisfy teaches an unrelated mapping.")
 
     # realise weights by explicit duplication
     weighted = {}
