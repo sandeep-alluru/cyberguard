@@ -1,0 +1,100 @@
+{
+  "gates": [
+    {
+      "gate": "G-A refusal retention",
+      "n_required": 1100,
+      "source": "v2/data/probe-set-gA.jsonl",
+      "available": 1100,
+      "status": "READY",
+      "note": "frozen 700 offensive + 400 abstention; re-registration recorded as D10"
+    },
+    {
+      "gate": "G-A severity",
+      "n_required": 1100,
+      "source": "same outputs as G-A",
+      "available": 1100,
+      "status": "READY",
+      "note": "descriptive share, rubric 0-4"
+    },
+    {
+      "gate": "G-A2 defensive",
+      "n_required": 60,
+      "source": "leak_scan DEFENSIVE_40 + cap_probes benign-help (~25)",
+      "available": 65,
+      "status": "READY",
+      "note": "40 defensive + 25 benign-help >= 60"
+    },
+    {
+      "gate": "G-B triage",
+      "n_required": 300,
+      "source": "format-compliance triage-one-word",
+      "available": 600,
+      "status": "READY",
+      "note": "needs >=200 negatives and >=100 positives: verify the split"
+    },
+    {
+      "gate": "G-C id factuality",
+      "n_required": 300,
+      "source": "no frozen ID-eliciting prompt set",
+      "available": 0,
+      "status": "AUTHOR",
+      "note": "SPEC wants >=300 emitted IDs from 600 generations per arm; the prompts must be frozen"
+    },
+    {
+      "gate": "G-D extraction",
+      "n_required": 100,
+      "source": "arcspan candidate sample",
+      "available": 500,
+      "status": "ZERO-SHOT",
+      "note": "labels are not retrievable -> D5 declares G-D zero-shot (UNMEASURED by design)"
+    },
+    {
+      "gate": "G-E sigma",
+      "n_required": 60,
+      "source": "format-compliance sigma-rule",
+      "available": 400,
+      "status": "READY",
+      "note": "60 requested from 400 available"
+    },
+    {
+      "gate": "G-F grounded qa",
+      "n_required": 60,
+      "source": "refusal-retention unknown-answer (unanswerable side)",
+      "available": 500,
+      "status": "PARTIAL",
+      "note": "unanswerable side covered (500); the >=40 ANSWERABLE items have no frozen set yet"
+    },
+    {
+      "gate": "G-G general",
+      "n_required": 1200,
+      "source": "cap_harness capability probes (GSM8K subset / IFEval-lite)",
+      "available": 120,
+      "status": "PARTIAL",
+      "note": "v1 ran 120 pairs/task; n=1200/task needs the official suites or authored pairs"
+    },
+    {
+      "gate": "G-I escape artifact",
+      "n_required": 500,
+      "source": "v2/holdout500.jsonl + battery outputs",
+      "available": 500,
+      "status": "READY",
+      "note": "observed: literal \\n count and raw/normalised F1"
+    },
+    {
+      "gate": "G-J chat retention",
+      "n_required": 100,
+      "source": "no frozen 100-prompt chat set",
+      "available": 0,
+      "status": "AUTHOR",
+      "note": "needs 100 benign general-instruction prompts; cap_probes holds ~25 benign-help"
+    },
+    {
+      "gate": "Claim 1 / Claim 2",
+      "n_required": 1100,
+      "source": "v2/data/probe-set-gA.jsonl (per-probe pairs)",
+      "available": 1100,
+      "status": "READY",
+      "note": "the C24 battery must emit PER-PROBE pairs for Claim 2; aggregate cross-tabs cannot express it"
+    }
+  ]
+}
