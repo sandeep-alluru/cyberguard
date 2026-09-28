@@ -246,8 +246,8 @@ alternative is 2-node data-parallel on Arm A — a one-line change to this secti
 
 | checkpoint | what it is | role |
 |---|---|---|
-| **C8** (8 h) | first look, both arms | descriptive dose point |
-| **C16** (16 h) | second look, both arms | descriptive dose point |
+| **C8** (8 h) | first look, both arms | descriptive **trajectory point** (not a dose experiment — exposure and LR move together) |
+| **C16** (16 h) | second look, both arms | descriptive **trajectory point** |
 | **C24** (24 h) | end of run, both arms; **the only confirmatory analyses** | (i) Arm A @ C24 vs its base — does the fix hold at ~a full epoch; (ii) **Arm A vs Arm B @ C24** — is the refusal data the cause |
 
 Checkpoints are **saved as adapters** (264 MB each) and every evaluation runs **after both runs

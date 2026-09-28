@@ -25,8 +25,14 @@ PHASE 3  data-integrity gate ................................ OPEN  audit PASSES
 PHASE 4  design reviews (#6–#13) ............................ 6–12 DONE; #13 DISPATCHED
 PHASE 5  training launch .................................... BLOCKED on Phase 3 + owner authorization (already given: 24 h, both machines)
    └─ 24 h x 2 arms in parallel, checkpoints C8/C16/C24
+   exit: two receipts exist, each carrying mask_check + coverage + the bound schedule fields, and
+         step progress was confirmed within 10 min of each launch (U3's command)
 PHASE 6  evaluation (C24 confirmatory + C8/C16 trajectory) ... BLOCKED on Phase 5
+   exit: `evals/cyberguard-lora-v2.json` exists with raw AND normalised F1 (both with CIs), the
+         evaluated representation named, and every gate in §2 reporting PASS/FAIL/UNMEASURED with n
 PHASE 7  verdict, harvest, CEO brief ........................ BLOCKED on Phase 6
+   exit: `docs/VERDICT-v2.md` passes its own checks; harvest prints HARVEST-COMPLETE with every
+         sha256 verified; the CEO brief renders on the portal with 0 raw IPv4
 ```
 
 **Two hard preconditions on Phase 5:**
