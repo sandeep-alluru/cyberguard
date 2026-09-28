@@ -869,7 +869,20 @@ def repair_attack_ids(text, table=None, by_leaf=None):
     def sub(m):
         eid, name = m.group(1), m.group(2).strip()
         canon = table.get(eid)
-        if canon is None or _leaf(name) == _leaf(canon):
+        if canon is None:
+            return m.group(0)
+        # Review #12: consult the FULL label FIRST. "T1584.002 (Acquire Infrastructure: DNS Server)" matched
+        # its leaf ("DNS Server") and returned early, hiding that the parent name in the text is Acquire
+        # Infrastructure, i.e. T1583.002 — T1584 is Compromise Infrastructure. A leaf match is not enough
+        # when the text also names the parent.
+        if ":" in name:
+            par_leaf, leaf_only = name.split(":", 1)
+            full = by_leaf.get("__full__") or {}
+            tgt_full = full.get((True, f"{_leaf(par_leaf)}|{_leaf(leaf_only)}"))
+            if tgt_full and tgt_full != eid:
+                sub.fixed += 1
+                return m.group(0).replace(eid, tgt_full, 1)
+        if _leaf(name) == _leaf(canon):
             return m.group(0)
         target = None
         if ":" in name:
@@ -888,7 +901,10 @@ def repair_attack_ids(text, table=None, by_leaf=None):
         return m.group(0)
 
     sub.fixed = 0
-    out = re.sub(r"\b(T\d{4}\.\d{3})\b\s*(?:=|:)?\s*\(([^)\n]{3,90})\)", sub, str(text))
+    # Review #12 item 4: parent ids carry assertions too ("T1620 (Deploy Container)" where Deploy Container
+    # is T1610), and the audit found 750 narrowed contradictions among them. Widening the pattern is safe
+    # because the same guards apply: the name index refuses ambiguity and only its unique resolution is used.
+    out = re.sub(r"\b(T\d{4}(?:\.\d{3})?)\b\s*(?:=|:)?\s*\(([^)\n]{3,90})\)", sub, str(text))
     return out, sub.fixed
 
 
