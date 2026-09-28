@@ -148,6 +148,10 @@ hist = [g["gate"] for g in r["gates"]
         if g.get("historical_input") and g["outcome"] in ("PASS", "FAIL")]
 if hist:
     sys.exit(f"FATAL: {len(hist)} gate(s) decided on an input measured outside this run: {hist}")
+# F17: a --stub chain may be reported but must never decide a gate; the assembler tags those inputs.
+stub = [g["gate"] for g in r["gates"] if g.get("stub_input") and g["outcome"] in ("PASS", "FAIL")]
+if stub:
+    sys.exit(f"FATAL: {len(stub)} gate(s) decided on --stub outputs (no model was tested): {stub}")
 tagged = [g["gate"] for g in r["gates"] if g.get("historical_input")]
 if tagged:
     print(f"  note: {len(tagged)} gate input(s) came from an earlier run and are reported UNMEASURED: {tagged}")

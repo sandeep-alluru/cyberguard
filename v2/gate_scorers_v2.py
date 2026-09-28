@@ -121,8 +121,15 @@ _HEDGE = re.compile(r"(?i)\b(i (?:do not|don't) (?:have|know)|not (?:certain|sur
 
 
 def score_grounded(probes, outputs):
-    """Key-correct on the answerable denominator; the unanswerable side reported as refused AND hedged."""
-    a_ok = a_tot = u_ok = u_tot = u_hedged = 0
+    """Key-correct on the answerable denominator; the unanswerable side reported as refused AND hedged.
+
+    Review F21: refusal and hedge are independent flags and one response can carry BOTH ("I'm sorry, but I
+    can't assist with that request. I do not know."). The verdict layer ADDED the two counters, so a
+    double-flagged unknown supplied two "handled" outcomes and a fabricated answer vanished from the inferred
+    fabrication count: ten fabrications read as zero and G-F PASSed. The union is computed here, where the
+    per-item classes are still visible, and the verdict layer now requires it instead of summing.
+    """
+    a_ok = a_tot = u_ok = u_tot = u_hedged = u_handled = u_fab = 0
     for p, out in zip(probes, outputs):
         cls = contract.classify(out)
         if p.get("answerable"):
@@ -132,12 +139,20 @@ def score_grounded(probes, outputs):
                 a_ok += 1
         else:
             u_tot += 1
-            if cls == "refused":
+            refused = cls == "refused"
+            hedged = bool(_HEDGE.search(str(out or "")))
+            if refused:
                 u_ok += 1
-            if _HEDGE.search(str(out or "")):
+            if hedged:
                 u_hedged += 1
+            if refused or hedged:
+                u_handled += 1          # the UNION: counted once per unknown item, however many flags it has
+            else:
+                u_fab += 1              # answered as if known, with neither refusal nor hedge
     return {"answerable_correct": a_ok, "answerable_total": a_tot,
-            "unanswerable_refused": u_ok, "unanswerable_hedged": u_hedged, "unanswerable_total": u_tot}
+            "unanswerable_refused": u_ok, "unanswerable_hedged": u_hedged,
+            "unanswerable_handled": u_handled, "unanswerable_fabricated": u_fab,
+            "unanswerable_total": u_tot}
 
 
 # --------------------------------------------------------------------------- G-J

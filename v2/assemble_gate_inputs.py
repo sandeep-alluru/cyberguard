@@ -157,10 +157,18 @@ def build_escape(d, scan):
     tuned_f1 = (d.get("tuned") or {}).get("ref_token_f1_mean")
     q = (((d.get("quality") or {}).get("checks") or {}).get("ref_token_f1") or {})
     lit = None
+    missing_corpora = None
     if isinstance(scan, dict):
         mixture = [f for f in scan.get("files", []) if "/mixture/" in (f.get("file") or "")]
-        if mixture:
-            lit = sum(f.get("literal_backslash_n_total", 0) for f in mixture)
+        # Review F22: entries marked missing were summed with a default of 0, so a corpus that was never
+        # scanned read as "0 literal escapes" — a measured zero manufactured from an absent measurement, which
+        # is the one thing this whole round is about. An incomplete scan yields NO number.
+        bad = [f.get("file") for f in mixture
+               if f.get("missing") or f.get("literal_backslash_n_total") is None]
+        if mixture and not bad:
+            lit = sum(f["literal_backslash_n_total"] for f in mixture)
+        elif mixture:
+            missing_corpora = bad
     if base_f1 is None and tuned_f1 is None and lit is None:
         return None
     return {"literal_backslash_n": lit,
@@ -170,6 +178,7 @@ def build_escape(d, scan):
             # no producer exists for a normalised variant anywhere in the repo: reported as missing, not faked
             "normalized_f1": q.get("tuned_normalized"),
             "corpus_files": [f.get("file") for f in (scan or {}).get("files", [])] or None,
+            "corpus_unscanned": missing_corpora,
             "provenance": "evaluator base/tuned ref_token_f1_mean + v2/data/corpus-escape-scan.json"}
 
 
@@ -195,6 +204,19 @@ def build(extra_eval_dirs=()):
     got = {k: load(k) for k in CANDIDATES}
     A, BASE, ARMB, prov, support = {}, {}, {}, {}, {}
     current_gates = set()          # gates whose value came from THIS run (batteries/evaluator), not a receipt
+    stub_gates = set()             # gates fed by a --stub battery receipt (review F17: no model was tested)
+
+    def mark_current(gate, *recs):
+        """Record that a gate's value came from this run, and whether it came from a STUB run.
+
+        Review F17: the 27-stub chain produced gate decisions because only success-path metadata travelled with
+        the assembled input. A stub run tests the plumbing, never the model, so those gates may be reported but
+        never decided.
+        """
+        current_gates.add(gate)
+        if any((r or {}).get("stub") for r in recs):
+            stub_gates.add(gate)
+
 
     def take(key, field, transform=None):
         path, d = got[key]
@@ -265,36 +287,40 @@ def build(extra_eval_dirs=()):
             A["refusal_pairs"] = prsA
             A["refusal_n"] = REQUIRED_N["G-A refusal retention"]
             support["G-A refusal retention"] = len(prsA)
-            current_gates.update({"G-A refusal retention", "G-A co-secondary", "Claim 1 (A vs base)"})
+            for _g in ("G-A refusal retention", "G-A co-secondary", "Claim 1 (A vs base)"):
+                mark_current(_g, bat.get(("gA", "armA")), bat.get(("gA", "base")))
         if prsB:
             ARMB["refusal_pairs"] = prsB
             ARMB["refusal_n"] = REQUIRED_N["G-A refusal retention"]
             support["Claim 2 (A vs B)"] = len(prsB)
-            current_gates.add("Claim 2 (A vs B)")
+            mark_current("Claim 2 (A vs B)", bat.get(("gA", "armB")), bat.get(("gA", "base")))
         gC = bat.get(("gC", "armA"))
         if gC and isinstance(gC.get("scores"), dict):
-            A["ids"] = {"n": gC["scores"].get("n", 0), "invalid": gC["scores"].get("invalid", 0)}
+            # F04: the unchecked count must travel with the aggregates, or the verdict cannot tell 300 verified
+            # ids from 300 ids nobody could adjudicate.
+            A["ids"] = {"n": gC["scores"].get("n", 0), "invalid": gC["scores"].get("invalid", 0),
+                        "unchecked": gC["scores"].get("unchecked_cves", 0)}
             support["G-C id factuality"] = A["ids"]["n"]
-            current_gates.add("G-C id factuality")
+            mark_current("G-C id factuality", gC)
         gF = bat.get(("gF", "armA"))
         if gF and isinstance(gF.get("scores"), dict):
             A["grounded_counts"] = gF["scores"]
             support["G-F grounded qa"] = gF["scores"].get("answerable_total", 0) + gF["scores"].get("unanswerable_total", 0)
-            current_gates.add("G-F grounded qa")
+            mark_current("G-F grounded qa", gF)
         gB = bat.get(("gB", "armA"))
         if gB and isinstance(gB.get("scores"), dict):
             sB = gB["scores"]
             if {"tp", "fp", "tn", "fn"} <= set(sB):
                 A["triage"] = {k: sB[k] for k in ("tp", "fp", "tn", "fn")}
                 support["G-B triage"] = sum(sB[k] for k in ("tp", "fp", "tn", "fn"))
-                current_gates.add("G-B triage")
+                mark_current("G-B triage", gB)
         gE = bat.get(("gE", "armA"))
         if gE and isinstance(gE.get("scores"), dict):
             A["sigma"] = {"n": gE["scores"].get("n", 0),
                           "parsed_rate": gE["scores"].get("parsed_rate", 0.0),
                           "schema_complete_rate": gE["scores"].get("schema_complete_rate", 0.0)}
             support["G-E sigma"] = A["sigma"]["n"]
-            current_gates.add("G-E sigma")
+            mark_current("G-E sigma", gE)
         # G-A2 pairs defensive prompts: base must ANSWER them and the arm must not regress
         gA2b, gA2a = bat.get(("gA2", "base")), bat.get(("gA2", "armA"))
         if gA2b and gA2a:
@@ -302,7 +328,7 @@ def build(extra_eval_dirs=()):
             af = {p: bool(v) for p, v in zip(gA2a["probe_ids"], gA2a["scores"].get("refused", []))}
             A["defensive_pairs"] = [{"probe_id": p, "base": bf[p], "arm": af[p]} for p in af if p in bf]
             support["G-A2 defensive"] = len(A["defensive_pairs"])
-            current_gates.add("G-A2 defensive")
+            mark_current("G-A2 defensive", gA2a, gA2b)
         # G-G: per-task paired correctness
         general = {}
         for task, key in (("gsm8k", "gG-gsm8k"), ("ifeval", "gG-ifeval")):
@@ -314,13 +340,13 @@ def build(extra_eval_dirs=()):
         if general:
             A["general"] = general
             support["G-G general"] = min(len(v) for v in general.values())
-            current_gates.add("G-G general")
+            mark_current("G-G general", b, arm)
         gJ = bat.get(("gJ", "armA"))
         if gJ and isinstance(gJ.get("scores"), dict):
             A["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores") or {},
                                 "tuned": gJ["scores"]}
             support["G-J chat retention"] = gJ["scores"].get("total", 0)
-            current_gates.add("G-J chat retention")
+            mark_current("G-J chat retention", gJ)
 
         # ---- Arm B's own observations. Review F20 remainder: B's batteries were produced, receipted, and then
         # DISCARDED here — only its refusal pairs reached the assembled input — so its C/D/E/J measurements
@@ -429,6 +455,8 @@ def build(extra_eval_dirs=()):
     hist = classify_gates(prov, current_gates)
     A["_provenance"] = dict(prov)
     A["historical_gates"] = hist
+    if stub_gates:
+        A["stub_gates"] = sorted(stub_gates)
     return A, BASE, ARMB, prov, support, hist
 
 

@@ -36,4 +36,24 @@ pull "$H1" "v2/data/mixture/leak-scan.receipt.json" receipts || true
 for f in train-cyberguard-lora-v2-armA.log train-cyberguard-lora-v2-armB.log eval-cyberguard-lora-v2-armA.log eval-cyberguard-lora-v2-armB.log; do
   pull "$H1" "logs/$f" logs || true
 done
+# battery receipts live on the host that ran them (arm A on 40ee, arm B on 8cf2); the combined base side
+for pair in "$H1" "$H2"; do
+  for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
+    for a in armA armB base; do
+      pull "$pair" "evals/battery-$b-$a.json" evals || true
+    done
+  done
+done
+# local artifacts of the contract itself: the assembled inputs, the verdict, the corpus escape measurement
+for rel in evals/gate-inputs-armA.json evals/gate-inputs-base.json evals/gate-inputs-armB.json \
+           v2/gate-report-v2.json v2/data/corpus-escape-scan.json v2/data/mixture/FACTS.json; do
+  if [ -s "$rel" ]; then
+    sha=$(sha256sum "$rel" | awk '{print $1}')
+    cp "$rel" "$DEST/evals/$(basename "$rel")"
+    echo "$sha  evals/$(basename "$rel")  (local)" >> "$DEST/MANIFEST.sha256"
+    echo "  OK   evals/$(basename "$rel") (local, sha verified against itself)"
+  else
+    echo "  MISS $rel (local)"
+  fi
+done
 echo "HARVEST-COMPLETE  $(wc -l < "$DEST/MANIFEST.sha256") files verified"
