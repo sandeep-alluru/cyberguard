@@ -64,6 +64,8 @@ def main():
     ap.add_argument("--dir", default="v2/data/mixture")
     ap.add_argument("--sample", type=int, default=4000)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--write-receipt", action="store_true",
+                    help="write audit.receipt.json (default: verify only, no writes)")
     ap.add_argument("--verify-receipt", action="store_true",
                     help="re-audit against a written receipt: fail if the arm files changed since it "
                          "passed, or if it did not pass. This is the launch precondition.")
@@ -309,8 +311,12 @@ def main():
                          "armB": _sha(os.path.join(args.dir, "armB.jsonl"))}
     rcpt = {"checks": rep, "failures": FAILS, "warnings": WARNS,
             "verdict": "FAIL" if FAILS else ("PASS-WITH-WARNINGS" if WARNS else "PASS")}
-    with open(os.path.join(args.dir, "audit.receipt.json"), "w", encoding="utf-8") as fh:
-        json.dump(rcpt, fh, indent=2)
+    if args.write_receipt or not args.verify_receipt:
+        try:
+            with open(rpath, "w", encoding="utf-8") as fh:
+                json.dump(rcpt, fh, indent=2)
+        except OSError as e:                       # read-only reviewer sandbox
+            print(f"(receipt not written: {e})")
     print(json.dumps(rep, indent=1)[:2400])
     print()
     for f in FAILS:

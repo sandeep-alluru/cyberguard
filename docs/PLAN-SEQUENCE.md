@@ -29,7 +29,9 @@ PHASE 6  evaluation (C24 confirmatory + C8/C16 trajectory) ... BLOCKED on Phase 
 PHASE 7  verdict, harvest, CEO brief ........................ BLOCKED on Phase 6
 ```
 
-**Two hard preconditions on Phase 5:** (i) U13 `--verify-receipt` exits 0 (no training on unverified
+**Two hard preconditions on Phase 5:**
+**Cadence (owner instruction):** a checkpoint every **3 h** of work; **Astra reviews every checkpoint**;
+findings are **fixed before proceeding**. Each checkpoint writes a dated CEO-desk brief. (i) U13 `--verify-receipt` exits 0 (no training on unverified
 data), and (ii) the owner's authorization line, **already recorded**: 24 h, both machines, serving may be
 stopped.
 
@@ -132,6 +134,14 @@ claims, no joint correction — a declared property. C8/C16 are **trajectory** p
 
 **Sequence:** D1 → D4 (the instrument must be trustworthy before its PASS means anything) → D2 → D3 →
 re-review by Astra **and** Muse on the frozen arms → Phase 5.
+**Dispositions of the two items the plan review named and this document had left unaddressed:**
+- **Reduced replay support** — the conversational-replay slot is 600 real turn pairs (0.7 % of the epoch),
+  down from a proposed 2,000–4,000 conversations. Disposition: **accepted as the floor**, with G-J as the
+  instrument that decides whether it is enough. If G-J fails, replay is increased in v2.1 — recorded
+  rather than implied.
+- **Surviving damaged targets** — after the residue cleanup, **1 row** still carries a backslash before a
+  newline, and 2 rows exceed the 512-token generation budget. Disposition: **accepted and recorded**; both
+  quantities are in the audit receipt, and neither is large enough to change a gate (0.001 % and 0.002 %).
 
 ---
 

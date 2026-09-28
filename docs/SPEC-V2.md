@@ -178,9 +178,9 @@ NIST, i.e. **excluding** the U1-gated extraction supervision and general replay:
 | quantity | value |
 |---|---|
 | unweighted rows | **84,484–95,984** |
-| weighted presentations per nominal epoch | **81,402 (built after the over-engineering cuts, deduped, leak-checked, audited)** |
+| weighted presentations per nominal epoch | **81,402** (from `v2/data/mixture/FACTS.json` — the single source of truth for every number in this document) |
 | epoch duration at 0.9683 s/sample | **25.4–28.9 h** |
-| full-epoch refusal contribution | **9,584 slots** (1,198 unique refusal rows × weight 8.0) = **11.8 % of the epoch** |
+| full-epoch refusal contribution | **9,584 slots** (1,198 unique refusal rows × weight 8.0) = **11.8% of the epoch** |
 
 U1's outcome (which extraction corpus is admitted, and whether replay gets a treatment) updates these
 totals in `docs/MIXTURE-V2.md` **before** U3. Every figure below is **projected** exposure under
@@ -347,7 +347,8 @@ box.
 | **Arm A training**, one continuous run (C8 → C16 → C24) | **spark-40ee** | **24 h GPU** | 89,230 presentations ≈ 83.1–94.5 % of the weighted epoch; 5,577 steps at effective batch 16 |
 | **Arm B training** (control: refusal rows replaced in place by matched defensive-Q&A), same schedule | **spark-8cf2** | **24 h GPU** | runs **in parallel** with Arm A — same wall-clock, different question |
 | checkpoint evaluations — G-A at C8 and C16, both arms | workstation/2nd machine after training | 4,400 generations ≈ 1.23 h | base arm once per arm (2 × 1,100, reused); each dose look adds tuned generations |
-| confirmatory batteries at C24, both arms (G-A2/B/C/D/E/F/G/H + G-J + gate 8 + §12 remeasure, **each including its own baseline arm**) | split across both machines | 20,208 generations ≈ 5.66 h | excludes G-A (4,400), which the C24 row above carries; **C24 total = 24,408** |
+| **C24 G-A (confirmatory, both arms)** | split across both machines | **4,400 generations ≈ 1.23 h** | 1,100 tuned per arm + one shared base per arm |
+| C24 confirmatory batteries (G-A2/B/C/D/E/F/G-J + §12 remeasure, each with its own baseline arm) | split across both machines | 20,208 generations ≈ 5.66 h | excludes G-A (4,400), which the C24 row above carries; **C24 total = 24,408** |
 | Benchmark (unit U4), 500 items × base/tuned × **both arms** | split across both machines | 2,000 generations ≈ 1.52 h | the benchmark the done-means require; **was missing from the earlier allocation** (review #11 finding 4) |
 | ID validator + harvest (U6, U10) | workstation (CPU) | ~0.5 h | local |
 | **GPU total** | 2 machines | **≈57.64 h** (48 h training + 8.12 h batteries + 1.52 h U4 benchmark) | **ideal balanced elapsed ≈28.82 h**; **30 h is an allowance, not a derived number** (reviews #11/#12) |
@@ -406,7 +407,18 @@ either box. v2 is served only after the qualifying condition of §7 clause 4 hol
 **G-A and G-A2 together**, defined in §7 and nowhere else), behind the U6 ID validator; otherwise v2
 stays unserved too.
 
-## 11. R-CA — Codex-Astra review cadence (mandatory, carried from v1)
+## 11. R-CA — review cadence (owner instruction 2026-09-27, supersedes the v1 cadence)
+
+1. **A checkpoint every 3 h of work**, whether or not GPU time is running. Each checkpoint writes a
+   dated CEO-desk brief (`docs/ceo/`) stating what was verified, what is open, and the cost to date.
+2. **Astra reviews every checkpoint.** A checkpoint is not closed until its review has landed and every
+   finding is **fixed before proceeding** — or explicitly refused in writing with a reason.
+3. **Full review for material design changes** (new arm, new gate, changed n, changed mixture
+   composition); a **delta check** on the amended sections for wording/arithmetic fixes, with the
+   artifact hash still binding the reviewed revision to the shipped one.
+4. Version numbers are not the protection; **hash binding is**. A reviewed artifact that is not the
+   shipped artifact is not reviewed.
+5. Every review gets a ledger line even if it found nothing.
 
 1. **Pre-launch:** this SPEC + the mixture ledger + gate definitions → findings fixed or refused in
    writing **before** U3 proceeds past its first-step confirmation.
