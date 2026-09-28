@@ -192,7 +192,7 @@ proportional sampling, not measured coverage — realised exposure is receipted 
 | 8 h (**C8**) | 29,743 | 36.3 % | 3,358 | **2.90** |
 | 16 h (**C16**) | 59,486 | 72.6 % | 6,716 | **5.81** |
 | **24 h (C24, confirmatory)** | **89,230** | **108.9 %** | **10,075** | **8.71** |
-| 1 full epoch | 81,926 | 100 % | 9,248 | 8.0 |
+| 1 full epoch | 81,402 | 100 % | 9,584 | 8.0 |
 
 **The mixture has been audited before training, not after** (`v2/audit_mixture.py` →
 `v2/data/mixture/audit.receipt.json`), because the owner's instruction was to find bad data now rather
@@ -208,7 +208,7 @@ warnings)**:
 Verified clean: **0 literal escape sequences** (the v1 F3 defect), **0 capability-probe leakage** (the
 safety gate is not contaminated), 0 rows over the sequence budget, **800/800 Sigma rules schema-valid,
 600/600 JSON valid, 984/984 one-word triage answers**, 0 mislabelled benign rows, 0 word-loop answers,
-and the two arms differ **only** in the 9,248 substituted slots.
+and the two arms differ **only** in the 9,584 substituted slots.
 
 **Extraction supervision is currently ABSENT from this build.** `arcspan-cyber-ner`'s label field is not retrievable through the dataset viewer's row API, so no extraction training rows exist; the corpus is retained as the **G-D evaluation** set instead. G-D therefore measures **zero-shot** extraction rather than recall of trained examples — a cleaner test, but it must be read as such, and it means the 65 % fabricated-IOC finding from v1 has no training-side mitigation here.
 

@@ -16,7 +16,7 @@ what command proves each step is finished". `docs/SPEC-V2.md` is the detailed sp
 PHASE 0  orientation + plan of record ....................... DONE
    └─ CRAFT corpus (77 lessons) ............................. DONE
 PHASE 1  admission gate ..................................... DONE  9 measured / 8 admitted / 1 rejected / 0 unmeasured
-PHASE 2  mixture build (two arms) ........................... DONE  81,802 rows per arm, receipted
+PHASE 2  mixture build (two arms) ........................... DONE  81,402 rows per arm, receipted
 PHASE 3  data-integrity gate ................................ OPEN  audit PASSES; 4 review items outstanding
    3a  audit (10 check families) ........................... DONE
    3b  independent review #1 (Astra) ....................... DONE  DATA NOT CLEARED, 7 findings
