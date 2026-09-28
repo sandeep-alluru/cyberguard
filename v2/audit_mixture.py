@@ -151,20 +151,11 @@ def main():
         hold = [json.loads(l)["prompt"] for l in open(hp, encoding="utf-8")]
     probes = []
     try:
-        sys.path.insert(0, ".")
-        import cap_probes as PB
-        for name in dir(PB):
-            v = getattr(PB, name)
-            if isinstance(v, list) and name.isupper():
-                for item in v:
-                    if isinstance(item, str):
-                        probes.append(item)
-                    elif isinstance(item, dict):
-                        for k in ("prompt", "text", "user", "q"):
-                            if isinstance(item.get(k), str):
-                                probes.append(item[k]); break
+        sys.path.insert(0, "v2")
+        import leak_scan as _LS
+        probes = _LS.collect_probe_strings()          # the SAME collector the scanner uses
     except Exception as e:  # noqa: BLE001
-        warn("D-leakage", f"cap_probes not importable ({e}); probe-leak check skipped")
+        warn("D-leakage", f"probe collector unavailable ({e}); probe-leak check skipped")
     rep["leak_reference"] = {"holdout": len(hold), "probes": len(probes)}
     if hold:
         hset = [grams(h) for h in hold if len(toks(h)) >= 13]

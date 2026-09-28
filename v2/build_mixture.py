@@ -47,6 +47,39 @@ def _tokenizer():
     return _TOK
 
 
+ABBREV = {"i.e", "e.g", "etc", "vs", "co", "inc", "ltd", "fig", "dr", "st", "mr", "ms", "no", "al",
+          "approx", "cf", "pp", "vol", "jr", "sr"}
+
+
+def complete_sentence(text):
+    """Drop a trailing incomplete fragment.
+
+    Review #3 found control answers ending mid-thought ("with [Web", "(i.e.", "an adversary might",
+    "reformat the file") because the trim accepted an abbreviation's period, or found no boundary at all
+    in ATT&CK prose that ends at a link or citation. Boundaries are therefore tried in order of strength:
+    a sentence terminator (rejecting abbreviations), then a closing bracket/paren (link and citation
+    ends), then a comma (list end) — and if none exists the text is returned unchanged rather than cut
+    mid-thought.
+    """
+    s = str(text).rstrip()
+    if s.endswith((".", "!", "?")):
+        tail = s[:-1].split()[-1].lower().strip("([") if s[:-1].split() else ""
+        if tail not in ABBREV and len(tail) > 1:
+            return s
+    for bounds in ((". ", "! ", "? "), (")", "]",), (", ",)):
+        cut = -1
+        for b in bounds:
+            i = s.rfind(b)
+            if i > cut:
+                cut = i
+        if cut != -1:
+            end = cut + len(bounds[0].strip()) if bounds[0].strip() else cut + 1
+            cand = s[:cut + 1].rstrip()
+            if len(cand.split()) >= 8:
+                return cand
+    return s
+
+
 def clip_answer(text):
     """Trim to <= ASSISTANT_MAX_TOKENS real tokens, then to the last sentence boundary."""
     tok = _tokenizer()
@@ -353,10 +386,27 @@ def build_replacements(refusal_rows, rng):
         name, desc = (x.strip() for x in txt.split("\n", 1))
         if len(desc) < 80 or not name:
             continue
-        # review #2 finding 2: desc[:600] cut 2,704 presentations inside a word. Pass the whole
-        # description; the builder's sentence-boundary clip trims it coherently afterwards.
+        # Reviews #2/#3: truncating a prefix leaves incomplete endings, and these descriptions often
+        # have no sentence boundary inside the token budget. Build the answer from WHOLE SENTENCES that
+        # fit, and skip the document if even its first sentence does not — a complete shorter answer
+        # beats a longer truncated one.
+        # accumulate WHOLE SENTENCES against the TOKEN budget (the word budget under-counts link- and
+        # punctuation-heavy ATT&CK prose, which is why 8 answers were still clipped mid-thought)
+        try:
+            _tk = _tokenizer()
+        except Exception:                                   # noqa: BLE001
+            _tk = None
+        sents = re.split(r"(?<=[.!?])\s+", desc)
+        txt_ok = ""
+        for s in sents:
+            cand = (txt_ok + " " + s).strip()
+            if _tk is not None and len(_tk(cand, add_special_tokens=False)["input_ids"]) > ASSISTANT_MAX_TOKENS:
+                break
+            txt_ok = cand
+        if len(txt_ok.split()) < 8:          # first sentence alone blows the budget -> not usable
+            continue
         pool.append((f"What does ATT&CK document about {name}, and what should a defender take from it?",
-                     desc))
+                     txt_ok))
     rng.shuffle(pool)
     out, seen = [], set()
     for q, a in pool:
@@ -458,6 +508,8 @@ def main():
                 a = scrub(r["assistant"])
                 # enforce on the STORED form: tokenising "a  b" or "a\nb" differs from "a b", so a
                 # whitespace-normalised measurement can pass while the stored string exceeds the budget
+                if r.get("src") in ("trendyol", "nvd", "nist", "attack", "replacement", "replay"):
+                    a = complete_sentence(a)      # prose only: JSON/YAML targets must not be trimmed
                 try:
                     tok = _tokenizer()
                     while len(a.split()) > 1 and len(tok(a, add_special_tokens=False)["input_ids"]) > ASSISTANT_MAX_TOKENS:

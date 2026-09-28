@@ -13,3 +13,13 @@
 [2026-09-28 01:33:41] cycle 7 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: FAIL (full)
     ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
     ALERT AUDIT: verify-receipt failed
+[2026-09-28 01:42:17] cycle 8 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+[2026-09-28 01:51:49] cycle 9 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: PASS (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+[2026-09-28 02:07:11] cycle 10 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: FAIL (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    ALERT AUDIT: verify-receipt failed
+[2026-09-28 02:22:19] cycle 11 | hashes: DRIFT | leak_scan: CLEAN (full) | audit: FAIL (full)
+    ALERT DATA-DRIFT: ['armA', 'armB'] changed since the audit that cleared them — re-audit required
+    ALERT AUDIT: verify-receipt failed
