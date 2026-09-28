@@ -1,0 +1,10 @@
+{
+  "corpus": "/home/clawerdigi2/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl",
+  "corpus_sha256": "2b08b09c41da22c94507ae7a2e9cbbe6d653e8b0c798ef817e96539b18c78268",
+  "rows_total_after_audit": 52284,
+  "rows_train": 51784,
+  "rows_eval": 500,
+  "seed": 0,
+  "out": "/home/clawerdigi2/cyberguard/v2/holdout500.jsonl",
+  "out_sha256": "cea25b40a7815a223afad7de7c2e4ff863fe197671bb0a73a24bf90b6f9edff7"
+}

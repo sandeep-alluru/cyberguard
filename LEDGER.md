@@ -820,3 +820,38 @@ Owner is the CEO and should not be tracking these; they are closed here rather t
 
 Also added `ARTIFACT-MAP.md`: every canonical directory now says where its content actually lives, so a
 fresh agent (or the owner) can find the adapter, the receipts and the corpus in one hop.
+
+## 2026-09-27 — OWNER AUTHORIZATION: 24 h training, both machines, serving may be stopped → design re-cut
+
+- **Authorization of record (owner, verbatim):** *"you can train for 24 hours the spark x2 is all yours
+  you can stop the model being served and use the full capacity of both machines."* This supersedes the
+  ≤14 h single-machine ceiling this plan had asked for, and removes the training/serving contention that
+  was the original reason for a bounded box.
+- **Hardware finding (measured this session):** the two Sparks have a **direct link on `10.10.20.0/24`**
+  (`enP2p1s0f0np0`; tailscale reaches the peer over it in **~1 ms**), so 2-node data-parallel would be
+  feasible. `spark-8cf2` has **passwordless sudo** and hosts `spark-flash-next.service`; `spark-40ee`
+  runs the `ggml-rpc-server` that shares its GPU. Both nodes are DGX Spark GB10.
+- **Design re-cut (SPEC-V2 `0ac30d50…`, passes `plan-validate.py`):** one arm on one machine → **two arms
+  in parallel, 24 h each, three saved checkpoints per arm (C8/C16/C24)**:
+  - **Arm A** (spark-40ee): the designed mixture, refusal weight 8.0.
+  - **Arm B** (spark-8cf2): the **causal control** — the same mixture with the 1,200 refusal rows
+    **swapped for 1,200 non-refusal defensive Q&A rows of matched length**, so size, weights, steps and
+    schedule are identical and only the refusal *content* differs. (First written as "Arm A minus the
+    refusal set"; that would have shrunk Arm B's epoch by 9,600 presentations so it would see >1 pass at
+    24 h while Arm A saw ~0.9 — a coverage asymmetry that would confound the very comparison. Fixed
+    before dispatch.)
+  - **Why two arms beats distributed training**, despite the fast link: one machine already reaches
+    **83–95 % of an epoch in 24 h**; a second epoch is worth less than a causal control. DDP would buy
+    ~1.7 epochs of one mixture and no causal information. (Owner may override — one-line change.)
+  - **Confirmatory analyses are pre-registered and only two:** Arm A@C24 vs base; Arm A vs Arm B@C24.
+    C8/C16 are descriptive dose points. 24 h = 89,230 presentations ≈ 0.83–0.95 epoch; refusal dose
+    2.2–2.5 passes (8 h) → 4.4–5.0 (16 h) → **6.7–7.6 passes (24 h)**.
+  - **Budget:** 24 h × 2 arms training in parallel + **28,608 evaluation generations ≈ 8.01 h** split
+    across both machines → **wall-clock ≈30 h**; the Flash-Next endpoint is stopped on both nodes for
+    the window and restored with a real completion probe afterwards.
+- **Prerequisite completed:** the **500-row held-out set is exported and verified**
+  (`v2/holdout500.jsonl`, 500 rows, seed 0, corpus sha256 `2b08b09c…`, rows 52,284 → 51,784/500) via the
+  new `v2/export_holdout.py`, which refuses to write anything that is not exactly the v1 split. The
+  admission gate now has its reference set.
+- **Review #11 dispatched** (delta review on the re-cut: arm policy, multiplicity, schedule horizon,
+  coverage arithmetic) because a material design change invalidates the #10 clearance for those axes.
