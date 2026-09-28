@@ -1083,3 +1083,17 @@ Also recorded: **extraction training supervision is currently absent** (arcspan'
 retrievable via the viewer API), so arcspan is the **G-D evaluation** corpus and **G-D measures zero-shot
 extraction**. That is a cleaner test than recall, but it must be read as such, and it means v1's 65 %
 fabricated-IOC finding has **no training-side mitigation in this build**.
+
+## 2026-09-27 — PLAN-SEQUENCE written; review #13 re-dispatched after a SELF-INFLICTED stop
+
+- **`docs/PLAN-SEQUENCE.md` written** (163 lines): the whole plan in order — phases with dependencies,
+  all 13 units with owner + exit condition + exit command + state, the gate table, the artifact list
+  (including the five deliverables that do not exist yet), the full review ledger, the four open data
+  items with owners and exits, owner decisions, and the ledger index.
+- **Review #13 stopped itself, correctly, because of my prompt.** I told it to verify the artifact hash
+  against "the ledger entry `Codex review #12`" — that entry contains no hash prefix, so the reviewer
+  refused to proceed rather than review an unidentified artifact. That is the behaviour I want from a
+  reviewer; the defect was mine. **Re-dispatched with the sha256 inline** (`ac5184e494af65e9b8b04df8fe3bcb33b8a426694cb0f180bc9951945159a4bc`).
+- **Astra dispatched on PLAN-SEQUENCE.md** with instructions to verify claims **against the filesystem**
+  rather than trusting the prose: run each unit's exit command, confirm the DONE states, check the gate
+  table against SPEC-V2 §7, and confirm §6's open-item list has not been softened.
