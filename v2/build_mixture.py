@@ -102,7 +102,7 @@ def _valid_end_at(w, i):
     if not _ends_sentence(w[i]):
         return False
     if _BARE_NUM.match(w[i]):
-        prev = w[i - 1].rstrip() if i > 0 else ""
+        prev = w[i - 1].rstrip().rstrip('\u2019\u201d\'"`')          # a quoted boundary counts as a boundary
         if not prev or prev.endswith((".", "!", "?", ":", ";")) or set(prev) <= set("#*-"):
             return False
     return True
@@ -150,6 +150,15 @@ def complete_sentence(text):
 # the completeness rules never ran on 62 % of the mixture (review #5's heading-only examples were here).
 PROSE_SOURCES = {"trendyol", "nist", "attack", "nvd", "replay", "refusal"}
 
+# Words after which a single letter is an identifier, not an unfinished initial (review #7's false drops).
+# A slash the sentence DESCRIBES is content, not a truncated path: CVE-2001-0892/0893 end
+# "…via a GET request with a trailing /." (review #7 checked the source continuations).
+_SLASH_DESCRIBED = {"trailing", "ending", "terminating"}
+
+_IDENTIFIER_CONTEXT = {"appendix", "figure", "table", "section", "annex", "part", "step", "equation",
+                       "listing", "algorithm", "version", "item", "chapter", "or", "and", "type",
+                       "class", "option", "reference", "see", "in"}
+
 
 def _ends_ok(text):
     """True if the text already ends at something a reader would accept as an end.
@@ -167,8 +176,19 @@ def _ends_ok(text):
         return True
     if t.lower().strip(".") == "etc":                 # "...Java, Javascript, etc."
         return True
-    if t in (".", "!", "?") and len(w) >= 2 and _ends_sentence(w[-2] + "."):
-        return True                                    # a period separated by a space
+    if t in (".", "!", "?") and len(w) >= 2:
+        # A separated period is an ending whatever precedes it: review #7 showed "n <= 8 m ." and
+        # "times on X ." being dropped because the token before the period looked like an initial.
+        return True
+    # A closed quoted literal is complete:  ..."u".   ..."P > O < C".   ...">" and "<".
+    if t.endswith(".") and re.search(r"[\"\u2019\u201d'`][^\s]*[\"\u2019\u201d'`]\.$", t):
+        return True
+    if re.search(r"[\"\u2019'`][^\"\u2019\u201d'`]{1,40}[\"\u2019\u201d'`]\.$", " ".join(w[-12:])):
+        return True                                    # a quoted literal spanning several tokens
+    # A single-letter identifier is complete in context ("Appendix B.", "IFRAME or A."): the label word or
+    # connector is what distinguishes it from an unfinished initial. Review #7 supplied these counterexamples.
+    if re.fullmatch(r"[A-Za-z]\.", t) and len(w) >= 2 and w[-2].rstrip(",;").lower() in _IDENTIFIER_CONTEXT:
+        return True
     # closed citation, bracket, code fence, table cell — complete as stored
     return t.endswith((")", "]", "`", '"'))
 
@@ -201,12 +221,27 @@ def defect(text):
     # Only a BARE path token is a truncation: "…discovery endpoint (usually /." truncates, while
     # "…/cgi-bin/ in the requested URL with /cgi-bin-sdb/." is a finished sentence (measured: the loose
     # version flagged 19 rows, of which the reviewed examples were all complete).
-    if re.search(r"(?:\s|^)[/\\]{1,2}\.$", s) or s.rstrip().endswith(("/", "\\")):
+    if (re.search(r"(?:\s|^)[/\\]{1,2}\.$", s) or s.rstrip().endswith(("/", "\\"))) and \
+            (s.split()[-2].strip(",;").lower() if len(s.split()) > 1 else "") not in _SLASH_DESCRIBED:
         return "truncated-path"
     # The "#" must start a marker, not end a word: review #6 warned that "C#." and issue numbers are not
     # headings, and a naive pattern flagged "...developed in PowerShell and C#." as a heading cut.
-    if re.search(r"(?<![\w#])#{1,6}\s*\d{0,3}\.?$", s):
+    if re.search(r"(?<![\w#])#{1,6}[\s*]*\d{0,3}\.?[*\s]*$", s):
         return "inline-heading-cut"                   # "...### 2." / a heading flattened into the prose
+    # --- the four classes review #7 supplied reproductions for -------------------------------------
+    tail = s[-160:]
+    words = s.split()
+    if words and _BARE_NUM.match(words[-1]) and not _valid_end_at(words, len(words) - 1):
+        return "list-marker-end"                       # "...Version 4.6.' 5."
+    if words and _ends_sentence(words[-1]) and not _valid_end_at(words, len(words) - 1):
+        return "list-marker-end"
+    if s.count("`") % 2 and "`" in tail and not tail.rstrip().endswith("`"):
+        return "terminal-open-inline-code"             # "...reflected in `location."
+    words = s.split()
+    if words and _BARE_NUM.match(words[-1]) and re.search(r"#{1,6}", tail):
+        return "flattened-heading-list-start"          # "...### Key Concepts 1." / "...### **2."
+    if re.search(r"\(such as[^)]*$", tail):
+        return "terminal-open-such-as"                 # "(such as spacing, `^`, `+`."
     return None
 
 
@@ -482,7 +517,6 @@ REPLACEMENT_QUESTIONS = [
     "What hardening steps address {n}?",
     "Which monitoring gaps let {n} go unnoticed?",
     "What should our detection strategy for {n} cover?",
-    "How do we baseline normal activity to spot {n}?",
     "Which preventive controls apply to {n}?",
     "What ongoing checks keep {n} in view?",
     "How should we tune alerts for {n}?",
@@ -663,9 +697,12 @@ def finalise(text, src):
         tok = _tokenizer()
         while len(a.split()) > 1 and len(tok(a, add_special_tokens=False)["input_ids"]) > ASSISTANT_MAX_TOKENS:
             a = " ".join(a.split()[:-1])
-            m = re.search(r"^[\s\S]*[.!?](?=\s|$)", a)
-            if m and len(m.group(0).split()) > len(a.split()) * 0.5:
-                a = m.group(0).strip()
+            # Same boundary logic as everywhere else: the old regex cut at any ".!?" and so severed a
+            # closed citation at its internal "!" ("...(Citation: Unit 42 OopsIE! Feb 2018)"), which
+            # review #7 caught as a builder-caused false drop.
+            trimmed = complete_sentence(a)
+            if trimmed != a and len(trimmed.split()) > len(a.split()) * 0.5:
+                a = trimmed
     except Exception:                                   # noqa: BLE001  tokenizer optional
         pass
     if prose and (defect(a) or not _ends_ok(a)):
@@ -675,6 +712,46 @@ def finalise(text, src):
         else:
             return a, False                 # no boundary to trim to -> this target is not shippable
     return a, True
+
+
+_PROBE_RUNS = None
+
+
+def _probe_runs():
+    """Contiguous token runs of >= 3 tokens from the shared probe collector.
+
+    The leak scanner is exact-only for short references, so a four-word probe topic ("WMI event
+    subscription persistence") could sit in a training row unnoticed — review #5 found 8 such
+    presentations, review #7 confirmed 8 literal overlaps. A row carrying one is not admitted.
+    """
+    global _PROBE_RUNS
+    if _PROBE_RUNS is None:
+        try:
+            from leak_scan import collect_probe_strings
+            runs = set()
+            for ref in collect_probe_strings():
+                t = tuple(re.findall(r"[a-z0-9]+", str(ref).lower()))
+                # the COMPLETE reference, not sub-runs: 3-token sub-runs matched ordinary prose
+                # ("use keys and disable passwords") and would have dropped unrelated rows.
+                if len(t) >= 4:
+                    runs.add(t)
+            _PROBE_RUNS = runs
+        except Exception:                               # noqa: BLE001
+            _PROBE_RUNS = set()
+    return _PROBE_RUNS
+
+
+def _probe_overlap(row):
+    runs = _probe_runs()
+    if not runs:
+        return False
+    for field in ("system", "user", "assistant"):
+        t = tuple(re.findall(r"[a-z0-9]+", str(row.get(field) or "").lower()))
+        for i in range(len(t)):
+            for n in range(min(40, len(t) - i), 3, -1):
+                if t[i:i + n] in runs:
+                    return True
+    return False
 
 
 def main():
@@ -727,7 +804,10 @@ def main():
             if clipped:
                 r["assistant"] = new
                 n_clipped += 1
-            if k in PROSE_SOURCES:
+            if _probe_overlap(r):
+                r["_drop"] = "probe-overlap"
+                drop_reasons["probe-overlap"] = drop_reasons.get("probe-overlap", 0) + 1
+            if k in PROSE_SOURCES and not r.get("_drop"):
                 a2, ok = finalise(r["assistant"], k)
                 if ok:
                     if a2 != r["assistant"]:

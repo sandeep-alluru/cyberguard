@@ -7,15 +7,25 @@ count grew instead of reaching zero: review #4 found 10 rows, #5 found 38, #6 fo
 conceded that "universal human-semantic certification is not established" for 162,244 rows — that standard
 is not decidable, so it cannot be the gate. This screen states the rules instead:
 
-  1. heading-only           the whole answer is a markdown heading (<= 16 words)
-  2. trailing-heading       a MULTI-LINE answer whose last non-empty line is a heading
-  3. inline-heading-cut     the answer ends inside a flattened heading ("... ### 2.")
-  4. list-marker-end        the answer ends on a bare list marker after a finished sentence ("... 2.")
-  5. unclosed-code-fence    an odd number of ``` fences
-  6. unclosed-citation      a "(Citation:" with no later ")"
-  7. truncated-path         ends with "/." or a bare "/" or "\\"
-  8. dangling-punctuation   ends on : , ; ( [ { | - or an em dash
-  10. no-boundary            no valid sentence end anywhere, and no trim can produce one
+  1. heading-only                the whole answer is a markdown heading (<= 16 words)
+  2. trailing-heading            a MULTI-LINE answer whose last non-empty line is a heading
+  3. inline-heading-cut          the answer ends inside a flattened heading ("... ### 2.", "...### **2.")
+  4. list-marker-end             the stored answer ends on a bare numbered list item ("... 4.6.' 5."),
+                                 even when complete_sentence() could repair it
+  5. flattened-heading-list-start  a heading fragment immediately followed by an empty numbered item
+                                 ("... ### Key Quantum-Resistant Cryptography Concepts 1.")
+  6. terminal-open-inline-code   an odd backtick count with the last backtick opening a span at the end
+                                 ("...reflected in `location.")
+  7. terminal-open-such-as       the answer ends inside "(such as ..." with no closing parenthesis
+  8. unclosed-code-fence         an odd number of ``` fences
+  9. unclosed-citation           a "(Citation:" with no later ")"
+ 10. truncated-path              ends with a bare "/" or "/." that the sentence does not describe
+                                 (CVE "...with a trailing /." is complete and exempt)
+ 11. dangling-punctuation        ends on : , ; ( [ { | - or an em dash
+ 12. no-boundary                 no valid sentence end anywhere, and no trim can produce one
+
+Also enforced outside this screen: any row carrying a COMPLETE probe reference of >= 4 tokens is dropped
+by the builder (reason "probe-overlap"), which closes the four-word overlaps reviews #5 and #7 found.
 
 REMOVED after measurement: "unbalanced-parenthesis". It counted parentheses anywhere in the answer, so a
 single stray "(" in a quoted CVE description flagged answers that end with a perfectly balanced sentence
