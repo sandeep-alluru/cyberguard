@@ -55,6 +55,7 @@ def main() -> int:
     arcspan = count_jsonl("v2/candidates/arcspan-train-sample.jsonl")
     gC = count_jsonl("v2/data/probe-set-gC.jsonl")     # frozen by build_batteries_v2.py
     gJ = count_jsonl("v2/data/probe-set-gJ.jsonl")
+    gF = count_jsonl("v2/data/probe-set-gF.jsonl")      # grounded battery, frozen by build_probe_set_gF.py
     gdef = 40                                          # leak_scan DEFENSIVE_40
     gbh = 0
     try:
@@ -82,9 +83,9 @@ def main() -> int:
          "labels are not retrievable -> D5 declares G-D zero-shot (UNMEASURED by design)"),
         ("G-E sigma", 60, "format-compliance sigma-rule", fmt.get("sigma-rule", 0),
          "READY" if fmt.get("sigma-rule", 0) >= 60 else "PARTIAL", "60 requested from 400 available"),
-        ("G-F grounded qa", 60, "refusal-retention unknown-answer (unanswerable side)",
-         ref.get("unknown-answer", 0), "PARTIAL",
-         "unanswerable side covered (500); the >=40 ANSWERABLE items have no frozen set yet"),
+        ("G-F grounded qa", 60, "v2/data/probe-set-gF.jsonl (40 answerable w/ key terms + 20 unanswerable)", gF,
+         "READY" if gF >= 60 else "PARTIAL",
+         "key = the reference answer's own rare terms; 40/40 verified present in the reference"),
         ("G-G general", 1200, "cap_harness capability probes (GSM8K subset / IFEval-lite)", 120,
          "PARTIAL", "v1 ran 120 pairs/task; n=1200/task needs the official suites or authored pairs"),
         ("G-I escape artifact", 500, "v2/holdout500.jsonl + battery outputs", holdout,

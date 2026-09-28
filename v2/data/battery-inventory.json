@@ -59,10 +59,10 @@
     {
       "gate": "G-F grounded qa",
       "n_required": 60,
-      "source": "refusal-retention unknown-answer (unanswerable side)",
-      "available": 500,
-      "status": "PARTIAL",
-      "note": "unanswerable side covered (500); the >=40 ANSWERABLE items have no frozen set yet"
+      "source": "v2/data/probe-set-gF.jsonl (40 answerable w/ key terms + 20 unanswerable)",
+      "available": 60,
+      "status": "READY",
+      "note": "key = the reference answer's own rare terms; 40/40 verified present in the reference"
     },
     {
       "gate": "G-G general",
