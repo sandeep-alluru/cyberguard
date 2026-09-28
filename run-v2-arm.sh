@@ -5,7 +5,11 @@
 set -euo pipefail
 ARM="${1:?usage: run-v2-arm.sh <A|B> [minutes]}"
 MINUTES="${2:-1440}"
-ROOT="$HOME/cyberguard"
+ROOT=""
+for c in "$HOME/cyberguard" "$HOME/AgentHub/cyberguard" "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; do
+  if [ -f "$c/train_cyberguard.py" ]; then ROOT="$c"; break; fi
+done
+[ -n "$ROOT" ] || { echo "REFUSING: cannot locate train_cyberguard.py (looked in \$HOME/cyberguard, \$HOME/AgentHub/cyberguard, script dir)"; exit 5; }
 case "$ARM" in
   A) ARMS="$ROOT/v2/data/mixture/armA.jsonl"; RUN="cyberguard-lora-v2-armA" ;;
   B) ARMS="$ROOT/v2/data/mixture/armB.jsonl"; RUN="cyberguard-lora-v2-armB" ;;
@@ -31,6 +35,6 @@ true
 [ -f "$ARMS" ] || { echo "REFUSING: arm file missing: $ARMS"; exit 4; }
 echo "launching $RUN  minutes=$MINUTES  arms=$ARMS"
 setsid nohup env CYBERGUARD_ARMS="$ARMS" MAX_MINUTES="$MINUTES" RUN_NAME="$RUN" \
-  python3 "$HOME/train_cyberguard.py" > "$LOG" 2>&1 < /dev/null &
+  python3 "$ROOT/train_cyberguard.py" > "$LOG" 2>&1 < /dev/null &
 sleep 5
 echo "pid $(pgrep -f 'train_cyberguard[.]py' | head -1)  log $LOG"

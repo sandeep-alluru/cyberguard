@@ -81,6 +81,12 @@ def hits(text, idx, n, jac_min, con_min):
     It now applies to fields of any length, with two guards calibrated against reproduced cases:
     references under 6 tokens are noun phrases, not prompts; and a reference must either be a question
     or be at least 10 tokens long, so shared terminology inside a different sentence is not a leak.
+
+      Review #4 removed a THIRD guard ("slack <= 8 words"): it measured padding, not leak-hood.
+      A reference copied in full and then wrapped in 9 extra words is *more* copied, not less, and
+      the reviewer showed exactly that string escaping the scan. The copy's completeness is already
+      established by the window being the reference's own length; the qualification rules above are
+      what keep short shared phrasing out.
     """
     exact, sh, index, short = idx
     k = norm(text)
@@ -88,7 +94,7 @@ def hits(text, idx, n, jac_min, con_min):
         return "exact"
     ft = toks(text)
     for length, windows in short.items():
-        if length > len(ft) or len(ft) - length > 8:
+        if length > len(ft):
             continue
         for i in range(0, len(ft) - length + 1):
             if tuple(ft[i:i + length]) in windows:

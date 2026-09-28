@@ -48,35 +48,67 @@ def _tokenizer():
 
 
 ABBREV = {"i.e", "e.g", "etc", "vs", "co", "inc", "ltd", "fig", "dr", "st", "mr", "ms", "no", "al",
-          "approx", "cf", "pp", "vol", "jr", "sr"}
+          "approx", "cf", "pp", "vol", "jr", "sr",
+          # review #4: citation/prose abbreviations that were being taken for sentence ends
+          "dept", "univ", "inst", "assn", "bros", "corp", "govt", "est", "ed", "eds", "trans",
+          "repr", "sec", "art", "figs", "eq", "ref", "refs", "ch", "pt", "cit", "ibid",
+          "avg", "min", "max", "ext", "a.k.a", "aka", "u.s", "u.k", "u.n"}
+
+
+def _ends_sentence(tok):
+    """True only for a REAL sentence end.
+
+    Review #4 found 10 control answers ending mid-thought ("(e.g.", "(i.e.", "(a.k.a.", "U.S.") and two
+    truncated citations ("(Citation: US Dept."): the old splitter took any period followed by whitespace
+    for a sentence boundary. A terminator counts only if the token before it is prose — not an
+    abbreviation, not an initial ("D."), not an intialism ("U.S.").
+    """
+    t = str(tok).strip().strip('\"\u201d\u2019\'`')
+    if not t:
+        return False
+    if t[-1] in "!?":
+        return True
+    if not t.endswith("."):
+        return False
+    core = t[:-1].strip("([{<\"'`").lower()
+    if not core or len(core) == 1:            # initial: "D."
+        return False
+    if "." in core:                           # "U.S." / "i.e" / "a.k.a"
+        return False
+    return core not in ABBREV
+
+
+def split_sentences(text):
+    """Split prose into sentences using _ends_sentence, so abbreviations cannot end a sentence."""
+    out, buf = [], []
+    for tok in str(text).split():
+        buf.append(tok)
+        if _ends_sentence(tok):
+            out.append(" ".join(buf))
+            buf = []
+    if buf:
+        out.append(" ".join(buf))
+    return out
 
 
 def complete_sentence(text):
     """Drop a trailing incomplete fragment.
 
-    Review #3 found control answers ending mid-thought ("with [Web", "(i.e.", "an adversary might",
-    "reformat the file") because the trim accepted an abbreviation's period, or found no boundary at all
-    in ATT&CK prose that ends at a link or citation. Boundaries are therefore tried in order of strength:
-    a sentence terminator (rejecting abbreviations), then a closing bracket/paren (link and citation
-    ends), then a comma (list end) — and if none exists the text is returned unchanged rather than cut
-    mid-thought.
+    Reviews #3/#4: the trim accepted an abbreviation's period ("(i.e.", "U.S.", "Dept.") or found no
+    boundary in ATT&CK prose ending at a link/citation. Scan for the NEWEST real sentence end; an
+    unclosed "(Citation: ..." fragment is removed rather than half-kept.
     """
     s = str(text).rstrip()
-    if s.endswith((".", "!", "?")):
-        tail = s[:-1].split()[-1].lower().strip("([") if s[:-1].split() else ""
-        if tail not in ABBREV and len(tail) > 1:
-            return s
-    for bounds in ((". ", "! ", "? "), (")", "]",), (", ",)):
-        cut = -1
-        for b in bounds:
-            i = s.rfind(b)
-            if i > cut:
-                cut = i
-        if cut != -1:
-            end = cut + len(bounds[0].strip()) if bounds[0].strip() else cut + 1
-            cand = s[:cut + 1].rstrip()
-            if len(cand.split()) >= 8:
-                return cand
+    w = s.split()
+    for i in range(len(w) - 1, 6, -1):            # newest valid end first; keep >= 8 words
+        if _ends_sentence(w[i]):
+            return " ".join(w[:i + 1])
+    low = s.lower()
+    i = low.rfind("(citation:")
+    if i > 0 and s[i:].count(")") == 0:
+        head = s[:i].rstrip()
+        if len(head.split()) >= 8:
+            return head
     return s
 
 
@@ -396,7 +428,7 @@ def build_replacements(refusal_rows, rng):
             _tk = _tokenizer()
         except Exception:                                   # noqa: BLE001
             _tk = None
-        sents = re.split(r"(?<=[.!?])\s+", desc)
+        sents = split_sentences(desc)
         txt_ok = ""
         for s in sents:
             cand = (txt_ok + " " + s).strip()

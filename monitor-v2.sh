@@ -4,7 +4,11 @@
 # Usage: bash monitor-v2.sh <A|B> [cycles] [interval_s]
 set -uo pipefail
 ARM="${1:?}"; CYCLES="${2:-288}"; IV="${3:-300}"
-ROOT="$HOME/cyberguard"
+ROOT=""
+for c in "$HOME/cyberguard" "$HOME/AgentHub/cyberguard" "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; do
+  if [ -f "$c/train_cyberguard.py" ]; then ROOT="$c"; break; fi
+done
+[ -n "$ROOT" ] || { echo "REFUSING: cannot locate train_cyberguard.py (looked in \$HOME/cyberguard, \$HOME/AgentHub/cyberguard, script dir)"; exit 5; }
 case "$ARM" in A) LOG="$ROOT/logs/train-cyberguard-lora-v2-armA.log"; REC="$ROOT/receipts/cyberguard-lora-v2-armA.json";; 
              B) LOG="$ROOT/logs/train-cyberguard-lora-v2-armB.log"; REC="$ROOT/receipts/cyberguard-lora-v2-armB.json";; esac
 MLOG="$ROOT/logs/monitor-v2-$ARM.log"; mkdir -p "$ROOT/logs"
