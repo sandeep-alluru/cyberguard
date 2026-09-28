@@ -9,15 +9,15 @@ from 1,198 unique rows = 11.79% of the epoch.
 
 | source | revision pinned | licence | role | admitted | realised presentations |
 |---|---|---|---|---|---|
-| `Trendyol/Trendyol-Cybersecurity-Instruction-Tuning-Dataset` | escaped copy sha256 2b08b09c41da22c9...; rows 52,284 after safety audi | Apache-2.0 | train | **ADMIT** |  |
-| `ethanolivertroy/nist-cybersecurity-training` | v1.1 (dataset card); 530,912 rows claimed | CC0-1.0 | train | **ADMIT** |  |
-| `mitre-attack/attack-stix-data` | enterprise-attack.json master as fetched 2026-09-27 | MITRE Terms of Use (copy-notice required) | train | **ADMIT** |  |
-| `nvd-cve-json-feeds` | NVD API 2.0, fetched 2026-09-27 (2000 of 398,563 CVEs sampled) | public domain (17 USC 105); CVE(R) notice required | train | **ADMIT** |  |
-| `AUTHORED-refusal-retention-set` | authored 2026-09-27 by v2/build_refusal_set.py (seed 0); receipt besid | ours + curated public refusal data (per-source gate) | train | **ADMIT** |  |
-| `AUTHORED-format-compliance-set` | authored 2026-09-27 by v2/build_format_set.py (seed 0); receipt beside | ours, from public rule schemas; SigmaHQ licence verified at U1 | train | **ADMIT** |  |
-| `chairulridjal/arcspan-cyber-ner` | train split as fetched 2026-09-27; test split EXCLUDED (benchmark, nev | Apache-2.0 (API cardData.license) | train | **ADMIT** |  |
-| `zefang-liu/secqa` | CC BY-NC-SA 4.0, ~242 rows — an EVALUATION set | CC BY-NC-SA 4.0 | eval | **REJECT** |  |
-| `HuggingFaceH4/ultrachat_200k` | train_sft split; card last-modified 2024-10-16; MIT | MIT (verified via HF API cardData.license) | train | **ADMIT** |  |
+| `Trendyol/Trendyol-Cybersecurity-Instruction-Tuning-Dataset` | escaped copy sha256 2b08b09c41da22c9...; rows 52,284 after safety audi | Apache-2.0 | train | **50,672** ||
+| `ethanolivertroy/nist-cybersecurity-training` | v1.1 (dataset card); 530,912 rows claimed | CC0-1.0 | train | **835** ||
+| `mitre-attack/attack-stix-data` | enterprise-attack.json master as fetched 2026-09-27 | MITRE Terms of Use (copy-notice required) | train | **2,144** ||
+| `nvd-cve-json-feeds` | NVD API 2.0, fetched 2026-09-27 (2000 of 398,563 CVEs sampled) | public domain (17 USC 105); CVE(R) notice required | train | **14,847** ||
+| `AUTHORED-refusal-retention-set` | authored 2026-09-27 by v2/build_refusal_set.py (seed 0); receipt besid | ours + curated public refusal data (per-source gate) | train | **9,584** ||
+| `AUTHORED-format-compliance-set` | authored 2026-09-27 by v2/build_format_set.py (seed 0); receipt beside | ours, from public rule schemas; SigmaHQ licence verified at U1 | train | **2,600** ||
+| `chairulridjal/arcspan-cyber-ner` | train split as fetched 2026-09-27; test split EXCLUDED (benchmark, nev | Apache-2.0 (API cardData.license) | train | **0 (rejected)** ||
+| `zefang-liu/secqa` | CC BY-NC-SA 4.0, ~242 rows — an EVALUATION set | CC BY-NC-SA 4.0 | eval | **0 (rejected)** ||
+| `HuggingFaceH4/ultrachat_200k` | train_sft split; card last-modified 2024-10-16; MIT | MIT (verified via HF API cardData.license) | train | **600** ||
 
 **Realised presentation counts by source key** (from `FACTS.json`):
 
