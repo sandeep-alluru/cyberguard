@@ -283,6 +283,26 @@ eval JSON for base/armA/armB, computes each gate from the §7 definitions, appli
 contains exactly one outcome per gate, each with its *(observed)*(confidence)* tag, plus the two claim results;
 a synthetic run with a deliberately missing eval file yields UNMEASURED for the affected gates and never PASS.
 
+## 6g. The evaluator/gate interface gap (2026-09-28) — found before C24, not at it
+
+**Found:** `v2/gates_v2.py` consumes 12 named gate inputs; `eval_cyberguard.py` emits its own shape
+(`base`, `tuned`, `defensive_boundary`, `probe_pairs`, `rate_confidence`, `quality`, ...). **None matched.**
+A perfectly successful C24 evaluation would therefore have produced **12 × UNMEASURED** — a contract with no
+verdicts — and the failure would have surfaced only after the harnesses had run.
+
+**Fix:** `v2/eval_inputs_v2.py` — an explicit mapping table from each gate input to the artifact and key that
+supplies it (four of the twelve already exist in a different shape: `probe_pairs`→`refusal_pairs`,
+`defensive_boundary`→`defensive_pairs`, the escape/F1 block→`escape`), a `--check` coverage table that names
+what is missing and how it is produced, and an assemble mode that **exits 1 while any required input is
+absent** so a partial battery cannot quietly yield a contract full of UNMEASURED.
+
+**Measured now:** 4/12 gate inputs available from the v1 artifacts; 8 required inputs (the v2 batteries:
+1100-probe refusal pairs, rubric severity, triage scorer, emitted-ID validity, sigma, grounded QA, capability
+pairs, chat) are produced by the C24 run itself.
+
+**Exit condition (MET for the mechanism):** `python3 v2/eval_inputs_v2.py --check` prints a per-input
+PRESENT/MISSING table with the producing artifact, and `--out` exits 1 while required inputs are missing.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
