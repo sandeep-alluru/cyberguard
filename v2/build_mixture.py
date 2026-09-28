@@ -232,6 +232,12 @@ def defect(text):
     tail = s[-160:]
     if re.search(r"[.!?][\"\u2019\u201d']?\s+\*\*\d{1,2}\.(?:\*\*)?$", s):
         return "list-marker-end"                       # "...complex passwords. **3."  (review #8)
+    # Review #9: an EMPTY next item after a bold item — "4. **Input Validation**: … 5." — is a list end.
+    m_end = re.search(r"\s(\d{1,2})\.\s*$", s)
+    if m_end:
+        prior = list(re.finditer(r"(?:^|\s)(\d{1,2})\.\s+\*\*[^*\n]+\*\*", s[:m_end.start()]))
+        if prior and int(m_end.group(1)) == int(prior[-1].group(1)) + 1:
+            return "list-marker-end"
     words = s.split()
     if words and _BARE_NUM.match(words[-1]) and not _valid_end_at(words, len(words) - 1):
         return "list-marker-end"                       # "...Version 4.6.' 5."
@@ -769,6 +775,72 @@ def _probe_overlap(row):
     return False
 
 
+_STIX_TABLE = None
+
+
+def _leaf(name):
+    """The leaf of an ATT&CK name: "Scheduled Task/Job: Windows Task Scheduler" -> "windows task scheduler"."""
+    return (str(name).split(":")[-1] if ":" in str(name) else str(name)).strip().lower()
+
+
+def attack_table():
+    """id -> canonical name, from MITRE's own STIX file already on disk (no network, no guessing)."""
+    global _STIX_TABLE
+    if _STIX_TABLE is None:
+        m = {}
+        try:
+            d = json.load(open("v2/candidates/attack-stix.json"))
+            for o in (d.get("objects") if isinstance(d, dict) else d):
+                if o.get("type") != "attack-pattern":
+                    continue
+                for er in o.get("external_references") or []:
+                    eid = er.get("external_id") or ""
+                    if re.fullmatch(r"T\d{4}(\.\d{3})?", eid):
+                        m[eid] = o.get("name") or ""
+                        break
+        except Exception:                               # noqa: BLE001
+            m = {}
+        _STIX_TABLE = m
+    return _STIX_TABLE
+
+
+def repair_attack_ids(text, table=None, by_leaf=None):
+    """Repair same-parent sub-technique id/name mismatches, and return (text, repaired_count).
+
+    Review #9, the material finding: the source corpus asserts sibling ids against the wrong names —
+    it teaches "T1071.004 = Web Protocols" when T1071.004 is **DNS** (Web Protocols is T1071.001),
+    "T1548.002 = Windows Service" when that is **Systemd** (Windows Service is T1548.003), and
+    "T1558.001 = Kerberoasting" when T1558.001 is **Golden Ticket** (Kerberoasting is T1558.003).
+    1,119 rows per arm carried such an assertion, and the evaluation contract asks about those ids.
+
+    The repair is deliberately narrow so it cannot invent text: it only rewrites the ID when the name in
+    the text matches a *different sub-technique under the SAME parent* in MITRE's table, which is
+    unambiguous. Anything else is left exactly as written.
+    """
+    table = table if table is not None else attack_table()
+    if not table:
+        return text, 0
+    if by_leaf is None:
+        by_leaf = {}
+        for i, nm in table.items():
+            by_leaf.setdefault(_leaf(nm), i)
+
+    def sub(m):
+        eid, name = m.group(1), m.group(2).strip()
+        canon = table.get(eid)
+        if canon is None or _leaf(name) == _leaf(canon):
+            return m.group(0)
+        target = by_leaf.get(_leaf(name))
+        if target and target != eid and target.split(".")[0] == eid.split(".")[0]:
+            sub.fixed += 1
+            return m.group(0).replace(eid, target, 1)
+        return m.group(0)
+
+    sub.fixed = 0
+    out = re.sub(r"\b(T\d{4}\.\d{3})\b\s*(?:=|:)?\s*\(([^)\n]{3,90})\)", sub, str(text))
+    return out, sub.fixed
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", default="v2/data/mixture")
@@ -798,6 +870,7 @@ def main():
     n_clipped = 0
     n_boundary_fixed = 0
     n_dropped_noend = 0
+    n_attack_fixed = 0
     drop_reasons = {}
     clean = {}
     for k, rows in pools.items():
@@ -819,6 +892,11 @@ def main():
             if clipped:
                 r["assistant"] = new
                 n_clipped += 1
+            if k == "trendyol" and r.get("assistant"):
+                fixed_a, n_fix = repair_attack_ids(r["assistant"])
+                if n_fix:
+                    r["assistant"] = fixed_a
+                    n_attack_fixed += n_fix
             if _probe_overlap(r):
                 r["_drop"] = "probe-overlap"
                 drop_reasons["probe-overlap"] = drop_reasons.get("probe-overlap", 0) + 1
@@ -932,6 +1010,7 @@ def main():
                                  "replacement_rows": mean_tok(armB, "replacement")},
         "answers_clipped_at_max": n_clipped,
         "prose_answers_re_ended": n_boundary_fixed,
+        "attack_id_assertions_repaired": n_attack_fixed,
         "prose_rows_dropped_no_boundary": n_dropped_noend,
         "prose_rows_dropped_by_reason": drop_reasons,
         "assistant_max_words": ASSISTANT_MAX_WORDS,
@@ -944,6 +1023,7 @@ def main():
     print(f"\n  held-out rows removed (exact or >=0.80 near): {n_near_removed}")
     print(f"  answers clipped at {ASSISTANT_MAX_WORDS} words: {n_clipped}")
     print(f"  prose answers re-ended at a real boundary: {n_boundary_fixed}")
+    print(f"  ATT&CK id/name assertions repaired from MITRE STIX: {n_attack_fixed}")
     print(f"  prose rows DROPPED (no sentence boundary exists): {n_dropped_noend}")
     print(f"    by reason: {drop_reasons}")
     print(f"WROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
