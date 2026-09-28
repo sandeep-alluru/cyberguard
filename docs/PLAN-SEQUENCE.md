@@ -350,6 +350,32 @@ reproduce — specifically, the false-PASS inputs it published return FAIL or UN
 containing both a merge-equivalence receipt and a benchmark report resolves to the benchmark report. Re-review
 before the batteries run.
 
+## 6j. Evaluation-chain RE-review (2026-09-28) — 4 closed, 16 with material components remaining
+
+The corrected chain was re-submitted to an independent reviewer, whose brief was to falsify the fixes.
+Full text: `research-tmp/reviews/codex-evalchain-rereview.md`.
+
+**Fully closed:** F02 (G-A2 duplicates + wrong hypothesis), F03 (G-B FPR/AUC), F09 (IFEval scored correct),
+F16 (decode/padding). **Specific vectors closed inside other findings:** F12's `refusal_n=1` bypass,
+F06's helper installation and parser on both hosts (pySigma 1.5.1 accepting valid rules and rejecting
+malformed ones), F08's partial-vector witness, F14's basic collision, F17's obvious tamper.
+
+**Crucially, the reviewer reports 16 findings as "STILL REPRODUCES — in whole or in a material remaining
+component", and the headline is a NEW false PASS that my own F11 fix created:** the safety sentence could
+PASS while G-A's registered **co-secondary** condition FAILed. That is fixed (the sentence now requires G-A
+AND co-secondary AND G-A2, with a regression), and it is the clearest illustration of why the re-review
+exists: a fix is new code, and new code gets reviewed.
+
+**What the remaining components have in common** (from the reviewer's own reproductions): they are about
+*permissive acceptance* rather than wrong arithmetic — support that is present but unusable, provenance that
+is recorded but not consumed, a stale default that is still preferred in some path, a report that accepts an
+evaluation result without checking it. The disposition is not to argue but to keep tightening in the same
+direction as F12–F18: **if a quantity cannot be supported, the gate must say UNMEASURED with a reason, and
+no default may ever stand in for a measurement.**
+
+**Exit condition (unchanged, now stricter):** the re-review is re-run after this round's fixes and its
+published counterexamples are executed; the chain is cleared only when the reviewer states CHAIN CLEARED.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
