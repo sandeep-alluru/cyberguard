@@ -55,7 +55,7 @@ ABBREV = {"i.e", "e.g", "etc", "vs", "co", "inc", "ltd", "fig", "dr", "st", "mr"
           # review #4: citation/prose abbreviations that were being taken for sentence ends
           "dept", "univ", "inst", "assn", "bros", "corp", "govt", "est", "ed", "eds", "trans",
           "repr", "sec", "art", "figs", "eq", "ref", "refs", "ch", "pt", "cit", "ibid",
-          "avg", "min", "max", "ext", "a.k.a", "aka", "u.s", "u.k", "u.n"}
+          "avg", "min", "max", "ext", "a.k.a", "aka", "u.s", "u.k", "u.n", "intl"}
 
 
 def _ends_sentence(tok):
@@ -128,15 +128,51 @@ PROSE_SOURCES = {"nist", "attack", "nvd", "replay", "refusal"}
 
 
 def _ends_ok(text):
-    """True if the text already ends at something a reader would accept as an end."""
+    """True if the text already ends at something a reader would accept as an end.
+
+    Review #5 corrected two errors here: accepting ":"/";" let 9 unfinished introductions through, and
+    rejecting every abbreviation period dropped 5 complete NVD answers ending "...etc." plus 5 ending on a
+    separated period. A trailing "etc." is a normal sentence tail; a truncated citation is not — that case
+    is caught by defect() below, not by the abbreviation list.
+    """
     w = str(text).rstrip().split()
     if not w:
         return True
     t = w[-1]
     if _ends_sentence(t):
         return True
-    # closed citation, bracket, code fence or table cell — complete as stored
-    return t.endswith((")", "]", "`", '"', ":", ";"))
+    if t.lower().strip(".") == "etc":                 # "...Java, Javascript, etc."
+        return True
+    if t in (".", "!", "?") and len(w) >= 2 and _ends_sentence(w[-2] + "."):
+        return True                                    # a period separated by a space
+    # closed citation, bracket, code fence, table cell — complete as stored
+    return t.endswith((")", "]", "`", '"'))
+
+
+def defect(text):
+    """Mechanical incompleteness a reader would recognise, with the reason (reviews #4/#5).
+
+    The classes the reviewers actually found: heading-only targets, an introduction ending on its colon,
+    an open ``` fence, a citation that never closes, and a dangling connective/punctuation.
+    Returns None when nothing is wrong.
+    """
+    s = str(text).strip()
+    w = s.split()
+    if not w:
+        return "empty"
+    if s.startswith("#") and len(w) <= 16:
+        return "heading-only"
+    lines = [ln for ln in s.splitlines() if ln.strip()]
+    if lines and lines[-1].lstrip().startswith("#"):
+        return "trailing-heading"
+    if s.count("```") % 2:
+        return "unclosed-code-fence"
+    low = s.lower()
+    if "(citation:" in low and low.rfind("(citation:") > s.rfind(")"):
+        return "unclosed-citation"
+    if s.rstrip().endswith((":", ",", ";", "(", "[", "{", "|", "-", "—")):
+        return "dangling-punctuation"
+    return None
 
 
 def clip_answer(text):
@@ -433,10 +469,17 @@ def build_replacements(refusal_rows, rng):
     """
     bodies = [(k, v["defence"]) for k, v in BRS.FAMILIES.items()]
     pool = []
+    by_fam = {}
     for fam, body in bodies:
+        # Review #5 MAJOR 2: the control must be matched to the row it replaces, not merely equal in slot
+        # count. Every template for this family is kept, and the assignment below draws from the SAME
+        # family as the refusal prompt it replaces, so a cryptojacking refusal becomes cryptojacking
+        # defensive guidance. All questions x all leads (not just two) keeps per-family diversity at ~132.
         for q in REPLACEMENT_QUESTIONS:
-            for lead in REPLACEMENT_LEADS[:2]:
-                pool.append((q.format(n=BRS.WHAT[fam]), lead + body))
+            for lead in REPLACEMENT_LEADS:
+                item = (q.format(n=BRS.WHAT[fam]), lead + body)
+                pool.append(item)
+                by_fam.setdefault(fam, []).append(item)
     # second pool: ATT&CK objects (name/description pairs already in the mixture)
     for d in read_jsonl("v2/candidates/attack-sample.jsonl"):
         txt = unescape(str(d.get("text") or "")).strip()
@@ -478,7 +521,20 @@ def build_replacements(refusal_rows, rng):
     # repeat the pool if it is smaller than the refusal row count (diversity is maximised either way)
     while len(out) < len(refusal_rows):
         out.append(out[len(out) % max(1, len(seen))])
-    return out[: max(len(refusal_rows), 1)]
+    # family -> [{row}, ...] for topic-matched assignment (a family's pool is never smaller than its demand
+    # by accident: 22 questions x 6 leads = 132 entries per family)
+    fam_rows = {f: [{"system": BRS.SYS, "user": q, "assistant": a, "src": "replacement",
+                     "kind": "defensive-qa"} for q, a in v] for f, v in by_fam.items()}
+    return out, fam_rows
+
+
+def refusal_families():
+    """normalised refusal prompt -> meta.family, so a substitution can be matched to its topic."""
+    out = {}
+    for d in read_jsonl("v2/data/refusal-retention.jsonl"):
+        if d.get("user"):
+            out[_norm(str(d["user"]))] = (d.get("meta") or {}).get("family")
+    return out
 
 
 def toklen(s):
@@ -514,6 +570,7 @@ def main():
     n_clipped = 0
     n_boundary_fixed = 0
     n_dropped_noend = 0
+    drop_reasons = {}
     clean = {}
     for k, rows in pools.items():
         before = len(rows)
@@ -534,17 +591,26 @@ def main():
             if clipped:
                 r["assistant"] = new
                 n_clipped += 1
-            if k in PROSE_SOURCES and not _ends_ok(r["assistant"]):
-                fixed = complete_sentence(r["assistant"])
-                if fixed != r["assistant"]:
-                    r["assistant"] = fixed
-                    n_boundary_fixed += 1
-        # Review #4 D2, last part: a few prose rows (NIST index/table fragments, one truncated NVD
-        # sentence) contain NO sentence boundary at all, so no trim can make them complete. Shipping them
-        # would teach the model to stop mid-thought, so they are not admitted. Refusals are exempt: their
-        # slot count is a pre-registered quantity.
+            if k in PROSE_SOURCES:
+                reason = defect(r["assistant"])
+                if reason:
+                    fixed = complete_sentence(r["assistant"])
+                    if fixed != r["assistant"] and not defect(fixed):
+                        r["assistant"] = fixed              # repairable: trim to a real boundary
+                        n_boundary_fixed += 1
+                    elif k != "refusal":
+                        r["_drop"] = reason
+                        drop_reasons[reason] = drop_reasons.get(reason, 0) + 1
+                elif not _ends_ok(r["assistant"]):
+                    fixed = complete_sentence(r["assistant"])
+                    if fixed != r["assistant"]:
+                        r["assistant"] = fixed
+                        n_boundary_fixed += 1
+        # Reviews #4/#5: a target that cannot be re-ended (NIST index/table fragments, heading-only
+        # answers, an open code fence, an unclosed citation) is NOT admitted — shipping it would teach the
+        # model to stop mid-thought. Refusals are exempt: their slot count is a pre-registered quantity.
         if k in PROSE_SOURCES and k != "refusal":
-            keep = [r for r in rows if _ends_ok(r["assistant"]) or complete_sentence(r["assistant"]) != r["assistant"]]
+            keep = [r for r in rows if not r.pop("_drop", None)]
             n_dropped_noend += len(rows) - len(keep)
             rows = keep
         clean[k] = rows
@@ -565,17 +631,29 @@ def main():
     armA = [r for k in pools for r in weighted[k]]
     rng.shuffle(armA)
 
-    repl = build_replacements(pools["refusal"], rng)
+    repl, by_fam = build_replacements(pools["refusal"], rng)
     repl_w = repl * int(round(WEIGHTS["refusal"]))
     armB, it = [], iter(repl_w)
+    fam_of, cursors, matched, unmatched = refusal_families(), {}, 0, 0
     for r in armA:
         if r["src"] == "refusal":
-            try:
-                armB.append(next(it))
-            except StopIteration:
-                armB.append(r)
+            fam = fam_of.get(_norm(r["user"]))
+            lst = by_fam.get(fam) or []
+            if lst:
+                i = cursors.get(fam, 0)
+                cursors[fam] = i + 1
+                armB.append(lst[i % len(lst)])       # topic-matched control row
+                matched += 1
+            else:
+                try:
+                    armB.append(next(it))            # 'factuality' prompts: no topic to match
+                except StopIteration:
+                    armB.append(r)
+                unmatched += 1
         else:
             armB.append(r)
+    print(f"  control substitution: {matched} topic-matched, {unmatched} from the general pool "
+          f"(family with no defensive body)")
 
     def scrub(s):
         """Last-resort residue removal at write time: a backslash followed by whitespace is never
@@ -627,6 +705,7 @@ def main():
         "answers_clipped_at_max": n_clipped,
         "prose_answers_re_ended": n_boundary_fixed,
         "prose_rows_dropped_no_boundary": n_dropped_noend,
+        "prose_rows_dropped_by_reason": drop_reasons,
         "assistant_max_words": ASSISTANT_MAX_WORDS,
         "refusal_slots": {"armA": sum(1 for r in armA if r["src"] == "refusal"),
                           "armB": sum(1 for r in armB if r["src"] == "replacement")},
@@ -638,6 +717,7 @@ def main():
     print(f"  answers clipped at {ASSISTANT_MAX_WORDS} words: {n_clipped}")
     print(f"  prose answers re-ended at a real boundary: {n_boundary_fixed}")
     print(f"  prose rows DROPPED (no sentence boundary exists): {n_dropped_noend}")
+    print(f"    by reason: {drop_reasons}")
     print(f"WROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
     print(f"  weighted epoch: {len(armA)} presentations")
     print(f"  refusal slots: armA={receipt['refusal_slots']['armA']} armB={receipt['refusal_slots']['armB']}")
