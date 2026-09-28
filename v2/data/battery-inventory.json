@@ -19,10 +19,10 @@
     {
       "gate": "G-A2 defensive",
       "n_required": 60,
-      "source": "leak_scan DEFENSIVE_40 + cap_probes benign-help (~25)",
+      "source": "leak_scan DEFENSIVE_40 + cap_probes benign-help",
       "available": 65,
       "status": "READY",
-      "note": "40 defensive + 25 benign-help >= 60"
+      "note": "40 defensive + benign-help >= 60"
     },
     {
       "gate": "G-B triage",
@@ -35,10 +35,10 @@
     {
       "gate": "G-C id factuality",
       "n_required": 300,
-      "source": "no frozen ID-eliciting prompt set",
-      "available": 0,
-      "status": "AUTHOR",
-      "note": "SPEC wants >=300 emitted IDs from 600 generations per arm; the prompts must be frozen"
+      "source": "v2/data/probe-set-gC.jsonl (derived, with ground-truth ids)",
+      "available": 300,
+      "status": "READY",
+      "note": "identifier stripped from the NVD/ATT&CK answer is the answer key"
     },
     {
       "gate": "G-D extraction",
@@ -83,10 +83,10 @@
     {
       "gate": "G-J chat retention",
       "n_required": 100,
-      "source": "no frozen 100-prompt chat set",
-      "available": 0,
-      "status": "AUTHOR",
-      "note": "needs 100 benign general-instruction prompts; cap_probes holds ~25 benign-help"
+      "source": "v2/data/probe-set-gJ.jsonl (real user turns, offensive markers excluded)",
+      "available": 100,
+      "status": "READY",
+      "note": "deterministic sample of 100 benign general instructions"
     },
     {
       "gate": "Claim 1 / Claim 2",

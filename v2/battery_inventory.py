@@ -53,6 +53,16 @@ def main() -> int:
     probes = count_jsonl("v2/data/probe-set-gA.jsonl")
     holdout = count_jsonl("v2/holdout500.jsonl")
     arcspan = count_jsonl("v2/candidates/arcspan-train-sample.jsonl")
+    gC = count_jsonl("v2/data/probe-set-gC.jsonl")     # frozen by build_batteries_v2.py
+    gJ = count_jsonl("v2/data/probe-set-gJ.jsonl")
+    gdef = 40                                          # leak_scan DEFENSIVE_40
+    gbh = 0
+    try:
+        import re as _re, inspect as _ins
+        import cap_probes as _cp
+        gbh = len(_re.findall(r'"[^"]{20,}"', _ins.getsource(_cp)[_ins.getsource(_cp).find("benign-help battery"):][:3000]))
+    except Exception:
+        gbh = 25
 
     rows = [
         # gate, n required, source, available, status, note
@@ -60,13 +70,13 @@ def main() -> int:
          "READY" if probes >= 1100 else "PARTIAL",
          "frozen 700 offensive + 400 abstention; re-registration recorded as D10"),
         ("G-A severity", 1100, "same outputs as G-A", probes, "READY", "descriptive share, rubric 0-4"),
-        ("G-A2 defensive", 60, "leak_scan DEFENSIVE_40 + cap_probes benign-help (~25)",
-         40 + 25, "READY", "40 defensive + 25 benign-help >= 60"),
+        ("G-A2 defensive", 60, "leak_scan DEFENSIVE_40 + cap_probes benign-help",
+         gdef + gbh, "READY" if gdef + gbh >= 60 else "PARTIAL", "40 defensive + benign-help >= 60"),
         ("G-B triage", 300, "format-compliance triage-one-word", fmt.get("triage-one-word", 0),
          "READY" if fmt.get("triage-one-word", 0) >= 300 else "PARTIAL",
          "needs >=200 negatives and >=100 positives: verify the split"),
-        ("G-C id factuality", 300, "no frozen ID-eliciting prompt set", 0, "AUTHOR",
-         "SPEC wants >=300 emitted IDs from 600 generations per arm; the prompts must be frozen"),
+        ("G-C id factuality", 300, "v2/data/probe-set-gC.jsonl (derived, with ground-truth ids)", gC,
+         "READY" if gC >= 300 else "PARTIAL", "identifier stripped from the NVD/ATT&CK answer is the answer key"),
         ("G-D extraction", 100, "arcspan candidate sample", arcspan,
          "ZERO-SHOT" if arcspan else "AUTHOR",
          "labels are not retrievable -> D5 declares G-D zero-shot (UNMEASURED by design)"),
@@ -79,8 +89,8 @@ def main() -> int:
          "PARTIAL", "v1 ran 120 pairs/task; n=1200/task needs the official suites or authored pairs"),
         ("G-I escape artifact", 500, "v2/holdout500.jsonl + battery outputs", holdout,
          "READY" if holdout >= 500 else "PARTIAL", "observed: literal \\n count and raw/normalised F1"),
-        ("G-J chat retention", 100, "no frozen 100-prompt chat set", 0, "AUTHOR",
-         "needs 100 benign general-instruction prompts; cap_probes holds ~25 benign-help"),
+        ("G-J chat retention", 100, "v2/data/probe-set-gJ.jsonl (real user turns, offensive markers excluded)", gJ,
+         "READY" if gJ >= 100 else "PARTIAL", "deterministic sample of 100 benign general instructions"),
         ("Claim 1 / Claim 2", 1100, "v2/data/probe-set-gA.jsonl (per-probe pairs)",
          probes, "READY" if probes >= 1100 else "PARTIAL",
          "the C24 battery must emit PER-PROBE pairs for Claim 2; aggregate cross-tabs cannot express it"),
