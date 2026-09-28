@@ -303,6 +303,27 @@ pairs, chat) are produced by the C24 run itself.
 **Exit condition (MET for the mechanism):** `python3 v2/eval_inputs_v2.py --check` prints a per-input
 PRESENT/MISSING table with the producing artifact, and `--out` exits 1 while required inputs are missing.
 
+## 6h. Phase-6 chain verified end to end on real receipts (2026-09-28, checkpoint 9)
+
+The two halves now meet, and the meeting is proven rather than asserted:
+
+    capability receipts  ->  v2/assemble_gate_inputs.py  ->  gate-inputs-{armA,base}.json  ->  v2/gates_v2.py
+
+| link | what it does | evidence |
+|---|---|---|
+| **receipts** | `cap-1-factuality` (ids), `cap-2-triage` (tp/fp/tn/fn), `cap-3-extraction` (span-F1), `cap-4-sigma` (parse/schema), `cap-5-grounded` (key-correct), `cap-6-general` (paired capability), `cap-7-paired/rubric/replay` (refusal pairs, severity, chat), plus the evaluator's `defensive_boundary`/`content` | every mapping read from a real file, with the source path printed per input |
+| **assembler** | `v2/assemble_gate_inputs.py` — 28 derived inputs; prints each input's support against the prespecified n and refuses to substitute or estimate | on the v1 receipts: 2 gates sufficient, **7 shortfalls** (G-A 60/1100, G-B 120/300, G-C 28/300, G-D 40/100, G-F 20/60, G-G 40/1200) — the C24 batteries must run at the prespecified n or those gates are UNMEASURED |
+| **verdict layer** | `v2/gates_v2.py` now consumes the aggregate/count forms as well as per-probe lists, reports each gate **exactly once**, and treats a MISSING input as a support shortfall | end-to-end run on the v1 receipts: **14 outcomes, one per gate plus both claims** — 1 PASS (G-A severity, descriptive), 2 FAIL (G-E sigma 0 % parse/schema — a genuine v1 failure), 11 UNMEASURED with reasons; self-test still PASS |
+
+**Two semantics bugs were found and fixed by this exercise**, both mine: a missing input was being reported as
+**FAIL** rather than UNMEASURED, and each gate was emitting **twice** when an aggregate form was present. Both
+are exactly the class of error the §7 contract exists to prevent, which is why the chain is now exercised on
+real receipts instead of being declared ready.
+
+**Exit condition (MET):** `python3 v2/assemble_gate_inputs.py --check` prints a per-input support table;
+`python3 v2/gates_v2.py --evals <dir> --out <f>` exits 0 with exactly one outcome per gate; and
+`python3 v2/gates_v2.py --selftest` passes all four fail-closed properties.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
