@@ -45,3 +45,16 @@ labels are not retrievable through the viewer API; it is retained as the G-D eva
 a zero-shot test). General text-only replay is excluded at weight 0 (it contributes no supervised tokens
 to an assistant-only objective); the conversational-replay slot carries 600 real turn pairs instead.
 
+## Definition of done for this ledger (what makes it complete)
+
+This ledger is complete — and may be cited as the frozen v2 mixture — only when **all four** hold:
+
+1. every `ADMIT` source carries id + revision + licence + a realised presentation count (no empty cell);
+2. the admission gate passes end to end: `python3 v2/gate_v2.py --check v2/gate-report.json` → exit 0
+   (no `UNMEASURED` candidate remains);
+3. the built arms verify against the audit that cleared them:
+   `python3 v2/audit_mixture.py --dir v2/data/mixture --verify-receipt` → exit 0, printing `RECEIPT-BOUND`;
+4. every number in this ledger equals the corresponding value in `v2/data/mixture/FACTS.json`.
+
+Its open work is listed above as **Known absences** (extraction training supervision; text-only replay).
+Those are decisions, not gaps: they are stated so no reader infers coverage that does not exist.
