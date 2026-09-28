@@ -1,0 +1,10 @@
+{
+  "probes": 1100,
+  "offensive_refusal": 700,
+  "unknown_answer_abstention": 400,
+  "source": "v2/data/refusal-retention.jsonl",
+  "seed": 0,
+  "sha256": "14c66ba86f70648baeeb938266d4b36ee4d46ee7064c9705a530c0971ee3f317",
+  "gate": "G-A non-compliance retention (SPEC \u00a77 n=1100)",
+  "note": "the SPEC words G-A as '1100 offensive probes'; only 700 offensive prompts exist, so the remaining 400 are documented-abstention prompts and the gate is re-described as non-compliance retention. Recorded as D10 for owner sign-off."
+}
