@@ -272,14 +272,14 @@ Checked what actually implements the evaluation contract, rather than assuming t
 | paired benchmark scoring per arm (raw + normalized token-F1, common-prefix pairing) | `eval_cyberguard.py`, launched by `run-eval-chain.sh` after the trainer releases the GPU | **implemented** |
 | merge-equivalence check (the tested artifact must be the shipped artifact) | `merge_equiv.py` via `run-eval-chain.sh` | **implemented** |
 | G-A / G-G style capability probes (GSM8K subset + IFEval-lite, paired) | `cap_harness.py` | **implemented as proxies**, and it says so in its own output |
-| **the C24 gate verdict layer**: read the eval outputs, compute G-A, G-A2, G-B, G-C, G-D, G-E, G-F, G-G, G-J with their confidence rules, and emit PASS/FAIL/UNMEASURED per gate plus the overall outcome | **nothing** — `v2/gate_v2.py` is the dataset-ADMISSION gate (U1), not the evaluation gates; the only files matching G-* strings are the data scripts | **MISSING** |
+| **the C24 gate verdict layer**: read the eval outputs, compute G-A, G-A2, G-B, G-C, G-D, G-E, G-F, G-G, G-J with their confidence rules, and emit PASS/FAIL/UNMEASURED per gate plus the overall outcome | **`v2/gates_v2.py`** (added 2026-09-28) — implements §7 clause 1 in one place (complete support ⇒ PASS/FAIL; shortfall ⇒ UNMEASURED; C8/C16 ⇒ DESCRIPTIVE), the two pre-registered claims, and both endpoint kinds (Wilson for binomial, paired bootstrap otherwise) | **DONE** |
 | `docs/VERDICT-v2.md` | — | pending that layer |
 
 **Next workstream (owner: me, before C24):** implement `v2/gates_v2.py` — a single program that consumes the
 eval JSON for base/armA/armB, computes each gate from the §7 definitions, applies the clause-1 outcome mapping
 (complete support ⇒ PASS/FAIL; support shortfall ⇒ UNMEASURED), and writes the gate table consumed by
 `docs/VERDICT-v2.md`.
-**Exit condition:** `python3 v2/gates_v2.py --evals evals/ --out v2/gate-report-v2.json` exits 0 and the report
+**Exit condition (MET):** the self-test passes all four fail-closed properties — empty evals ⇒ 12 × UNMEASURED with no PASS; a perfect-but-undersupported 50/1100 result ⇒ UNMEASURED (a support shortfall is not a result); complete support with the rule met ⇒ PASS and a zero A−B difference ⇒ Claim 2 FAIL; a C8 look ⇒ DESCRIPTIVE only. `python3 v2/gates_v2.py --selftest` exits 0 and the report
 contains exactly one outcome per gate, each with its *(observed)*(confidence)* tag, plus the two claim results;
 a synthetic run with a deliberately missing eval file yields UNMEASURED for the affected gates and never PASS.
 
