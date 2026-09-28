@@ -82,6 +82,11 @@ def main():
         if prev.get("verdict", "").startswith("FAIL"):
             print(f"FAIL: the last audit did not pass ({prev.get('failures')})")
             return 1
+        if not ((prev.get("checks") or {}).get("arm_sha256")):
+            print("FAIL: the receipt records no arm hashes, so it cannot establish which revision it "
+                  "cleared — re-run with --write-receipt (a receipt that cannot identify its artifact "
+                  "must not yield a pass)")
+            return 1
 
     A = read(os.path.join(args.dir, "armA.jsonl"))
     B = read(os.path.join(args.dir, "armB.jsonl"))
