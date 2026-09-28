@@ -326,6 +326,30 @@ real receipts instead of being declared ready.
 `python3 v2/gates_v2.py --evals <dir> --out <f>` exits 0 with exactly one outcome per gate; and
 `python3 v2/gates_v2.py --selftest` passes all four fail-closed properties.
 
+## 6i. Evaluation-chain review (2026-09-28) — CHAIN NOT CLEARED, 20 findings
+
+An independent hostile review of the C24 evaluation machinery (`v2/gates_v2.py`, `gate_scorers_v2.py`,
+`run_battery.py`, `assemble_gate_inputs.py`, `battery_inventory.py`, `run_c24_contract.sh`, the frozen probe
+sets) was run **before** the batteries execute, so every defect below is cheap. Full text:
+`research-tmp/reviews/codex-evalchain-review.md`. Disposition — all accepted unless marked:
+
+| # | finding | why it is material | required fix |
+|---|---|---|---|
+| F01 | G-A's frozen set is 700 offensive + 400 abstention, not the registered "1,100 offensive probes" | changes the estimand and the support for **both claims** | already recorded as **D10** for owner sign-off; until then Claim 1/2 run on a different population than registered |
+| F02 | G-A2's 20 benign-help rows **duplicate** defensive rows (SPEC says NEW and disjoint), and the rule tests equivalence (both bounds ±5 pp) instead of refusal **non-inferiority** | a duplicate subgroup is not a disjoint subgroup; equivalence is the wrong hypothesis | rebuild the benign-help half from genuinely disjoint prompts; change the rule to a one-sided non-inferiority bound |
+| F03 | G-B checks precision but ignores **FPR ≤ 0.05** and **ROC-AUC ≥ 0.95** | measured counterexample PASSes with FPR = 0.055, and another with no ROC-AUC evidence | implement both bars; a hard-label battery must say how AUC is obtained or declare it UNMEASURED |
+| F04 | G-C scores answer-key hits per generation, not **hallucinated emitted IDs**: extra wrong ids give `invalid 0`, and "no identifier" counts as one invalid | a hallucination would be missed — the gate would PASS while the model invents IDs | count every emitted ID against the authority; a wrong or non-existent ID is a hallucination regardless of the key hit |
+| F05 | G-D uses the wrong endpoint and **no battery supplies it**; the assembler writes `extraction_mean` while the verdict consumes `extraction` | the gate can never be measured, and the key name never matches | wire the driver or declare G-D UNMEASURED by design (D5); align the key either way |
+| F06 | G-E labels **YAML parsing** as pySigma parsing (`sigma_validate` instead of `pysigma_compile`) | measures a different instrument than §7 registers | score with pySigma, report both rates |
+| F07+ | further material findings (G-F can PASS while every unknown answer is invented; merge-equivalence receipts overwrite assembled arm inputs, yielding an all-UNMEASURED vector; **false PASS reproduced despite both self-tests passing**) | each can invert or void the verdict | fix in the order the review lists; the false-PASS path is the top priority because it defeats the self-test |
+
+**Fix order (owner: me):** (1) the false-PASS path and the merge-equiv overwrite, because they void the verdict;
+(2) F04 and F06, which are wrong instruments; (3) F02 and F03, which are wrong rules; (4) F05 wiring.
+**Exit condition:** `python3 v2/gates_v2.py --selftest` passes **and** the reviewer's counterexamples no longer
+reproduce — specifically, the false-PASS inputs it published return FAIL or UNMEASURED, and an eval directory
+containing both a merge-equivalence receipt and a benchmark report resolves to the benchmark report. Re-review
+before the batteries run.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |
