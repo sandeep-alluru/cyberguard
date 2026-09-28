@@ -788,15 +788,19 @@ def attack_table():
     global _STIX_TABLE
     if _STIX_TABLE is None:
         m = {}
+        _deprecated = set()
         try:
             d = json.load(open("v2/candidates/attack-stix.json"))
             for o in (d.get("objects") if isinstance(d, dict) else d):
                 if o.get("type") != "attack-pattern":
                     continue
-                # Review #10: REVOKED and DEPRECATED objects were included, so the name index picked a
-                # dead id — revoked T1208 is literally named "Kerberoasting", which made every
-                # "T1558.001 (Kerberoasting)" look unmappable and left 339 contradictions in place.
+                # Review #10: the name index picked a DEAD id — revoked T1208 is literally named
+                # "Kerberoasting", so "T1558.001 (Kerberoasting)" looked unmappable. But dropping revoked
+                # objects only moves the problem: ids that exist ONLY there become unknown. So every
+                # object stays in the identity table and revoked/deprecated ones are merely marked, so the
+                # NAME index can prefer an active id and the identity table still resolves old ids.
                 if o.get("revoked") or o.get("x_mitre_deprecated"):
+                    _deprecated.add(eid)
                     continue
                 for er in o.get("external_references") or []:
                     eid = er.get("external_id") or ""
@@ -805,8 +809,16 @@ def attack_table():
                         break
         except Exception:                               # noqa: BLE001
             m = {}
-        _STIX_TABLE = m
+        _STIX_TABLE = (m, _deprecated)
     return _STIX_TABLE
+
+
+def attack_active(table=None):
+    """The ids that are still ACTIVE in MITRE's export (the ones a correct answer may cite)."""
+    table = table if table is not None else attack_table()
+    if isinstance(table, tuple):
+        return set(table[0]) - table[1]
+    return set(table)
 
 
 def repair_attack_ids(text, table=None, by_leaf=None):
@@ -822,16 +834,25 @@ def repair_attack_ids(text, table=None, by_leaf=None):
     the text matches a *different sub-technique under the SAME parent* in MITRE's table, which is
     unambiguous. Anything else is left exactly as written.
     """
-    table = table if table is not None else attack_table()
+    if table is None:
+        table = attack_table()
+    if isinstance(table, tuple):
+        table, _dep = table
+    else:
+        _dep = set()
     if not table:
         return text, 0
     if by_leaf is None:
-        by_leaf = {}
         seen = {}
         for i, nm in table.items():
             seen.setdefault(_leaf(nm), set()).add(i)
-        # a leaf that maps to more than one active id is ambiguous: never repair from it
-        by_leaf = {k: next(iter(v)) for k, v in seen.items() if len(v) == 1}
+        by_leaf = {}
+        for leaf, ids in seen.items():
+            act = [i for i in ids if i not in _dep]          # prefer an ACTIVE id
+            if len(act) == 1:
+                by_leaf[leaf] = act[0]
+            elif not act and len(ids) == 1:                  # only a revoked id carries that name
+                by_leaf[leaf] = next(iter(ids))
 
     def sub(m):
         eid, name = m.group(1), m.group(2).strip()
