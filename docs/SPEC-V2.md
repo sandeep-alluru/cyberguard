@@ -146,6 +146,19 @@ implied (CRAFT-M-17).
 
 ---
 
+### 5.1 Acceptance test for target completeness (item D9)
+
+A review can only withhold clearance against a **stated** rule set, so the rules are written down and
+executable: `python3 v2/completeness_screen.py` (exit 0 = clean) implements ten decidable classes —
+heading-only, trailing-heading, inline-heading-cut, list-marker-end, unclosed-code-fence, unclosed-citation,
+truncated-path, dangling-punctuation, no-boundary — and prints its deliberate exclusions (`src="format"`:
+2,600 label/YAML/JSON targets per arm) with their counts so an exclusion cannot hide a row. Two candidate
+rules were **removed after measurement** because they were not decidable: "unbalanced-parenthesis" (25 of 30
+hits were answers ending on a perfectly balanced sentence, with a stray "(" earlier in quoted CVE text) and a
+loose "truncated-path" that flagged the complete sentence "…replacing /cgi-bin/ with /cgi-bin-sdb/.". Rows
+that are awkward but end at a genuine sentence boundary are judgement calls, not defects; a reviewer who
+wants them excluded must propose a rule, as review #6 did for list markers.
+
 ## 6. Mixture proposal (for owner approval) + the gate that must pass first
 
 **Nothing is admitted until U1 passes.** This is a *proposal*; U1 can only reject or downsize it.
