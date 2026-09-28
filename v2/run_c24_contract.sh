@@ -39,7 +39,13 @@ for spec in "$S4 A" "$S8 B"; do set -- $spec
   L=$(timeout 60 ssh -o BatchMode=yes "$1" "grep -m1 'ARM MODE' ~/cyberguard/logs/train-cyberguard-lora-v2-arm$2.log" 2>/dev/null)
   echo "    $1: ${L:0:110}"
 done
-[ "$PRE" = 0 ] && ok "preflight passed" || { bad "preflight failed (${PRE} problem)"; exit 2; }
+if [ "$PRE" = 0 ]; then ok "preflight passed"
+elif [ "$DRY" = 1 ]; then
+  bad "preflight found $PRE problem(s) — expected before C24 (the adapters are written when training ends)."
+  echo "  Continuing in DRY-RUN so the plan can be previewed; the real run would stop here."
+else
+  bad "preflight failed ($PRE problem(s))"; exit 2
+fi
 
 # ---------------------------------------------------------------- stage 1: merge equivalence
 step 1 "merge equivalence — the tested artefact must be the shipped artefact"
