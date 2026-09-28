@@ -1,0 +1,9 @@
+{
+  "rows": 300,
+  "sha256": "76044e251ca99c3d0a6d77a5f7f49b5761b3b9a7f69402c834b0f5fe1227a8b3",
+  "seed": 0,
+  "gate": "G-C id factuality",
+  "kind": "id-eliciting",
+  "source": "v2/data/mixture/armA.jsonl",
+  "note": "derived: identifier stripped from the NVD/ATT&CK answer becomes ground truth"
+}

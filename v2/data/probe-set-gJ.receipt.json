@@ -1,0 +1,9 @@
+{
+  "rows": 100,
+  "sha256": "99d3b9631a5d116af1f68bba43bdca043ced18c8c8b0df522f261a9e1d48a57d",
+  "seed": 0,
+  "gate": "G-J chat retention",
+  "kind": "benign general instruction",
+  "source": "v2/candidates/ultrachat-pairs.jsonl",
+  "note": "deterministic sample of real user turns, offensive markers excluded"
+}
