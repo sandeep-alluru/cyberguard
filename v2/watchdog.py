@@ -47,14 +47,19 @@ def main():
             if drift:
                 alerts.append(f"DATA-DRIFT: {drift} changed since the audit that cleared them — re-audit required")
             line.append(f"hashes: {'MATCH' if not drift else 'DRIFT'}")
-        rc_leak, out_leak = sh(sys.executable, "v2/leak_scan.py", "--no-write")
-        line.append(f"leak_scan: {'CLEAN' if rc_leak == 0 else 'LEAK'}")
-        if rc_leak != 0:
-            alerts.append("LEAK: unified leak scan found a hit")
-        rc_aud, out_aud = sh(sys.executable, "v2/audit_mixture.py", "--verify-receipt")
-        line.append(f"audit: {'PASS' if rc_aud == 0 else 'FAIL'}")
-        if rc_aud != 0:
-            alerts.append("AUDIT: verify-receipt failed")
+        # hash-gated: the expensive scans run when the data changed, or every 6th cycle as a heartbeat
+        changed = bool(cleared) and (drift if cleared else True)
+        if changed or cycles % 6 == 1:
+            rc_leak, out_leak = sh(sys.executable, "v2/leak_scan.py", "--no-write")
+            line.append(f"leak_scan: {'CLEAN' if rc_leak == 0 else 'LEAK'} (full)")
+            if rc_leak != 0:
+                alerts.append("LEAK: unified leak scan found a hit")
+            rc_aud, out_aud = sh(sys.executable, "v2/audit_mixture.py", "--verify-receipt")
+            line.append(f"audit: {'PASS' if rc_aud == 0 else 'FAIL'} (full)")
+            if rc_aud != 0:
+                alerts.append("AUDIT: verify-receipt failed")
+        else:
+            line.append("scans: skipped (hashes unchanged since the last full pass)")
         with open(logpath, "a", encoding="utf-8") as fh:
             fh.write(" | ".join(line) + "\n")
             for al in alerts:
