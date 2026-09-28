@@ -675,10 +675,16 @@ def selftest() -> int:
     sev = next((x for x in r if x["gate"] == "G-A severity"), None)
     check("F13: a gate with no bar is REPORTED, never PASS", sev is not None and sev["outcome"] == "REPORTED",
           sev["outcome"] if sev else "MISSING")
+    # a COMPLETE measurement (newline count AND both F1s) with 3 newlines is the case that must FAIL;
+    # an incomplete one is UNMEASURED, which the check below also asserts.
+    r = evaluate({"armA": {"escape": {"literal_backslash_n": 3, "raw_f1": 0.4, "normalized_f1": 0.5}}}, "C24")
+    gi = next((x for x in r if x["gate"] == "G-I escape artifact"), None)
+    check("F10: a complete measurement with 3 literal \\n must FAIL", gi is not None and gi["outcome"] == "FAIL",
+          gi["outcome"] if gi else "MISSING")
     r = evaluate({"armA": {"escape": {"literal_backslash_n": 3, "raw_f1": 0.4}}}, "C24")
     gi = next((x for x in r if x["gate"] == "G-I escape artifact"), None)
-    check("F10: 3 literal \\n in the corpus must FAIL", gi is not None and gi["outcome"] == "FAIL",
-          gi["outcome"] if gi else "MISSING")
+    check("F10: an incomplete measurement is UNMEASURED, not a verdict",
+          gi is not None and gi["outcome"] == "UNMEASURED", gi["outcome"] if gi else "MISSING")
     r = evaluate({"armA": {"extraction_mean": {"n": 40, "mean_f1": 0.56}}}, "C24")
     gds = [x for x in r if x["gate"] == "G-D extraction"]
     check("F05: a v1 mean cannot stand in for G-D, and G-D appears once",
