@@ -32,6 +32,17 @@ import build_refusal_set as BRS  # noqa: E402  (family defence bodies + verb/nou
 CORPUS = os.environ.get(
     "CYBERGUARD_CORPUS",
     os.path.expanduser("~/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl"))
+# Fail closed, loudly. Rebuild lesson: with CYBERGUARD_CORPUS unset this default path does not exist on
+# every host, read_jsonl returned nothing, and the build cheerfully emitted a 30,610-row mixture instead
+# of 81,282 — a silent ~62 % corpus loss that only a row count would catch. A missing input must stop it.
+if not os.path.exists(CORPUS):
+    sys.exit(f"FATAL: corpus not found: {CORPUS}\n"
+             f"       set CYBERGUARD_CORPUS to the CyberSec-Dataset_escaped.jsonl you mean\n"
+             f"       (this repository keeps it at v2/data/corpus/trendyol-escaped.jsonl)")
+
+# Sources that MUST contribute rows. 'arcspan' is deliberately absent: its extraction labels are not
+# retrievable from the shipped sample, so G-D is declared zero-shot (docs/SPEC-V2.md §5 U7).
+REQUIRED_SOURCES = {"trendyol", "nist", "attack", "nvd", "replay", "format", "refusal"}
 
 ASSISTANT_MAX_WORDS = 400   # fallback when the tokenizer is unavailable
 ASSISTANT_MAX_TOKENS = 512  # the evaluation's generation budget (review #2 finding 3: measuring in
@@ -502,6 +513,9 @@ def main():
         clean[k] = rows
         print(f"  loaded {k:<9} {len(pools[k]):>6} rows -> held-out removed, deduped: "
               f"{len(rows):>6} (exact dup {de}, near dup {dn})")
+        if k in REQUIRED_SOURCES and not rows:
+            sys.exit(f"FATAL: source '{k}' contributed 0 rows. Its input is missing or unreadable; "
+                     f"refusing to write a mixture that silently drops a source.")
     pools = clean
 
     # realise weights by explicit duplication
