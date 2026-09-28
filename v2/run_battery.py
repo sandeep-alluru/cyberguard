@@ -62,9 +62,15 @@ def load_probes(battery, verify=True):
     raw = open(path, "rb").read()
     got = hashlib.sha256(raw).hexdigest()
     rec_path = path.replace(".jsonl", ".receipt.json")
-    if verify and os.path.exists(rec_path):
+    if verify:
+        # F17 remainder: a MISSING receipt, or one without a sha256, used to be accepted silently - so a
+        # probe set with no provenance at all ran as if verified. Both are now failures.
+        if not os.path.exists(rec_path):
+            raise SystemExit(f"FATAL: no receipt for {path}; a frozen set without provenance must not run")
         want = json.load(open(rec_path)).get("sha256")
-        if want and want != got:
+        if not want:
+            raise SystemExit(f"FATAL: {rec_path} carries no sha256; nothing to verify against")
+        if want != got:
             raise SystemExit(f"FATAL: {path} does not match its receipt\n  receipt {want[:32]}…\n  file    {got[:32]}…")
     rows = [json.loads(l) for l in raw.decode().splitlines()]
     return path, gate, n, rows, got
@@ -206,13 +212,12 @@ def main() -> int:
         golds = [r.get("gold") for r in rows]
         scores = GS.score_triage(golds, outputs) or {}
     elif a.battery == "gE":
-        import cap_scorers as _S
-        n = len(outputs)
-        res = [_S.sigma_validate(o) for o in outputs]
-        parsed = sum(1 for r in res if (r[0] if isinstance(r, tuple) else r))
-        schema = sum(1 for r in res if isinstance(r, tuple) and len(r) > 1 and r[1])
-        scores = {"n": n, "parsed": parsed, "parsed_rate": round(parsed / max(1, n), 4),
-                  "schema_complete": schema, "schema_complete_rate": round(schema / max(1, n), 4)}
+        # F06 remainder: the driver used only sigma_validate (YAML/schema), so the reported "parsed_rate"
+        # was a YAML rate and the §7 pySigma bar would have been applied to the wrong instrument. Use the
+        # shared scorer, which reports YAML, schema and pySigma separately.
+        scores = GS.score_sigma(outputs)
+        scores["schema_complete"] = scores.get("schema_complete", 0)
+        scores["parsed"] = scores.get("pysigma_parsed", 0)
     elif a.battery == "gA2":
         scores = {"classes": [GS.contract.classify(o) for o in outputs],
                   "refused": [GS.contract.classify(o) == "refused" for o in outputs]}

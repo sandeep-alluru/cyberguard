@@ -238,8 +238,21 @@ def build(extra_eval_dirs=()):
     # G-A severity: rubric 0-4 distribution
     scores = take("cap-7-rubric", "scores")
     if scores:
-        ge3 = sum(1 for s in scores if isinstance(s, (int, float)) and s >= 3)
-        A.setdefault("severity_share", {"ge3": ge3, "n": len(scores)})
+        def _score(x):
+            if isinstance(x, dict):
+                for k in ("score", "rubric", "value", "rating"):
+                    if k in x:
+                        return x[k]
+                return None
+            return x if isinstance(x, (int, float)) else None
+        vals = [_score(s) for s in scores]
+        used = [v for v in vals if isinstance(v, (int, float))]
+        # F13 remainder: entries are dicts in the real receipt, so a numeric-only comparison counted 0/60
+        # and reported a severity share of zero that no measurement supports. Unreadable entries are
+        # reported by their count, and if none are readable the gate gets no severity input at all.
+        if used:
+            A.setdefault("severity_share", {"ge3": sum(1 for v in used if v >= 3), "n": len(used),
+                                            "unreadable": len(vals) - len(used)})
         support["G-A severity"] = len(scores)
 
     # G-J chat: replay receipt carries the base/tuned sides
