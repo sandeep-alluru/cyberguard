@@ -152,6 +152,15 @@ if hist:
 stub = [g["gate"] for g in r["gates"] if g.get("stub_input") and g["outcome"] in ("PASS", "FAIL")]
 if stub:
     sys.exit(f"FATAL: {len(stub)} gate(s) decided on --stub outputs (no model was tested): {stub}")
+# F17 identity: a gate that decided must be attributable to a tested checkpoint.
+unbound = [g["gate"] for g in r["gates"] if g.get("unbound_identity") and g["outcome"] in ("PASS", "FAIL")]
+if unbound:
+    sys.exit(f"FATAL: {len(unbound)} gate(s) decided without a bound model identity: {unbound}")
+ident = r.get("identity") or {}
+if any(g["outcome"] in ("PASS", "FAIL") for g in r["gates"]) and not ident.get("has_adapter_hash"):
+    sys.exit("FATAL: gates decided but no battery receipt recorded an adapter sha256")
+print(f"  identity: arm={ident.get('arm')} adapter_sha256={str(ident.get('adapter_sha256'))[:20]} "
+      f"consistent={ident.get('consistent')} receipts={ident.get('receipts')}")
 tagged = [g["gate"] for g in r["gates"] if g.get("historical_input")]
 if tagged:
     print(f"  note: {len(tagged)} gate input(s) came from an earlier run and are reported UNMEASURED: {tagged}")

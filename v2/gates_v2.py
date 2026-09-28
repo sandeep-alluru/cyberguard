@@ -284,6 +284,9 @@ def _evaluate(evals, checkpoint="C24"):
     # shortfall for the checkpoint being reported, so it is UNMEASURED and says why.
     _hist = {}
     _stub = set()
+    _battery_gates = set()
+    _ident = (A or {}).get("_identity") or (B or {}).get("_identity")
+    _ident_bad = None
     for payload in (A, B):
         h = (payload or {}).get("historical_gates")
         if isinstance(h, dict):
@@ -295,6 +298,22 @@ def _evaluate(evals, checkpoint="C24"):
             _stub.update(s)
         elif isinstance(s, dict):
             _stub.update(s)
+        bg = (payload or {}).get("battery_gates")
+        if isinstance(bg, list):
+            _battery_gates.update(bg)
+    # F17 identity half: an assembled number must be bound to a tested model. If the batteries for an arm
+    # disagree about which adapter/decoding surface they ran, or none recorded an adapter hash, then the
+    # battery-derived gates cannot be attributed to a checkpoint at all.
+    if isinstance(_ident, dict):
+        if not _ident.get("consistent", True):
+            _ident_bad = (f"the {_ident.get('receipts')} battery receipts for {_ident.get('arm')} do not agree "
+                          f"on the tested adapter/decoding surface (adapter hashes "
+                          f"{_ident.get('adapter_sha256_count')}, base models "
+                          f"{len(_ident.get('base_models') or [])}, decode surfaces "
+                          f"{len(_ident.get('decode_surfaces') or [])})")
+        elif not _ident.get("has_adapter_hash", True):
+            _ident_bad = (f"no battery receipt for {_ident.get('arm')} recorded an adapter sha256, so the "
+                          f"measurement cannot be attributed to a checkpoint")
 
     def emit(gid, support_ok, rule_holds, observed, detail, has_bar=True):
         row = {"gate": gid, "outcome": outcome_for(checkpoint, support_ok, rule_holds, has_bar),
@@ -313,6 +332,11 @@ def _evaluate(evals, checkpoint="C24"):
             row["stub_input"] = True
             row["detail"] = (f"{detail}; input came from a --stub run, which tests the chain and not the model "
                              f"— not a {checkpoint} measurement")
+        if _ident_bad and gid in _battery_gates:
+            row["outcome"] = "DESCRIPTIVE" if checkpoint in ("C8", "C16") else "UNMEASURED"
+            row["support_ok"] = False
+            row["unbound_identity"] = True
+            row["detail"] = f"{detail}; {_ident_bad}"
         results.append(row)
 
     # ---- G-A and the two claims share the refusal pairs
@@ -1141,6 +1165,21 @@ def selftest() -> int:
     check("F12: an aggregate id form with no invalid count emits exactly one row",
           len([x for x in evaluate({"armA": {"ids": {"n": 300}}}, "C24")
                if x["gate"] == "G-C id factuality"]) == 1, "double emit")
+    # F17 identity half: a gate measured under an arm whose batteries disagree about the tested adapter, or
+    # which recorded no adapter hash at all, cannot be attributed to a checkpoint.
+    _tri = {"tp": 290, "fp": 5, "tn": 195, "fn": 10}
+    for _lbl, _id, _want in (
+        ("inconsistent", {"arm": "armA", "receipts": 2, "consistent": False, "has_adapter_hash": True},
+         "UNMEASURED"),
+        ("no adapter hash", {"arm": "armA", "receipts": 2, "consistent": True, "has_adapter_hash": False},
+         "UNMEASURED"),
+        ("consistent and hashed", {"arm": "armA", "receipts": 2, "consistent": True, "has_adapter_hash": True},
+         "PASS"),
+    ):
+        _r = evaluate({"armA": {"triage": _tri, "battery_gates": ["G-B triage"], "_identity": _id}}, "C24")
+        _gb = next(x for x in _r if x["gate"] == "G-B triage")
+        check(f"F17: identity {_lbl} -> G-B {_want}", _gb["outcome"] == _want,
+              f"{_gb['outcome']} unbound={_gb.get('unbound_identity')}")
 
     # re-review F11: the primary rule can be met by a model that refuses almost nothing, so the sentence
     # must also require G-A's co-secondary condition.
@@ -1249,6 +1288,8 @@ def main() -> int:
            "sources": dict(LOADED_SOURCES),
            "historical_inputs": sorted({r["gate"] for r in results if r.get("historical_input")}),
            "stub_inputs": sorted({r["gate"] for r in results if r.get("stub_input")}),
+           "unbound_identity": sorted({r["gate"] for r in results if r.get("unbound_identity")}),
+           "identity": (evals.get("armA") or {}).get("_identity"),
            "arm_b_observations": summarize_arm_b(evals.get("armB"))}
     json.dump(rep, open(a.out, "w"), indent=2)
     print(f"  {a.checkpoint}: arms found {sorted(evals)} -> {rep['counts']}")

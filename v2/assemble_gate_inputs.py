@@ -206,6 +206,8 @@ def build(extra_eval_dirs=()):
     current_gates = set()          # gates whose value came from THIS run (batteries/evaluator), not a receipt
     stub_gates = set()             # gates fed by a --stub battery receipt (review F17: no model was tested)
 
+    battery_gates = set()          # gates fed by battery receipts (the only ones an identity can bind)
+
     def mark_current(gate, *recs):
         """Record that a gate's value came from this run, and whether it came from a STUB run.
 
@@ -214,6 +216,8 @@ def build(extra_eval_dirs=()):
         never decided.
         """
         current_gates.add(gate)
+        if any(r is not None for r in recs):
+            battery_gates.add(gate)
         if any((r or {}).get("stub") for r in recs):
             stub_gates.add(gate)
 
@@ -457,6 +461,41 @@ def build(extra_eval_dirs=()):
     A["historical_gates"] = hist
     if stub_gates:
         A["stub_gates"] = sorted(stub_gates)
+
+    # ---- F17's identity half: bind the assembled numbers to the model that produced them.
+    # Each real battery receipt carries provenance {adapter_sha256, base_model, decode}; nothing previously
+    # carried it into the assembled input, so an assembled verdict could not be tied to a tested checkpoint.
+    def arm_identity(arm):
+        hashes, models, decodes, probes = set(), set(), set(), {}
+        n_recs = 0
+        for (batt, a2), rec in bat.items():
+            if a2 != arm:
+                continue
+            n_recs += 1
+            prov = rec.get("provenance") or {}
+            if prov.get("adapter_sha256"):
+                hashes.add(prov["adapter_sha256"])
+            if prov.get("base_model"):
+                models.add(prov["base_model"])
+            if prov.get("decode"):
+                decodes.add(json.dumps(prov["decode"], sort_keys=True))
+            probes[batt] = rec.get("probe_set_sha256")
+        if not n_recs:
+            return None
+        return {"arm": arm, "receipts": n_recs, "adapter_sha256": sorted(hashes),
+                "adapter_sha256_count": len(hashes), "has_adapter_hash": bool(hashes),
+                "base_models": sorted(models), "decode_surfaces": sorted(decodes),
+                # one model per arm, or the batteries did not all test the same thing
+                "consistent": len(hashes) <= 1 and len(models) <= 1 and len(decodes) <= 1,
+                "probe_sets": probes}
+
+    ident = {a2: arm_identity(a2) for a2 in ("armA", "armB")}
+    ident = {k: v for k, v in ident.items() if v}
+    A["battery_gates"] = sorted(battery_gates)
+    A["_identity"] = ident.get("armA")
+    if ident.get("armB"):
+        ARMB["_identity"] = ident["armB"]
+        ARMB["battery_gates"] = sorted(battery_gates)
     return A, BASE, ARMB, prov, support, hist
 
 
