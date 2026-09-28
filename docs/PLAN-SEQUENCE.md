@@ -88,6 +88,8 @@ claims, no joint correction — a declared property. C8/C16 are **trajectory** p
 
 ## 4. Artifacts that must exist (the spec list)
 
+*Corrected 2026-09-28: three rows read MISSING while the files existed (`harvest-v2.sh`, `v2/serve_guard_check.sh`, `docs/MIXTURE-V2.md`), and three U-items are v2.1 by the over-engineering review rather than open. The artifacts built during the data work are listed too, so this table is the true spec list.*
+
 | artifact | state |
 |---|---|
 | `docs/SPEC-V2.md` | DONE — passes `plan-validate.py` |
@@ -98,13 +100,18 @@ claims, no joint correction — a declared property. C8/C16 are **trajectory** p
 | `v2/data/{refusal-retention,format-compliance}.jsonl` + receipts | DONE |
 | `v2/data/mixture/audit.receipt.json` | DONE (PASS, receipt-bound) |
 | `v2/holdout500.jsonl` + manifest | DONE |
-| `v2/id_validator.py` (U6) | **MISSING** |
-| `docs/GATE8-protocol.md` (U9) | **MISSING** |
-| `harvest-v2.sh` (U10) | **MISSING** |
-| `v2/cpt_probe.py` (U11) | **MISSING** |
-| `v2/serve_guard_check.sh` (U12) | **MISSING** |
-| `docs/MIXTURE-V2.md` (frozen mixture ledger) | **MISSING** |
+| `v2/id_validator.py` (U6) | **DEFERRED to v2.1** — the over-engineering review cut it from v2 (it validated IDs the arm loaders already assert) |
+| `docs/GATE8-protocol.md` (U9) | **DEFERRED to v2.1** — gate-8's judge battery was cut as over-engineering |
+| `harvest-v2.sh` (U10) | DONE — 1,963 bytes, per-file sha256 harvest |
+| `v2/cpt_probe.py` (U11) | **DEFERRED to v2.1** — the CPT-probe unit was cut as over-engineering |
+| `v2/serve_guard_check.sh` (U12) | DONE — exit 0; v1 confirmed unserved |
+| `docs/MIXTURE-V2.md` (frozen mixture ledger) | DONE — 4,229 bytes, passes the plan validator |
 | `docs/VERDICT-v2.md` (U10) | pending Phase 6 |
+| `v2/completeness_screen.py` (D9 acceptance test, 12 decidable classes) | DONE |
+| `v2/attack_label_audit.py` (ATT&CK supervision measurement + REPAIR CHECK) | DONE |
+| `v2/checkpoint_metrics.sh` (C8/C16/C24 collector: measured rate, epochs, refusal exposure) | DONE |
+| `v2/pool_control.sh` (pool stop/restore with a real completion probe) | DONE |
+| `run-v2-arm.sh`, `monitor-v2.sh` (detached launch with fired refusal gates; /proc+growth monitor) | DONE |
 
 ---
 
