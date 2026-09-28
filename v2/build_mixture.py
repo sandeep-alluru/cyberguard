@@ -101,9 +101,13 @@ def near_holdout(user, hold_index):
             cand[i] = cand.get(i, 0) + 1
     for i, shared in cand.items():
         h = sh[i]
-        if h and shared >= max(2, len(s) * 0.25) and len(s & h) / len(s | h) >= 0.80:
+        if not h or shared < max(2, len(s) * 0.25):
+            continue
+        if len(s & h) / len(s | h) >= 0.80:          # near-duplicate (what the audit instrument used)
             return True
-    return False
+        if shared / min(len(s), len(h)) >= 0.80:     # CONTAINMENT: a held-out prompt embedded in a longer
+            return True                              # training row. leak_scan found exactly this case and
+    return False                                     # the Jaccard-only filter had let it through.
 
 
 def dedupe(rows, key="user"):
