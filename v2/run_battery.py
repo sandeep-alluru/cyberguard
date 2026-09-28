@@ -51,10 +51,23 @@ SYSTEM = ("You are a cyber-defence assistant. Give accurate, actionable defensiv
           "covering detection, hardening, and incident response.")
 
 
-def load_probes(battery):
+def load_probes(battery, verify=True):
+    """Load a frozen set, and VERIFY it against its receipt (review F17: recording a hash is not checking it).
+
+    Review F17: the driver hashed whatever bytes were on disk and wrote that hash into the receipt, so a
+    modified probe set would be blessed rather than caught. The receipt is the authority, and a mismatch stops
+    the battery.
+    """
     path, gate, n = BATTERIES[battery]
-    rows = [json.loads(l) for l in open(path)]
-    return path, gate, n, rows
+    raw = open(path, "rb").read()
+    got = hashlib.sha256(raw).hexdigest()
+    rec_path = path.replace(".jsonl", ".receipt.json")
+    if verify and os.path.exists(rec_path):
+        want = json.load(open(rec_path)).get("sha256")
+        if want and want != got:
+            raise SystemExit(f"FATAL: {path} does not match its receipt\n  receipt {want[:32]}…\n  file    {got[:32]}…")
+    rows = [json.loads(l) for l in raw.decode().splitlines()]
+    return path, gate, n, rows, got
 
 
 def prompt_of(battery, row):
@@ -104,10 +117,10 @@ def main() -> int:
     ap.add_argument("--stub", action="store_true")
     a = ap.parse_args()
 
-    path, gate, n_req, rows = load_probes(a.battery)
+    path, gate, n_req, rows, set_sha = load_probes(a.battery)
     if a.limit:
         rows = rows[: a.limit]
-    sha = hashlib.sha256(open(path, "rb").read()).hexdigest()
+    sha = set_sha
     dest = os.path.join(a.out, f"battery-{a.battery}-{a.arm}.json")
     est_min = len(rows) * 2 * a.rate / 60          # base + arm share the battery; this run is one side
 
@@ -136,6 +149,11 @@ def main() -> int:
             tok = AutoTokenizer.from_pretrained(base)
             if tok.pad_token is None:
                 tok.pad_token = tok.eos_token
+            # F16: the evaluator sets LEFT padding inside its own main(); a driver that skipped it would
+            # decode under a different contract than the benchmark it is compared against.
+            tok.padding_side = "left"
+        if hasattr(eg, "MAX_NEW"):
+            eg.MAX_NEW = a.max_new          # F16: --max-new was printed and receipted but never applied
         outputs = []
         for i in range(0, len(rows), a.batch):
             chunk = rows[i:i + a.batch]
@@ -178,13 +196,23 @@ def main() -> int:
                 got = _S.gsm_extract(out)
                 correct.append(bool(gold is not None and got is not None and gold == got))
             else:
-                correct.append(True)      # IFEval-lite checkers live in cap_harness; recorded as advisory here
+                # F09: the real IFEval checkers, using the constraint the probe carries. Unconditional True
+                # meant the paired capability outcome was never measured.
+                if row.get("kind"):
+                    correct.append(bool(_S.ifeval_check(out, row["kind"], row.get("param"))))
+                else:
+                    correct.append(False)   # no constraint recorded -> cannot be called correct
         scores = {"n": len(outputs), "correct": correct, "correct_rate": round(sum(correct) / max(1, len(correct)), 4)}
     else:
         scores = {"n": len(outputs)}
 
     os.makedirs(a.out, exist_ok=True)
     json.dump({"battery": a.battery, "gate": gate, "arm": a.arm, "adapter": a.adapter,
+               "provenance": {"arm": a.arm, "adapter": a.adapter,
+                              "adapter_sha256": (hashlib.sha256(open(os.path.join(a.adapter, "adapter_model.safetensors"), "rb").read()).hexdigest()
+                                                 if a.adapter and os.path.exists(os.path.join(a.adapter, "adapter_model.safetensors")) else None),
+                              "base_model": os.environ.get("EVAL_BASE", "Qwen3-4B-Instruct-2507"),
+                              "decode": {"greedy": True, "max_new": a.max_new, "batch": a.batch, "padding": "left"}},
                "probe_set": path, "probe_set_sha256": sha, "n_probes": len(rows),
                "n_prespecified": n_req, "decode": {"max_new": a.max_new, "batch": a.batch, "greedy": True},
                "stub": bool(a.stub), "wall_seconds": round(time.time() - t0, 1),

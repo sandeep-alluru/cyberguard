@@ -62,14 +62,18 @@ def main() -> int:
     try:
         import cap_probes as PB
         for i, entry in enumerate(getattr(PB, "IFEVAL", [])):
-            prompt = entry[0] if isinstance(entry, (list, tuple)) else entry.get("prompt")
-            ife.append({"probe_id": f"gG:ifeval:{i}", "prompt": prompt})
+            # entries are (prompt, kind, param) tuples; keeping ONLY the prompt made the battery
+            # uncheckable, which is why every IFEval output was scored correct (review F09)
+            if isinstance(entry, (list, tuple)) and len(entry) >= 3:
+                ife.append({"probe_id": f"gG:ifeval:{i}", "prompt": entry[0], "kind": entry[1], "param": entry[2]})
+            else:
+                ife.append({"probe_id": f"gG:ifeval:{i}", "prompt": str(entry)})
     except Exception as e:                                     # noqa: BLE001
         print(f"  IFEval unavailable: {e}")
     freeze("v2/data/probe-set-gG-ifeval.jsonl", ife,
            {"gate": "G-G general capability", "task": "ifeval",
             "n_reachable": len(ife), "n_prespecified": 1200,
-            "source": "cap_probes.PB.IFEVAL (authored)", "note": "official IFEval is 541 prompts and is not cached"},
+            "source": "cap_probes.PB.IFEVAL (authored, prompt+kind+param)", "note": "official IFEval is 541 prompts and is not cached"},
            "v2/data/probe-set-gG-ifeval.receipt.json")
 
     # ---- MMLU: record the absence rather than implying coverage

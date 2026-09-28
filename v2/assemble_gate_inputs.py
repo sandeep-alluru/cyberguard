@@ -37,16 +37,18 @@ import os
 import sys
 
 # Every (receipt glob, side) pair that may exist. A missing file is reported, never substituted.
+# Review F18: the CURRENT receipt directory is tried FIRST; the v1 harvest used to win, so a stale v1
+# measurement could be installed as a C24 result without the battery ever being consulted.
 CANDIDATES = {
-    "cap-1-factuality": ["research-tmp/harvest-cap-v1/receipts/cap-1-factuality.json", "cap/receipts/cap-1-factuality.json"],
-    "cap-2-triage":     ["research-tmp/harvest-cap-v1/receipts/cap-2-triage.json", "cap/receipts/cap-2-triage.json"],
-    "cap-3-extraction": ["research-tmp/harvest-cap-v1/receipts/cap-3-extraction.json", "cap/receipts/cap-3-extraction.json"],
-    "cap-4-sigma":      ["research-tmp/harvest-cap-v1/receipts/cap-4-sigma.json", "cap/receipts/cap-4-sigma.json"],
-    "cap-5-grounded":   ["research-tmp/harvest-cap-v1/receipts/cap-5-grounded.json", "cap/receipts/cap-5-grounded.json"],
-    "cap-6-general":    ["research-tmp/harvest-cap-v1/receipts/cap-6-general.json", "cap/receipts/cap-6-general.json"],
-    "cap-7-paired":     ["research-tmp/harvest-cap-v1/receipts/cap-7-paired-stats.json", "cap/receipts/cap-7-paired-stats.json"],
-    "cap-7-rubric":     ["research-tmp/harvest-cap-v1/receipts/cap-7-rubric-grok.json", "cap/receipts/cap-7-rubric-grok.json"],
-    "cap-7-replay":     ["research-tmp/harvest-cap-v1/receipts/cap-7-replay.json", "cap/receipts/cap-7-replay.json"],
+    "cap-1-factuality": ["cap/receipts/cap-1-factuality.json", "research-tmp/harvest-cap-v1/receipts/cap-1-factuality.json"],
+    "cap-2-triage":     ["cap/receipts/cap-2-triage.json", "research-tmp/harvest-cap-v1/receipts/cap-2-triage.json"],
+    "cap-3-extraction": ["cap/receipts/cap-3-extraction.json", "research-tmp/harvest-cap-v1/receipts/cap-3-extraction.json"],
+    "cap-4-sigma":      ["cap/receipts/cap-4-sigma.json", "research-tmp/harvest-cap-v1/receipts/cap-4-sigma.json"],
+    "cap-5-grounded":   ["cap/receipts/cap-5-grounded.json", "research-tmp/harvest-cap-v1/receipts/cap-5-grounded.json"],
+    "cap-6-general":    ["cap/receipts/cap-6-general.json", "research-tmp/harvest-cap-v1/receipts/cap-6-general.json"],
+    "cap-7-paired":     ["cap/receipts/cap-7-paired-stats.json", "research-tmp/harvest-cap-v1/receipts/cap-7-paired-stats.json"],
+    "cap-7-rubric":     ["cap/receipts/cap-7-rubric-grok.json", "research-tmp/harvest-cap-v1/receipts/cap-7-rubric-grok.json"],
+    "cap-7-replay":     ["cap/receipts/cap-7-replay.json", "research-tmp/harvest-cap-v1/receipts/cap-7-replay.json"],
     "eval-armA":        ["evals/*armA*.json"],
     "eval-armB":        ["evals/*armB*.json"],
     "eval-base":        ["evals/*base*.json"],

@@ -429,6 +429,17 @@ def _evaluate(evals, checkpoint="C24"):
              "aggregate form carries paired n but no per-pair outcomes; the interval cannot be computed"
              f" (paired n={per.get('gsm8k', {}).get('n')}/{per.get('ifeval', {}).get('n')}) -> UNMEASURED")
         gen = _AGG
+    REQUIRED_TASKS = ("gsm8k", "ifeval", "mmlu_lite")
+    if gen is not _AGG and isinstance(gen, dict):
+        missing_tasks = [t for t in REQUIRED_TASKS if not gen.get(t)]
+        if missing_tasks:
+            # Review F08: the loop only visited the tasks present, so GSM8K alone with 1,200 unchanged
+            # pairs reported PASS. §7 registers a three-task vector: a partial vector is a support
+            # shortfall, never a satisfied gate.
+            emit("G-G general", False, False, {"present": sorted(gen), "missing": missing_tasks},
+                 f"partial vector: {missing_tasks} absent; §7 registers three tasks "
+                 f"(gsm8k/ifeval/mmlu_lite), so no per-task PASS may stand for the vector")
+            gen = _AGG
     if gen is not _AGG and gen:
         per, sup_all = {}, True
         for task, rows in gen.items():
@@ -636,6 +647,11 @@ def selftest() -> int:
     safe = next((x for x in r if x["gate"].startswith("SAFETY")), None)
     check("F11: the safety sentence needs BOTH G-A and G-A2",
           safe is not None and safe["outcome"] == "FAIL", safe["outcome"] if safe else "MISSING")
+
+    r = evaluate({"armA": {"general": {"gsm8k": [{"base": True, "arm": True}] * 1200}}}, "C24")
+    gg = next((x for x in r if x["gate"] == "G-G general"), None)
+    check("F08: a partial capability vector cannot PASS", gg is not None and gg["outcome"] != "PASS",
+          gg["outcome"] if gg else "MISSING")
 
     print(f"  SELF-TEST: {'PASS' if ok else 'FAIL'}")
     return 0 if ok else 1
