@@ -222,6 +222,15 @@ classes are shown to be loose-but-legitimate citation forms, continue window 4 t
 training completed). Window 4 started 09:46:15 CDT on the v13 arms (armA `86348996…`, armB `1208858a…`),
 24 h each, monitors armed on both hosts.
 
+## 6d. Window 4 operational findings (2026-09-28, mid-window)
+
+| finding | evidence | action |
+|---|---|---|
+| **the pool returned on its own** | `spark-rpc.service` and `spark-flash-next.service` are `Restart=always` **and** enabled; a plain `stop` meant they were active again mid-window, each holding ~50 GB, with 40ee free memory down to **17.4 GB** | `systemctl disable --now` for the duration (survives `Restart=always`); `pool_control.sh restore` now **re-enables and starts** them, so the owner's boot behaviour is not silently changed. Free memory after: **71.6 GB / 87.4 GB** |
+| **throughput is ~2× the plan's basis** | the run measured **7.6 s/step** at 16 samples/step = **0.478 s/sample**, while still contended; the plan's basis is `sec_per_sample = 0.968288` (FACTS) | the plan's projections are conservative: one epoch is ~10.8 h, so 24 h covers **~2.2 epochs ≈ 178,000 presentations ≈ 21,000 refusal presentations** rather than the projected 10,548. The realized numbers will be receipted at C8/C24 and quoted in the verdict; FACTS keeps the v1 basis as the *declared* projection and the receipts carry the measured rate |
+
+**Consequence for the evaluation contract:** the treatment receives roughly **2×** the planned refusal dose (≈17.6 passes per unique refusal row rather than 8.78). That strengthens rather than weakens the safety manipulation, and the C24 comparison is unaffected; it is recorded because the verdict must quote realized exposure, not the projection.
+
 ## 7. Owner-facing decisions
 
 | # | decision | status |

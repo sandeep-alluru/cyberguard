@@ -54,8 +54,11 @@ case "$ACT" in
     ;;
   restore)
     echo "=== restoring the flash-next pool ==="
-    ssh4 "sudo systemctl start spark-rpc.service && echo '  40ee: spark-rpc started'"
-    ssh8 "sudo systemctl start spark-flash-next.service && echo '  8cf2: spark-flash-next started'"
+    # The units are `Restart=always` AND enabled, so a plain `stop` came back within minutes mid-window.
+    # They are disabled for the duration; restore must re-enable them or the owner's boot behaviour is
+    # silently changed.
+    ssh4 "sudo systemctl enable spark-rpc.service >/dev/null 2>&1; sudo systemctl start spark-rpc.service && echo '  40ee: spark-rpc enabled + started'"
+    ssh8 "sudo systemctl enable spark-flash-next.service >/dev/null 2>&1; sudo systemctl start spark-flash-next.service && echo '  8cf2: spark-flash-next enabled + started'"
     for i in $(seq 1 40); do
       sleep 15
       ssh8 "ss -ltn | grep -q ':8093'" 2>/dev/null || { echo "  waiting for :8093 (${i})"; continue; }
