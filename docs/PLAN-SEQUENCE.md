@@ -565,3 +565,14 @@ entries for G-H and the Sigma detection/utility halves.
 | 2026-09-28 | window 4 on the verified-v14 arms (receipt-bound, `ARM MODE` hashes match FACTS); **F15 closed on the real prompt path** — the driver was sending each G-B probe's gold label as the question — with a falsified `--check-driver` gate wired into the contract preflight; F17's driver-level receipt vectors closed, assembly-provenance remainder open |
 
 Full text: `LEDGER.md` (≈950 lines). Project memory and the vault carry the durable summaries.
+
+### Review-round scope note (2026-09-28, round 43)
+
+The pass-three evaluation-chain review was dispatched against commit **f87526c**, which is the revision that
+contains F15/F14/F18/F19/F07/F08/F10 and the first half of F20. Three further changes were made while that
+review was running — Arm B's per-gate observations folded into the assembled input and surfaced as
+`arm_b_observations`, and the three declared-UNMEASURED entries (G-H, G-E detection, G-E utility) added to the
+vector, taking it from 15 to 18 rows. Those are **outside the dispatched review's scope**, so its verdict
+applies to f87526c and a delta confirmation is required on the final revision before the chain is treated as
+cleared. Recorded here rather than resolved by assertion, because *a reviewed artifact that is not the shipped
+artifact is not reviewed* is the rule this project has already paid for once.

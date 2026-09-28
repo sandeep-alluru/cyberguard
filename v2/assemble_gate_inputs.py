@@ -322,6 +322,42 @@ def build(extra_eval_dirs=()):
             support["G-J chat retention"] = gJ["scores"].get("total", 0)
             current_gates.add("G-J chat retention")
 
+        # ---- Arm B's own observations. Review F20 remainder: B's batteries were produced, receipted, and then
+        # DISCARDED here — only its refusal pairs reached the assembled input — so its C/D/E/J measurements
+        # could never appear in a report. They are folded in now. They inform the report; the registered
+        # decisions remain Arm A's gates plus Claim 2 (A vs B), which is why these use B's own keys and do not
+        # enter Arm A's payload.
+        _gBb = bat.get(("gB", "armB"))
+        if _gBb and isinstance(_gBb.get("scores"), dict) and {"tp", "fp", "tn", "fn"} <= set(_gBb["scores"]):
+            ARMB["triage"] = {k: _gBb["scores"][k] for k in ("tp", "fp", "tn", "fn")}
+        _gCb = bat.get(("gC", "armB"))
+        if _gCb and isinstance(_gCb.get("scores"), dict):
+            ARMB["ids"] = {"n": _gCb["scores"].get("n", 0), "invalid": _gCb["scores"].get("invalid", 0)}
+        _gEb = bat.get(("gE", "armB"))
+        if _gEb and isinstance(_gEb.get("scores"), dict):
+            ARMB["sigma"] = {"n": _gEb["scores"].get("n", 0),
+                             "parsed_rate": _gEb["scores"].get("parsed_rate", 0.0),
+                             "schema_complete_rate": _gEb["scores"].get("schema_complete_rate", 0.0)}
+        _gFb = bat.get(("gF", "armB"))
+        if _gFb and isinstance(_gFb.get("scores"), dict):
+            ARMB["grounded_counts"] = _gFb["scores"]
+        _gJb = bat.get(("gJ", "armB"))
+        if _gJb and isinstance(_gJb.get("scores"), dict):
+            ARMB["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores") or {},
+                                   "tuned": _gJb["scores"]}
+        _gA2b = bat.get(("gA2", "armB"))
+        if _gA2b and isinstance(_gA2b.get("scores"), dict):
+            ARMB["defensive_scores"] = _gA2b["scores"]
+        _genB = {}
+        for _task, _key in (("gsm8k", "gG-gsm8k"), ("ifeval", "gG-ifeval")):
+            _b, _arm = bat.get((_key, "base")), bat.get((_key, "armB"))
+            if _b and _arm:
+                _bc = {p: bool(v) for p, v in zip(_b["probe_ids"], _b["scores"].get("correct", []))}
+                _ac = {p: bool(v) for p, v in zip(_arm["probe_ids"], _arm["scores"].get("correct", []))}
+                _genB[_task] = [{"base": _bc[p], "arm": _ac[p]} for p in _ac if p in _bc]
+        if _genB:
+            ARMB["general"] = _genB
+
     # G-A and the claims: the paired-stats receipt gives the cross-tab, which is the same information as
     # per-probe pairs at the aggregate level.
     pn = take("cap-7-paired", "paired_n")
