@@ -64,9 +64,22 @@ def main():
     ap.add_argument("--dir", default="v2/data/mixture")
     ap.add_argument("--sample", type=int, default=4000)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--verify-receipt", action="store_true",
+                    help="re-audit against a written receipt: fail if the arm files changed since it "
+                         "passed, or if it did not pass. This is the launch precondition.")
     args = ap.parse_args()
     rng = random.Random(args.seed)
     rep = {}
+    prev = None
+    rpath = os.path.join(args.dir, "audit.receipt.json")
+    if args.verify_receipt:
+        if not os.path.exists(rpath):
+            print("FAIL: no audit receipt — this data has never been audited")
+            return 1
+        prev = json.load(open(rpath, encoding="utf-8"))
+        if prev.get("verdict", "").startswith("FAIL"):
+            print(f"FAIL: the last audit did not pass ({prev.get('failures')})")
+            return 1
 
     A = read(os.path.join(args.dir, "armA.jsonl"))
     B = read(os.path.join(args.dir, "armB.jsonl"))
@@ -289,6 +302,11 @@ def main():
         exp = sum(1 for r in A if "one word" in r["user"].lower())
         if diff == 0:
             warn("I-arm-diff", "the two arms are identical — the control substitution did not apply")
+    def _sha(path):
+        import hashlib
+        return hashlib.sha256(open(path, "rb").read()).hexdigest()
+    rep["arm_sha256"] = {"armA": _sha(os.path.join(args.dir, "armA.jsonl")),
+                         "armB": _sha(os.path.join(args.dir, "armB.jsonl"))}
     rcpt = {"checks": rep, "failures": FAILS, "warnings": WARNS,
             "verdict": "FAIL" if FAILS else ("PASS-WITH-WARNINGS" if WARNS else "PASS")}
     with open(os.path.join(args.dir, "audit.receipt.json"), "w", encoding="utf-8") as fh:
@@ -300,6 +318,18 @@ def main():
     for w in WARNS:
         print("  warn:", w)
     print(f"\n  VERDICT: {rcpt['verdict']} ({len(FAILS)} failures, {len(WARNS)} warnings)")
+
+    if args.verify_receipt and prev:
+        now = rep["arm_sha256"]
+        was = (prev.get("checks") or {}).get("arm_sha256") or {}
+        drift = [k for k in ("armA", "armB") if was.get(k) and was[k] != now[k]]
+        if drift:
+            print(f"FAIL: {', '.join(drift)} changed since the audit that cleared them — re-audit before training")
+            return 1
+        if FAILS:
+            print("FAIL: this re-audit found failures")
+            return 1
+        print("RECEIPT-BOUND: the arm files are byte-identical to the audited, passing revision")
     return 1 if FAILS else 0
 
 

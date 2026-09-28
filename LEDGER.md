@@ -1052,3 +1052,34 @@ the cost to date. Existing chain, all portal-verified:
 
 Each subsequent data checkpoint (leakage unification, control matching, format semantics, audit coverage,
 then the re-review) will produce its own brief rather than being folded into this one.
+
+## 2026-09-27 — DATA REPAIR IS A UNIT OF THE PLAN, NOT A PRE-PHASE (owner question)
+
+Owner asked whether the data should be repaired first and work started after, or whether repair belongs
+inside the plan. **Answer, and now the plan's structure: both, in that order, with repair made
+executable.**
+
+- **Repair first** because nothing can launch on data with a known defect: the held-out leak alone would
+  have invalidated the benchmark regardless of how good the design is.
+- **Repair as a unit** because data quality is a property of the *pipeline*, not of a file — the builder,
+  the dedupe, the leak filter, the weighting and the audit all produce it, and **three rebuilds this
+  session each reintroduced a defect**. A one-off cleanup would be undone by the next mixture change with
+  nothing to catch it.
+
+**Implemented as `U13 — Data-integrity gate`** in `docs/SPEC-V2.md`, with an owner, an exit condition and
+an executable exit command:
+
+```
+python3 v2/audit_mixture.py --dir v2/data/mixture --verify-receipt   # must print RECEIPT-BOUND
+```
+
+`audit_mixture.py` now records **both arms' SHA-256** in its receipt, and `--verify-receipt` fails if
+(a) no audit receipt exists, (b) the last audit did not pass, (c) either arm file changed since the audit
+that cleared it, or (d) this re-audit finds failures. **U3 (training) now carries U13 as a stated
+precondition** — *no training launch on unverified data* — and the failure ladder gains the corresponding
+row: "data repaired once, then silently rebuilt" → receipt binding.
+
+Also recorded: **extraction training supervision is currently absent** (arcspan's label field is not
+retrievable via the viewer API), so arcspan is the **G-D evaluation** corpus and **G-D measures zero-shot
+extraction**. That is a cleaner test than recall, but it must be read as such, and it means v1's 65 %
+fabricated-IOC finding has **no training-side mitigation in this build**.
