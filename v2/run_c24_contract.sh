@@ -122,10 +122,19 @@ echo "  python3 v2/gates_v2.py --evals evals/ --out v2/gate-report-v2.json"
   python3 v2/gates_v2.py --evals evals/ --out v2/gate-report-v2.json > logs/verdicts.log 2>&1
   [ -s v2/gate-report-v2.json ] && ok "gate report written" || { bad "verdict layer produced no report"; exit 7; }
   python3 - <<'PY'
-import json
+import json, sys
 r = json.load(open("v2/gate-report-v2.json"))
 print("  counts:", r["counts"])
-assert r["counts"]["PASS"] + r["counts"]["FAIL"] + r["counts"]["UNMEASURED"] > 0, "empty contract"
+# F19: a nonempty report is NOT a result. An aborted evaluation writes a single CONTRACT row, which the old
+# check accepted (PASS+FAIL+UNMEASURED > 0). A contract must show real gate outcomes and no abort row.
+if any(g["gate"] == "CONTRACT" for g in r["gates"]):
+    sys.exit("FATAL: the verdict layer aborted; the report is not a contract")
+decided = r["counts"]["PASS"] + r["counts"]["FAIL"]
+if decided == 0:
+    sys.exit("FATAL: no gate reached PASS or FAIL; an all-UNMEASURED report is not a contract")
+if len([g for g in r["gates"] if g["gate"] != "CONTRACT"]) < 14:
+    sys.exit(f"FATAL: only {len(r['gates'])} gate rows; every gate must appear")
+print(f"  contract accepted: {decided} decided, {r['counts']['UNMEASURED']} unmeasured")
 PY
 }
 

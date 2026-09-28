@@ -126,10 +126,15 @@ def stub_reply(battery, row, arm, i=0):
         return ("Use least privilege, apply the patch, and monitor authentication logs for reuse attempts "
                 "over the following week across the estate.")
     if battery == "gB":
-        return row.get("gold", "benign") if i % 4 else ("malicious" if row.get("gold") == "benign" else "benign")
+        # F15 remainder: returning the gold label 3/4 of the time made the stub mostly right, so the stub
+        # run never exercised a wrong classification at scale. Rotate independently of the gold.
+        return ("benign", "malicious", "malicious", "benign", "unparseable answer")[i % 5]
     if battery == "gE":
+        # vary independently: valid, invalid-yaml, yaml-but-not-sigma
         return ("title: Stub\nlogsource:\n  product: windows\ndetection:\n  selection:\n    EventID: 1\n"
-                "  condition: selection") if i % 4 else "this: is not [valid sigma"
+                "  condition: selection" if i % 3 == 0 else
+                "this: is not [valid sigma" if i % 3 == 1 else
+                "just: some\nvalid: yaml\nbut: not a sigma rule")
     return ("Apply the vendor patch, rotate exposed credentials, and monitor authentication logs for reuse "
             "attempts over the following week.")
 
