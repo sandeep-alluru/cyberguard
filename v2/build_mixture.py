@@ -32,14 +32,6 @@ import build_refusal_set as BRS  # noqa: E402  (family defence bodies + verb/nou
 CORPUS = os.environ.get(
     "CYBERGUARD_CORPUS",
     os.path.expanduser("~/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl"))
-# Fail closed, loudly. Rebuild lesson: with CYBERGUARD_CORPUS unset this default path does not exist on
-# every host, read_jsonl returned nothing, and the build cheerfully emitted a 30,610-row mixture instead
-# of 81,282 — a silent ~62 % corpus loss that only a row count would catch. A missing input must stop it.
-if not os.path.exists(CORPUS):
-    sys.exit(f"FATAL: corpus not found: {CORPUS}\n"
-             f"       set CYBERGUARD_CORPUS to the CyberSec-Dataset_escaped.jsonl you mean\n"
-             f"       (this repository keeps it at v2/data/corpus/trendyol-escaped.jsonl)")
-
 # Sources that MUST contribute rows. 'arcspan' is deliberately absent: its extraction labels are not
 # retrievable from the shipped sample, so G-D is declared zero-shot (docs/SPEC-V2.md §5 U7).
 REQUIRED_SOURCES = {"trendyol", "nist", "attack", "nvd", "replay", "format", "refusal"}
@@ -82,10 +74,15 @@ def _ends_sentence(tok):
     if not t.endswith("."):
         return False
     core = t[:-1].strip("([{<\"'`").lower()
-    if not core or len(core) == 1:            # initial: "D."
+    if not core:
         return False
-    if "." in core:                           # "U.S." / "i.e" / "a.k.a"
+    if len(core) == 1 and core.isalpha():     # a letter initial: "D." (but "0." is a real end)
         return False
+    if re.fullmatch(r"[a-z](\.[a-z])+", core):  # initialism: "U.S" "i.e" "a.k.a"
+        return False
+    # NB: a period INSIDE the token does not by itself disqualify it — "1.2.3" (a version) and
+    # "example.com" (a host) are ordinary sentence ends, and treating them as non-ends made 898 NVD
+    # answers look boundary-less when they were complete.
     return core not in ABBREV
 
 
@@ -496,6 +493,12 @@ def main():
     rng = random.Random(args.seed)
     os.makedirs(args.outdir, exist_ok=True)
 
+    # Fail closed, loudly — but only when BUILDING, never on import (a module-level exit broke the
+    # regression checks that import complete_sentence()).
+    if not os.path.exists(CORPUS):
+        sys.exit(f"FATAL: corpus not found: {CORPUS}\n"
+                 f"       set CYBERGUARD_CORPUS to the CyberSec-Dataset_escaped.jsonl you mean\n"
+                 f"       (this repository keeps it at v2/data/corpus/trendyol-escaped.jsonl)")
     pools = {
         "trendyol": load_trendyol(CAPS["trendyol"]),
         "nist": load_nist(CAPS["nist"], rng),
@@ -510,6 +513,7 @@ def main():
     n_near_removed = 0
     n_clipped = 0
     n_boundary_fixed = 0
+    n_dropped_noend = 0
     clean = {}
     for k, rows in pools.items():
         before = len(rows)
@@ -535,6 +539,14 @@ def main():
                 if fixed != r["assistant"]:
                     r["assistant"] = fixed
                     n_boundary_fixed += 1
+        # Review #4 D2, last part: a few prose rows (NIST index/table fragments, one truncated NVD
+        # sentence) contain NO sentence boundary at all, so no trim can make them complete. Shipping them
+        # would teach the model to stop mid-thought, so they are not admitted. Refusals are exempt: their
+        # slot count is a pre-registered quantity.
+        if k in PROSE_SOURCES and k != "refusal":
+            keep = [r for r in rows if _ends_ok(r["assistant"]) or complete_sentence(r["assistant"]) != r["assistant"]]
+            n_dropped_noend += len(rows) - len(keep)
+            rows = keep
         clean[k] = rows
         print(f"  loaded {k:<9} {len(pools[k]):>6} rows -> held-out removed, deduped: "
               f"{len(rows):>6} (exact dup {de}, near dup {dn})")
@@ -614,6 +626,7 @@ def main():
                                  "replacement_rows": mean_tok(armB, "replacement")},
         "answers_clipped_at_max": n_clipped,
         "prose_answers_re_ended": n_boundary_fixed,
+        "prose_rows_dropped_no_boundary": n_dropped_noend,
         "assistant_max_words": ASSISTANT_MAX_WORDS,
         "refusal_slots": {"armA": sum(1 for r in armA if r["src"] == "refusal"),
                           "armB": sum(1 for r in armB if r["src"] == "replacement")},
@@ -624,6 +637,7 @@ def main():
     print(f"\n  held-out rows removed (exact or >=0.80 near): {n_near_removed}")
     print(f"  answers clipped at {ASSISTANT_MAX_WORDS} words: {n_clipped}")
     print(f"  prose answers re-ended at a real boundary: {n_boundary_fixed}")
+    print(f"  prose rows DROPPED (no sentence boundary exists): {n_dropped_noend}")
     print(f"WROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
     print(f"  weighted epoch: {len(armA)} presentations")
     print(f"  refusal slots: armA={receipt['refusal_slots']['armA']} armB={receipt['refusal_slots']['armB']}")
