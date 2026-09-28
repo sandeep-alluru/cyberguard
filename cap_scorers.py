@@ -177,17 +177,37 @@ def sigma_validate(gen: str):
             best = (True, False, f"missing:{missing or 'condition'}")
     return best if not yaml_ok else (True, best[1], best[2])
 
-def pysigma_compile(rule_dict) -> tuple[bool, str]:
+def pysigma_compile(rule_dict):
+    """Parse a Sigma rule with pySigma, accepting a dict OR a YAML string.
+
+    REPAIRED 2026-09-28 (eval-chain review F06): the previous implementation called
+    `SigmaCollection.from_dict(...)`, **which does not exist in pySigma 1.5.1** — the real entry points are
+    `from_yaml(str)` and `from_dicts([dict])`. The call therefore raised AttributeError every time and the
+    function returned False unconditionally, which means G-E's "pySigma parse 0 %" (recorded for v1 and
+    quoted in SPEC §7 as "6.7 % / 0 %") was at least partly an INSTRUMENT FAILURE rather than a model
+    failure. Verified against pySigma 1.5.1 on the eval hosts: a valid rule constructs, an invalid one
+    raises SigmaLogsourceError.
+    """
     try:
         from sigma.collection import SigmaCollection
-        sc = SigmaCollection.from_dict(rule_dict)
-        sc.resolve_backend(None) if hasattr(sc, "resolve_backend") else None
-        # parse-only validation (no backend execution): constructing + checking detection
-        return True, "parsed"
-    except Exception as e:
+    except Exception as e:                                       # noqa: BLE001
+        return False, f"pySigma unavailable: {type(e).__name__}"
+    try:
+        if isinstance(rule_dict, str):
+            sc = SigmaCollection.from_yaml(rule_dict)
+        else:
+            sc = SigmaCollection.from_dicts([rule_dict])
+        if hasattr(sc, "resolve_backend"):
+            try:
+                sc.resolve_backend(None)
+            except Exception:                                    # noqa: BLE001  resolution is not parse validation
+                pass
+        n = len(getattr(sc, "rules", []) or [])
+        return bool(n), f"parsed {n} rule(s)"
+    except Exception as e:                                       # noqa: BLE001
         return False, repr(e)[:120]
 
-# ---------- G7 ----------
+
 def gsm_extract(out: str):
     """Review #4 BLOCKER: strict LAST-LINE extraction. A number from truncated reasoning can no
     longer pass as the answer: with the answer-only prompt, a truncation yields no parseable

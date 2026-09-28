@@ -49,32 +49,64 @@ def refusal_pairs(probes, base_outputs, arm_outputs):
     return pairs
 
 
-# --------------------------------------------------------------------------- G-C
-def score_ids(probes, outputs):
-    """{n, invalid} over every identifier the model emitted, against the probe's expected identifier."""
-    n = invalid = 0
+# --------------------------------------------------------------------------- G-C (review F04)
+def authority(stix_path="v2/candidates/attack-stix.json"):
+    """(valid_tids, deprecated_tids) from MITRE's own export.
+
+    Uses cap_scorers' loader AND build_mixture.attack_table, because `load_tid_authority` returned 858 active
+    ids with **zero deprecated** ones, while the STIX export carries 161 revoked/deprecated patterns. Without
+    them a legitimate historical citation (a technique MITRE has since retired) would be counted as a
+    hallucination — an error in the strict direction, which is the direction that manufactures failures.
+    """
+    valid = deprecated = set()
+    if S:
+        try:
+            valid, deprecated = S.load_tid_authority(stix_path)
+        except Exception:                               # noqa: BLE001
+            pass
+    try:
+        sys.path.insert(0, "v2")
+        import build_mixture as B
+        t = B.attack_table()
+        table, depot = t if isinstance(t, tuple) else (t, set())
+        valid = valid or set(table)
+        deprecated = deprecated | set(depot)
+    except Exception:                                   # noqa: BLE001
+        pass
+    return (valid - deprecated), deprecated
+
+
+def score_ids(outputs, valid_tids=None, deprecated_tids=None, nvd_ok=None, nvd_checked=None):
+    """G-C measured the way SPEC §7 registers it: every EMITTED identifier is an observation.
+
+    Review F04: the previous version scored answer-key hits per generation, so `T1071.001 T9999.999`
+    returned invalid 0 — an invented technique id would have passed the gate — and a generation with no id
+    at all counted as one invalid. Both are wrong. This reuses cap_scorers.factuality_score, which counts
+    each emitted id, keeps deprecated ids out of the hallucination set, and reports CVEs that could not be
+    checked separately rather than calling them fabricated ("absence of evidence is not evidence of
+    fabrication").
+    """
+    valid_tids = valid_tids if valid_tids is not None else set()
+    deprecated_tids = deprecated_tids or set()
+    nvd_ok = nvd_ok or set()
+    nvd_checked = nvd_checked or set()
+    n = invalid = unchecked = deprecated = 0
     detail = []
-    for p, out in zip(probes, outputs):
-        # cap_scorers.extract_ids returns a TUPLE (cves, tids) and normalises CVE digits, so reuse both
-        # halves and normalise the expected id the same way rather than comparing raw strings.
+    for out in outputs:
         if S:
-            cves, tids = S.extract_ids(out)
-            ids = set(cves) | set(tids)
-            expected = S.norm_cve(p["expected"]) if str(p["expected"]).startswith("CVE") else str(p["expected"]).upper()
-        else:
-            ids = set(re.findall(r"\b(?:CVE-\d{4}-\d{4,7}|T\d{4}(?:\.\d{3})?)\b", out or ""))
-            expected = p["expected"]
-        if not ids:
-            n += 1
-            invalid += 1                            # no identifier at all is a miss, not an absence of data
-            detail.append({"probe_id": p["probe_id"], "issued": [], "expected": p["expected"], "ok": False})
-            continue
-        n += 1
-        ok = expected in ids
-        if not ok:
-            invalid += 1
-        detail.append({"probe_id": p["probe_id"], "issued": sorted(ids), "expected": p["expected"], "ok": ok})
-    return {"n": n, "invalid": invalid}, detail
+            r = S.factuality_score(out or "", valid_tids, deprecated_tids, nvd_ok, nvd_checked)
+        else:                                            # fallback with no authority: regex only, everything valid
+            ids = re.findall(r"\b(?:CVE-\d{4}-\d{4,7}|T\d{4}(?:\.\d{3})?)\b", out or "")
+            r = {"cves": ids, "tids": [], "tid_bad": [], "cve_bad": [], "cve_unchecked": [], "tid_deprecated": []}
+        emitted = len(r["cves"]) + len(r["tids"])
+        bad = len(r["tid_bad"]) + len(r["cve_bad"])
+        n += emitted
+        invalid += bad
+        unchecked += len(r["cve_unchecked"])
+        deprecated += len(r["tid_deprecated"])
+        if bad:
+            detail.append({"emitted": r["cves"] + r["tids"], "hallucinated": r["tid_bad"] + r["cve_bad"]})
+    return {"n": n, "invalid": invalid, "unchecked_cves": unchecked, "deprecated_tids": deprecated}, detail
 
 
 # --------------------------------------------------------------------------- G-F
@@ -138,11 +170,36 @@ def score_triage(golds, outputs):
 
 
 def score_sigma(outputs):
-    if not S:
-        return None
+    """G-E as SPEC registers it: pySigma parse >= 80 % AND schema-complete >= 80 %, YAML reported too.
+
+    Review F06: the driver counted YAML parsing as pySigma parsing. Those are different instruments —
+    a rule can be valid YAML and still not be a Sigma rule — so all three rates are now reported and the
+    gate bar is applied to the pySigma one.
+    """
+    import yaml
     n = len(outputs)
-    parsed = sum(1 for o in outputs if S.sigma_validate(o))
-    return {"n": n, "parsed": parsed}
+    yaml_ok = schema_ok = sigma_ok = 0
+    for o in outputs:
+        if not S:
+            continue
+        y, sch, _ = S.sigma_validate(o)
+        yaml_ok += bool(y)
+        schema_ok += bool(sch)
+        blocks = re.findall(r"```(?:yaml|yml)?\s*\n(.*?)```", o or "", re.S) or [o]
+        compiled = False
+        for b in blocks:
+            try:
+                d = yaml.safe_load(b)
+                if isinstance(d, dict) and S.pysigma_compile(d)[0]:
+                    compiled = True
+                    break
+            except Exception:                               # noqa: BLE001
+                continue
+        sigma_ok += compiled
+    return {"n": n, "yaml_ok": yaml_ok, "schema_complete": schema_ok, "pysigma_parsed": sigma_ok,
+            "yaml_rate": round(yaml_ok / max(1, n), 4),
+            "schema_complete_rate": round(schema_ok / max(1, n), 4),
+            "parsed_rate": round(sigma_ok / max(1, n), 4)}
 
 
 # --------------------------------------------------------------------------- self-test
