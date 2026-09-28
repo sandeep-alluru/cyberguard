@@ -21,6 +21,31 @@ def sh(*cmd):
 def sha(path):
     return hashlib.sha256(open(os.path.join(ROOT, path), "rb").read()).hexdigest()
 
+def _build_in_progress() -> bool:
+    """True while build_mixture.py is running.
+
+    The test uses exe+argv, never a substring scan of the command line, because a substring scan matches the
+    very shell that runs it — a trap that has now cost three incidents in this project (pgrep for the codex
+    runner, pkill for the trainer, pkill for this watchdog).
+    """
+    import glob
+    for d in glob.glob("/proc/[0-9]*"):
+        try:
+            exe = os.path.realpath(os.path.join(d, "exe"))
+        except OSError:
+            continue
+        if "python" not in exe:
+            continue
+        try:
+            raw = open(os.path.join(d, "cmdline"), "rb").read().split(b"\0")
+        except OSError:
+            continue
+        for a in raw:
+            if a.endswith(b"/build_mixture.py") or a == b"build_mixture.py":
+                return True
+    return False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--interval", type=int, default=300)
@@ -41,7 +66,13 @@ def main():
         cycles += 1
         ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         line, alerts = [f"[{ts}] cycle {cycles}"], []
-        if cleared:
+        drift = False                     # defined on every path: the guard below may skip the branch that sets it
+        if _build_in_progress():
+            # A build rewrites the arm files, so a hash check DURING a build reports drift that is not
+            # drift: two such alerts (09:27 and 10:03 on 2026-09-28) were raised while v13/v14 were being
+            # built. Skip the data checks; the cadence check below is process-level and still runs.
+            line.append("data checks skipped: a build is writing the arms")
+        elif cleared:
             now = {"armA": sha("v2/data/mixture/armA.jsonl"), "armB": sha("v2/data/mixture/armB.jsonl")}
             drift = [k for k in cleared if cleared[k] != now[k]]
             if drift:
