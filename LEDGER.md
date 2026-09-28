@@ -925,3 +925,21 @@ an executed check, not by assertion). 35,698 sampled documents measured against 
   execution*…"), producing ungrammatical training data until the templates were split by slot type.
 - **State:** every mixture component now exists, is measured, and is pinned by revision + licence. The
   path to launch is: mixture-build script → MASK PROOF → production-config smoke → the 30 h window.
+
+## 2026-09-27 — Codex review #11 (delta on the two-arm re-cut): 3 MAJOR + 2 MINOR, all fixed
+
+Review #11 audited the 24 h two-arm re-cut and found **internal inconsistencies I introduced**, not
+disputed science. Every finding was reproduced by the reviewer (it recomputed the step count, the LR at
+each checkpoint, and the generation totals) and all five are now fixed in `docs/SPEC-V2.md` (`bb25935e…`,
+passes `plan-validate.py`):
+
+| # | sev | finding | fix |
+|---|---|---|---|
+| 1 | MAJOR | Arm B defined as "the control" in §6 but still "minus the refusal set" in U3/§8; the replacement's weight was unassigned; and "only the refusal content differs" **overclaimed** | U3/§8 aligned to the in-place replacement at the same weight 8.0 with matched batch boundaries; the causal claim narrowed to **"refusal-content substitution versus matched defensive-Q&A"** with the residual confounds (prompt distribution, task shape, answer style, supervised-token mix) named rather than dismissed |
+| 2 | MAJOR | clause 2 named two confirmatory contrasts, clause 3 required base-relative bounds "in each arm", and A-vs-B had **no directional criterion and no multiplicity policy**; clause 2 also let C8/C16 "halt a run" although evaluation happens after training | clause 2 rewritten: C8/C16 are **trajectory points** that can neither halt nor promote; **Claim 1** (Arm A@C24 non-inferiority, 82.2 % power) and **Claim 2** (A vs B, **95 % CI lower bound on the difference > 15 pp**, >90 % power at a 30 pp separation) each have their own rule; **multiplicity policy stated**: separate marginal claims, no joint correction, family-wise error not controlled (a declared property, not an oversight) |
+| 3 | MINOR | 5,577 steps is correct rounding, but C8/C16 cannot isolate refusal dose — total exposure **and** LR move together (≈7.8×10⁻⁵ at step 1,859 → ≈2.6×10⁻⁵ at 3,718) | the "descriptive dose point" language replaced by **trajectory point**, with the LR figures stated |
+| 4 | MAJOR | the C24 battery row mislabelled 19,808 as including G-A (24,208 actually), and **U4's benchmark was never allocated** | rows relabelled; **U4 added: 2,000 generations ≈ 1.52 h**; total restated as **≈57.5 machine-hours / ≈28.8 h ideal balanced elapsed**, with **30 h labelled a rounded allowance, not a derived number** |
+| 5 | MINOR | the deletion rationale said "more than one pass" where the arithmetic gives **91.25–105.24 %**; the G-G extension figure was inconsistent; §15 still called superseded numbers current | all three corrected, and §15 now states plainly that §13–§15 are **dated records**, lists the superseded values to ignore, and names §6/§8 as governing |
+
+**Standing:** the re-cut therefore goes to a further confirmation pass (#12) before launch — the same
+rule that produced #7–#11: *a reviewed artifact that is not the shipped artifact is not reviewed*.
