@@ -67,10 +67,10 @@
     {
       "gate": "G-G general",
       "n_required": 1200,
-      "source": "cap_harness capability probes (GSM8K subset / IFEval-lite)",
+      "source": "cap_harness: gsm8k-120.json (ABSENT here; official cached on spark-40ee) + PB.IFEVAL (40 authored) + MMLU (not implemented)",
       "available": 120,
       "status": "PARTIAL",
-      "note": "v1 ran 120 pairs/task; n=1200/task needs the official suites or authored pairs"
+      "note": "D11: pre-registered as a 3x1200 vector; only GSM8K can reach 1,200 (host cache), IFEval is 40/541, MMLU absent -> per-task n must be declared, owner sign-off requested"
     },
     {
       "gate": "G-I escape artifact",
