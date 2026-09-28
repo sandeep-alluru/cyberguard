@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# run-v2-arm.sh — launch ONE v2 training arm, detached, with a refuse-to-start-twice gate.
+# Usage: bash run-v2-arm.sh <A|B> [minutes]        (run ON the training host)
+#   A -> spark-40ee, armA.jsonl (designed mix)      B -> spark-8cf2, armB.jsonl (control)
+set -euo pipefail
+ARM="${1:?usage: run-v2-arm.sh <A|B> [minutes]}"
+MINUTES="${2:-1440}"
+ROOT="$HOME/cyberguard"
+case "$ARM" in
+  A) ARMS="$ROOT/v2/data/mixture/armA.jsonl"; RUN="cyberguard-lora-v2-armA" ;;
+  B) ARMS="$ROOT/v2/data/mixture/armB.jsonl"; RUN="cyberguard-lora-v2-armB" ;;
+  *) echo "arm must be A or B"; exit 2 ;;
+esac
+LOG="$ROOT/logs/train-${RUN}.log"
+mkdir -p "$ROOT/logs"
+# refuse to start twice — a /proc case-scan, never a self-matching pgrep (CRAFT-O-02/O-28)
+for p in /proc/[0-9]*; do
+  cmd=$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null) || continue
+  case "$cmd" in *train_cyberguard[.]py*) echo "REFUSING: a trainer is already running (pid ${p#/proc/})"; exit 3;; esac
+done
+[ -f "$ARMS" ] || { echo "REFUSING: arm file missing: $ARMS"; exit 4; }
+echo "launching $RUN  minutes=$MINUTES  arms=$ARMS"
+setsid nohup env CYBERGUARD_ARMS="$ARMS" MAX_MINUTES="$MINUTES" RUN_NAME="$RUN" \
+  python3 "$HOME/train_cyberguard.py" > "$LOG" 2>&1 < /dev/null &
+sleep 5
+echo "pid $(pgrep -f 'train_cyberguard[.]py' | head -1)  log $LOG"
