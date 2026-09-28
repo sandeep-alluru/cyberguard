@@ -527,16 +527,27 @@ def build_replacements(refusal_rows, rng):
         k = " ".join(q.lower().split())
         if k in seen:
             continue
+        a2, ok = finalise(a, "replacement")     # same decision as every other row: never shipped if not ok
+        if not ok:
+            continue
         seen.add(k)
-        out.append({"system": BRS.SYS, "user": q, "assistant": a, "src": "replacement",
+        out.append({"system": BRS.SYS, "user": q, "assistant": a2, "src": "replacement",
                     "kind": "defensive-qa"})
     # repeat the pool if it is smaller than the refusal row count (diversity is maximised either way)
     while len(out) < len(refusal_rows):
         out.append(out[len(out) % max(1, len(seen))])
     # family -> [{row}, ...] for topic-matched assignment (a family's pool is never smaller than its demand
     # by accident: 22 questions x 6 leads = 132 entries per family)
-    fam_rows = {f: [{"system": BRS.SYS, "user": q, "assistant": a, "src": "replacement",
-                     "kind": "defensive-qa"} for q, a in v] for f, v in by_fam.items()}
+    fam_rows = {}
+    for f, v in by_fam.items():
+        keep = []
+        for q, a in v:
+            a2, ok = finalise(a, "replacement")
+            if ok:
+                keep.append({"system": BRS.SYS, "user": q, "assistant": a2, "src": "replacement",
+                             "kind": "defensive-qa"})
+        if keep:
+            fam_rows[f] = keep
     return out, fam_rows
 
 
@@ -551,6 +562,43 @@ def refusal_families():
 
 def toklen(s):
     return len(re.findall(r"[a-z0-9]+", str(s).lower()))
+
+
+def scrub(s):
+    """Last-resort residue removal at write time: a backslash followed by whitespace is never meaningful in
+    this data (Windows paths are backslash+letter), so it is always residue."""
+    return re.sub(r"[\\](?=[\s])", "", str(s))
+
+
+def finalise(text, src):
+    """The ONE place a target is turned into its stored form, so the row count a build reports and the row
+    count it writes can never disagree (build13's write-time repair dropped 4 rows the loop had kept, which
+    the audit correctly caught as receipt/file drift).
+
+    Order: scrub residue, complete the prose ending, trim to the token budget, then re-check completeness —
+    because the budget trim can re-open a citation, which is how the OopsIE row survived.
+    Returns (text, ok); ok=False means this row must not be shipped.
+    """
+    prose = src not in (None, "", "format")
+    a = scrub(text)
+    if prose:
+        a = complete_sentence(a)
+    try:
+        tok = _tokenizer()
+        while len(a.split()) > 1 and len(tok(a, add_special_tokens=False)["input_ids"]) > ASSISTANT_MAX_TOKENS:
+            a = " ".join(a.split()[:-1])
+            m = re.search(r"^[\s\S]*[.!?](?=\s|$)", a)
+            if m and len(m.group(0).split()) > len(a.split()) * 0.5:
+                a = m.group(0).strip()
+    except Exception:                                   # noqa: BLE001  tokenizer optional
+        pass
+    if prose and (defect(a) or not _ends_ok(a)):
+        fixed = complete_sentence(a)
+        if fixed != a and not defect(fixed) and _ends_ok(fixed):
+            a = fixed
+        else:
+            return a, False                 # no boundary to trim to -> this target is not shippable
+    return a, True
 
 
 def main():
@@ -604,23 +652,15 @@ def main():
                 r["assistant"] = new
                 n_clipped += 1
             if k in PROSE_SOURCES:
-                reason = defect(r["assistant"])
-                if reason:
-                    fixed = complete_sentence(r["assistant"])
-                    if fixed != r["assistant"] and not defect(fixed):
-                        r["assistant"] = fixed              # repairable: trim to a real boundary
+                a2, ok = finalise(r["assistant"], k)
+                if ok:
+                    if a2 != r["assistant"]:
+                        r["assistant"] = a2
                         n_boundary_fixed += 1
-                    elif k != "refusal":
-                        r["_drop"] = reason
-                        drop_reasons[reason] = drop_reasons.get(reason, 0) + 1
-                elif not _ends_ok(r["assistant"]):
-                    fixed = complete_sentence(r["assistant"])
-                    if fixed != r["assistant"]:
-                        r["assistant"] = fixed
-                        n_boundary_fixed += 1
-                    elif k != "refusal":          # no boundary anywhere and nothing to trim to
-                        r["_drop"] = "no-boundary"
-                        drop_reasons["no-boundary"] = drop_reasons.get("no-boundary", 0) + 1
+                elif k != "refusal":
+                    reason = defect(a2) or "no-boundary"
+                    r["_drop"] = reason
+                    drop_reasons[reason] = drop_reasons.get(reason, 0) + 1
         # Reviews #4/#5: a target that cannot be re-ended (NIST index/table fragments, heading-only
         # answers, an open code fence, an unclosed citation) is NOT admitted — shipping it would teach the
         # model to stop mid-thought. Refusals are exempt: their slot count is a pre-registered quantity.
@@ -670,43 +710,16 @@ def main():
     print(f"  control substitution: {matched} topic-matched, {unmatched} from the general pool "
           f"(family with no defensive body)")
 
-    def scrub(s):
-        """Last-resort residue removal at write time: a backslash followed by whitespace is never
-        meaningful in this data (Windows paths are backslash+letter), so it is always residue."""
-        return re.sub(r"[\\](?=[\s])", "", str(s))   # character class: a bare backslash would escape the group
-
     write_stats = {"dropped": 0}
 
     def write(name, rows):
         path = os.path.join(args.outdir, name)
         with open(path, "w", encoding="utf-8") as fh:
             for r in rows:
-                # clip AFTER the scrub: removing a backslash changes whitespace and can shift
-                # tokenisation by a token, which is why 36 answers sat one token over the budget
-                a = scrub(r["assistant"])
-                # enforce on the STORED form: tokenising "a  b" or "a\nb" differs from "a b", so a
-                # whitespace-normalised measurement can pass while the stored string exceeds the budget
-                if r.get("src") in ("trendyol", "nvd", "nist", "attack", "replacement", "replay"):
-                    a = complete_sentence(a)      # prose only: JSON/YAML targets must not be trimmed
-                try:
-                    tok = _tokenizer()
-                    while len(a.split()) > 1 and len(tok(a, add_special_tokens=False)["input_ids"]) > ASSISTANT_MAX_TOKENS:
-                        a = " ".join(a.split()[:-1])
-                        m = re.search(r"^[\s\S]*[.!?](?=\s|$)", a)
-                        if m and len(m.group(0).split()) > len(a.split()) * 0.5:
-                            a = m.group(0).strip()
-                except Exception:
-                    pass
-                # Review #5, last hole: this budget trim runs AFTER the loop's completeness checks and can
-                # cut a citation open again (the OopsIE row ended "(Citation: Unit 42 OopsIE!"). Re-check the
-                # STORED form and drop the row rather than ship a truncated sentence.
-                if r.get("src") not in (None, "", "format") and defect(a):
-                    fixed = complete_sentence(a)
-                    if fixed != a and not defect(fixed):
-                        a = fixed
-                    else:
-                        write_stats["dropped"] += 1
-                        continue
+                a, ok = finalise(r["assistant"], r.get("src", ""))
+                if not ok:
+                    raise SystemExit(f"FATAL: finalise() rejects a row the loop admitted (src={r.get('src')}); "
+                                     f"counts and content would drift. Row: {r['assistant'][:80]!r}")
                 fh.write(json.dumps({"system": scrub(r["system"]), "user": scrub(r["user"]),
                                      "assistant": a, "src": r.get("src", "")},
                                     ensure_ascii=False) + "\n")
