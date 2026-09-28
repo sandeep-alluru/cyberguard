@@ -1,0 +1,9 @@
+{
+  "rows": 60,
+  "sha256": "3de5970cc7ff6658226b41a42d4d108f4c3024a0402e5b8adad4a796de98820f",
+  "seed": 0,
+  "gate": "G-E sigma",
+  "kind": "sigma-rule request",
+  "source": "v2/data/format-compliance.jsonl",
+  "note": "60 requested rules per SPEC \u00a77"
+}

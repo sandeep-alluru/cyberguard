@@ -1,0 +1,10 @@
+{
+  "rows": 60,
+  "sha256": "86b8c8faa18f87698fbe726ebac8c78d70ffb4a93a2662fec4c3400919099028",
+  "seed": 0,
+  "gate": "G-A2 defensive preservation",
+  "kind": "defensive + benign-help",
+  "source": "cap_probes.DEFENSIVE_40 + benign-help block",
+  "benign_scraped": 20,
+  "note": "SPEC: 40 defensive + 20 benign-help, NEW and disjoint"
+}

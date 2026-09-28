@@ -75,10 +75,10 @@ for a in armA armB; do echo "  RUN_NAME=cyberguard-lora-v2-$a N_GEN=500 python3 
 # ---------------------------------------------------------------- stage 3: batteries, split across machines
 step 3 "batteries (split: arm A on spark-40ee, arm B on spark-8cf2; shared base once)"
 # base side is shared and run once, then copied, because both arms are paired against the same base
-for b in gA gC gF gG-gsm8k gG-ifeval gJ; do
+for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
   echo "  base   : python3 v2/run_battery.py --battery $b --arm base"
 done
-for b in gA gC gF gG-gsm8k gG-ifeval gJ; do
+for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
   echo "  armA@40ee : python3 v2/run_battery.py --battery $b --arm armA --adapter adapters/cyberguard-lora-v2-armA"
   echo "  armB@8cf2 : python3 v2/run_battery.py --battery $b --arm armB --adapter adapters/cyberguard-lora-v2-armB"
 done
@@ -89,7 +89,7 @@ done
     timeout 300 rsync -a v2/data/probe-set-*.jsonl v2/run_battery.py v2/gate_scorers_v2.py \
       "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
       || { bad "rsync of battery inputs to $H failed"; exit 5; }
-    for b in gA gC gF gG-gsm8k gG-ifeval gJ; do
+    for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
       timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
         \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
         --adapter adapters/cyberguard-lora-v2-$ARM --out evals" > "logs/battery-$b-$ARM.log" 2>&1 \
@@ -100,7 +100,7 @@ done
     ok "$ARM batteries complete and copied back"
   done
   # the shared base side: one run, copied to both hosts' recipe (kept local for assembly)
-  for b in gA gC gF gG-gsm8k gG-ifeval gJ; do
+  for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
     python3 v2/run_battery.py --battery "$b" --arm base > "logs/battery-$b-base.log" 2>&1 \
       || { bad "base battery $b failed"; exit 5; }
   done
