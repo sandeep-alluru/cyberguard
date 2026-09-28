@@ -230,16 +230,29 @@ def defect(text):
         return "inline-heading-cut"                   # "...### 2." / a heading flattened into the prose
     # --- the four classes review #7 supplied reproductions for -------------------------------------
     tail = s[-160:]
+    if re.search(r"[.!?][\"\u2019\u201d']?\s+\*\*\d{1,2}\.(?:\*\*)?$", s):
+        return "list-marker-end"                       # "...complex passwords. **3."  (review #8)
     words = s.split()
     if words and _BARE_NUM.match(words[-1]) and not _valid_end_at(words, len(words) - 1):
         return "list-marker-end"                       # "...Version 4.6.' 5."
     if words and _ends_sentence(words[-1]) and not _valid_end_at(words, len(words) - 1):
         return "list-marker-end"
-    if s.count("`") % 2 and "`" in tail and not tail.rstrip().endswith("`"):
+    # Strip PAIRED spans before counting: review #8 showed 7 complete answers rejected because a literal
+    # backtick mentioned in prose (CVE "quoted literal backtick in the email address") made the raw count odd.
+    stripped = re.sub(r"`[^`]*`", "", s)              # discard paired spans first
+    # Review #8's rule: a backtick the prose explicitly DESCRIBES is content, not a delimiter
+    # ("a literal backtick ` in the email address", "quoted literal backtick in the filename").
+    stripped = re.sub(r"(?i)\b(?:literal|quoted|character|metacharacter|accent|backtick|tick|grave|"
+                      r"symbol|apostrophe)\b[\s\w,;:'\-]{0,48}`", lambda m: m.group(0)[:-1], stripped)
+    last_sent = (split_sentences(stripped) or [stripped])[-1]
+    if last_sent.count("`") % 2:
         return "terminal-open-inline-code"             # "...reflected in `location."
     words = s.split()
     if words and _BARE_NUM.match(words[-1]) and re.search(r"#{1,6}", tail):
         return "flattened-heading-list-start"          # "...### Key Concepts 1." / "...### **2."
+    m_ip = re.search(r"(?:IP address of|X-Forwarded-For:)\s+((?:\d{1,3}\.){3})$", s, re.I)
+    if m_ip and all(0 <= int(o) <= 255 for o in m_ip.group(1).rstrip(".").split(".")):
+        return "truncated-ip-address"                  # "...IP address of 192.168.1." (review #8)
     if re.search(r"\(such as[^)]*$", tail):
         return "terminal-open-such-as"                 # "(such as spacing, `^`, `+`."
     return None
@@ -691,7 +704,9 @@ def finalise(text, src):
     """
     prose = src not in (None, "", "format")
     a = scrub(text)
-    if prose:
+    if prose and not (defect(a) is None and _ends_ok(a)):
+        # Only incomplete targets are trimmed. Review #8: trimming a target that was ALREADY complete
+        # severed a closed "(Citation: Unit 42 OopsIE! Feb 2018)" at its internal "!" and lost the row.
         a = complete_sentence(a)
     try:
         tok = _tokenizer()
