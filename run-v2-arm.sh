@@ -14,10 +14,20 @@ esac
 LOG="$ROOT/logs/train-${RUN}.log"
 mkdir -p "$ROOT/logs"
 # refuse to start twice — a /proc case-scan, never a self-matching pgrep (CRAFT-O-02/O-28)
-for p in /proc/[0-9]*; do
-  cmd=$(tr '\0' ' ' < "$p/cmdline" 2>/dev/null) || continue
-  case "$cmd" in *train_cyberguard[.]py*) echo "REFUSING: a trainer is already running (pid ${p#/proc/})"; exit 3;; esac
-done
+# liveness = exe is python AND an argv element is EXACTLY the trainer path.
+# A substring scan matches any shell whose script merely MENTIONS the file (CRAFT-O-28 self-match).
+trainer_pids() {
+  for p in /proc/[0-9]*; do
+    exe=$(readlink -f "$p/exe" 2>/dev/null) || continue
+    case "$exe" in *python*) ;; *) continue;; esac
+    while IFS= read -r -d '' a; do
+      case "$a" in */train_cyberguard.py|train_cyberguard.py) echo "${p#/proc/}"; break;; esac
+    done < "$p/cmdline" 2>/dev/null
+  done
+}
+LIVE=$(trainer_pids | head -1)
+[ -n "$LIVE" ] && { echo "REFUSING: a trainer is already running (pid $LIVE)"; exit 3; }
+true
 [ -f "$ARMS" ] || { echo "REFUSING: arm file missing: $ARMS"; exit 4; }
 echo "launching $RUN  minutes=$MINUTES  arms=$ARMS"
 setsid nohup env CYBERGUARD_ARMS="$ARMS" MAX_MINUTES="$MINUTES" RUN_NAME="$RUN" \
