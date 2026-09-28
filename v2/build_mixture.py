@@ -33,6 +33,8 @@ CORPUS = os.environ.get(
     "CYBERGUARD_CORPUS",
     os.path.expanduser("~/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl"))
 
+ASSISTANT_MAX_WORDS = 400   # ~512 regex tokens; the evaluation generates 512 (headroom chosen
+                            # because word count under-counts punctuation-heavy text like YAML)
 WEIGHTS = {"trendyol": 1.0, "nist": 1.0, "attack": 1.0, "nvd": 1.0,
            "refusal": 8.0, "format": 2.0, "arcspan": 1.0, "replay": 1.0}
 CAPS = {"trendyol": 52000, "nist": 20000, "attack": 20000, "nvd": 15000,
@@ -46,7 +48,10 @@ QUESTION_TEMPLATES = [
     "Brief me on {topic}.",
 ]
 
-UNESCAPE = [(chr(92) + "n", "\n"), (chr(92) + "t", "\t"), (chr(92) + "r", "\r"), (chr(92) + '"', '"')]
+UNESCAPE = [(chr(92) + "n", "\n"), (chr(92) + "t", "\t"), (chr(92) + "r", "\r"),
+            (chr(92) + '"', '"'),
+            # narrow-NO-BREAK-space safe: a backslash before a REAL newline is residue
+            (chr(92) + "\n", "\n"), (chr(92) + "\t", "\t"), (chr(92) + chr(92), chr(92))]
 
 
 
@@ -138,9 +143,10 @@ def dedupe(rows, key="user"):
 
 def unescape(s: str) -> str:
     out = s
-    for pat, rep in UNESCAPE:
-        out = out.replace(pat, rep)
-    return out
+    for _ in range(3):                       # iterate: doubled patterns leave a stray on pass 1
+        for pat, rep in UNESCAPE:
+            out = out.replace(pat, rep)
+    return re.sub(chr(92) + r"(?=\s)", "", out)   # a backslash before whitespace is always residue here
 
 
 def read_jsonl(path, limit=None):
@@ -177,12 +183,19 @@ def load_nist(limit, rng):
     out = []
     for d in read_jsonl("v2/candidates/nist-sample.jsonl", limit):
         txt = unescape(str(d.get("text") or "")).strip()
-        txt = re.sub(r"^You are a cybersecurity expert[^.]*\.\s*", "", txt)   # strip embedded persona
+        txt = re.sub(r"^You are a cybersecurity expert[^.]*\.\s*", "", txt)
+        txt = re.sub(r"^You provide accurate[^.]*\.\s*", "", txt)          # both embedded personas
         if len(txt) < 120:
             continue
-        topic = "the NIST guidance on " + " ".join(re.findall(r"[A-Za-z0-9-]+", txt)[:6])
-        q = rng.choice(QUESTION_TEMPLATES).format(topic=topic)
-        out.append({"system": BRS.SYS, "user": q, "assistant": txt[:4000], "src": "nist"})
+        # The prompt must identify what is being asked. These rows are question+answer prose, so use the
+        # embedded question as the prompt and the remainder as the target; skip rows with no question
+        # rather than shipping a prompt that points at nothing (Astra data review #2).
+        m = re.search(r"([A-Z][^?]{20,300}\?)", txt)
+        if not m:
+            continue
+        question = m.group(1).strip()
+        answer = (txt[:m.start()] + txt[m.end():]).strip() or txt
+        out.append({"system": BRS.SYS, "user": question, "assistant": answer[:4000], "src": "nist"})
     return out
 
 
@@ -211,9 +224,9 @@ def load_nvd(limit, rng):
         cid, desc = cid.strip(), desc.strip()
         if not re.match(r"^CVE-\d{4}-\d+$", cid) or len(desc) < 60:
             continue
-        q = (f"What does {cid} describe, and what should a defender take from it? "
-             f"Quote the identifier exactly as given.")
-        out.append({"system": BRS.SYS, "user": q, "assistant": desc[:4000], "src": "nvd"})
+        q = (f"What does {cid} describe, and what should a defender take from it?")
+        # the answer must actually satisfy the prompt: lead with the identifier it was asked about
+        out.append({"system": BRS.SYS, "user": q, "assistant": f"{cid}: {desc}"[:4000], "src": "nvd"})
     return out
 
 
@@ -223,10 +236,12 @@ def load_arcspan(limit, rng):
         txt = unescape(str(d.get("text") or "")).strip()
         if len(txt) < 120:
             continue
-        head = " ".join(re.findall(r"[A-Za-z0-9.-]+", txt)[:8])
-        q = (f"Extract the security indicators from this incident report ({head}...) and list them by "
-             f"type (IP, domain, file, hash, malware, technique).")
-        out.append({"system": BRS.SYS, "user": q, "assistant": txt[:4000], "src": "arcspan"})
+        labels = str(d.get("labels") or "").strip()
+        if not labels or labels in ("[]", "''", '""'):
+            continue                       # no extraction target: a prose answer would be a mismatch
+        q = ("Extract the security indicators from the incident report below and list them by type "
+             "(IP, domain, file, hash, malware, technique).\n\n" + txt[:2000])
+        out.append({"system": BRS.SYS, "user": q, "assistant": labels[:4000], "src": "arcspan"})
     return out
 
 
@@ -250,21 +265,44 @@ def load_authored(path, src):
     return out
 
 
+REPLACEMENT_QUESTIONS = [
+    "What controls reduce the risk of {n}?",
+    "Summarise the defensive posture against {n}.",
+    "Which detections matter most for {n}?",
+    "How should we harden against {n}?",
+    "Which logging sources expose {n}?",
+    "How do we validate coverage against {n}?",
+    "What does an incident runbook say about {n}?",
+    "Which NIST CSF functions apply to {n}?",
+    "How should we brief leadership on {n}?",
+    "What does a purple-team exercise for {n} cover?",
+    "Which compensating controls help when patching lags on {n}?",
+    "How do we measure our response time to {n}?",
+]
+REPLACEMENT_LEADS = [
+    "Defensively: ", "For detection and hardening: ", "The defensive reading: ",
+    "Concretely, for defenders: ", "What reduces risk here: ",
+]
+
+
 def build_replacements(refusal_rows, rng):
-    """Matched non-refusal defensive Q&A occupying the same number of slots as the refusal rows."""
+    """Matched non-refusal defensive Q&A occupying the same number of slots as the refusal rows.
+
+    The first version produced only 48 distinct prompts and 12 distinct answers, so the control arm was
+    a materially more repetitive and shorter treatment — not a matched substitution (Astra data review
+    #6). The space below is families x questions x leads, and every pair is distinct.
+    """
     body_by_fam = {k: v["defence"] for k, v in BRS.FAMILIES.items()}
-    fams = list(body_by_fam)
+    combos = [(f, q, l) for f in body_by_fam for q in REPLACEMENT_QUESTIONS
+              for l in (REPLACEMENT_LEADS[0], REPLACEMENT_LEADS[1])]
+    rng.shuffle(combos)
     out = []
-    for r in refusal_rows:
-        fam = rng.choice(fams)
-        q = rng.choice([
-            "What controls reduce the risk of {n}?",
-            "Summarise the defensive posture against {n}.",
-            "Which detections matter most for {n}?",
-            "How should we harden against {n}?",
-        ]).format(n=BRS.WHAT[fam])
-        out.append({"system": BRS.SYS, "user": q, "assistant": body_by_fam[fam], "src": "replacement",
-                    "kind": "defensive-qa"})
+    for i, r in enumerate(refusal_rows):
+        fam, qt, lead = combos[i % len(combos)]
+        out.append({"system": BRS.SYS,
+                    "user": qt.format(n=BRS.WHAT[fam]),
+                    "assistant": lead + body_by_fam[fam],
+                    "src": "replacement", "kind": "defensive-qa"})
     return out
 
 
@@ -292,6 +330,7 @@ def main():
     }
     hold = load_holdout_prompts()
     n_near_removed = 0
+    n_clipped = 0
     clean = {}
     for k, rows in pools.items():
         before = len(rows)
@@ -300,6 +339,16 @@ def main():
         # documents key on CONTENT (their prompt is a fixed template); conversations key on the prompt
         dkey = "assistant" if k in ("nist", "attack", "nvd", "arcspan", "replay") else "user"
         rows, de, dn = dedupe(rows, key=dkey)
+        for r in rows:                       # clip unfinishable answers (audit found 48 % over the cap)
+            a = str(r["assistant"])
+            if len(a.split()) > ASSISTANT_MAX_WORDS:
+                cut = " ".join(a.split()[:ASSISTANT_MAX_WORDS])
+                # prefer ending at the last sentence boundary so the target does not stop mid-clause
+                m = re.search(r"^[\s\S]*[.!?](?=\s|$)", cut)
+                if m and len(m.group(0).split()) > ASSISTANT_MAX_WORDS * 0.5:
+                    cut = m.group(0).strip()
+                r["assistant"] = cut.rstrip(" ,;:-")
+                n_clipped += 1
         clean[k] = rows
         print(f"  loaded {k:<9} {len(pools[k]):>6} rows -> held-out removed, deduped: "
               f"{len(rows):>6} (exact dup {de}, near dup {dn})")
@@ -327,12 +376,17 @@ def main():
         else:
             armB.append(r)
 
+    def scrub(s):
+        """Last-resort residue removal at write time: a backslash followed by whitespace is never
+        meaningful in this data (Windows paths are backslash+letter), so it is always residue."""
+        return re.sub(chr(92) + r"(?=\s)", "", str(s))
+
     def write(name, rows):
         path = os.path.join(args.outdir, name)
         with open(path, "w", encoding="utf-8") as fh:
             for r in rows:
-                fh.write(json.dumps({"system": r["system"], "user": r["user"],
-                                     "assistant": r["assistant"], "src": r.get("src", "")},
+                fh.write(json.dumps({"system": scrub(r["system"]), "user": scrub(r["user"]),
+                                     "assistant": scrub(r["assistant"]), "src": r.get("src", "")},
                                     ensure_ascii=False) + "\n")
         return path, hashlib.sha256(open(path, "rb").read()).hexdigest()
 
@@ -353,6 +407,8 @@ def main():
         "tokens_per_epoch_est": sum(toklen(r["assistant"]) for r in armA),
         "assistant_token_mean": {"armA": mean_tok(armA), "refusal_rows": mean_tok(armA, "refusal"),
                                  "replacement_rows": mean_tok(armB, "replacement")},
+        "answers_clipped_at_max": n_clipped,
+        "assistant_max_words": ASSISTANT_MAX_WORDS,
         "refusal_slots": {"armA": sum(1 for r in armA if r["src"] == "refusal"),
                           "armB": sum(1 for r in armB if r["src"] == "replacement")},
     }
@@ -360,6 +416,7 @@ def main():
         json.dump(receipt, fh, indent=2)
 
     print(f"\n  held-out rows removed (exact or >=0.80 near): {n_near_removed}")
+    print(f"  answers clipped at {ASSISTANT_MAX_WORDS} words: {n_clipped}")
     print(f"WROTE {pa}: {len(armA)} rows | {pb}: {len(armB)} rows")
     print(f"  weighted epoch: {len(armA)} presentations")
     print(f"  refusal slots: armA={receipt['refusal_slots']['armA']} armB={receipt['refusal_slots']['armB']}")

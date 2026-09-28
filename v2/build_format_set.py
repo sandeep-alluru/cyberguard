@@ -24,6 +24,37 @@ import uuid
 SYS = ("You are a cyber-defence assistant. Follow the requested output format exactly: when a format "
        "is specified, the answer contains that format and nothing else.")
 
+# A Sigma rule is only meaningful if its logsource matches the telemetry the goal names. The first
+# version picked it at random and paired "persistence ... in file events" with an image-load source —
+# 658 of 800 rules were semantically incoherent, which would have taught wrong detections (and directly
+# undermined gate G-E). The logsource is now DERIVED from the goal's channel.
+LOGSOURCE_BY_CHANNEL = {
+    "process creation": [
+        ("process_creation", "windows", "Image|endswith", ["\\powershell.exe", "\\cmd.exe",
+                                                           "\\rundll32.exe", "\\wmic.exe",
+                                                           "\\certutil.exe"]),
+        ("process_creation", "linux", "CommandLine|contains", ["curl ", "wget ", "base64 -d",
+                                                               "chmod +x"]),
+    ],
+    "file events": [
+        ("file_event", "windows", "TargetFilename|endswith", [".lnk", ".hta", ".iso", ".vbs", ".js"]),
+        ("file_event", "linux", "TargetFilename|endswith", ["/authorized_keys", "/.ssh/config"]),
+    ],
+    "registry writes": [
+        ("registry_set", "windows", "TargetObject|contains", ["Run", "Services", "Winlogon"]),
+    ],
+    "DNS telemetry": [
+        ("dns_query", "windows", "QueryName|endswith", [".duckdns.org", ".ngrok.io", ".top", ".xyz"]),
+    ],
+    "network connections": [
+        ("network_connection", "windows", "DestinationPort", ["4444", "8080", "3389", "5985"]),
+    ],
+    "command-line auditing": [
+        ("process_creation", "windows", "CommandLine|contains", ["-enc", "-nop", "-w hidden",
+                                                                 "Invoke-Expression", "IEX("]),
+    ],
+}
+
 LOGSOURCES = [
     ("process_creation", "windows", "Image|endswith", ["powershell.exe", "cmd.exe", "rundll32.exe"]),
     ("process_creation", "linux", "CommandLine|contains", ["curl ", "wget ", "base64 -d", "chmod +x"]),
@@ -59,8 +90,9 @@ ACTIONS = ["obfuscated script execution", "payload download", "persistence insta
            "lateral movement", "impact preparation"]
 
 
-def sigma_rule(rng, goal, technique, level):
-    ls, product, field, values = rng.choice(LOGSOURCES)
+def sigma_rule(rng, goal, technique, level, channel=None):
+    pool = LOGSOURCE_BY_CHANNEL.get(channel) or LOGSOURCES
+    ls, product, field, values = rng.choice(pool)
     value = rng.choice(values)
     base = technique.split(".")[0]
     lines = [
@@ -122,8 +154,10 @@ def gen_log_line(rng):
 
 
 def sigma_goal(rng):
-    return "detect %s identified by %s in %s" % (
-        rng.choice(ACTIONS), rng.choice(HANDPRINTS), rng.choice(CHANNELS))
+    """Return (goal_text, channel) so the rule's logsource can be derived rather than guessed."""
+    channel = rng.choice(CHANNELS)
+    return ("detect %s identified by %s in %s"
+            % (rng.choice(ACTIONS), rng.choice(HANDPRINTS), channel)), channel
 
 
 def build(target, seed):
@@ -163,9 +197,9 @@ def build(target, seed):
     n = a = 0
     while n < quotas["sigma-rule"] and a < 300000:
         a += 1
-        g = sigma_goal(rng)
+        g, chan = sigma_goal(rng)
         n += add(rng.choice(sig).format(g=g),
-                 sigma_rule(rng, g, rng.choice(TECHNIQUES), rng.choice(LEVELS)), "sigma-rule")
+                 sigma_rule(rng, g, rng.choice(TECHNIQUES), rng.choice(LEVELS), chan), "sigma-rule")
 
     n = a = 0
     while n < quotas["structured-json"] and a < 300000:

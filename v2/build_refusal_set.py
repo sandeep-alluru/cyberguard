@@ -240,12 +240,32 @@ UNKNOWN_ASKS = [
     "Name the exact threat actor behind the {thing} campaign last month.",
     "Give me the precise date {thing} was first exploited in the wild.",
     "What is the CVE for the {thing} flaw disclosed in {ver}?",
+    "Give me the patch identifier for {thing} in {ver}.",
+    "Which advisory number covers the {thing} issue in {ver}?",
+    "What is the exact attack technique ID for {thing}?",
+    "Name the vendor bulletin that fixed {thing} in {ver}.",
+    "How many known exploits target {thing} in {ver}?",
+    "What is the precise detection rule ID for {thing}?",
+    "Which CWE is assigned to the {thing} weakness in {ver}?",
 ]
 UNKNOWN_THINGS = ["a widely deployed VPN appliance", "an unnamed enterprise SIEM", "a legacy ERP system",
-                  "a small vendor's firmware", "an internal authentication service", "a niche library"]
+                  "a small vendor's firmware", "an internal authentication service", "a niche library",
+                  "a proprietary backup appliance", "an embedded device in the OT network",
+                  "a third-party identity provider", "a bespoke line-of-business application"]
 UNKNOWN_VERS = ["2.4.1", "the 2023 release", "build 7.2", "the LTS branch", "the current stable"]
 
 UNKNOWN_RESPONSES = [
+    ("I can't confirm that identifier, and I won't invent one. Identifiers in this field are exact: an "
+     "invented CVE or a technique ID one digit off a real one still looks plausible and still misleads. "
+     "Verify against NVD, the vendor advisory and MITRE's published data; treat anything untraceable as "
+     "unverified."),
+    ("I don't know that value with confidence, so the honest answer is that I can't give it. Look it up "
+     "in the authoritative record — NVD for CVE entries, the vendor bulletin for patch versions, MITRE "
+     "ATT&CK for technique IDs — and if the record is absent, the correct reading is that it is "
+     "unassigned rather than known under another name."),
+    ("That specific detail isn't something I can verify, so I'm not going to state it. In security "
+     "work a wrong identifier is worse than no identifier because it propagates: check the primary "
+     "source (NVD, vendor advisory, MITRE) and cite the record you actually read."),
     ("I can't give you that ID because I can't verify it, and an invented identifier is worse than none — "
      "it will be quoted and acted on. Check the authoritative sources instead: NVD for the CVE record "
      "(with the vendor advisory linked from it), the vendor's own security bulletin for the patch "
@@ -363,8 +383,8 @@ def build(target: int, seed: int) -> list[dict]:
     """Fill explicit quotas per behaviour. Shuffling a fixed pool and truncating starves categories —
     which is exactly how the first run produced 36 unknown-answer rows against a requirement of 200."""
     rng = random.Random(seed)
-    quotas = {"offensive-refusal": 600, "unknown-answer": 220,
-              "dual-use-boundary": 180, "defensive-redirect": 200}
+    quotas = {"offensive-refusal": 560, "unknown-answer": 300,
+              "dual-use-boundary": 160, "defensive-redirect": 180}
     assert sum(quotas.values()) == target, "quotas must sum to the target"
     rows: list[dict] = []
     seen: set[str] = set()
@@ -400,11 +420,10 @@ def build(target: int, seed: int) -> list[dict]:
                     break
                 n += add(ask.format(thing=thing, ver=ver), rng.choice(UNKNOWN_RESPONSES),
                          "unknown-answer", "factuality")
-    # top up if the grid was not wide enough
-    while n < quotas["unknown-answer"]:
-        q, a = rng.choice(DUALUSE)
-        if add(q + f" ({n})", a, "unknown-answer", "factuality"):
-            n += 1
+    # NO top-up loop: an earlier version padded this category with DUALUSE answers relabelled as
+    # unknown-answer. Codex data review #1 reproduced it (only 144 of 220 rows genuinely abstained,
+    # 76 were ordinary defensive answers wearing the label) — support that is multiplied is not
+    # support, and a mislabelled row teaches the opposite of the intended behaviour.
 
     # 3) dual-use boundary: conceptual framing over each family's defensive body.
     #    Retry on collision instead of breaking — an early `break` is what starved this category.

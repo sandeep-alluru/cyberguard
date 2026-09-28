@@ -174,6 +174,16 @@ def main():
     if over > len(A) * 0.01:
         warn("E-truncation", f"{over} rows ({over/len(A):.2%}) exceed the {MAX_SEQ}-token budget")
 
+    # E2 --- generation-budget consistency: training answers must be producible at eval time
+    #         (v1's lesson: a train/eval length mismatch is invisible until somebody scores it)
+    GEN_CAP = 512
+    over_cap = sum(1 for r in A if len(toks(r["assistant"])) > GEN_CAP)
+    rep["answers_over_generation_cap"] = over_cap
+    if over_cap > len(A) * 0.01:
+        fail("E2-generation-cap", f"{over_cap} training answers exceed the {GEN_CAP}-token generation "
+                                  f"budget ({over_cap/len(A):.1%}) — the model would be taught output "
+                                  f"it can never finish")
+
     # F --- authored format validity
     SIGMA_PREFIX = ("Write a Sigma rule", "Produce a schema-complete Sigma rule",
                     "Draft Sigma YAML", "Give me a Sigma rule for:", "Rule please:")
@@ -238,6 +248,39 @@ def main():
         fail("H-degeneracy", f"{loop} answers are word-loop degenerate")
     if short > len(A) * 0.01:
         warn("H-degeneracy", f"{short} answers are shorter than 5 words")
+
+    # H2 --- post-dedupe support for the gates that depend on specific data
+    ref = [r for r in A if r.get("src") == "refusal"]
+    known = {}
+    rp = "v2/data/refusal-retention.jsonl"
+    if os.path.exists(rp):
+        for line in open(rp, encoding="utf-8"):
+            d = json.loads(line)
+            known[" ".join(d["user"].lower().split())] = (d.get("meta") or {}).get("kind")
+    uniq = collections.Counter()
+    seen_prompt = set()
+    for r in ref:
+        k = " ".join(r["user"].lower().split())
+        if k in seen_prompt:          # count UNIQUE rows: weighting makes slot counts lie
+            continue
+        seen_prompt.add(k)
+        uniq[known.get(k, "?")] += 1
+    rep["refusal_unique_by_kind"] = dict(uniq)
+    # a labelled abstention must actually abstain (Astra data review #1: 76 of 220 did not)
+    ABSTAIN = ("i can't", "i cannot", "i don't know", "i won't", "not able",
+               "can't confirm", "don't know", "isn't something i can verify", "not going to state")
+    bad_abstain = 0
+    for r in ref:
+        if known.get(" ".join(r["user"].lower().split())) == "unknown-answer":
+            if not any(a in r["assistant"].lower() for a in ABSTAIN):
+                bad_abstain += 1
+    rep["unknown_answer_rows_that_do_not_abstain"] = bad_abstain
+    if bad_abstain:
+        fail("H3-abstention", f"{bad_abstain} rows labelled unknown-answer do not actually abstain")
+    rep["refusal_unique_total"] = sum(uniq.values())
+    if uniq.get("unknown-answer", 0) < 200:
+        fail("H2-support", f"only {uniq.get('unknown-answer',0)} unique unknown-answer rows survive into "
+                           f"the mixture; gate G-F prespecifies support of >=200")
 
     # I --- arm diff
     if len(A) == len(B):
