@@ -64,9 +64,18 @@ def main():
             fh.write(" | ".join(line) + "\n")
             for al in alerts:
                 fh.write(f"    ALERT {al}\n")
+        fired = {al.split(":")[0] for al in alerts}
         for al in alerts:
             with open(os.path.join(ROOT, "logs", "ALERT-" + al.split(":")[0]), "w", encoding="utf-8") as fh:
                 fh.write(f"{ts} {al}\n")
+        # clear alerts whose condition has resolved (a stale ALERT is worse than no ALERT)
+        import glob as _glob
+        for f in _glob.glob(os.path.join(ROOT, "logs", "ALERT-*")):
+            kind = os.path.basename(f).replace("ALERT-", "")
+            if kind not in fired:
+                os.rename(f, f + ".resolved")
+                with open(logpath, "a", encoding="utf-8") as fh:
+                    fh.write(f"    RESOLVED {kind} (condition no longer holds)\n")
         time.sleep(a.interval)
     with open(logpath, "a", encoding="utf-8") as fh:
         fh.write(f"[{datetime.datetime.now():%Y-%m-%d %H:%M:%S}] watchdog exit after {cycles} cycles\n")
