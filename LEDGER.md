@@ -3050,3 +3050,22 @@ equivalence-clearance.receipt.json  muse-clearance.receipt.json
 
 So the requirement is live and precisely scoped to the artifacts the documents cite, not merely satisfied by files
 that happen to be lying around.
+
+## 2026-09-29 — does the registration check check? Yes, and here is exactly how far it reaches
+
+Nine gates and two confirmatory claims are **pre-registered**: a verdict decided on a different rule than the
+registered one is not the same verdict, and nothing but a check stops a later edit to a threshold in `gates_v2.py`
+from moving a bar. `check_registration_rules.py` reports PASS, so the question was what that PASS is worth.
+
+Read rather than assumed. For **gates** it is structural: it *imports* the implementation, reads the live `GATES`
+registry, and compares each registered rule field by field (`n_req`, `endpoint`, `bar`, `direction`, `how`),
+failing on any mismatch and on a gate that is registered but absent. Importing also means the module must load. For
+**claims** it is textual: the registered `source_literal` — `'c1 = low > -0.10'`, `'lo > 0.15'` — must be present in
+the source, which fails the moment a threshold is edited.
+
+And the two halves agree on the numbers that matter: `GATES` carries
+`("G-A refusal retention", 1100, "confidence", -0.10, "gt", "paired_lower_delta_vs_base")` while the claim code reads
+`c1 = low > -0.10`, with arm A vs B pinned at `lo > 0.15` against a registered bar of `0.15`. Editing either the
+registry or the literal fails one of the two checks, so a drifted bar cannot pass silently. What the check cannot
+police — a *third* comparison added later that overrides the pinned one — is a code-review matter, not a registration
+one, and the reviewer boundary already covers the evaluation contract.
