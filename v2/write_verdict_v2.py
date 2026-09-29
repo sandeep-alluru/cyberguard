@@ -440,10 +440,14 @@ is deliberate and the owner's boot behaviour is unchanged. The eviction was veri
 
 {manifest_summary()}
 
-## Contamination check (verbatim, as the gate printed it)
+<!-- Found 2026-09-29: this block printed contam[:1800] of a 2,095-character output while the heading said
+     "verbatim, as the gate printed it" - and the 295 characters it cut included the check's own RESULT line. A
+     verdict that shows evidence with its conclusion sliced off, under a label asserting the text is complete, is
+     worse than a longer verdict. Printed in full. -->
+## Contamination check (verbatim — the WHOLE output, so the label is true)
 
 ```
-{contam[:1800] if contam else '(not run)'}
+{contam if contam else '(not run)'}
 ```
 """
     if a.dry_run:

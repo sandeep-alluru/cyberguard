@@ -2209,3 +2209,36 @@ Both previews now print the **whole** document, and the affected claims were re-
 assertions read the written file, the harvest hashes the file on disk, and the portal verification fetches the
 served file — all full-document. What was unsound was my ad-hoc method for checking brief content, and the
 conclusions that depended on text past the cut are now re-verified above rather than carried.
+
+## 2026-09-29 — the verdict showed the contamination evidence with its CONCLUSION cut off, labelled "verbatim"
+
+The previous entry's finding (my verification instrument was truncating documents) prompted a sweep for the same
+pattern everywhere. Two more instances, and the second is far worse than a preview:
+
+**1. `verdict_brief.py` had the same preview truncation** — `print(body[:2500])`, copied from the two scripts
+fixed a round earlier when I wrote it. Fixed: it prints the whole brief, whose tail is the every-gate table and
+the opening-deviations list.
+
+**2. The verdict's contamination block was truncated while claiming to be verbatim.** The heading read
+`## Contamination check (verbatim, as the gate printed it)` and the body was `contam[:1800]`. The check's real
+output is **2,095 characters**, so the verdict would have cut **295 characters** — and here is precisely what they
+were:
+
+```
+    gF: 20/60 of its probes are training rows
+    gJ: 99/100 of its probes are training rows
+
+  RESULT: PASS — every GENERALISATION instrument is prompt-disjoint from both training arms; the
+          retention/recall instruments are labelled as such and carry no generalisation claim
+```
+
+The cut removed the per-instrument findings **and the check's own RESULT line**. A verdict that presents
+contamination evidence with the conclusion sliced off — under a label asserting the text is complete — is worse
+than a longer verdict, because the reader is told the excerpt is whole.
+
+Fixed: the block is printed in full, the heading now says "verbatim — the WHOLE output, so the label is true", and
+the reason is recorded in the file at the point of the change. Re-verified by composing the verdict: the
+contamination block is now 2,180 characters and contains `RESULT: PASS` and "every GENERALISATION instrument is
+prompt-disjoint from both training arms". The brief's preview now reaches its end.
+
+Both were found only because the *first* truncation was chased to its cause rather than patched where it surfaced.

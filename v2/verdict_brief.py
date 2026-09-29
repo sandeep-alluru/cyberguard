@@ -166,7 +166,10 @@ worst case {gh.get('worst_case_total_gpu_h', '?')} of {gh.get('authorization_gpu
 * The merge check's coverage boundaries and the per-module sensitivity limit are stated in the verdict itself.
 """
     if a.dry_run:
-        print(body[:2500])
+        # PRINT THE WHOLE BODY — the same truncation found in checkpoint_brief.py and write_verdict_v2.py on
+        # 2026-09-29, copied into this script when it was written: a preview that hides the end of the document
+        # is used to verify the document. The brief carries the every-gate table, so its tail is not optional.
+        print(body)
         print(f"\n(DRY RUN: would write {os.path.join(a.out_dir, fname)})")
         return 0
     os.makedirs(a.out_dir, exist_ok=True)
