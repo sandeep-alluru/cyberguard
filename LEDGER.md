@@ -2415,3 +2415,37 @@ lock — the interruptible-wait fix working in production, not just in a test �
 `v2/.c24-timeline.lock`, grace-skipped the 05:50 M2 checkpoint, and is armed for C24 11:55 / brief 11:57 / contract
 12:10. One self-inflicted error caught immediately: the reorder first produced **two** C24 dispatch lines, which would
 have run the reviewer twice for one checkpoint; the count is now asserted at two sites (one per path).
+
+## 2026-09-29 — what actually stops the training, and a checkpoint that would have photographed a moving train
+
+**I nearly reported a critical failure that did not exist, and the check that disproved it is the entry.** The
+trainer's progress bar shows a cap of **5,068 steps**. At the measured ~7.5 s/step that is ~10.5 h from the 02:31
+start — ending ~13:05, i.e. *after* stage 00's deadline (12:10 + `TRAINER_WAIT_MIN=45` → 12:55). Stage 00 would
+have exited 3, the timeline would have retried once, failed again, and the window would have produced **no
+verdict** — the single most expensive outcome available.
+
+So I stopped reading the step count as the stop criterion and asked the machine. `/proc/<trainer>/environ` on both
+hosts carries **`MAX_MINUTES=570`**, and `train_cyberguard.py` enforces it with a `TimeBox(TrainerCallback)` whose
+`deadline = time.time() + minutes*60` is set when the callback is constructed — wall clock, from just after model
+load, checked at every `on_step_end`. The governing stop is therefore `min(step cap, 570 min)`, and 570 min from
+~02:33 is **~12:03**. Stage 00 opens at 12:10 and sees the trainers already gone. The 5,068 step count is a
+*derived* cap that this run will not reach (~4,130 steps expected at the measured rate). No defect existed; what
+was missing was the check, and "the projection said so" is not the same as reading `MAX_MINUTES` off the live
+process.
+
+**The same investigation found a real one.** Because the window closes ~12:03 and the timeline's C24 step fires at
+**11:55**, the end-of-window checkpoint was going to snapshot the run *while it was still running* — ~60 steps short,
+under a heading that says the window closes, and disagreeing by that margin with the receipt-based numbers the
+verdict quotes. `checkpoint_metrics.sh C24` now waits (bounded, `C24_WAIT_MIN=20`) for the trainers to exit before
+sampling, so the C24 snapshot is the end of the window. It is bounded and its timeout only *warns* — a trainer that
+never exits must not stall the timeline, which owns the contract. The gate is an explicit **0** from both hosts:
+the first version treated any non-1 value as "exited", and an unreachable host returns an empty string, so a dead
+ssh connection would have been read as "the trainer has exited" and closed the window on no evidence. Verified:
+a live host reports `1`/running, a bogus host reports `""`/UNREACHABLE, the C24 path with a zero budget prints the
+poll line, warns, and finishes in 6 s rather than blocking, and a non-C24 label produces no wait at all.
+
+Also re-verified while here: stage 0's registration preflight **PASS** (12 gate rules + 2 claim rules match the
+registration frozen at spec `75a909355bb9dc91`), and 77 GB free locally for the harvest's adapters and receipts.
+
+This change needs no re-arm: the timeline invokes the metrics script by path, so the new behaviour takes effect at
+11:55 without touching the running process.
