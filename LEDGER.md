@@ -3513,3 +3513,21 @@ run.
 This is the same class as the working-directory defect and the 1,580: a document asserting something the code does not
 support, where the check that would catch it upstream (C4 "executable exit command") cannot see flag existence. Four of
 the five would have let a reader execute the plan's own pass/fail condition, get exit 0, and measure the wrong thing.
+
+## 2026-09-29 08:28 — regression pass after the plan-of-record corrections
+
+A second single-pass run, because the last one predates the corrections to both plan documents and to the harvest,
+brief and verdict scripts:
+
+```
+1. registration rules      PASS — 12 gate rules + 2 claim rules match spec 75a909355bb9dc91
+2. plan documents          SPEC-V2.md 0 failures / 0 warnings;  PLAN-SEQUENCE.md 11 (all C3, the documented kinds)
+3. rehearsal               PASS — the local verdict chain decides, binds identity, rests no decision on stub input
+4. contract dry-run        exit 0, 15 stages, no lock taken
+5. objective verifier      exit 2 — elements 1 and 2 PASS; 3, 4, 5 NOT-YET (awaiting the contract)
+6. repository compile      0 compile-time failures across every v2/ and root Python file
+```
+
+The two NOT-YET lines remain the honest state: training ends ~12:03, the contract opens 12:10. Nothing in this pass
+changed a claim — it confirms that the corrections of the last three rounds (the harvest's completeness set, the
+receipt-sourced numbers in the brief and the verdict, and the five stale unit commands) left the machinery green.
