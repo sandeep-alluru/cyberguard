@@ -35,7 +35,8 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 N = {"gA": 1100, "gA2": 60, "gB": 300, "gC": 300, "gE": 60, "gF": 60,
-     "gG-gsm8k": 1200, "gG-ifeval": 40, "gJ": 100}
+     "gG-gsm8k": 1200, "gG-ifeval": 40, "gJ": 100,
+     "fresh-gA": 1100, "fresh-gB": 300, "fresh-gE": 60, "fresh-gF": 60, "fresh-gJ": 100}
 EXPECTED_UNMEASURED = {"G-A severity", "G-D extraction", "G-I escape artifact",
                        "G-H harm (judge uplift)", "G-E detection", "G-E utility"}
 
@@ -70,19 +71,22 @@ def build_inputs(d: str) -> None:
         r = refused(rate, 1100)
         return {"refused": r, "abstained": r, "compliant": r, "compliant_n": sum(r),
                 "abstention_probes": 400}
-    batt("gA", "base", ga(0.10))
-    batt("gA", "armA", ga(0.85))
-    batt("gA", "armB", ga(0.10))
+    for nm in ("gA", "fresh-gA"):       # fresh decides; the registered set rides along as recall
+        batt(nm, "base", ga(0.10)); batt(nm, "armA", ga(0.85)); batt(nm, "armB", ga(0.10))
     for a in ("base", "armA"):
         batt("gA2", a, {"refused": [False] * 60})
-        batt("gB", a, {"tp": 290, "fp": 5, "tn": 195, "fn": 10, "n": 300})
         batt("gC", a, {"n": 300, "invalid": 6, "unchecked_cves": 0})
-        batt("gE", a, {"n": 60, "parsed_rate": 0.9, "schema_complete_rate": 0.9})
-        batt("gF", a, {"answerable_correct": 38, "answerable_total": 40, "unanswerable_refused": 19,
-                       "unanswerable_hedged": 1, "unanswerable_handled": 20, "unanswerable_fabricated": 0,
-                       "unanswerable_total": 20})
-        batt("gJ", a, {"answered": 97, "total": 100, "degenerated": 1,
-                       "len_arm_median": 100, "len_base_median": 100})
+        for nm in ("gB", "fresh-gB"):
+            batt(nm, a, {"tp": 290, "fp": 5, "tn": 195, "fn": 10, "n": 300})
+        for nm in ("gE", "fresh-gE"):
+            batt(nm, a, {"n": 60, "parsed_rate": 0.9, "schema_complete_rate": 0.9})
+        for nm in ("gF", "fresh-gF"):
+            batt(nm, a, {"answerable_correct": 38, "answerable_total": 40, "unanswerable_refused": 19,
+                         "unanswerable_hedged": 1, "unanswerable_handled": 20, "unanswerable_fabricated": 0,
+                         "unanswerable_total": 20})
+        for nm in ("gJ", "fresh-gJ"):
+            batt(nm, a, {"answered": 97, "total": 100, "degenerated": 1,
+                         "len_arm_median": 100, "len_base_median": 100})
         batt("gG-gsm8k", a, {"n": 1200, "correct": [True] * 1200})
         batt("gG-ifeval", a, {"n": 40, "correct": [True] * 40})
     # the evaluator's report and the merge check, shaped like the real ones
@@ -140,6 +144,11 @@ def main() -> int:
             fails.append(f"counts {r['counts']} do not sum to {r['rows']} rows")
         ident = r.get("identity") or {}
         pq = json.load(open(f"{d}/evals/gate-inputs-armA.json")).get("paired_quantity") or ""
+        roles = json.load(open(f"{d}/evals/gate-inputs-armA.json")).get("instrument_roles") or {}
+        if not roles.get("generalisation") or not roles.get("retention_recall"):
+            fails.append(f"instrument roles not recorded: {roles}")
+        if not any(isinstance(g.get("observed"), dict) and "retention_recall" in g["observed"] for g in rows):
+            fails.append("no row carries the labelled retention/recall evidence")
         if not pq.startswith("compliant"):
             fails.append(f"G-A did not pair on the registered quantity (D10); paired_quantity={pq!r}")
         if not (ident.get("consistent") and ident.get("has_adapter_hash")):

@@ -134,7 +134,7 @@ def battery_receipts(evals_dir="evals", extra_dirs=()):
     return out
 
 
-def pairs_from_batteries(bat, arm):
+def pairs_from_batteries(bat, arm, battery="gA"):
     """Per-probe compliance pairs for one arm, from its gA receipt plus the base receipt.
 
     Review F23: the paired boolean must be the REGISTERED quantity — non-compliance retention (refusal of the
@@ -142,8 +142,8 @@ def pairs_from_batteries(bat, arm):
     `compliant`. Receipts written before that change carry only `refused` and remain readable; which key was
     used is returned so the report can say which quantity it paired on.
     """
-    base = bat.get(("gA", "base"))
-    side = bat.get(("gA", arm))
+    base = bat.get((battery, "base"))
+    side = bat.get((battery, arm))
     if not base or not side:
         return None, None
 
@@ -303,8 +303,20 @@ def build(extra_eval_dirs=()):
         prov["battery receipts"] = ", ".join(sorted({f"{b}/{a}" for (b, a) in bat}))
         # arm A's pairs carry (arm, base); arm B's pairs are written to their OWN file, because Claim 2
         # reads arm A and arm B from separate files and joins them by probe_id.
-        prsA, keyA = pairs_from_batteries(bat, "armA")
-        prsB, keyB = pairs_from_batteries(bat, "armB")
+        # Owner decision 2026-09-28 22:02 CDT, items 2 and 4: the fresh instruments (disjoint from training)
+        # carry the generalisation verdict; the registered sets, which proved to be training rows, are carried
+        # alongside as RETENTION/recall and must never be presented as generalisation.
+        roles = {"generalisation": [], "retention_recall": []}
+        prsA, keyA = pairs_from_batteries(bat, "armA", battery="fresh-gA")
+        prsB, keyB = pairs_from_batteries(bat, "armB", battery="fresh-gA")
+        _rprsA, _ = pairs_from_batteries(bat, "armA", battery="gA")
+        _rprsB, _ = pairs_from_batteries(bat, "armB", battery="gA")
+        if _rprsA:
+            A["refusal_pairs_retention"] = _rprsA
+            roles["retention_recall"].append("G-A refusal retention")
+        if _rprsB:
+            ARMB["refusal_pairs_retention"] = _rprsB
+            roles["retention_recall"].append("Claim 2 (A vs B)")
         if prsA:
             A["refusal_pairs"] = prsA
             A["refusal_n"] = REQUIRED_N["G-A refusal retention"]
@@ -313,13 +325,15 @@ def build(extra_eval_dirs=()):
             A["paired_quantity"] = keyA
             support["G-A refusal retention"] = len(prsA)
             for _g in ("G-A refusal retention", "G-A co-secondary", "Claim 1 (A vs base)"):
-                mark_current(_g, bat.get(("gA", "armA")), bat.get(("gA", "base")))
+                mark_current(_g, bat.get(("fresh-gA", "armA")), bat.get(("fresh-gA", "base")))
+                roles["generalisation"].append(_g)
         if prsB:
             ARMB["refusal_pairs"] = prsB
             ARMB["refusal_n"] = REQUIRED_N["G-A refusal retention"]
             ARMB["paired_quantity"] = keyB
             support["Claim 2 (A vs B)"] = len(prsB)
-            mark_current("Claim 2 (A vs B)", bat.get(("gA", "armB")), bat.get(("gA", "base")))
+            mark_current("Claim 2 (A vs B)", bat.get(("fresh-gA", "armB")), bat.get(("fresh-gA", "base")))
+            roles["generalisation"].append("Claim 2 (A vs B)")
         gC = bat.get(("gC", "armA"))
         if gC and isinstance(gC.get("scores"), dict):
             # F04: the unchecked count must travel with the aggregates, or the verdict cannot tell 300 verified
@@ -328,25 +342,42 @@ def build(extra_eval_dirs=()):
                         "unchecked": gC["scores"].get("unchecked_cves", 0)}
             support["G-C id factuality"] = A["ids"]["n"]
             mark_current("G-C id factuality", gC)
-        gF = bat.get(("gF", "armA"))
+        gF = bat.get(("fresh-gF", "armA"))
+        _gFr = bat.get(("gF", "armA"))                      # registered set = retention/recall instrument
+        if _gFr and isinstance(_gFr.get("scores"), dict):
+            A["grounded_counts_retention"] = _gFr["scores"]
+            roles["retention_recall"].append("G-F grounded qa")
         if gF and isinstance(gF.get("scores"), dict):
             A["grounded_counts"] = gF["scores"]
+            roles["generalisation"].append("G-F grounded qa")
             support["G-F grounded qa"] = gF["scores"].get("answerable_total", 0) + gF["scores"].get("unanswerable_total", 0)
             mark_current("G-F grounded qa", gF)
-        gB = bat.get(("gB", "armA"))
+        gB = bat.get(("fresh-gB", "armA"))
+        _gBr = bat.get(("gB", "armA"))
+        if _gBr and isinstance(_gBr.get("scores"), dict) and {"tp","fp","tn","fn"} <= set(_gBr["scores"]):
+            A["triage_retention"] = {k: _gBr["scores"][k] for k in ("tp", "fp", "tn", "fn")}
+            roles["retention_recall"].append("G-B triage")
         if gB and isinstance(gB.get("scores"), dict):
             sB = gB["scores"]
             if {"tp", "fp", "tn", "fn"} <= set(sB):
                 A["triage"] = {k: sB[k] for k in ("tp", "fp", "tn", "fn")}
                 support["G-B triage"] = sum(sB[k] for k in ("tp", "fp", "tn", "fn"))
                 mark_current("G-B triage", gB)
-        gE = bat.get(("gE", "armA"))
+                roles["generalisation"].append("G-B triage")
+        gE = bat.get(("fresh-gE", "armA"))
+        _gEr = bat.get(("gE", "armA"))
+        if _gEr and isinstance(_gEr.get("scores"), dict):
+            A["sigma_retention"] = {"n": _gEr["scores"].get("n", 0),
+                                    "parsed_rate": _gEr["scores"].get("parsed_rate", 0.0),
+                                    "schema_complete_rate": _gEr["scores"].get("schema_complete_rate", 0.0)}
+            roles["retention_recall"].append("G-E sigma")
         if gE and isinstance(gE.get("scores"), dict):
             A["sigma"] = {"n": gE["scores"].get("n", 0),
                           "parsed_rate": gE["scores"].get("parsed_rate", 0.0),
                           "schema_complete_rate": gE["scores"].get("schema_complete_rate", 0.0)}
             support["G-E sigma"] = A["sigma"]["n"]
             mark_current("G-E sigma", gE)
+            roles["generalisation"].append("G-E sigma")
         # G-A2 pairs defensive prompts: base must ANSWER them and the arm must not regress
         gA2b, gA2a = bat.get(("gA2", "base")), bat.get(("gA2", "armA"))
         if gA2b and gA2a:
@@ -367,12 +398,18 @@ def build(extra_eval_dirs=()):
             A["general"] = general
             support["G-G general"] = min(len(v) for v in general.values())
             mark_current("G-G general", b, arm)
-        gJ = bat.get(("gJ", "armA"))
+        gJ = bat.get(("fresh-gJ", "armA"))
+        _gJr = bat.get(("gJ", "armA"))
+        if _gJr and isinstance(_gJr.get("scores"), dict):
+            A["chat_counts_retention"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores") or {},
+                                          "tuned": _gJr["scores"]}
+            roles["retention_recall"].append("G-J chat retention")
         if gJ and isinstance(gJ.get("scores"), dict):
-            A["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores") or {},
+            A["chat_counts"] = {"base": (bat.get(("fresh-gJ", "base")) or {}).get("scores") or {},
                                 "tuned": gJ["scores"]}
             support["G-J chat retention"] = gJ["scores"].get("total", 0)
             mark_current("G-J chat retention", gJ)
+            roles["generalisation"].append("G-J chat retention")
 
         # ---- Arm B's own observations. Review F20 remainder: B's batteries were produced, receipted, and then
         # DISCARDED here — only its refusal pairs reached the assembled input — so its C/D/E/J measurements
@@ -478,6 +515,7 @@ def build(extra_eval_dirs=()):
             if esc.get("literal_backslash_n") is not None:
                 support["G-I escape artifact"] = 500
                 current_gates.add("G-I escape artifact")
+    A["instrument_roles"] = roles
     hist = classify_gates(prov, current_gates)
     A["_provenance"] = dict(prov)
     A["historical_gates"] = hist

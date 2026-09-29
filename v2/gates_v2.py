@@ -315,6 +315,23 @@ def _evaluate(evals, checkpoint="C24"):
             _ident_bad = (f"no battery receipt for {_ident.get('arm')} recorded an adapter sha256, so the "
                           f"measurement cannot be attributed to a checkpoint")
 
+    # Owner decision 2026-09-28 22:02 CDT, item 4: the registered sets that proved to be training rows are
+    # reported alongside the generalisation result, labelled as recalL on memorised items. A contaminated
+    # number must never appear unlabelled where a generalisation claim could be read from it.
+    _retention = {k: (A or {}).get(k) for k in
+                  ("triage_retention", "sigma_retention", "grounded_counts_retention",
+                   "chat_counts_retention", "refusal_pairs_retention")}
+
+    def with_retention(observed, key):
+        v = _retention.get(key)
+        if v is None or not isinstance(observed, dict):
+            return observed
+        out = dict(observed)
+        note = ("registered instrument contains training rows — RECALL/regression only, never generalisation")
+        out["retention_recall"] = ({"pairs": len(v), "note": note} if isinstance(v, list)
+                                   else {"values": v, "note": note})
+        return out
+
     def emit(gid, support_ok, rule_holds, observed, detail, has_bar=True):
         row = {"gate": gid, "outcome": outcome_for(checkpoint, support_ok, rule_holds, has_bar),
                "observed": observed, "support_ok": bool(support_ok), "detail": detail}
@@ -859,6 +876,22 @@ def _evaluate(evals, checkpoint="C24"):
     ):
         results.append({"gate": _gid, "outcome": "UNMEASURED", "observed": None, "support_ok": False,
                         "detail": _detail, "declared_unmeasured": True})
+
+    # Owner decision 2026-09-28 22:02 CDT, item 4: attach the labelled retention/recall evidence to the rows
+    # whose registered instrument was training rows. Done here, after evaluation, so no gate's logic or its
+    # construction is disturbed: the generalisation result is decided from the fresh instruments, and the
+    # recall number rides alongside it, named as recall.
+    _gate_retention = {"G-B triage": "triage_retention", "G-E sigma": "sigma_retention",
+                       "G-F grounded qa": "grounded_counts_retention",
+                       "G-J chat retention": "chat_counts_retention",
+                       "G-A refusal retention": "refusal_pairs_retention",
+                       "G-A co-secondary": "refusal_pairs_retention",
+                       "Claim 1 (A vs base)": "refusal_pairs_retention",
+                       "Claim 2 (A vs B)": "refusal_pairs_retention"}
+    for _row in results:
+        _k = _gate_retention.get(_row.get("gate"))
+        if _k and isinstance(_row.get("observed"), dict):
+            _row["observed"] = with_retention(_row["observed"], _k)
     # F11: SPEC binds the safety sentence to G-A **AND** G-A2, but the report previously showed G-A alone, so
     # a reader could quote a satisfied G-A while G-A2 failed. The joint condition is derived and emitted.
     ga = next((r["outcome"] for r in results if r["gate"] == "G-A refusal retention"), "UNMEASURED")
