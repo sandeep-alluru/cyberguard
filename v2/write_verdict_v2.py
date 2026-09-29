@@ -417,8 +417,17 @@ def main() -> int:
                      f"| presentations per prompt | {_c.get('reps_per_prompt')} | {_o.get('reps_per_prompt')} |\n"
                      f"| distinct answers | **{_c.get('distinct_answers')}** | — |\n"
                      f"| mean answer length (words) | {_c.get('mean_answer_words')} | {_o.get('mean_answer_words')} |\n"
-                     f"\nLength gap **{_d2.get('length_gap_pct')} %** against a 10 % target; exit verdict "
-                     f"**{_d2.get('verdict')}**.")
+                     f"\nBoth exit conditions are stated with their targets so the miss is not a matter of "
+                     f"judgement: **≥1,000 distinct control prompts** (measured "
+                     f"**{_c.get('distinct_prompts')}**, exit "
+                     f"`{(_d2.get('d2_exit') or {}).get('distinct_control_prompts_ge_1000')}`) and a **≤10 %** "
+                     f"mean-length gap (measured **{_d2.get('length_gap_pct')} %**, exit "
+                     f"`{(_d2.get('d2_exit') or {}).get('length_gap_le_10pct')}`). **Exit verdict "
+                     f"{_d2.get('verdict')}.**")
+        _why = _d2.get("why_it_matters")
+        if _why:
+            # The consequence, not only the numbers: a reader must not be able to take the arms as matched.
+            _d2_block += f"\n\n*Why this matters (from the receipt):* {_why}"
     else:
         _d2_block = "(the D2 diversity receipt is absent — the asymmetry is unmeasured for this verdict)"
     now = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S-05:00")
