@@ -105,9 +105,12 @@ def merge_equivalence_block() -> str:
             "(exhaustive, not sampled), the worst element deviates by",
             f"**{_fmt(w.get('merge_weight_max_ulp'), '.3f')} of a bf16 ULP** (half an ULP is the optimum for a",
             f"correctly-rounded operation), with **{w.get('merge_weight_nonfinite_elements', '?')} non-finite weights**",
-            f"and **{w.get('merge_weight_near_zero_elements', '?')} near-zero elements** bounded separately (max",
-            f"{_fmt(w.get('merge_weight_near_zero_max_abs'), '.3g')} absolute, because a ULP ratio is meaningless at",
-            "subnormal scale). It is *deterministic*,",
+            f"and **{w.get('merge_weight_near_zero_elements', '?')} near-zero elements**, reported with a maximum "
+            f"absolute deviation of {_fmt(w.get('merge_weight_near_zero_max_abs'), '.3g')} — **not** excluded, "
+            f"because with the exponent clamped the subnormal spacing is the uniform 2^-133 and a ULP ratio is "
+            f"therefore well defined at every magnitude. The main statistic and BOTH controls cover "
+            f"**identical** element sets ({_fmt(w.get('merge_weight_measured_elements'), ',')} elements), so a "
+            f"tolerated residual cannot manufacture the sensitivity the controls claim. It is *deterministic*,"
             "so unlike any behavioural test it cannot be passed by a defect concentrated in a region that happens",
             "not to be sampled — including a SPARSE one: the gate is the element-wise maximum, because a",
             "fraction-only gate was rejected when it permitted 3,633 arbitrarily erroneous elements and passed a",

@@ -1759,3 +1759,36 @@ Third finding fixed as well: the verdict presented the controls as "the same sta
 disproves; it now says **the same measurement applied to an injected defect**. (The merge itself remains
 **0.5 ULP**, with 0 non-finite weights and comparisons and 5 near-zero elements at deviation exactly 0. Rehearsal
 PASS; the stage-2 matrix re-verified with the corrected magnitudes.)
+
+## 2026-09-29 — review #24: the root cause was ASYMMETRIC MASKING, and removing it fixes both findings
+
+#24 executed two counterexamples and both were right. Its diagnosis was the root cause:
+
+> "the main statistic and the sensitivity controls must cover identical element sets"
+> "**Sensitivity can pass entirely through an admitted residual.** … merged zero except one element `100q` …
+> near-zero deviation 9.18355e-39, controls **100.800003/108 ULP**: PASS. Removing the residual gives controls
+> **0.800003/8 ULP**: FAIL. The residual supplies the claimed sensitivity."
+
+The asymmetry was mine: the main statistic **masked subnormal ideals** (they were bounded absolutely, 1e-38) while
+the **controls divided by the same spacing over every element**. A residual tolerated by the absolute bound could
+therefore manufacture the control separation — sensitivity that came from the residual rather than from the
+injected change. #24's second finding was the same asymmetry seen from the verdict's side: the claim "the same
+measurement applied to an injected defect" was still false while the sets differed.
+
+**Fixed at the root by deleting the mask.** With the exponent clamped (the #23 fix), bf16 subnormal spacing is a
+**uniform 2^-133**, so a ULP ratio is well defined for **every** element including zero — the masking was never
+necessary and was itself the defect. Now:
+
+* the statistic and **both controls compute over the same tensors with the same spacing**, so the sets are
+  identical **by construction**; `merge_weight_measured_elements` records that count and stage 2 **requires it to
+  equal `merge_weight_elements`**;
+* #24's matrix is now refused by the **main** statistic, not tolerated: the residual is `100q / q = 100 ULP`,
+  which exceeds the 2-ULP bound;
+* the verdict's claim that a subnormal ULP ratio is "meaningless" is **deleted** — #24 correctly noted the
+  verified uniform spacing contradicts it — and replaced by the statement that the statistic and both controls
+  cover identical sets, so a tolerated residual cannot manufacture sensitivity.
+
+Measured after the change: worst element **0.5 ULP**, `measured_elements == elements == 3,633,315,840`,
+non-finite 0/0, controls **4.14e36 / 4.14e37** ULP. Both of #24's counterexamples are now **re-derived
+regressions** in `v2/test_ulp_spacing.py`, alongside #23's. Stage-2 matrix verified: as-measured PASSES; a
+mismatched set count FAILS; a residual-manufactured 60-ULP separation FAILS. Rehearsal PASS.

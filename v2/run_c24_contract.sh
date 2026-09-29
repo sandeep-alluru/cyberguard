@@ -458,7 +458,8 @@ for arm in ("armA", "armB"):
     # The max has no sparse blind spot and no NaN blind spot, and it cannot fail spuriously: a correct merge
     # measured **0.5 ULP max over 3,633,315,840 elements**, which is the optimum for a correctly-rounded
     # operation, while a 10% mis-scaling measures 3.8e26 and a dropped contribution 3.8e27.
-    for k in ("merge_weight_max_ulp", "merge_weight_elements", "merge_weight_nonfinite_elements",
+    for k in ("merge_weight_max_ulp", "merge_weight_elements", "merge_weight_measured_elements",
+              "merge_weight_nonfinite_elements",
               "merge_weight_nonfinite_comparisons", "merge_weight_any_nonfinite_module",
               "merge_weight_near_zero_elements", "merge_weight_near_zero_max_abs",
               "merge_weight_control_scale_0p9_max_ulp", "merge_weight_control_module_dropped_max_ulp"):
@@ -471,6 +472,12 @@ for arm in ("armA", "armB"):
                  f"comparison must never be readable as agreement")
     if we < 100000:
         sys.exit(f"FATAL: {arm} the weight-level check covered only {we} elements; it must be exhaustive")
+    # Review #24: the main statistic and the sensitivity controls must cover IDENTICAL element sets, or a
+    # tolerated residual can manufacture the control separation (an executed matrix passed reporting 100.8/108
+    # ULP where removing the residual gave 0.8/8). The mask that caused it is gone; this asserts the sets match.
+    if int(e["merge_weight_measured_elements"]) != we:
+        sys.exit(f"FATAL: {arm} the statistic covered {we} elements but the controls covered "
+                 f"{e['merge_weight_measured_elements']} — different sets, so the separation is not comparable")
     if nf != 0:
         sys.exit(f"FATAL: {arm} the merged model has {nf} non-finite weight(s); NaN compares False against every "
                  f"tolerance and would otherwise vanish from the exceedance count")

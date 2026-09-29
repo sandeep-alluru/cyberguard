@@ -87,6 +87,18 @@ else:
     print(f"    with the corrected spacing : the 10%-scale control is {_true_90:.0f} ULP -> FAILS the >=100 "
           f"requirement, so that matrix is REFUSED rather than accepted on an artefact")
 
+# Review #24's counterexample, re-derived with NO masking (the fix). Their matrix: ideal = 0 everywhere,
+# base = -8q, A = 1, B = 8q, scaling = 1, merged zero except one element = 100q (q = 2**-133). Because the
+# statistic no longer masks subnormal ideals, the residual itself is measured: 100q / q = 100 ULP, which FAILS
+# the 2-ULP bound - previously it was excluded while the controls divided by the same spacing, so the residual
+# manufactured control separations of 100.8/108 ULP and PASSED.
+_resid_ulp = 100.0 * q / q
+print(f"  review #24 counterexample re-derived (no masking): the residual is {_resid_ulp:.0f} ULP and exceeds "
+      f"the 2-ULP bound -> REFUSED by the main statistic, not tolerated")
+if _resid_ulp <= 2.0:
+    print("  FAIL: the residual must exceed the main tolerance once the mask is removed")
+    BAD += 1
+
 print(f"  checked {CHECKED} magnitudes: bit-pattern exponent correct in every case" if not BAD
       else f"  {BAD} bit-pattern failures")
 print(f"  the log2 route is WRONG for {len(LOG2_WRONG)} of them, e.g. "

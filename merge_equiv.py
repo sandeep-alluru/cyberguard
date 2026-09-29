@@ -161,8 +161,15 @@ def merge_weight_check(merged, un):
                 # errors on subnormal-scale ideals were understated. bf16's smallest NORMAL magnitude is 2**-126,
                 # so the ULP statistic is applied only where the ideal is normal, and the subnormal/near-zero
                 # remainder is counted separately with its own absolute bound (bf16 subnormal spacing is 2**-133).
+                # NO MASKING. An earlier version excluded subnormal ideals from the main ULP statistic and
+                # bounded them absolutely instead, while the CONTROLS still divided by the same spacing. Review
+                # #24 executed a matrix where that asymmetry mattered: a tolerated residual (9.18e-39, under the
+                # disclosed 1e-38 bound) manufactured control separations of 100.8/108 ULP and PASSED, whereas
+                # removing the residual gave 0.8/8 and FAILED - the sensitivity came from the residual, not from
+                # the injected changes. With the exponent clamped, subnormal spacing is a UNIFORM 2**-133, so a
+                # ULP ratio is well defined for EVERY element including zero, and the statistic and both controls
+                # then cover exactly the same set by construction.
                 _tiny = 2.0 ** -126
-                _normal = _ai >= _tiny
                 # THE EXPONENT COMES FROM THE BIT PATTERN, NOT FROM log2. Review #22 found a DEFECT here: a
                 # deviation exceeding the stated 2-ULP bound could PASS, because float32 log2 of a value just
                 # below a power of two can round UP to that integer, so floor() returned an exponent one too
@@ -179,9 +186,10 @@ def merge_weight_check(merged, un):
                 _e = torch.clamp(_e, min=-126)
                 # ldexp builds the spacing as an exact power of two; no logarithm is involved anywhere.
                 _ulp = torch.ldexp(torch.ones_like(_ai), (_e - 7).to(torch.int32))
-                _ulp_err = torch.where(_normal, d / _ulp, torch.zeros_like(d))
-                _nz = int((~_normal).sum())
-                _nz_max = float(d[~_normal].max()) if _nz else 0.0
+                _ulp_err = d / _ulp
+                # still REPORTED: how many elements sit at subnormal scale, and their worst absolute deviation
+                _nz = int((_ai < _tiny).sum())
+                _nz_max = float(d[_ai < _tiny].max()) if _nz else 0.0
                 # NaN and inf must be COUNTED, not compared: `NaN > 2` is False, so a model whose weights were all
                 # NaN reported an exceedance fraction of 0 and passed the fraction gate (review #20 executed
                 # exactly that). _nf counts them in the WEIGHTS; _nfc counts them in the COMPARISON ITSELF, because
@@ -225,6 +233,7 @@ def merge_weight_check(merged, un):
                 # the CONTROLS in the SAME units, so the threshold is justified by the separation rather than
                 # fitted to the observation: a correct merge is <=1 ULP; what a real defect costs in ULP is
                 # measured here rather than asserted.
+                "measured_elements": int(_ulp.numel()),
                 "control_scale_0p9_max_ulp": float((d90 / _ulp).max()),
                 "control_module_dropped_max_ulp": float((ddrop / _ulp).max()),
                 "control_scale_0p9_frac_gt_2ulp": float(((d90 / _ulp) > 2.0).float().mean()),
@@ -313,6 +322,8 @@ report = {
     # NaN-SAFE aggregate: every per-module value is checked for finiteness FIRST, because `max` with a NaN
     # operand is order-dependent and could discard it (review #21).
     "merge_weight_max_ulp": max(x["max_ulp_error"] for x in wchk),
+    # the controls use the SAME tensors and the SAME spacing as the main statistic, so the sets are identical
+    "merge_weight_measured_elements": sum(x["measured_elements"] for x in wchk),
     "merge_weight_any_nonfinite_module": any(not math.isfinite(x["max_ulp_error"]) for x in wchk),
     "merge_weight_nonfinite_elements": sum(x["nonfinite_merged_elements"] for x in wchk),
     "merge_weight_nonfinite_comparisons": sum(x["nonfinite_comparisons"] for x in wchk),
