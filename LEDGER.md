@@ -1409,3 +1409,24 @@ The verdict's merge section no longer asserts equivalence. It states what is est
 arithmetic, exhaustive), what is **NOT** established (general behavioural equivalence — with #18's counterexample
 cited), and that the free-running generation statistics are **reported and never gated**. The rehearsal asserts
 those sentences are present, and a negative control proves the assertion is not vacuous.
+
+## 2026-09-29 — stage 2 would have accepted a benchmark that measured NO TUNED MODEL
+
+Found by testing the fallback branch rather than reading it. `eval_cyberguard.py` writes
+`"tuned": {"skipped": "no adapter at ..."}` when the adapter is absent, and stage 2's check was
+`isinstance(d.get("tuned"), dict)` — which `{"skipped": ...}` satisfies. **A benchmark that measured only the
+base model therefore passed the contract's verification of the benchmark.**
+
+Consequence had it survived: if the adapter failed to load on a host for any reason, the whole evaluation would
+have scored the **base model** while the verdict reported the tuned arms. That is the same defect class as the
+frozen resume — a complete-looking result for an arm that was never evaluated — and it would have been invisible,
+because every structural check still passed. Nothing in `gates_v2.py` required a tuned loss either.
+
+Stage 2 now requires, per arm: a finite `base.held_out_loss`; a finite **`tuned.held_out_loss`**, explicitly
+rejecting the `{"skipped": ...}` fallback; and a `parent_identity.match` that is not False (a False value means
+the arm was benchmarked against a different base model than it was trained from — review #2 MAJOR 6's identity
+check, which until now was recorded but never enforced). `match: None` — the trainer receipt unreadable — prints a
+WARNING rather than being assumed either way.
+
+Verified four ways: a good report PASSES; a base-only report FAILS naming the fallback; a parent mismatch FAILS;
+a non-numeric tuned loss FAILS.

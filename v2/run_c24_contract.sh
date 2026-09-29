@@ -327,7 +327,7 @@ done
 # ---------------------------------------------------------------- stage 2: verify the pulled artefacts
 step 2 "verify the pulled artefacts are measurements, not stubs"
 [ "$DRY" = 1 ] || python3 - <<'PY' || exit 4
-import json, os, sys
+import json, math, os, sys
 for arm in ("armA", "armB"):
     run = f"cyberguard-lora-v2-{arm}"
     bench = f"evals/{run}.json"
@@ -339,6 +339,30 @@ for arm in ("armA", "armB"):
     rows = d.get("held_out_rows") or (d.get("quality") or {}).get("held_out_rows")
     if not rows:
         sys.exit(f"FATAL: {bench} records no held_out_rows; an empty benchmark is not a measurement")
+    # THE TUNED MODEL MUST ACTUALLY HAVE BEEN MEASURED. Found 2026-09-29 by testing the fallback path:
+    # eval_cyberguard writes `"tuned": {"skipped": ...}` when no adapter is present, and `{"skipped": ...}` is
+    # still a dict - so the block check above ACCEPTED a benchmark that measured no tuned model at all. Had the
+    # adapter failed to load on a host, the entire evaluation would have scored the BASE model while the verdict
+    # reported the tuned arms: a complete-looking result for an arm that was never evaluated.
+    for side in ("base", "tuned"):
+        blk = d.get(side)
+        if not isinstance(blk, dict):
+            sys.exit(f"FATAL: {bench} has no {side} block")
+        if "skipped" in blk:
+            sys.exit(f"FATAL: {bench} did not measure the {side} model ({blk['skipped']!r}) - the benchmark "
+                     f"fell back to the base and would score the wrong model")
+        loss = blk.get("held_out_loss")
+        if not isinstance(loss, (int, float)) or not math.isfinite(float(loss)):
+            sys.exit(f"FATAL: {bench} records no finite {side} held_out_loss ({loss!r})")
+    # Parent identity (review #2 MAJOR 6): the benchmark's base model must be the one the arm was trained from,
+    # as recorded by the trainer's own receipt. `None` means the receipt was unreadable, which is reported
+    # rather than assumed, but a present-and-False value means the arm was evaluated against a different parent.
+    pid = d.get("parent_identity") or {}
+    if pid.get("match") is False:
+        sys.exit(f"FATAL: {arm} was evaluated against a different base model than it was trained from: "
+                 f"train={pid.get('train_base')!r} eval={pid.get('eval_base')!r}")
+    if pid.get("match") is None:
+        print(f"    WARNING: {arm} parent identity is UNVERIFIED (trainer receipt unreadable)")
     eq = f"evals/merge-equiv-{run}.json"
     if not os.path.exists(eq) or os.path.getsize(eq) == 0:
         sys.exit(f"FATAL: {eq} missing or empty — merge equivalence was not recorded")
@@ -351,7 +375,6 @@ for arm in ("armA", "armB"):
     if missing:
         sys.exit(f"FATAL: {eq} lacks {missing}; merge equivalence is not measurable from it")
     # Review F19 (pass eleven): NaN passed every comparison, so the stated tolerances were not enforced.
-    import math
     if not math.isfinite(float(e["loss_delta"])):
         sys.exit(f"FATAL: {arm} loss_delta is not finite ({e['loss_delta']})")
     if float(e["loss_delta"]) > 0.02:
