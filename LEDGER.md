@@ -3531,3 +3531,23 @@ brief and verdict scripts:
 The two NOT-YET lines remain the honest state: training ends ~12:03, the contract opens 12:10. Nothing in this pass
 changed a claim — it confirms that the corrections of the last three rounds (the harvest's completeness set, the
 receipt-sourced numbers in the brief and the verdict, and the five stale unit commands) left the machinery green.
+
+## 2026-09-29 08:29 — the wait was checked for its *target*, not just its existence
+
+Every checkpoint this window has been verified by its effects, which means the waiter itself was only ever assumed:
+"a sleep exists under the timeline" is not the same as "the sleep targets M3". Computed from the child's own elapsed
+time rather than from a start-time field:
+
+```
+sleep child pid 457073: total 3991s, elapsed 2727s, remaining 1264s
+  targets 08:50:00 | M3 at 08:50:00 | delta +1s
+```
+
+So the timeline is aimed at **08:50:00** and not merely waiting. This is the first round in which the schedule was
+confirmed at the level of the process that will act on it.
+
+My first attempt at that check was wrong, in the by-now familiar way: it derived the child's start from
+`/proc/<pid>/stat`'s `starttime` **without adding the boot time**, and printed a target of 01:09 for a process started
+this hour. Switched to `ps -o etimes=` and the arithmetic is trivial and exact. Sixth time this window that a
+checker of mine, not the artifact, was what looked wrong — and the reason I re-derive every such number from a second
+source before recording it.
