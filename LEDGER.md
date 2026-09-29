@@ -2753,3 +2753,26 @@ contract is still running*, it will meet the contract's own lock, receive **exit
 post-contract steps (harvest fallback, verdict brief, verifier) would not run. That is survivable because the
 contract is now self-sufficient: its stage 7 harvests and its stage 8 composes the terminal brief, so the
 deliverables still land. The guard's real job is the pre-12:10 window, where its recovery is complete.
+
+## 2026-09-29 — a supervisor that would have "recovered" a finished job forever, and a watchdog window checked against the contract
+
+Adding a supervisor to the timeline raised the question of what it does when there is nothing left to supervise. The
+answer was wrong: once the contract finishes, **no** timeline is alive, so the guard would launch one **every cycle,
+forever**. Each launch would find the verdict and the gate report, skip the contract, skip the harvest, no-op the
+brief (idempotent) and exit — so the deliverables were never at risk, but the log would grow a relaunch every five
+minutes until the guard's 24-hour window closed, and a reader could not tell that from a genuine recovery loop. The
+guard now exits cleanly once `docs/VERDICT-v2.md` and `v2/gate-report-v2.json` exist **and** no contract is still
+running (`v2/.c24-contract.lock` absent) — the single case it exists for is a death *before* the contract produces
+anything. Tested in all three states: deliverables absent and no timeline ⇒ **launch**; deliverables present and no
+contract ⇒ **exit 0** with the reason logged; deliverables present but a contract **still running** ⇒ keep watching
+(the exit must not fire while stage 7 is still harvesting). Paths are overridable (`GUARD_VERDICT`,
+`GUARD_GATEREPORT`, `GUARD_CONTRACT_LOCK`) so the terminal condition was exercised without touching the real
+deliverables. The production guard was restarted on the new code: one guard (pid 463554), one timeline (pid 457038).
+
+**The watchdog's window was checked rather than assumed, and deliberately not extended.** It was started
+2026-09-28 13:16 with `--hours 30`, so it expires **2026-09-29 19:16** — about four hours before the contract is
+projected to finish. That is acceptable and extending it would cost more than it returns: the watchdog's subject is
+the **frozen arm files**, which nothing writes after 12:03, and its expensive parts are the full leak scan and
+mixture audit, which would contend for CPU with the contract's own CPU-bound stages (the assembler, the gate layer
+and the verdict composer). A second instance would double that contention to monitor files that cannot change.
+Recorded as a considered decision, not an oversight.
