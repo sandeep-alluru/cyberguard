@@ -59,11 +59,22 @@ done
 collect_local() {  # $1 = path relative to the repo root
   local rel="$1"
   if [ -s "$rel" ]; then
-    local sha
-    sha=$(sha256sum "$rel" | awk '{print $1}')
-    cp "$rel" "$DEST/evals/$(basename "$rel")"
-    echo "$sha  evals/$(basename "$rel")  (local)" >> "$DEST/MANIFEST.sha256"
-    echo "  OK   evals/$(basename "$rel") (local, sha verified against itself)"
+    # VERIFY THE DEPOSITED COPY, don't just record the source's hash. The remote path already compares the host's
+    # hash with the local file's before writing anything to the manifest; this path hashed the source and wrote the
+    # line regardless of what `cp` produced, and said so ("sha verified against itself"). A truncated or failed copy
+    # would therefore have entered the manifest carrying the SOURCE's hash - a manifest entry that is wrong about
+    # the file it names, which is the one thing a checksum-verified harvest must not contain. Now the copy is
+    # re-hashed and must match the source, exactly as the remote case does.
+    local sha_c sha_d
+    cp "$rel" "$DEST/evals/$(basename "$rel")" || { echo "  FAIL cp $rel"; return 1; }
+    sha_c=$(sha256sum "$rel" | awk '{print $1}')
+    sha_d=$(sha256sum "$DEST/evals/$(basename "$rel")" | awk '{print $1}')
+    if [ "$sha_c" = "$sha_d" ]; then
+      echo "$sha_c  evals/$(basename "$rel")  (local)" >> "$DEST/MANIFEST.sha256"
+      echo "  OK   evals/$(basename "$rel") (local; deposited copy re-hashed and equal to the source)"
+    else
+      echo "  FAIL evals/$(basename "$rel") - deposited copy differs from the source"; return 1
+    fi
   else
     echo "  MISS $rel (local)"
   fi
@@ -88,10 +99,17 @@ done
 # exited 1 and the contract's stage 7 exited 8 on a completely perfect run. Proven in an isolated run with the
 # verdict present on disk: it was still reported missing.
 if [ -s docs/VERDICT-v2.md ]; then
-  sha=$(sha256sum docs/VERDICT-v2.md | awk '{print $1}')
+  # Same rule as collect_local: the DEPOSITED copy is re-hashed and must equal the source before the manifest line
+  # is written, so no entry can name a hash that belongs to a different file than the one it points at.
   cp docs/VERDICT-v2.md "$DEST/VERDICT-v2.md"
-  echo "$sha  VERDICT-v2.md  (local)" >> "$DEST/MANIFEST.sha256"
-  echo "  OK   VERDICT-v2.md (local, sha verified against itself)"
+  sha=$(sha256sum docs/VERDICT-v2.md | awk '{print $1}')
+  sha_d=$(sha256sum "$DEST/VERDICT-v2.md" | awk '{print $1}')
+  if [ "$sha" = "$sha_d" ]; then
+    echo "$sha  VERDICT-v2.md  (local)" >> "$DEST/MANIFEST.sha256"
+    echo "  OK   VERDICT-v2.md (local; deposited copy re-hashed and equal to the source)"
+  else
+    echo "  FAIL VERDICT-v2.md - deposited copy differs from the source"
+  fi
 else
   echo "  MISS docs/VERDICT-v2.md (local)"
 fi
