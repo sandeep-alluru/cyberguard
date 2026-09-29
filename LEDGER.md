@@ -3808,3 +3808,13 @@ tracked under research-tmp/reviews/                -> 408 files, 225 of them rev
 So the fix did what it claimed and my check was the tenth instrument fault of this window — a name-matching pattern
 that could not distinguish a 1.8 KB log from a 194 MB JSONL. The record keeps both facts: the bulk is out of git and
 on disk, and the scripts that produced it are still tracked.
+
+## 2026-09-29 08:37 — the endgame state written where a fresh session will find it
+
+`research-tmp/HANDOVER-endgame.md` is the detailed handover, but a session starting fresh reads project memory first.
+So the endgame state was written there in one entry: what is armed (the timeline and the guard, with their locks and
+the guard's terminal condition), the exact schedule, the contract's fifteen stages and its **exit-code → stage** table,
+the two verifiers and what their exit codes mean, where every deliverable lands, the four things that need a person
+including the three declared deviations that must not be "fixed", the two figures that are estimates rather than
+measurements, and the one defect this window found that would have cost the entire evaluation — with the fix and the
+hash that is now on both hosts.
