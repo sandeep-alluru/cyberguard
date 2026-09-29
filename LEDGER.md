@@ -2925,3 +2925,25 @@ receipts measuring the same substitution. Tokenizer coverage is real-tokenizer s
 
 So element 1 reads as it should: three items closed with their own receipted evidence, one declined with its
 measurements and its consequence carried into every artifact that discusses the arms.
+
+## 2026-09-29 — element 2's evidence was under-reported, and my first fix over-reported it
+
+Element 2 is "independent clearance from Astra **and** Muse on the frozen arms". The verifier scanned
+`v2/data/mixture/*.receipt.json`, where Astra's clearance is *"EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c"*
+(review #25) and Muse's is *"FROZEN ARMS CLEARED 35e9166fa0d4"*. That passed the element — but it silently omitted
+Astra's **chain** clearance, `CHAIN CLEARED a91da33296ab` (review #17, resolving the registration objection), which
+lives in the reviewer's output log and is quoted in a published CEO brief rather than in a receipt. The evidence
+list was therefore narrower than the element it certified.
+
+The fix scans `research-tmp/reviews/` for clearance lines as well — and the **first version of that scan was wrong in
+the opposite direction**, which is the more dangerous error. It matched the phrases wherever they appeared, and most
+hits were `*-prompt.md` files that merely *quote* an earlier clearance as context for the reviewer. Listing a prompt
+as evidence of a clearance would have been false support of exactly the kind this window has been spent removing. A
+prompt is not a verdict: prompts are now excluded, and the evidence names only the reviewers' own outputs —
+`codex-evalchain-review10.log` (*"CHAIN CLEARED — no training-validity objection to running the C24 evaluation"*),
+`codex-evalchain-review11.log` (*"FROZEN ARMS CLEARED — no training-validity objection to evaluating these two
+arms"*), `codex-review-15.log` / `codex-review-16.log` (the later re-clearances), alongside the two receipts.
+
+Verified in both directions with a fixture containing **both** a reviewer output carrying a clearance and a prompt
+that only quotes one: the complete tree exits **0** with the output cited and the prompt cited **zero** times, and
+the real tree still exits **2** (awaiting the contract).

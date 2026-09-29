@@ -100,6 +100,39 @@ def element_clearances() -> tuple[str, list[str]]:
                               or d.get("spec_sha256_at_review") or "(no revision named)")))
     ev: list[str] = []
     reject = _re.compile(r"\b(block(?:ed|er)?|fail(?:ed)?|not cleared|no clearance|unresolved objection|reject)\b", _re.I)
+    # ALSO SCAN THE REVIEWS. Astra's clearance of the frozen arms is a review verdict — "CHAIN CLEARED
+    # a91da33296ab" from review #17 — recorded in the review log and quoted in a published CEO brief, not in a
+    # receipt. Scanning only `v2/data/mixture/*.receipt.json` therefore under-reported the element's evidence: it
+    # showed Astra's equivalence-basis clearance (review #25) and Muse's frozen-arms clearance, and silently omitted
+    # Astra's chain clearance, which is the one the objective's wording points at. Named here, deduplicated, and
+    # capped so a long log cannot flood the report.
+    _clr = _re.compile(r"(CHAIN CLEARED[^\n\"']{0,60}|FROZEN ARMS CLEARED[^\n\"']{0,60}|EQUIVALENCE BASIS SOUND[^\n\"']{0,60})")
+    seen: set[str] = set()
+    for path in sorted(_glob.glob(p("research-tmp/reviews/*"))):
+        base = os.path.basename(path)
+        if not path.endswith((".md", ".log", ".txt")):
+            continue
+        # A PROMPT IS NOT A VERDICT. The first version of this scan matched the clearance phrases wherever they
+        # appeared, and most hits were `*-prompt.md` files that QUOTE an earlier clearance as context - listing those
+        # as clearances would be false support of exactly the kind this window has been spent removing. Only the
+        # reviewers' own outputs count: a `.log` or a `-review.md` that is not a prompt.
+        if "-prompt" in base or base.endswith("review-prompt.md"):
+            continue
+        try:
+            blob = open(path, encoding="utf-8", errors="replace").read()
+        except OSError:
+            continue
+        for m in _clr.findall(blob):
+            line = m.strip().rstrip("{")
+            key = line[:60]
+            if key in seen:
+                continue
+            seen.add(key)
+            ev.append(f"review-log clearance [{os.path.basename(path)}]: {line}")
+            if len(seen) >= 6:
+                break
+        if len(seen) >= 6:
+            break
     for fname, who, line, rev in found:
         flag = "  <-- REJECTION WORDING" if reject.search(line) else ""
         ev.append(f"{who} [{fname}]: {line} — revision {rev[:16]}{flag}")
