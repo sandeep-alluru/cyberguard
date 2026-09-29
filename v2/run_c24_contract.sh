@@ -82,6 +82,40 @@ if [ "$DRY" != 1 ]; then
   ok "receipt v2/data/mixture/trainer-exit.receipt.json (adapter hashes as of exit)"
 fi
 
+# ---------------------------------------------------------------- stage 0d: learning proof
+# Codex review #14 (2026-09-29) accepted that the repaired resume is TRAINABLE (trainable params 66,060,288
+# against the frozen run's 0) but refused to accept that it is LEARNING:
+#   "Trainability restored is supported. Actual learning remains UNVERIFIED; a nonzero optimizer-applied
+#    adapter-weight change from the preserved parent settles whether updates occurred."
+# So it is settled here, before anything is evaluated. A candidate byte-identical to the parent it resumed
+# from means no optimizer update was applied — either the frozen-run failure mode, or an adapter that was
+# never re-saved — and in BOTH cases the "continuation" would be the epoch-1 artifact wearing a new mtime.
+# The preserved parents (sha256 receipted in noop-resume.receipt.json) are the reference.
+RESUME_WINDOW_EPOCH="${RESUME_WINDOW_EPOCH:-$(date -d '2026-09-29 02:32:53' +%s)}"
+step 0d "learning proof (deliberately BEFORE the pull, so a stale adapter is caught without a 264 MB transfer)"
+echo "  window start ${RESUME_WINDOW_EPOCH} ($(date -d @${RESUME_WINDOW_EPOCH} '+%F %T %Z'))"
+for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+  echo "  ssh $host: verify_resume_learning.py --parent $arm.epoch1-final-bak --candidate $arm"
+  [ "$DRY" = 1 ] && continue
+  # Capture the status of the REMOTE command, not of a downstream `tail` — piping would test tail's exit.
+  rl_out=$(timeout 1800 ssh -o BatchMode=yes -o ConnectTimeout=10 "$host" \
+        "cd ~/cyberguard && \$HOME/venvs/sglang/bin/python v2/verify_resume_learning.py \
+           --parent adapters/cyberguard-lora-v2-$arm.epoch1-final-bak \
+           --candidate adapters/cyberguard-lora-v2-$arm \
+           --after $RESUME_WINDOW_EPOCH --label $arm --out /tmp/rl-$arm.json" 2>&1)
+  rl_rc=$?
+  printf '%s\n' "$rl_out" | tail -8
+  if [ "$rl_rc" != 0 ]; then
+    bad "$arm: no optimizer-applied weight change since the parent (exit $rl_rc) — refusing to evaluate an"
+    bad "     artifact that may never have trained (frozen resume, or an adapter that was not re-saved)"
+    exit 4
+  fi
+  timeout 120 rsync -a -e "ssh -o BatchMode=yes" "$host:/tmp/rl-$arm.json" \
+    "v2/data/mixture/resume-learning-$arm.receipt.json" 2>/dev/null \
+    && ok "$arm: weights moved — receipt v2/data/mixture/resume-learning-$arm.receipt.json" \
+    || bad "$arm: learning proof passed but its receipt did not arrive"
+done
+
 # ---------------------------------------------------------------- stage 0a: pull the adapters
 # Added while preparing C24, because the contract as written could NOT have run: stages 1-2 (merge equivalence
 # and the benchmark) execute LOCALLY, while the trained adapters exist only on the training hosts — so
