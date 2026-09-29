@@ -3614,3 +3614,20 @@ Tested in both directions: against M2 it passes 10 items and fails only freshnes
 historical checkpoint — widening the tolerance with `--max-age-min 500` turns it green); against a label with nothing
 on disk it fails exactly the three deliverables with exit 1. Written before M3 fires so both remaining checkpoints are
 verified the same way.
+
+## 2026-09-29 — the record's own repository was carrying ~2 GB of regenerable review bulk
+
+`git add -A` has been the commit habit for 288 commits, and `.gitignore` states the project's convention plainly
+("heavy / binary artifacts: they live in the durable archive, not in git") — but the convention had a hole. Every
+review round rebuilt both mixtures and dumped a change set, and those files landed in `research-tmp/reviews/…` under
+names the ignore file did not cover: **ten files of ~190–220 MB each, ~2 GB tracked, and `.git` had reached 726 MB**.
+Each further round would have added another ~200 MB.
+
+Untracked them (`git rm --cached`, so the files stay on disk) and extended `.gitignore` to
+`research-tmp/reviews/*_rebuild/` and `*_changes.json`, matching the stated convention. Verified afterwards that
+nothing that matters moved: `LEDGER.md`, both plan documents, the contract and verifier scripts, and the reviewers'
+own outputs are all still tracked, and the working copies of the untracked bulk are untouched.
+
+This is hygiene, not correctness — the contract never touches git, and the disk has 77 GB free — but the failure mode
+is the same shape as the rest of this window: a rule stated in one place (the ignore file's comment) and not applied
+where it mattered.
