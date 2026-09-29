@@ -112,7 +112,8 @@ def merge_equivalence_block() -> str:
             "not to be sampled — including a SPARSE one: the gate is the element-wise maximum, because a",
             "fraction-only gate was rejected when it permitted 3,633 arbitrarily erroneous elements and passed a",
             "single weight corrupted to 1024 while detecting it. Its tolerance is justified by measured separation:",
-            f"the same statistic reports **{_fmt(w.get('merge_weight_control_scale_0p9_max_ulp'), '.3g')}** ULP for a 10 %",
+            f"the same measurement applied to an injected defect reports "
+            f"**{_fmt(w.get('merge_weight_control_scale_0p9_max_ulp'), '.3g')}** ULP for a 10 %",
             f"mis-scaling and **{_fmt(w.get('merge_weight_control_module_dropped_max_ulp'), '.3g')}** ULP for a dropped",
             "contribution, against **0.5** as shipped. Non-finite weights are counted separately and gated at zero,",
             "because `NaN > 2` is False and would otherwise vanish from the count.",

@@ -1728,3 +1728,34 @@ recorded in the JSON).
 Also verified end to end this round: the **battery filename contract** (producer `battery-{battery}-{arm}.json`
 → stage-3 pull glob `battery-*-$ARM.json` → assembler glob `battery-*.json` → harvest's explicit 42 names) agrees
 at every hop.
+
+## 2026-09-29 — review #23: subnormal spacing was half the truth, which doubled the CONTROL values
+
+#23 constructed a counterexample with `torch.nextafter` and was right on all three counts:
+
+> "At zero and subnormal ideals, merge_equiv.py produces spacing 2^-134, whereas bf16 subnormal spacing is
+> 2^-133 … the main error statistic excludes these elements, but **both controls use this incorrect
+> denominator**, doubling their reported ULP values."
+
+My exponent came from the exponent field, and for a subnormal that field is 0 → exponent −127 → spacing `2^-134`,
+half the truth. The **main** statistic masks subnormal ideals, but the two **controls** divided by the same wrong
+denominator, so their ULP values were **doubled**. Their executed matrix (base `=−600q`, scaling 1, `A=1`,
+`B=600q`, merged all-zero except one element `q`) passed all eight conditions reporting controls of **122 and
+1202**, when the true separations are **61 and 601** — the first of which must fail the `>= 100` requirement.
+
+Fixed by clamping the exponent at the minimum normal exponent, so the spacing is the correct **uniform 2^-133**
+for subnormals. Verified three ways:
+* `v2/test_ulp_spacing.py` now asserts the subnormal spacing is exactly `2^-133` **using bf16 `nextafter`** (the
+  reviewer's own method) and shows the unclamped value is a factor 2 too small;
+* the reviewer's counterexample is **re-derived as a regression**: true separations 600/60 ULP, unclamped 1200/120
+  — and with the corrected spacing the 10 %-scale control is **60 ULP, failing the gate**, so that matrix is
+  **REFUSED** rather than accepted on an artefact. Reproduced at the gate: feeding controls of 60/600 now exits 1
+  with "a tolerance whose separation is unmeasured is theatre";
+* **the defect was material for the real adapter, not only for the contrived matrix**: the controls moved from
+  **8.27e36 to 4.14e36** (10 % mis-scaling) and **8.27e37 to 4.14e37** (dropped contribution) — i.e. the reported
+  separations had been inflated 2×.
+
+Third finding fixed as well: the verdict presented the controls as "the same statistic", which the counterexample
+disproves; it now says **the same measurement applied to an injected defect**. (The merge itself remains
+**0.5 ULP**, with 0 non-finite weights and comparisons and 5 near-zero elements at deviation exactly 0. Rehearsal
+PASS; the stage-2 matrix re-verified with the corrected magnitudes.)

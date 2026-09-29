@@ -42,6 +42,51 @@ for k in range(-120, 120):
         if log2_e != bits_e:
             LOG2_WRONG.append((label, k, bits_e, log2_e))
 
+# SUBNORMAL SPACING (review #23): bf16 subnormal spacing is a UNIFORM 2**-133, so the exponent must be clamped
+# at the minimum normal exponent (-126). An unclamped exponent field of zero gives -127 and therefore 2**-134,
+# half the truth - which DOUBLED the control ULP values and let a 61-ULP separation pass a >=100 requirement.
+import math
+Q_TRUE = 2.0 ** -133
+sub = torch.tensor(2.0 ** -130, dtype=torch.float32)          # a subnormal-scale ideal
+e_field = int(((sub.view(torch.int32) >> 23) & 0xFF)) - 127
+e_clamped = max(e_field, -126)
+got = 2.0 ** (e_clamped - 7)
+if abs(got - Q_TRUE) > 0:
+    print(f"  FAIL subnormal spacing: got {got:.3e}, bf16 subnormal spacing is {Q_TRUE:.3e}")
+    BAD += 1
+else:
+    print(f"  subnormal spacing exact: {got:.3e} == 2**-133 (unclamped would be {2.0 ** (e_field - 7):.3e}, "
+          f"a factor {Q_TRUE / (2.0 ** (e_field - 7)):.1f} too small)")
+# and verify against torch's own notion of the next BF16 subnormal value (a float32 tensor would measure
+# FLOAT32 spacing here - 2**-149 - which is what an earlier version of this test did, printing a spurious
+# mismatch). bf16 is what the merge check compares.
+_n = torch.tensor(2.0 ** -130, dtype=torch.bfloat16)
+_delta = abs(float((torch.nextafter(_n, torch.tensor(0.0, dtype=torch.bfloat16)) - _n).float()))
+if abs(_delta - Q_TRUE) > 0.0:
+    print(f"  FAIL bf16 nextafter spacing {_delta:.3e} != claimed 2**-133 {Q_TRUE:.3e}")
+    BAD += 1
+else:
+    print(f"  bf16 nextafter confirms subnormal spacing {_delta:.3e} == 2**-133")
+# Review #23's EXECUTED COUNTEREXAMPLE, re-derived with the corrected denominator. Their matrix: bf16, rank one,
+# base = -600q, scaling = 1, A = 1, B = 600q, merged = 0 except one element = q (q = 2**-133). The ideal is
+# therefore 0, and with the unclamped denominator (2**-134) the controls reported 122 and 1202 ULP and PASSED the
+# >=100 separation requirement, while their true separations are 61 and 601 - the first of which must FAIL it.
+q = Q_TRUE
+_true_drop = 600.0 * q / q          # |merged - base| / spacing
+_true_90 = 60.0 * q / q             # |merged - (base + 0.9*600q)| / spacing
+_unclamped = 2.0 ** -134
+_infl_drop = 600.0 * q / _unclamped
+_infl_90 = 60.0 * q / _unclamped
+print(f"  review #23 counterexample re-derived: ideal=0 (subnormal binade)")
+print(f"    true control separations   : dropped {_true_drop:.0f} ULP, 10%-scale {_true_90:.0f} ULP")
+print(f"    with the unclamped spacing : dropped {_infl_drop:.0f} ULP, 10%-scale {_infl_90:.0f} ULP  <-- PASSED >=100")
+if _true_90 >= 100:
+    print("  FAIL: the corrected denominator must make the 10%-scale control FAIL the >=100 separation")
+    BAD += 1
+else:
+    print(f"    with the corrected spacing : the 10%-scale control is {_true_90:.0f} ULP -> FAILS the >=100 "
+          f"requirement, so that matrix is REFUSED rather than accepted on an artefact")
+
 print(f"  checked {CHECKED} magnitudes: bit-pattern exponent correct in every case" if not BAD
       else f"  {BAD} bit-pattern failures")
 print(f"  the log2 route is WRONG for {len(LOG2_WRONG)} of them, e.g. "

@@ -170,6 +170,13 @@ def merge_weight_check(merged, un):
                 # float32 exponent field is exact by construction, so read it: bits 30..23, biased by 127.
                 _bits = _ai.view(torch.int32)
                 _e = ((_bits >> 23) & 0xFF) - 127
+                # CLAMPED AT THE MINIMUM NORMAL EXPONENT. Review #23 verified with torch.nextafter that bf16's
+                # SUBNORMAL spacing is a uniform 2**-133, while an exponent field of zero yields -127 here and
+                # therefore 2**-134 — half the truth. The main statistic masks subnormal ideals, but the two
+                # CONTROLS divided by this denominator, so their ULP values were DOUBLED: a matrix whose true
+                # control separation is 61 ULP reported 122 and passed the >=100 requirement. Clamping at -126
+                # gives 2**(-126-7) = 2**-133, the correct uniform subnormal spacing.
+                _e = torch.clamp(_e, min=-126)
                 # ldexp builds the spacing as an exact power of two; no logarithm is involved anywhere.
                 _ulp = torch.ldexp(torch.ones_like(_ai), (_e - 7).to(torch.int32))
                 _ulp_err = torch.where(_normal, d / _ulp, torch.zeros_like(d))
