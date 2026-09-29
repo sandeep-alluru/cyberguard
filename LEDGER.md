@@ -3376,3 +3376,24 @@ The context the prompt carries is consistent with FACTS: epoch 1 at 11.03 h/11.0
 `grad_norm ~0.6`, the 23:29–02:30 frozen interval with `is_trainable=False`, the repaired 570-minute relaunch at
 02:32:53, and review #14's two conditions (a measured exposure description and the tensor-level learning proof) which
 stages 0d and 6 implement.
+
+## 2026-09-29 — the restore capability the objective asks for exists; only the decision not to use it is superseded
+
+SPEC §17 records the owner's supersession of the objective's *"restoring it with a verified probe"* clause, and claims
+two things worth checking rather than believing: that the eviction is held down, and that it is **reversible** (so the
+owner's boot behaviour is not silently changed).
+
+Both check out, and the second is better than claimed. `pool_control.sh restore` does not merely start the units — it
+`enable`s **and** `start`s both (`spark-rpc.service` on 40ee, `spark-flash-next.service` on 8cf2), then waits for port
+8093 and runs its **`probe`** until it passes, printing `RESTORED (probe passed)`. That is exactly the "verified
+probe" the objective's clause describes: the machinery is implemented, so the clause is unperformed **by decision, not
+by capability** — a distinction the record did not previously make explicit.
+
+The `stop` path explains why `disable` was needed at all, and is honest about its own limits: an earlier version
+disabled the units, which "left the owner's machines changed (a reboot would not bring the served model back)" and
+still "did not even hold, because `spark-rpc-guard.timer` restarts them every 2 minutes". The durable eviction
+therefore required disabling the **guard timers** too, which is what the running state shows — `spark-rpc-guard.timer`
+and `qwen-flash-guard.timer` are both inactive *and* disabled, alongside their services, with zero listeners on 8093.
+
+Nothing was run to test this: `pool_control.sh restore` would bring the serving stack up mid-window, so the check was
+a read of the script, the units' state, and the port.
