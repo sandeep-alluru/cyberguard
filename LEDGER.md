@@ -2689,3 +2689,29 @@ same run exercised the fail-closed path by construction, since the contract has 
 evals/battery-fresh-g{A,B,E,F,J}-armA.json` and the note "22 files verified; the missing ones mean the contract did
 not finish" — naming precisely the artifacts that do not exist yet, which is what the contract's stage 7 will read
 at 12:10. The real DEST was confirmed untouched afterwards.
+
+## 2026-09-29 — the last producer/consumer pair, checked against a live checkpoint
+
+The verdict's only source for **measured exposure** is the trainer's own receipt: it reads `wall_seconds` and walks
+`log_history` for `step`, `learning_rate` and `grad_norm`, then reports the update count, the wall clock and the
+**terminal** LR (review #14's requirement, since a time box halts mid-schedule). The consumer is defensive — it
+filters entries that carry the key, so an eval-only record cannot break it — but defensive code still needs the
+producer to emit those keys, and the earlier pairs in this window (stage 1→2, stage 3→4) each hid a real mismatch.
+
+The epoch-1 v2 receipt is no longer on either host, so instead of trusting the code path this was checked against
+data the live run is producing right now: `checkpoint-2000/trainer_state.json` from `spark-40ee`. Its
+`log_history` holds **200 entries, 200 with `step`, 200 with `learning_rate`, 200 with `grad_norm`**, key union
+`{entropy, epoch, grad_norm, learning_rate, loss, mean_token_accuracy, num_tokens, step}`, and the last entry reads
+`step 2000, learning_rate 6.904925072327304e-05, grad_norm 0.6147027015686035`. So at 12:03 the receipt will carry
+`wall_seconds` and a full `log_history`, and the verdict's exposure table will show a real update count, a real
+terminal LR and a nonzero `grad_norm` count.
+
+That last number is worth stating for a second reason: `grad_norm` **0.61 at step 2000** is independent evidence
+from the live run that the continuation is learning — the same quantity that sat at **0** at every logged step of
+the frozen resume (`FACTS.training_window.incidents.noop_resume`). The earlier learning proof was a tensor-level
+comparison against the preserved parent; this is the trainer's own record agreeing with it.
+
+With this, every producer/consumer boundary on the critical path has been checked against real artifacts rather than
+against the rehearsal's synthetic ones: benchmark and merge receipts (stage 1→2), battery receipts (stage 3→4), the
+probe sets and their receipts, the gate registry versus the gate layer, and now the trainer receipt versus the
+verdict.
