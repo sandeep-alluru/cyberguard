@@ -67,6 +67,15 @@ else
   bad "driver check FAILED — batteries would not measure the frozen items:"; sed 's/^/        /' "$DC"; PRE=$((PRE+1))
 fi
 rm -f "$DC"
+# The local verdict chain must be able to DECIDE before the run starts: stages 4-6 are file transforms, and
+# this session has already seen them emit 18 UNMEASURED rows while every stage printed OK. ~10 s, no GPU.
+RS=$(mktemp)
+if python3 v2/rehearse_c24_local.py >"$RS" 2>&1; then
+  ok "local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input"
+else
+  bad "local verdict-chain rehearsal FAILED:"; sed 's/^/        /' "$RS"; PRE=$((PRE+1))
+fi
+rm -f "$RS"
 echo "  arms the trainers loaded (must match FACTS):"
 for spec in "$S4 A" "$S8 B"; do set -- $spec
   L=$(timeout 60 ssh -o BatchMode=yes "$1" "grep -m1 'ARM MODE' ~/cyberguard/logs/train-cyberguard-lora-v2-arm$2.log" 2>/dev/null)
