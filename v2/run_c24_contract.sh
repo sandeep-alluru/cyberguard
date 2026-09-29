@@ -309,5 +309,16 @@ step 6 "harvest with per-file sha256"
 echo "  bash harvest-v2.sh   (prints HARVEST-COMPLETE only when every file is checksum-verified)"
 [ "$DRY" = 1 ] || { bash harvest-v2.sh | tail -3 || { bad "harvest failed"; exit 8; }; }
 
+# ---------------------------------------------------------------- stage 7: the verdict document
+step 7 "compose VERDICT-v2.md from the gate report and the harvest"
+echo "  python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals evals --out docs/VERDICT-v2.md"
+[ "$DRY" = 1 ] || {
+  python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals evals \
+    --out docs/VERDICT-v2.md > logs/verdict-doc.log 2>&1 \
+    || { bad "the verdict document was not written (see logs/verdict-doc.log)"; exit 9; }
+  [ -s docs/VERDICT-v2.md ] && ok "VERDICT-v2.md written ($(wc -c < docs/VERDICT-v2.md) bytes)" \
+    || { bad "VERDICT-v2.md missing or empty"; exit 9; }
+}
+
 echo
 if [ "$DRY" = 1 ]; then echo "  DRY RUN complete — nothing was executed"; else echo "  C24 CONTRACT COMPLETE"; fi
