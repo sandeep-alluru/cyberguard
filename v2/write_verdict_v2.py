@@ -447,7 +447,9 @@ is deliberate and the owner's boot behaviour is unchanged. The eviction was veri
 ```
 """
     if a.dry_run:
-        print(doc[:3000])
+        # Print the WHOLE document for the same reason as checkpoint_brief.py: a truncated preview is used to
+        # verify a document's content, and content past the cut is invisible to that verification.
+        print(doc)
         return 0
     p = os.path.join(ROOT, a.out)
     os.makedirs(os.path.dirname(p), exist_ok=True)

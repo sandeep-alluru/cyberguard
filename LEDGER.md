@@ -2184,3 +2184,28 @@ Corrected in two places:
 
 This is the second time in this session that a "finding" dissolved when tested, and the first where the wrong
 claim was mine rather than the code's. Both are recorded for the same reason.
+
+## 2026-09-29 — my verification instrument was truncating the documents it was used to verify
+
+Chasing why a clause I had just added was invisible to `grep` on `checkpoint_brief.py --dry-run`, the cause was
+in the preview, not the brief:
+
+    if a.dry_run:
+        print(body[:2000])        # the review-status line sits at offset 1920 of a 3,145-char brief
+
+and `write_verdict_v2.py` did the same with `doc[:3000]` on a 16,403-character document. So every
+`--dry-run | grep` "verification" of a brief this session was checking **a truncated view**, and anything past the
+cut was invisible to it. The earlier evidence was visibly truncated and I read past it: the rendered eviction
+check ended "(`eviction` block of **the me**" and the review line ended "(**`checkpoint-M1**" — both cut mid-word,
+both of which I took as confirmations.
+
+Both previews now print the **whole** document, and the affected claims were re-derived from full output:
+* `checkpoint_brief.py M1 --dry-run` now shows `no dispatch log exists, so this prompt may have come from a
+  --dry-run`, and its tail reaches the `## Cost to date` section (previously unreachable in a preview);
+* `write_verdict_v2.py --dry-run` now emits 16,303 characters reaching the final `Contamination check` section
+  (previously cut at 3,000).
+
+**What this does and does not invalidate.** The *deliverables* were never affected: the rehearsal's content
+assertions read the written file, the harvest hashes the file on disk, and the portal verification fetches the
+served file — all full-document. What was unsound was my ad-hoc method for checking brief content, and the
+conclusions that depended on text past the cut are now re-verified above rather than carried.

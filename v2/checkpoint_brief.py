@@ -214,7 +214,12 @@ def main() -> int:
         raise SystemExit(f"FATAL: label {a.label!r} must be alphanumeric (it becomes a path component)")
     fname, body = compose(a.label, a.notes)
     if a.dry_run:
-        print(body[:2000])
+        # PRINT THE WHOLE BODY. This truncated to `body[:2000]`, and the review-status line sits at offset 1920
+        # of a 3,145-character brief — so a `--dry-run | grep` "verified" content that was partly cut away, and
+        # a clause placed past character 2000 (the dispatch-log distinction) was invisible to it. A preview that
+        # silently hides the end of the document is worse than no preview, because it is used to check the
+        # document. (Found 2026-09-29 while re-checking a claim.)
+        print(body)
         return 0
     os.makedirs(CEO, exist_ok=True)
     path = os.path.join(CEO, fname)
