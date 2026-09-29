@@ -99,7 +99,7 @@ def merge_equivalence_block() -> str:
             "in total — exhaustive, not sampled), the merged weight equals `base_weight + scaling * (B @ A)` to",
             f"within **{w.get('merge_weight_max_ulp', 0):.3f} of a bf16 ULP** at the worst element, with",
             f"**{w.get('merge_weight_nonfinite_elements', '?')} non-finite weights**. Half an ULP is the optimum for",
-            "a correctly-rounded operation, so this is the strongest form the check can take. It is *deterministic*,,",
+            "a correctly-rounded operation, so this is the strongest form the check can take. It is *deterministic*,",
             "so unlike any behavioural test it cannot be passed by a defect concentrated in a region that happens",
             "not to be sampled — including a SPARSE one: the gate is the element-wise maximum, because a",
             "fraction-only gate was rejected when it permitted 3,633 arbitrarily erroneous elements and passed a",
