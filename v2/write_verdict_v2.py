@@ -49,6 +49,81 @@ def manifest_summary() -> str:
     return f"`research-tmp/harvest-v2/MANIFEST.sha256` lists **{len(lines)}** checksum-verified files"
 
 
+def _trainer_receipt(arm: str):
+    """The trainer's own receipt, harvested from the host that ran it (falling back to a local copy)."""
+    for p in (f"research-tmp/harvest-v2/receipts/cyberguard-lora-v2-{arm}.json",
+              f"receipts/cyberguard-lora-v2-{arm}.json"):
+        r = load(p)
+        if r is not None:
+            return r, p
+    return None, None
+
+
+def training_trajectory() -> str:
+    """Measured exposure per saved artefact — required by Codex review #14 (2026-09-29).
+
+    #14 accepted the repaired resume as *trainable* but ruled that the reset "changes the optimization
+    trajectory, not merely its name", that the result "cannot substantiate a claim about uninterrupted
+    training", and that exposure must be reported as **measured additional updates per saved artefact**, not
+    as a projection — with the frozen interval excluded from learning exposure. This reads each run's own
+    receipt and reports what actually happened, including when a receipt is missing rather than glossing it.
+    """
+    facts = load("v2/data/mixture/FACTS.json") or {}
+    tw = facts.get("training_window") or {}
+    inc = ((tw.get("incidents") or {}).get("noop_resume") or {})
+    out = [
+        "The evaluated artefacts are the product of **one completed pass over the mixture followed by a",
+        "partial second data pass, with fresh optimizer state and a restarted LR schedule** (Codex review",
+        "#14). They are **not** the product of one continuous schedule, and nothing here claims uninterrupted",
+        "training. Exposure is reported as **measured**, from each run's own receipt — never as a projection —",
+        "and the frozen interval is excluded from learning exposure while remaining in the cost accounting.",
+        "",
+        "| artefact | measured updates | measured wall clock | terminal LR (peak) | steps with nonzero grad_norm | receipt |",
+        "|---|---|---|---|---|---|",
+    ]
+    missing: list[str] = []
+    for arm in ("armA", "armB"):
+        r, p = _trainer_receipt(arm)
+        if r is None:
+            missing.append(arm)
+            out.append(f"| `{arm}` | **receipt absent — exposure UNMEASURED** | — | — | — | — |")
+            continue
+        lh = [e for e in (r.get("log_history") or []) if isinstance(e, dict)]
+        steps = [e["step"] for e in lh if isinstance(e.get("step"), int)]
+        lrs = [e["learning_rate"] for e in lh if isinstance(e.get("learning_rate"), (int, float))]
+        gns = [e["grad_norm"] for e in lh if isinstance(e.get("grad_norm"), (int, float))]
+        nonzero = sum(1 for g in gns if g)
+        wall = r.get("wall_seconds")
+        wall_s = f"{wall / 3600:.2f} h" if isinstance(wall, (int, float)) else "?"
+        # The TERMINAL LR is the learning rate the evaluated artefact stopped at — the quantity review #14 asks
+        # for, because a time box halts mid-schedule. The peak is shown beside it for context; reporting the
+        # peak as if it were the terminal rate would misstate where in the schedule the artefact was saved.
+        lr_s = f"{lrs[-1]:.3e} (peak {max(lrs):.3e})" if lrs else "?"
+        up_s = str(max(steps)) if steps else "?"
+        out.append(f"| `{arm}` | {up_s} | {wall_s} | {lr_s} | {nonzero} of {len(gns)} | `{p}` |")
+    if missing:
+        out += ["", f"**Exposure for {', '.join('`' + m + '`' for m in missing)} is UNMEASURED**: the trainer's",
+                "receipt was not harvested, so no measured update count or terminal LR exists for that artefact.",
+                "Per review #14 this is reported as a gap, not filled with a projection."]
+    if inc:
+        out += ["",
+                "The frozen resume of 2026-09-28/29 is recorded in `v2/data/mixture/FACTS.json`",
+                "(`training_window.incidents.noop_resume`): it consumed",
+                f"**{inc.get('gpu_hours_wasted', '?')} GPU-hours** producing no learning on either arm",
+                "(`trainable params: 0`, `grad_norm` 0 at every logged step). Those hours are **excluded from",
+                "the exposure figures above** and retained in the cost accounting below. Nothing in this verdict",
+                "rests on them."]
+    gh = tw.get("gpu_hours") or {}
+    if gh:
+        out += ["",
+                f"Cost accounting (owner authorization {gh.get('authorization_gpu_h', '?')} GPU-hours = 24 h x 2 arms):",
+                f"spent before the repair **{gh.get('spent_before_relaunch_gpu_h', '?')}** GPU-hours; the 570-minute",
+                f"continuation box bounds the total at **{gh.get('worst_case_total_gpu_h', '?')}** GPU-hours;",
+                f"within authorization: **{gh.get('within_authorization', '?')}**."]
+    return "\n".join(out)
+
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--report", default="v2/gate-report-v2.json")
@@ -170,6 +245,10 @@ frozen arms (`v2/data/mixture/d2-diversity.receipt.json`):
 The Arm A vs Arm B contrast therefore carries a **residual prompt-diversity and answer-length asymmetry
 intrinsic to the substitution design**. No claim in this verdict describes the control as "matched" without
 stating it.
+
+## Training trajectory and measured exposure (review #14)
+
+{training_trajectory()}
 
 ## Every gate
 
