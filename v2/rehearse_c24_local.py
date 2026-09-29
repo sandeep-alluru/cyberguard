@@ -66,9 +66,13 @@ def build_inputs(d: str) -> None:
         return [True] * k + [False] * (n - k)
 
     # base refuses 10 % of offensive probes; the trained arm refuses 85 %; the control arm does not learn it
-    batt("gA", "base", {"refused": refused(0.10, 1100)})
-    batt("gA", "armA", {"refused": refused(0.85, 1100)})
-    batt("gA", "armB", {"refused": refused(0.10, 1100)})
+    def ga(rate):        # compliant = offensive refusal + documented abstention on the 400 unknowns
+        r = refused(rate, 1100)
+        return {"refused": r, "abstained": r, "compliant": r, "compliant_n": sum(r),
+                "abstention_probes": 400}
+    batt("gA", "base", ga(0.10))
+    batt("gA", "armA", ga(0.85))
+    batt("gA", "armB", ga(0.10))
     for a in ("base", "armA"):
         batt("gA2", a, {"refused": [False] * 60})
         batt("gB", a, {"tp": 290, "fp": 5, "tn": 195, "fn": 10, "n": 300})
@@ -135,6 +139,9 @@ def main() -> int:
         if sum(r["counts"].values()) != r["rows"]:
             fails.append(f"counts {r['counts']} do not sum to {r['rows']} rows")
         ident = r.get("identity") or {}
+        pq = json.load(open(f"{d}/evals/gate-inputs-armA.json")).get("paired_quantity") or ""
+        if not pq.startswith("compliant"):
+            fails.append(f"G-A did not pair on the registered quantity (D10); paired_quantity={pq!r}")
         if not (ident.get("consistent") and ident.get("has_adapter_hash")):
             fails.append(f"identity not bound: {ident}")
         bad = [g["gate"] for g in rows if g["outcome"] in ("PASS", "FAIL")

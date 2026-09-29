@@ -135,15 +135,33 @@ def battery_receipts(evals_dir="evals", extra_dirs=()):
 
 
 def pairs_from_batteries(bat, arm):
-    """Per-probe refusal pairs for one arm, from its gA receipt plus the base receipt."""
+    """Per-probe compliance pairs for one arm, from its gA receipt plus the base receipt.
+
+    Review F23: the paired boolean must be the REGISTERED quantity — non-compliance retention (refusal of the
+    offensive probes plus documented abstention on the unknowns, D10) — which the driver now records as
+    `compliant`. Receipts written before that change carry only `refused` and remain readable; which key was
+    used is returned so the report can say which quantity it paired on.
+    """
     base = bat.get(("gA", "base"))
     side = bat.get(("gA", arm))
     if not base or not side:
-        return None
-    flags = {pid: bool(v) for pid, v in zip(side["probe_ids"], side["scores"]["refused"])}
-    bflags = {pid: bool(v) for pid, v in zip(base["probe_ids"], base["scores"]["refused"])}
-    return [{"probe_id": pid, "base": bflags[pid], "arm": flags[pid]}
-            for pid in side["probe_ids"] if pid in bflags]
+        return None, None
+
+    def flags(rec):
+        s = rec.get("scores") or {}
+        if isinstance(s.get("compliant"), list):
+            return s["compliant"], "compliant"
+        return s.get("refused") or [], "refused"
+
+    iflags, ikey = flags(side)
+    bflags, bkey = flags(base)
+    if len(iflags) != len(side["probe_ids"]) or len(bflags) != len(base["probe_ids"]):
+        return None, None
+    fl = {pid: bool(v) for pid, v in zip(side["probe_ids"], iflags)}
+    bf = {pid: bool(v) for pid, v in zip(base["probe_ids"], bflags)}
+    return ([{"probe_id": pid, "base": bf[pid], "arm": fl[pid]}
+             for pid in side["probe_ids"] if pid in bf],
+            f"{ikey}/{bkey}")
 
 
 def build_escape(d, scan):
@@ -285,17 +303,21 @@ def build(extra_eval_dirs=()):
         prov["battery receipts"] = ", ".join(sorted({f"{b}/{a}" for (b, a) in bat}))
         # arm A's pairs carry (arm, base); arm B's pairs are written to their OWN file, because Claim 2
         # reads arm A and arm B from separate files and joins them by probe_id.
-        prsA = pairs_from_batteries(bat, "armA")
-        prsB = pairs_from_batteries(bat, "armB")
+        prsA, keyA = pairs_from_batteries(bat, "armA")
+        prsB, keyB = pairs_from_batteries(bat, "armB")
         if prsA:
             A["refusal_pairs"] = prsA
             A["refusal_n"] = REQUIRED_N["G-A refusal retention"]
+            # F23/D10: state which quantity was paired on, so a reader can tell "compliant" (refusal OR
+            # documented abstention, the registered measure) from a legacy "refused"-only receipt.
+            A["paired_quantity"] = keyA
             support["G-A refusal retention"] = len(prsA)
             for _g in ("G-A refusal retention", "G-A co-secondary", "Claim 1 (A vs base)"):
                 mark_current(_g, bat.get(("gA", "armA")), bat.get(("gA", "base")))
         if prsB:
             ARMB["refusal_pairs"] = prsB
             ARMB["refusal_n"] = REQUIRED_N["G-A refusal retention"]
+            ARMB["paired_quantity"] = keyB
             support["Claim 2 (A vs B)"] = len(prsB)
             mark_current("Claim 2 (A vs B)", bat.get(("gA", "armB")), bat.get(("gA", "base")))
         gC = bat.get(("gC", "armA"))
