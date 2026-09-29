@@ -75,8 +75,13 @@ fi
 
 if wait_until "$(at "$BRIEF_AT")"; then
   say "C24 brief"; python3 v2/checkpoint_brief.py C24 2>&1 | tail -3 | tee -a "$LOG"
+  # The cadence is "an Astra review at EVERY checkpoint", and the mid-window loop dispatches one per checkpoint —
+  # but the C24 step, the terminal and most important checkpoint, had a brief and NO review. Dispatched here; it
+  # is a codex call with no GPU, so it runs concurrently with the contract starting at 12:10, and the contract is
+  # not gated on it (owner instruction).
+  say "C24 review (Astra)"; bash v2/checkpoint_review.sh C24 2>&1 | tail -2 | tee -a "$LOG"
 else
-  say "C24 brief ($BRIEF_AT) already passed — skipping"
+  say "C24 brief ($BRIEF_AT) already passed — skipping (and its review, for the same reason)"
 fi
 
 wait_until "$(at "$CONTRACT_AT")"

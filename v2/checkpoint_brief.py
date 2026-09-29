@@ -65,6 +65,26 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
     # The plan requires the Flash-Next serving stack evicted for the whole window, and checkpoint_metrics.sh now
     # collects it per host. It was never surfaced in the brief, so the requirement went unmentioned in the record
     # the CEO reads - reported here, with a breach stated plainly rather than buried.
+    # CADENCE SELF-REPORT. The owner's cadence is "an Astra review at EVERY checkpoint", and a missing or
+    # incomplete review was invisible in the record: M1's dispatch left a prompt on disk with no output, and
+    # C8/C16/C24 had no review step at all (C24's is now dispatched by the timeline). Each brief now states its
+    # own review status, including when the answer is "none" or "dispatched but no output".
+    _rev_out = os.path.join(ROOT, f"research-tmp/reviews/checkpoint-{label}-review.md")
+    _rev_prompt = os.path.join(ROOT, f"research-tmp/reviews/checkpoint-{label}-review-prompt.md")
+    if os.path.exists(_rev_out) and os.path.getsize(_rev_out) > 0:
+        try:
+            _last = [l.strip() for l in open(_rev_out, encoding="utf-8", errors="replace") if l.strip()][-1]
+        except Exception:                                          # noqa: BLE001
+            _last = "(unreadable)"
+        review_line = (f"present — `research-tmp/reviews/checkpoint-{label}-review.md`, closing line: "
+                       f"{_last[:160]}")
+    elif os.path.exists(_rev_prompt):
+        review_line = (f"**DISPATCHED BUT NO OUTPUT** (`checkpoint-{label}-review-prompt.md` exists, "
+                       f"`checkpoint-{label}-review.md` does not) — the review did not complete, and the cadence "
+                       f"requires one per checkpoint")
+    else:
+        review_line = (f"**NO REVIEW ON DISK for `{label}`** in `research-tmp/reviews/` — the cadence requires "
+                       f"an Astra review at every checkpoint")
     _ev = m.get("eviction") or {}
     _breach = [h for h, v in _ev.items() if isinstance(v, dict) and (v.get("port_8093") or v.get("active_units"))]
     if not _ev:
@@ -135,6 +155,7 @@ Projection to 24 h from the same file: **{exp.get('A', {}).get('projected_24h_ep
 * Watchdog, last cycle: `{wd[:150]}`
 * Repository revision: `{head[:150]}`
 * **Serving posture (plan requirement):** {ev_line}
+* **Astra review at this checkpoint:** {review_line}
 {notes or ''}
 ## What is open
 

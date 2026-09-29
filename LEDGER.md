@@ -2137,3 +2137,28 @@ was confirmed by hand against its producer rather than waved through.
 
 So: no new defect this round. The packaging surface I have been working is close to exhausted — the remaining
 unverified thing is the run itself, which cannot be rehearsed without the artifacts it produces.
+
+## 2026-09-29 — the cadence itself had a gap, at the checkpoint that matters most
+
+The owner's cadence is "**an Astra review at every checkpoint**". Checking compliance rather than assuming it:
+
+* **briefs: complete** — 16 numbered checkpoints plus five earlier CEO briefs, all dated and portal-verified;
+* **reviews: NOT complete.** Only three review artifacts exist (`checkpoint-M1-review-prompt.md`,
+  `checkpoint-M2-review-prompt.md`, `checkpoint-M2-review.md`). **C8, C16 and C24 had no review step in the
+  timeline at all**, and **M1's dispatch left a prompt on disk with no output** — so a review that never completed
+  looked exactly like one that had never been asked for.
+
+Two fixes:
+
+1. **C24 now gets a review.** The timeline ran metrics + brief for the terminal checkpoint and stopped there —
+   the single most important checkpoint in the window was the one with no review. Dispatched after the brief; it
+   is a codex call with no GPU, so it runs concurrently with the contract starting at 12:10, and the contract is
+   not gated on it (owner instruction).
+2. **Every brief now self-reports its review status**, in three states, all three exercised against the real
+   artifacts: `present — <file>, closing line: …` (M2), `**DISPATCHED BUT NO OUTPUT**` (M1 — the failed dispatch
+   surfaced rather than hidden) and `**NO REVIEW ON DISK for <label>**` (C16).
+
+The honest position on the earlier checkpoints: their state is frozen and a review run now would assess the
+*current* state, not C8's — so labelling one "the C8 review" would be false. What the chain reviews (#1–#25, on
+the spec, the design and the evaluation contract) covered in that period was the artifact under change, not the
+metrics snapshot; this entry records the difference rather than papering over it.
