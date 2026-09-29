@@ -2000,3 +2000,27 @@ Verified rather than asserted: row 1's check runs (`GATE-REPORT-OK`, exit 0); ro
 with no verdict written); and the corrected gate list was compared **programmatically** against
 `gates_v2.GATES` — no registered gate is missing. `plan-validate` now reports **0 failures, 0 warnings** (spec sha
 `e065cc170d3b6246…`), so any future warning stands out instead of being one of a standing pair.
+
+## 2026-09-29 — the harvest would have carried the measurements without the evidence
+
+Rehearsing the harvest against the live hosts (into a temp DEST, so nothing real was touched) found that the
+**pull mechanism works** — mixtures, logs and the local artifacts all arrived with matching sha256 — and that it
+**fails closed** correctly. But it also printed:
+
+    MISS v2/data/mixture/audit.receipt.json (not present on clawerdigi2@spark-40ee)
+
+and that was the finding. **Nine of the ten evidence receipts exist only on this machine** — `audit.receipt.json`
+(the re-audit PASS), `leak-scan-c24.receipt.json` (the unified leakage instrument D1), `d2-diversity.receipt.json`
+(the D2 NOT MET declaration), `mask-proof.receipt.json`, `learning-proof-early.receipt.json`,
+`noop-resume.receipt.json`, `registered-rules.receipt.json`, `equivalence-clearance.receipt.json` and
+`muse-clearance.receipt.json`. The harvest attempted nine of them **from the hosts**, where they do not exist, and
+they were **not in the local list either**. So the "checksum-verified harvest" — one of the objective's five
+deliverables — would have carried the *measurements* without the *evidence for the claims made about them*.
+
+Fixed: the harvest now collects `v2/data/mixture/*.receipt.json` from this machine (the glob deliberately
+excludes the superseded `*.receipt.pre-*.json`, which are dated history). Rehearsal result: **13 evidence receipts
+collected** where there were 0, zero superseded receipts included, and fail-closed behaviour unchanged.
+
+Strengthened further: the audit and leak-scan receipts are now **required** for `HARVEST-COMPLETE`, so a harvest
+cannot certify a verdict whose supporting evidence it did not collect. Unit-tested both directions — satisfied
+when both are present, `HARVEST-INCOMPLETE` naming the audit receipt when it is removed.

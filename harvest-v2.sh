@@ -45,9 +45,10 @@ for pair in "$H1" "$H2"; do
   done
 done
 # local artifacts of the contract itself: the assembled inputs, the verdict, the corpus escape measurement
-for rel in evals/gate-inputs-armA.json evals/gate-inputs-base.json evals/gate-inputs-armB.json \
-           v2/gate-report-v2.json v2/data/corpus-escape-scan.json v2/data/mixture/FACTS.json; do
+collect_local() {  # $1 = path relative to the repo root
+  local rel="$1"
   if [ -s "$rel" ]; then
+    local sha
     sha=$(sha256sum "$rel" | awk '{print $1}')
     cp "$rel" "$DEST/evals/$(basename "$rel")"
     echo "$sha  evals/$(basename "$rel")  (local)" >> "$DEST/MANIFEST.sha256"
@@ -55,6 +56,20 @@ for rel in evals/gate-inputs-armA.json evals/gate-inputs-base.json evals/gate-in
   else
     echo "  MISS $rel (local)"
   fi
+}
+for rel in evals/gate-inputs-armA.json evals/gate-inputs-base.json evals/gate-inputs-armB.json \
+           v2/gate-report-v2.json v2/data/corpus-escape-scan.json v2/data/mixture/FACTS.json; do
+  collect_local "$rel"
+done
+# THE EVIDENCE RECEIPTS, which exist ONLY on this machine. Found 2026-09-29 by rehearsing the harvest against
+# the live hosts: nine of the ten (audit PASS, the unified leakage instrument, the D2 declaration, the live mask
+# proof, the learning proof, the no-op-resume incident record, the registration binding and the two clearances)
+# were attempted FROM THE HOSTS, where they do not exist, and were absent from the local list as well - so a
+# "checksum-verified harvest" would have carried the measurements without the evidence for the claims made about
+# them. The glob deliberately excludes the superseded `*.receipt.pre-*.json` files, which are dated history
+# rather than current evidence.
+for rel in v2/data/mixture/*.receipt.json; do
+  [ -e "$rel" ] && collect_local "$rel"
 done
 # The verdict itself is a DOCUMENT of this contract, not an eval input, so it is harvested at the DEST root.
 # Added 2026-09-29: `REQUIRED` below has always demanded docs/VERDICT-v2.md, but nothing ever copied it into
@@ -71,7 +86,11 @@ else
 fi
 # Fail closed on the artifacts the verdict actually needs: "HARVEST-COMPLETE" printed over a manifest that is
 # missing the gate report or the fresh generalisation receipts would be a success message for a failed run.
-REQUIRED="v2/gate-report-v2.json evals/gate-inputs-armA.json docs/VERDICT-v2.md"
+# The evidence for the objective's own claims is REQUIRED, not optional: the re-audit PASS (step 2) and the
+# unified leakage instrument (D1). A harvest that prints HARVEST-COMPLETE without them would certify a verdict
+# whose supporting evidence it had not collected - which is what rehearsing against the live hosts exposed.
+REQUIRED="v2/gate-report-v2.json evals/gate-inputs-armA.json docs/VERDICT-v2.md \
+          v2/data/mixture/audit.receipt.json v2/data/mixture/leak-scan-c24.receipt.json"
 MISSING=""
 for rel in $REQUIRED; do
   base=$(basename "$rel")
