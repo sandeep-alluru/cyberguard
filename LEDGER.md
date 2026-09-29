@@ -2818,3 +2818,26 @@ exercised the two element-3 clauses added earlier: the serving eviction read fro
 negative cases already run (one claim instead of two; a manifest missing an adapter; rejection wording in a
 clearance; a breached eviction record), the instrument is now tested in both directions, which is the only state in
 which it can be trusted to make a claim rather than merely to withhold one.
+
+## 2026-09-29 — the next checkpoint's whole sequence, run before it fires
+
+Each piece of the M3 sequence had been tested after its own change, but never **as a sequence**, and the sequence is
+what the timeline actually executes in ~an hour. Run end to end under a scratch label, so the real checkpoint's
+artifacts were never touched:
+
+1. `checkpoint_metrics.sh <label>` → a 1,427-byte snapshot carrying the live numbers and the per-host `eviction`
+   block.
+2. `checkpoint_review.sh <label> --dry-run` → an 8,274-byte prompt with **0** unsubstituted placeholders (the
+   `{{REV}}`/`{{SPEC_SHA}}` substitution the timeline performs, checked rather than assumed).
+3. With a dispatch log present and no output yet — exactly the state M3 will be in, since the timeline now dispatches
+   the review *before* composing the brief — the brief rendered
+   **"DISPATCHED, OUTPUT NOT YET WRITTEN … its answer lands at `research-tmp/reviews/checkpoint-<label>-review.md`"**,
+   which is the honest statement of a running background reviewer rather than the earlier false "this checkpoint has
+   none".
+4. With the output written, the same brief switched to `present — …, closing line: …`.
+
+The composed body also carried the two lines added earlier this window: the snapshot age ("taken 2026-09-29 07:47:31,
+0 min before this brief") and the serving posture ("in force on both hosts — no `8093` listener and no active serving
+unit"). All scratch artifacts were removed and the review directory confirmed free of them.
+
+So the next scheduled event has been exercised as a unit, not just as four tested parts.
