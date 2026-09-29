@@ -699,3 +699,21 @@ checkpoints **inside that single run**.
 confirmation pass (#17) is requested against this revision. Because the contract is not gated on a clearance
 marker (owner instruction of 2026-09-29: *"if the review doesnt work you move forward dont stop with the work"*),
 evaluation proceeds either way, and the verdict records the clearance state that actually obtained.
+
+## 17. Amendment A2 — the serving posture, and the objective's restore clause (2026-09-29)
+
+**The CyberGuard objective for this window includes *"stopping the Flash-Next service for the window and
+restoring it with a verified probe"*. The OWNER SUPERSEDED THE RESTORE.** This section records that, because a
+deviation from the objective that is not written down is indistinguishable from an omission.
+
+| element | state |
+|---|---|
+| **why it was stopped** | both hosts share one GPU with the training run; the stack holds ~50 GB per host, and it is `Restart=always` **and enabled**, so a plain `stop` allowed it back mid-window (measured: 40ee free memory down to 17.4 GB) — `systemctl disable --now` was required to hold it down |
+| **eviction** | in force on both hosts for the whole window |
+| **restore** | **NOT PERFORMED, on owner instruction.** The objective's restore clause is superseded: the stack remains evicted/disabled after this window |
+| **reversibility** | `pool_control.sh restore` **re-enables and starts** the units, so the owner's boot behaviour is not silently changed and the decision is deliberate rather than a side effect |
+| **verification** | checked at every 3-hourly checkpoint and again by the evaluation contract's preflight: port **8093** has no listener and no serving unit is `active`/`activating` (`v2/checkpoint_metrics.sh` records it under `eviction`; `v2/check_eval_surface.sh` fails on a breach) |
+
+**Consequence for step 3 of the objective:** the training requirement itself is unaffected — the GPUs were
+dedicated for the window, which is what the eviction exists to achieve — but the *"with a verified probe"*
+restoration is deliberately **not delivered**, and no artifact in this project claims otherwise.

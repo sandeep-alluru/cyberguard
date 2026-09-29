@@ -1792,3 +1792,28 @@ Measured after the change: worst element **0.5 ULP**, `measured_elements == elem
 non-finite 0/0, controls **4.14e36 / 4.14e37** ULP. Both of #24's counterexamples are now **re-derived
 regressions** in `v2/test_ulp_spacing.py`, alongside #23's. Stage-2 matrix verified: as-measured PASSES; a
 mismatched set count FAILS; a residual-manufactured 60-ULP separation FAILS. Rehearsal PASS.
+
+## 2026-09-29 — a deviation from the objective that nothing recorded: the Flash-Next restore clause
+
+The objective for this window includes *"stopping the Flash-Next service for the window and **restoring it with a
+verified probe**"*. The owner **superseded the restore** — the stack remains evicted — but that supersession was
+nowhere in the plan of record, and the verdict said **nothing at all** about the serving posture. A deviation from
+the objective that is not written down is indistinguishable from an omission, which is exactly the failure this
+project keeps finding in other guises.
+
+Added as **Amendment A2** (`docs/SPEC-V2.md` §17, with a pointer in `docs/PLAN-SEQUENCE.md`), recording the why
+(the stack is `Restart=always` **and enabled**, so a plain `stop` let it return mid-window at ~50 GB per host,
+measured with 40ee free memory down to 17.4 GB), the eviction, the **superseded restore**, and the fact that
+`pool_control.sh restore` still re-enables and starts the units so the owner's boot behaviour is unchanged and the
+decision is reversible rather than a side effect. `plan-validate.py` PASSES.
+
+The verdict now carries the deviation in its own section, and the **rehearsal asserts it** — verified
+discriminating, since removing the section makes the rehearsal fail on exactly that sentence.
+
+Also verified this round, as an objective item rather than assumed: **D1's leakage instrument is unified as
+specified** — exact match, **13-gram Jaccard** (`ngram = 13`) and **containment**, with short references handled
+explicitly (`SHORT_TOKENS = 13`, exact + contiguous-copy rules), both arms, **162,148 checked rows** across all
+fields, and a reference universe that now **includes the frozen C24 batteries** (`references: c24_batteries,
+holdout, probes`) — which closes the exact gap Muse raised in its first pass, when the universe was only
+`holdout500` plus 225 legacy probe strings. Per-set verdicts: `holdout` CLEAN, `probes` CLEAN, `c24_batteries`
+**LEAK** (14,162 findings), declared rather than hidden.

@@ -192,6 +192,9 @@ def main() -> int:
                 # The exposure section must carry MEASURED numbers when the trainer receipt exists — a verdict
                 # that says "UNMEASURED" here would silently defeat review #14's requirement.
                 ("measured updates", "the measured-exposure table"),
+                # A deviation from the objective must be stated in the verdict, not merely in a log: the
+                # objective says "restoring it with a verified probe" and the owner superseded that (A2).
+                ("Serving posture (amendment A2", "the serving-posture deviation statement"),
             ):
                 if need not in v_txt:
                     fails.append(f"the composed verdict is missing {why}: {need!r}")

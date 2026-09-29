@@ -678,3 +678,11 @@ authorized**.
 Review #15 withheld clearance on exactly this inconsistency while finding **no intrinsic training-validity
 defect** in the continuation or the mid-epoch stop; the remedy applied is to correct the registration rather
 than re-describe the artifact.
+
+## 2026-09-29 — Amendment A2: the serving posture (normative text is `docs/SPEC-V2.md` §17)
+
+The Flash-Next serving stack was evicted from both hosts for the training window (owner instruction
+2026-09-27) and **remains evicted**: the owner superseded the objective's *"restoring it with a verified probe"*
+clause. `pool_control.sh restore` still re-enables and starts the units, so this is a deliberate, reversible
+decision and the owner's boot behaviour is unchanged. The eviction is verified at every 3-hourly checkpoint (port
+8093 closed, no active serving unit) and again by the evaluation contract's preflight — see §17 for the table.

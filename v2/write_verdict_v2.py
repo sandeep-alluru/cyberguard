@@ -389,6 +389,16 @@ stating it.
   holdout universe remains CLEAN; the **battery universe is LEAK**, which is the contamination this verdict
   declares rather than hides.
 
+## Serving posture (amendment A2 — stated because it is a deviation from the objective)
+
+The evaluation ran with the **Flash-Next serving stack evicted from both hosts**, which the plan requires (the
+stack is `Restart=always` and enabled, and once returned mid-window at ~50 GB per host, so `disable --now` was
+needed to hold it down). The objective's clause *"restoring it with a verified probe"* was **superseded by the
+owner**, and the stack **remains evicted**; `pool_control.sh restore` can re-enable and start it, so the decision
+is deliberate and the owner's boot behaviour is unchanged. The eviction was verified at every 3-hourly checkpoint
+(port 8093 closed, no active serving unit) and again by this contract's preflight. Recorded in
+`docs/SPEC-V2.md` §17; no artifact in this project claims the restoration was performed.
+
 ## Independent review status
 
 * **Codex (Astra)** reviewed the evaluation chain across six passes; the chain's blocking findings were fixed
