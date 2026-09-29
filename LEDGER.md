@@ -3152,3 +3152,24 @@ and no-verdict are the same outcome, since an undecided confirmatory claim fails
 would trade a loud, diagnosable failure (a stage name and an exit code, with the timeline's one automatic re-run and
 now the packaging-failure path) for a quieter risk of a verdict whose gate table is thinner than it looks. Recorded
 as a considered option, not an oversight.
+
+## 2026-09-29 08:07 — consolidated pre-flight: every machine gate green in one pass
+
+The checks have been run individually as each change landed; this is the single pass, recorded because a suite that
+is only ever run piecemeal is not evidence that the pieces agree with each other at one moment. Run at 08:06 CDT,
+with the training window still live and M3 ~40 minutes away:
+
+```
+1. registration rules      PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+2. probe sets              14 sets, 0 mismatches against their receipts
+3. rehearsal               PASS — the local verdict chain decides, binds identity, rests no decision on stub input
+4. contract dry-run        exit 0, 15 stages, no lock taken
+5. objective verifier      exit 2 — elements 1 and 2 PASS; 3, 4, 5 NOT-YET (awaiting the contract)
+```
+
+Element 1 and 2 passing *here* is the load-bearing part: they are the two elements the window has already delivered,
+and the verifier decides them from receipts rather than from the ledger's narrative about them. The three NOT-YET
+lines are the honest state — training completes at ~12:03, the contract opens at 12:10, and the verdict, harvest and
+terminal brief do not exist yet. Reviewed together with the host-side checks run earlier today (eval surface, compile
+gate, probe-set hashes, held-out split, transfer mechanisms, and the eviction's durability), this is the state in
+which the contract will start.
