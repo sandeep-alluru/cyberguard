@@ -1932,3 +1932,34 @@ verdict's sha256 and size, the harvest manifest's checksum-verified count, the b
 to write a brief that would announce a verdict which is not there. Verified: all three refusal paths exit 1 with
 their reason, and the composition path writes a well-formed brief (tested into a temp out-dir, so nothing fake
 reached `docs/ceo`). It now runs after the harvest in the timeline.
+
+## 2026-09-29 — closed the weakest link in the contract: stage 1 had no retry
+
+`run-eval-chain.sh` **always exits 0 by design** (it records its inner exit codes in its own log), so a failure in
+stage 1 is detectable only from the pulled **artefacts**. Before this change, one transient failure in that
+~2-hour step discarded the entire ~11-hour contract, with only the timeline's full re-run as a rescue. Stage 1 now
+makes **two attempts**: an attempt = launch the chain on both hosts in parallel, wait, pull both files per arm,
+and require both present **and non-empty**; only then is the stage satisfied.
+
+Verified in isolation in the three directions that matter: succeeding on attempt 1 → ok; on attempt 2 → retried
+then ok; never → retried once and exited **3** naming the missing files. The full dry-run still renders all 14
+stages with no spurious retry.
+
+### The contract's failure ladder, now stated in one place
+
+| stage | failure mode | mitigation |
+|---|---|---|
+| 00 | trainers do not exit | 45-min deadline, then a loud exit 3 (the box is verified to stop them at ~12:01) |
+| 0pre | quarantine fails | exit 2 |
+| 0d | adapter stale / a frozen run | exit 4 — the failure mode that burned 6.02 GPU-h |
+| 0a | adapter missing or torn | exit 2 (completeness check by name **and** size) |
+| 0c | live mask wrong | recorded as a limitation the verdict carries, non-fatal by design |
+| 0 / 0b | preflight, sync, host eval surface | exit 2 |
+| 1 | benchmark / merge fails | **retry once**, then exit 3 (new) |
+| 2 | artefacts are not measurements; tuned model not measured; sets differ; ULP spacing or rule drift | exit 4, 20+ fail-closed conditions |
+| 3 | a battery fails | **retry per battery**, then exit 5 |
+| 4 / 5 / 6 / 7 | assembler, verdict layer, verdict document, harvest | exits 6 / 7 / 9 / 8, each after substantive checks |
+| timeline | any non-zero exit | **one automatic re-run** of the contract |
+
+Budget, re-derived rather than assumed: epoch 1 (11.0296 + 11.0136 h) + the frozen window (3.0088 + 3.0084 h) +
+the capped continuation (2 × 9.5 h) = **47.0604 GPU-h of the 48 authorized** — the figure FACTS carries.

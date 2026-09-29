@@ -350,30 +350,53 @@ done
 
 # ---------------------------------------------------------------- stage 1: merge equivalence + benchmark
 step 1 "merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU)"
-PIDS=()
-for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
-  RUN="cyberguard-lora-v2-$arm"
-  echo "  ssh $host: cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh"
-  [ "$DRY" = 1 ] && continue
-  # 12 h, not 7. Measured 2026-09-29: a 100-probe battery took 925 s WITH training contending for the GPU;
-  # merge_equiv (200 loss rows, 100 generations, 100 teacher-forced rows) plus eval_cyberguard (500 generations
-  # per model) is hours of GPU work, and a timeout here discards the whole window's evaluation.
-  ( timeout 43200 ssh -o BatchMode=yes "$host" "cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh" \
-      > "logs/eval-chain-$arm.log" 2>&1 ) &
-  PIDS+=($!)
-done
-# both hosts run in parallel; the chain waits for each trainer to release its GPU before starting
-[ "$DRY" = 1 ] || for p in "${PIDS[@]}"; do wait "$p" || true; done
-# run-eval-chain.sh always exits 0 (it records the inner exit codes in its own log), so the ARTEFACTS are the
-# evidence, not the exit status — the failure this replaces was a stage that "succeeded" while producing nothing.
-for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
-  RUN="cyberguard-lora-v2-$arm"
-  [ "$DRY" = 1 ] && continue
-  for f in "evals/$RUN.json" "evals/merge-equiv-$RUN.json"; do
-    timeout 900 rsync -a -e "ssh -o BatchMode=yes" "$host:~/cyberguard/$f" evals/ \
-      || { bad "$arm: $f did not arrive from $host (did the chain run?)"; exit 3; }
+# ONE TARGETED RETRY, mirroring stage 3's per-battery retry and closing the weakest link in this contract.
+# `run-eval-chain.sh` always exits 0 by design (it records its inner exit codes in its own log), so a failure
+# here is detected only by the pulled ARTEFACTS — and before this retry existed, one transient failure in a
+# ~2-hour step discarded the entire ~11-hour contract, with only the timeline's full re-run as a rescue. An
+# "attempt" is: launch the chain on both hosts in parallel, wait, pull both files per arm, and require both to be
+# present and non-empty. A deterministic failure simply costs one more attempt.
+S1_OK=0
+for s1_try in 1 2; do
+  PIDS=()
+  for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+    RUN="cyberguard-lora-v2-$arm"
+    echo "  ssh $host: cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh"
+    [ "$DRY" = 1 ] && continue
+    # 12 h, not 7. Measured 2026-09-29: a 100-probe battery took 925 s WITH training contending for the GPU;
+    # merge_equiv (200 loss rows, 100 generations, 100 teacher-forced rows) plus eval_cyberguard (500 generations
+    # per model) is hours of GPU work, and a timeout here discards the whole window's evaluation.
+    ( timeout 43200 ssh -o BatchMode=yes "$host" "cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh" \
+        > "logs/eval-chain-$arm.log" 2>&1 ) &
+    PIDS+=($!)
   done
-  ok "$arm: benchmark + merge-equivalence pulled from $host"
+  # both hosts run in parallel; the chain waits for each trainer to release its GPU before starting
+  [ "$DRY" = 1 ] || for p in "${PIDS[@]}"; do wait "$p" || true; done
+  # the ARTEFACTS are the evidence, not the exit status
+  s1_missing=""
+  for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+    RUN="cyberguard-lora-v2-$arm"
+    [ "$DRY" = 1 ] && continue
+    for f in "evals/$RUN.json" "evals/merge-equiv-$RUN.json"; do
+      if ! timeout 900 rsync -a -e "ssh -o BatchMode=yes" "$host:~/cyberguard/$f" evals/ 2>/dev/null \
+         || [ ! -s "evals/$(basename "$f")" ]; then
+        s1_missing="$s1_missing $arm:$(basename "$f")"
+      fi
+    done
+  done
+  if [ "$DRY" = 1 ] || [ -z "$s1_missing" ]; then
+    S1_OK=1
+    [ "$DRY" = 1 ] || ok "benchmark + merge-equivalence present for both arms"
+    break
+  fi
+  if [ "$s1_try" = 1 ]; then
+    echo "  attempt 1 incomplete:${s1_missing} — retrying the benchmark stage once"
+    sleep 30
+  else
+    bad "benchmark stage incomplete after 2 attempts:${s1_missing}"
+    bad "  (see logs/eval-chain-armA.log and logs/eval-chain-armB.log)"
+    exit 3
+  fi
 done
 
 # ---------------------------------------------------------------- stage 2: verify the pulled artefacts
