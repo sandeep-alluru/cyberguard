@@ -82,6 +82,34 @@ if [ "$DRY" != 1 ]; then
   ok "receipt v2/data/mixture/trainer-exit.receipt.json (adapter hashes as of exit)"
 fi
 
+# ---------------------------------------------------------------- stage 0pre: quarantine stale eval inputs
+# The verdict layer classifies EVERY json in evals/, and `cyberguard-lora-v1.json` is a RECOGNISED name (the
+# chain accepts `...-v1.json`, `...-armA.json`, `...-armB.json`, `...base.json`). Two Sep-27 v1 artifacts were
+# still sitting in evals/ while this window's measurements are written THERE. Nothing guarantees a stale file
+# is rejected rather than consumed, and "a measurement from a previous run" is not evidence about this one.
+# So everything already present is archived (kept, never deleted) before any stage can write into evals/.
+CONTRACT_START="${CONTRACT_START:-$(date +%s)}"
+step 0pre "quarantine pre-existing evals/ inputs (the verdict must consume only this window's measurements)"
+if [ -d evals ]; then
+  stale=$(find evals -maxdepth 1 -name '*.json' -type f ! -newermt "@$CONTRACT_START" 2>/dev/null | wc -l)
+  if [ "$stale" -gt 0 ]; then
+    if [ "$DRY" = 1 ]; then
+      echo "  DRY-RUN: would archive $stale pre-existing eval json(s):"
+      find evals -maxdepth 1 -name '*.json' -type f ! -newermt "@$CONTRACT_START" -printf '    %p\n' 2>/dev/null
+    else
+      mkdir -p evals/.pre-c24-archive
+      find evals -maxdepth 1 -name '*.json' -type f ! -newermt "@$CONTRACT_START" \
+        -exec mv -t evals/.pre-c24-archive {} + 2>/dev/null \
+        || { bad "could not quarantine stale eval inputs"; exit 2; }
+      left=$(find evals -maxdepth 1 -name '*.json' -type f ! -newermt "@$CONTRACT_START" 2>/dev/null | wc -l)
+      [ "$left" -eq 0 ] || { bad "quarantine incomplete: $left stale eval json(s) remain"; exit 2; }
+      ok "archived $stale pre-existing eval json(s) into evals/.pre-c24-archive (kept, not deleted)"
+    fi
+  else
+    ok "no pre-existing eval json to archive"
+  fi
+fi
+
 # ---------------------------------------------------------------- stage 0d: learning proof
 # Codex review #14 (2026-09-29) accepted that the repaired resume is TRAINABLE (trainable params 66,060,288
 # against the frozen run's 0) but refused to accept that it is LEARNING:
