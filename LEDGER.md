@@ -2492,3 +2492,32 @@ comparison reported `probe_set_sha256` as *missing from the producer*. It was no
 `"([a-z_]+)"`, which cannot match a key containing digits, so the checker silently omitted the one key it then
 declared absent. The finding was in the instrument, not the artifact (the same shape as the `grep -q "*foo[.]py"`
 lesson). Re-run with `"([a-z0-9_]+)"`: nothing missing.
+
+## 2026-09-29 — the module the hosts were running on trust, and a syntax check that could not see the error it was written to catch
+
+**A host-side dependency that nothing synced.** Stage 0b ships the evaluation surface to both hosts. `eval_cyberguard.py`
+imports `cyberguard_contract`, and `cyberguard_data.py` does too — but `cyberguard_contract.py` sits at the repo
+**root**, so the `v2/*.py` glob never covered it and it was not in `EVAL_FILES` either. It is present on both hosts
+today and byte-identical to the repo (sha `55c2832b0b823841`), but only because a 2026-09-27 sync left it there:
+had that file been edited at any point since — and it is a file this effort has repeatedly reviewed — the hosts
+would have gone on running the old quality-verdict logic while the repo advanced, with every preflight reporting
+OK. It is now in `EVAL_FILES`, and the reason is written beside the list.
+
+**A syntax check that accepted what it was meant to reject.** While repairing a self-inflicted edit I ran
+`ast.parse` as a syntax check and it reported OK on a module whose `return` had been dedented out of its function.
+`ast.parse` only validates grammar; `'return' outside function` is a **compile-time** error, so `compile()` — not
+`ast.parse` — is the check that catches this class. The break was caught by the **rehearsal** (which actually runs
+the composer), not by the check; my repair is verified by the rehearsal passing and by the contract's nine
+mandatory-section needles being present in a freshly composed verdict. Every Python file in the project (56) was
+then re-checked with `compile()`: no failures.
+
+Both facts are now a gate rather than a lesson: `check_eval_surface.sh` compiles every host-side Python script
+(with `compile()`, not `ast.parse`) and checks the shell chain with `bash -n`, before stage 1's benchmark and
+stage 3's batteries — so a compile-time error costs a preflight rather than a spent window. Two further
+self-inflicted errors were caught by *running* it rather than reading it: the gate first compiled the **shell**
+script `run-eval-chain.sh` as Python and reported a "compile-time error" in a perfectly good file, and it used
+`[ -f "$f" ] || continue`, which would have printed OK for a script that was missing altogether. The gate now
+requires only the scripts the contract actually runs on the host (the assembler and gate layer run locally, and
+the trainer is finished by stage 0b, so their absence must not abort stage 0b's `exit 2`), reports absence
+explicitly, and passes on both hosts — the only remaining preflight failure being the expected one, that the live
+trainer still holds the GPU.

@@ -46,6 +46,43 @@ for f in cyberguard_data.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh 
 done
 [ -f "$ROOT_HOME/v2/run_battery.py" ] && ok "eval files present (stage 0b sync done)"
 
+# SYNTAX BY COMPILATION, not by parsing. Found 2026-09-29: `ast.parse` ACCEPTED a module with a top-level `return`
+# — grammar is valid, and "'return' outside function" is raised at COMPILE time — so the syntax check this project
+# had been using was blind to that whole class, and a break of exactly that kind reached the verdict composer and
+# was caught by the rehearsal rather than by the check. These scripts run unattended for hours on this host, so
+# every evaluation script is compiled here, before stage 1's benchmark and stage 3's batteries: a compile-time
+# error now costs a preflight, not a spent window.
+# REQUIRED must exist AND compile (the contract runs them on this host after training). IF_PRESENT are compiled
+# only when present: v2/assemble_gate_inputs.py and v2/gates_v2.py run LOCALLY, and the trainer is already done by
+# stage 0b, so their absence here is not a contract failure and must not abort stage 0b (which exits 2 on any bad).
+COMPILE_FAIL=""; COMPILE_MISSING=""
+for f in eval_cyberguard.py merge_equiv.py cyberguard_contract.py cyberguard_data.py \
+         v2/run_battery.py v2/gate_scorers_v2.py; do
+  [ -f "$f" ] || { COMPILE_MISSING="$COMPILE_MISSING $f"; continue; }
+  "$PY" -c 'import sys; compile(open(sys.argv[1], encoding="utf-8").read(), sys.argv[1], "exec")' "$f" 2>/dev/null \
+    || COMPILE_FAIL="$COMPILE_FAIL $f"
+done
+# SHELL, not Python: `run-eval-chain.sh` is the host-side chain that invokes the two Python steps, and compiling a
+# shell script as Python fails by definition - which is exactly what the first version of this gate did, reporting
+# a "compile-time error" in a file that was fine. Its syntax is checked the way shell syntax should be.
+if [ -f run-eval-chain.sh ]; then
+  bash -n run-eval-chain.sh 2>/dev/null || COMPILE_FAIL="$COMPILE_FAIL run-eval-chain.sh(bash -n)"
+else
+  COMPILE_MISSING="$COMPILE_MISSING run-eval-chain.sh"
+fi
+for f in train_cyberguard.py v2/assemble_gate_inputs.py v2/gates_v2.py v2/verify_resume_learning.py; do
+  [ -f "$f" ] || continue
+  "$PY" -c 'import sys; compile(open(sys.argv[1], encoding="utf-8").read(), sys.argv[1], "exec")' "$f" 2>/dev/null \
+    || COMPILE_FAIL="$COMPILE_FAIL $f"
+done
+# An ABSENT script is reported, not skipped: the first version of this check used `[ -f "$f" ] || continue`, so a
+# script the contract needs could be missing entirely and the check would still print OK.
+[ -z "$COMPILE_MISSING" ] || bad "host-side script(s) ABSENT, and the contract runs them here:$COMPILE_MISSING"
+[ -z "$COMPILE_FAIL" ] || bad "compile-time error in:$COMPILE_FAIL - the contract would fail hours in, not here"
+if [ -z "$COMPILE_FAIL" ] && [ -z "$COMPILE_MISSING" ]; then
+  ok "every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)"
+fi
+
 # Batteries write many thousands of generations; a full disk mid-contract loses the whole run.
 FREE_GB=$(df -BG --output=avail "$ROOT_HOME" | tail -1 | tr -dc '0-9')
 [ "${FREE_GB:-0}" -ge 60 ] && chk yes "disk free ${FREE_GB} GB (>= 60 GB)" \

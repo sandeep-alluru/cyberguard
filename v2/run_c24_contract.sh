@@ -346,13 +346,16 @@ fi
 step 0b "sync the evaluation surface to the hosts"
 # verify_resume_learning.py is here because stage 0d calls it ON the hosts and runs before stage 3 syncs
 # anything: without it a fresh host aborts the contract at the learning proof with a missing file.
+# cyberguard_contract.py is here because `eval_cyberguard.py` and `cyberguard_data.py` both import it and it lives
+# at the repo ROOT, so `v2/*.py` never covered it: it was present on both hosts only because a 2026-09-27 sync left
+# it there (identical sha, verified), and nothing would have kept it current had it been edited since.
 # v2/*.py is every host-side scoring/authority module (run_battery, gate_scorers_v2, cap_scorers,
 # build_mixture, build_refusal_set, cyberguard_contract, ...). attack-stix.json is the ATT&CK authority: without
 # it the host's authority() is EMPTY and every legitimate technique citation scores as a hallucination. Both
 # were missing on both hosts until 2026-09-29, when a host-side scorer selftest exposed it.
 # scorer-authority.receipt.json is the DECLARED authority the host check compares against; without it the
 # host cannot verify that its id-factuality table is the one the verdict assumes.
-EVAL_FILES=(cyberguard_data.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh
+EVAL_FILES=(cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh
             v2/data/mixture/scorer-authority.receipt.json)
 EVAL_MODULES=(v2/*.py)
 EVAL_AUTHORITY=(v2/candidates/attack-stix.json)
