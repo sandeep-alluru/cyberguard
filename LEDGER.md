@@ -2056,3 +2056,18 @@ fabricated, and `v2/gates_v2.py:811` requires the field to be *present*, with th
 clear G-I UNMEASURED" and "a complete measurement with 3 literal \n must FAIL". So the limitation is accurate and
 the gate cannot silently pass on half a measurement. No change needed; recorded so the claim is known to be
 checked rather than inherited.
+
+## 2026-09-29 — the timeline was re-running a harvest that had already succeeded, and would have truncated it
+
+The contract's **stage 7** runs `harvest-v2.sh`, and the timeline then ran it **again** into the same DEST. But
+`harvest-v2.sh` does `: > "$DEST/MANIFEST.sha256"` at the start of every run — so the second pass **truncates** the
+manifest stage 7 produced and re-pulls ~50 files from both hosts. A transient failure on any single pull during
+that redundant pass would leave a **shorter** manifest, silently downgrading the objective's
+checksum-verified-harvest deliverable to a partial one; and the timeline line never checked the exit status
+either, so the downgrade would have been invisible.
+
+Fixed: the timeline harvests only when the contract did **not** produce a manifest (or produced one that does not
+name the verdict), and when it does run it captures and reports the exit status explicitly. Verified in the three
+cases that matter: manifest present **and** naming the verdict → SKIP (with the file count); no manifest (the
+contract failed before stage 7) → RUN; manifest present but **without** the verdict → RUN, because a post-contract
+manifest that does not include the verdict is not a completed harvest.

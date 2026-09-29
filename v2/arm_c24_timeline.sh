@@ -112,7 +112,22 @@ if [ "$rc" != 0 ]; then
 fi
 fi
 
-say "harvest"; bash harvest-v2.sh 2>&1 | tail -5 | tee -a "$LOG"
+# The contract's STAGE 7 ALREADY HARVESTED into the same DEST. Re-running it here would TRUNCATE the manifest
+# stage 7 produced (`harvest-v2.sh` does `: > "$DEST/MANIFEST.sha256"` at the start of every run) and re-pull
+# ~50 files from both hosts; a transient failure on any single pull would then leave a SHORTER manifest,
+# silently downgrading the checksum-verified-harvest deliverable — and this line never checked the exit status
+# either. Run it only when the contract did not produce a manifest, and report the status when it does.
+MAN="research-tmp/harvest-v2/MANIFEST.sha256"
+if [ -s "$MAN" ] && grep -qF "VERDICT-v2.md" "$MAN"; then
+  say "harvest already complete in the contract's stage 7 ($(wc -l < "$MAN") files, including the verdict)"
+  say "  not re-running it: the manifest must not be truncated by a redundant pass"
+else
+  say "harvest (the contract produced no manifest, so this is the only pass)"
+  bash harvest-v2.sh > logs/harvest-timeline.log 2>&1
+  hrc=$?
+  tail -5 logs/harvest-timeline.log | tee -a "$LOG"
+  say "harvest exit=$hrc (no manifest in the contract means a failure here leaves the deliverable missing, not partial)"
+fi
 # The TERMINAL checkpoint gets its brief too. The cadence requires "a dated CEO-desk brief per checkpoint", and
 # this one was missing: the timeline's last act was to log whether VERDICT-v2 exists, so ~11 hours of unattended
 # work would have delivered the headline artifact with no CEO-facing summary of what it decided. It composes from
