@@ -163,6 +163,18 @@ def merge_equivalence_block() -> str:
     ])
 
 
+
+def _cut(s, n: int) -> str:
+    """Truncate for display and MARK the cut.
+
+    Found 2026-09-29: six places in the deliverables sliced content (`[:110]`, `[:400]`, `[:150]` …) and presented
+    it as whole. The worst instance was the verdict's contamination block, headed "verbatim" while dropping the
+    295 characters that contained the check's own RESULT line. An unmarked cut reads as the full text, so every
+    one is marked here instead.
+    """
+    s = str(s)
+    return s if len(s) <= n else s[:n].rstrip() + " …[truncated]"
+
 def _fmt(v, spec: str = ".4f") -> str:
     """Format a number, or render `?` for a missing one.
 
@@ -317,7 +329,7 @@ def main() -> int:
                 note = "retention/recall instrument (training rows) — recall only"
             else:
                 note = "measured"
-            out.append(f"| {g['gate']} | **{g['outcome']}** | {note} — {str(g.get('detail'))[:110]} |")
+            out.append(f"| {g['gate']} | **{g['outcome']}** | {note} — {_cut(g.get('detail'), 110)} |")
         return "\n".join(out)
 
     claims = [g for g in gates if g["gate"].startswith("Claim")]
@@ -397,7 +409,7 @@ stating it.
   {facts.get('unique_refusal_rows', '?')} unique refusal rows, all cited from `v2/data/mixture/FACTS.json`).
   Their results are **recall on memorised items**; a failure there is a red flag, and no number from them may
   be presented as generalisation.
-* Report's own role map: `{json.dumps(roles)[:400]}`
+* Report's own role map: `{_cut(json.dumps(roles), 400)}`
 * Leakage instrument, per-set verdicts: `{json.dumps(leak.get('verdict_by_reference_set', {}))}` — the
   holdout universe remains CLEAN; the **battery universe is LEAK**, which is the contamination this verdict
   declares rather than hides.

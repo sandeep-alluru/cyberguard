@@ -56,6 +56,18 @@ def next_number(files: list[str]) -> int:
     return (max(nums) + 1) if nums else 1
 
 
+
+def _cut(s, n: int) -> str:
+    """Truncate for display and MARK the cut.
+
+    Found 2026-09-29: six places in the deliverables sliced content (`[:110]`, `[:400]`, `[:150]` …) and presented
+    it as whole. The worst instance was the verdict's contamination block, headed "verbatim" while dropping the
+    295 characters that contained the check's own RESULT line. An unmarked cut reads as the full text, so every
+    one is marked here instead.
+    """
+    s = str(s)
+    return s if len(s) <= n else s[:n].rstrip() + " …[truncated]"
+
 def compose(label: str, notes: str | None = None) -> tuple[str, str]:
     mp = os.path.join(ROOT, f"research-tmp/checkpoints/{label}-metrics.json")
     if not os.path.exists(mp):
@@ -77,7 +89,7 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
         except Exception:                                          # noqa: BLE001
             _last = "(unreadable)"
         review_line = (f"present — `research-tmp/reviews/checkpoint-{label}-review.md`, closing line: "
-                       f"{_last[:160]}")
+                       f"{_cut(_last, 160)}")
     elif os.path.exists(_rev_prompt):
         # A prompt on disk does NOT prove a dispatch happened: `checkpoint_review.sh <label> --dry-run` writes the
         # prompt and stops. M1 was in exactly that state, and an earlier version of this line asserted
@@ -160,8 +172,8 @@ Projection to 24 h from the same file: **{exp.get('A', {}).get('projected_24h_ep
 ## Verified at this checkpoint
 
 * Live trainer state and the numbers above come from `checkpoint_metrics.sh {label}` at the scheduled moment.
-* Watchdog, last cycle: `{wd[:150]}`
-* Repository revision: `{head[:150]}`
+* Watchdog, last cycle: `{_cut(wd, 150)}`
+* Repository revision: `{_cut(head, 150)}`
 * **Serving posture (plan requirement):** {ev_line}
 * **Astra review at this checkpoint:** {review_line}
 {notes or ''}

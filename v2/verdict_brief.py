@@ -30,6 +30,18 @@ PORTAL = "http://127.0.0.1:3100/ceo/report/"
 IPV4 = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 
 
+
+def _cut(s, n: int) -> str:
+    """Truncate for display and MARK the cut.
+
+    Found 2026-09-29: six places in the deliverables sliced content (`[:110]`, `[:400]`, `[:150]` …) and presented
+    it as whole. The worst instance was the verdict's contamination block, headed "verbatim" while dropping the
+    295 characters that contained the check's own RESULT line. An unmarked cut reads as the full text, so every
+    one is marked here instead.
+    """
+    s = str(s)
+    return s if len(s) <= n else s[:n].rstrip() + " …[truncated]"
+
 def load(rel: str):
     p = rel if os.path.isabs(rel) else os.path.join(ROOT, rel)
     if not os.path.exists(p):
@@ -99,7 +111,7 @@ def main() -> int:
             for k in keys:
                 v = it.get(k)
                 if isinstance(v, (dict, list)):
-                    v = json.dumps(v)[:120]
+                    v = _cut(json.dumps(v), 120)
                 cells.append(str(v if v is not None else "—"))
             out.append("| " + " | ".join(cells) + " |")
         return "\n".join(out)
@@ -143,7 +155,7 @@ supersedes: {newest_brief() or 'none'}
 | `docs/VERDICT-v2.md` | sha256 `{vsha}` ({vsize:,} bytes) |
 | `{a.report}` | {len(rows)} rows, counts {json.dumps(counts, sort_keys=True)} |
 | `{a.manifest}` | {len(manifest_lines)} checksum-verified files |
-| adapter identity | {json.dumps(rep.get('identity') or {})[:200]} |
+| adapter identity | {_cut(json.dumps(rep.get('identity') or {}), 200)} |
 
 **Independent clearances of record** (each with the revision it names, never silently extended):
 Astra on the evaluation chain — {clear.get('clearance_line', '(see research-tmp/reviews/)')}

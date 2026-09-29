@@ -2242,3 +2242,22 @@ contamination block is now 2,180 characters and contains `RESULT: PASS` and "eve
 prompt-disjoint from both training arms". The brief's preview now reaches its end.
 
 Both were found only because the *first* truncation was chased to its cause rather than patched where it surfaced.
+
+## 2026-09-29 — six unmarked truncations in the deliverables, and one of them was in ten gate rows at once
+
+Following the previous entry's finding to its conclusion rather than stopping at the case that surfaced: a sweep of
+the deliverable-producing code found **six live truncation sites, none of which marked the cut** — the "Every gate"
+table's detail column (`[:110]`), the role map (`[:400]`), the brief's observed-value cells (`[:120]`), the adapter
+identity (`[:200]`), and the review closing line, watchdog line and repo revision (`[:160]`, `[:150]`, `[:150]`).
+
+An unmarked cut reads as the whole text, which is exactly the defect that hid the contamination check's own RESULT
+line under a "verbatim" heading. A shared `_cut(s, n)` helper now truncates **and marks** (`…[truncated]`), applied
+at every site, with the reasoning in its docstring.
+
+Measured rather than assumed: the helper leaves short values untouched and marks long ones, and the composed
+verdict renders **ten** `[truncated]` markers — i.e. ten gate rows were displaying partial detail as if complete —
+while the M2 brief renders one, on its review closing line. The remaining `[:N]` matches in a grep are the helper's
+own docstring and the already-marked `vsha[:16]…`.
+
+Nothing about the underlying data changed: the full detail lives in `v2/gate-report-v2.json`, which the harvest
+checksums. What changed is that a reader of the verdict can now tell an excerpt from the whole thing.
