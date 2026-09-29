@@ -3131,3 +3131,24 @@ now is: on 40ee `spark-rpc.service`, `spark-rpc-guard.timer` and `spark-rpc-work
 likewise; and `ss -ltn` reports **0** listeners on port 8093 on both. Disabled means the stack will not return on a
 boot or as a dependency, so the eviction does not depend on anyone remembering to keep it stopped — which is what the
 checkpoint snapshots verify every three hours in any case.
+
+## 2026-09-29 — the benchmark's held-out input, and a fail-closed choice left as it stands
+
+**Another stage-1 precondition, confirmed on the machines that run it.** `eval_cyberguard.py` loads its held-out
+split from `v2/holdout500.jsonl`, which stage 0b syncs. Present and byte-identical on both hosts — sha256
+`874217b1bc8b71bf…`, 500 rows, matching local — with `evals/` writable on both. A missing or divergent split would
+have failed the benchmark ~2 h into stage 1 on a file the contract never checked for itself.
+
+**One design consequence I am recording rather than changing.** Stage 3 is fail-closed: if any battery fails both of
+its attempts, the stage exits 5 and the contract produces **no verdict at all**, even if the failed battery backs a
+gate that is *not* one of the two confirmatory claims. Since the chain demonstrably supports UNMEASURED rows (six
+SPEC §7 gates are declared unmeasurable by construction and the verdict still decides everything else), a
+non-claim battery could in principle be reported UNMEASURED and the claims still decided.
+
+I am leaving it fail-closed. Three reasons, in order of weight: it is the plan of record's reviewed behaviour, and
+un-revieweed semantic changes to the evaluation contract hours before it runs are exactly what this window has spent
+its time preventing; for the batteries that *matter* — the fresh disjoint instruments behind both claims — UNMEASURED
+and no-verdict are the same outcome, since an undecided confirmatory claim fails element 4 either way; and the change
+would trade a loud, diagnosable failure (a stage name and an exit code, with the timeline's one automatic re-run and
+now the packaging-failure path) for a quieter risk of a verdict whose gate table is thinner than it looks. Recorded
+as a considered option, not an oversight.
