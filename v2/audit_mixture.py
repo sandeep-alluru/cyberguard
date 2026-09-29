@@ -203,53 +203,59 @@ def main():
                                   f"budget ({over_cap/len(A):.1%}) — the model would be taught output "
                                   f"it can never finish")
 
-    # F --- authored format validity
+    # F/G --- authored format validity and triage label sanity, on BOTH arms (Muse's D4 note: these were
+    # arm-A-only, so arm B's formats and labels were never checked by anything).
     SIGMA_PREFIX = ("Write a Sigma rule", "Produce a schema-complete Sigma rule",
                     "Draft Sigma YAML", "Give me a Sigma rule for:", "Rule please:")
-    sigma = [r for r in A if r["user"].startswith(SIGMA_PREFIX)]
-    jsonrows = [r for r in A if "Return JSON" in r["user"]]
-    triage = [r for r in A if "one word" in r["user"].lower() or "single word" in r["user"].lower()]
-    try:
-        import yaml
-        ok = 0
-        for r in sigma:
-            try:
-                d = yaml.safe_load(r["assistant"])
-                if isinstance(d, dict) and d.get("detection") and d.get("logsource") and d.get("title"):
-                    ok += 1
-            except Exception:  # noqa: BLE001
-                pass
-        rep["sigma_yaml_valid"] = f"{ok}/{len(sigma)}"
-        if sigma and ok / len(sigma) < 0.95:
-            fail("F-formats", f"only {ok}/{len(sigma)} Sigma rows parse schema-complete")
-    except ImportError:
-        warn("F-formats", "pyyaml unavailable; Sigma parse check skipped")
-    jok = 0
-    for r in jsonrows:
-        try:
-            json.loads(r["assistant"]); jok += 1
-        except Exception:  # noqa: BLE001
-            pass
-    rep["json_valid"] = f"{jok}/{len(jsonrows)}"
-    if jsonrows and jok != len(jsonrows):
-        fail("F-formats", f"{len(jsonrows)-jok} JSON answers do not parse")
-    oneword = [r for r in triage if r["assistant"].strip().lower() in ("malicious", "benign")]
-    rep["triage_one_word"] = f"{len(oneword)}/{len(triage)}"
-    if triage and len(oneword) < len(triage):
-        fail("F-formats", f"{len(triage)-len(oneword)} triage answers are not a single verdict word")
-
-    # G --- triage label sanity (attack signatures must not be labelled benign)
     SIG = ("enc", "powershell -enc", "duckdns", "certutil", "registry_set", "run value",
            "base64 -d", "shadow", "urlcache")
-    mis = 0
-    for r in triage:
-        if r["assistant"].strip().lower() == "benign":
-            low = r["user"].lower()
-            if any(s in low for s in SIG if s != "enc") or "-enc " in low:
-                mis += 1
-    rep["suspicious_benign_labels"] = mis
-    if mis > 2:
-        warn("G-labels", f"{mis} rows labelled benign carry attack-like signatures — review them")
+    per_arm = {}
+    _LISTS = {}
+    for _label, _rows in (("armA", A), ("armB", B)):
+        _sigma = [r for r in _rows if r["user"].startswith(SIGMA_PREFIX)]
+        _json = [r for r in _rows if "Return JSON" in r["user"]]
+        _tri = [r for r in _rows if "one word" in r["user"].lower() or "single word" in r["user"].lower()]
+        _ok = _jok = _one = _mis = 0
+        try:
+            import yaml as _y
+            for r in _sigma:
+                try:
+                    d = _y.safe_load(r["assistant"])
+                    if isinstance(d, dict) and d.get("detection") and d.get("logsource") and d.get("title"):
+                        _ok += 1
+                except Exception:                                  # noqa: BLE001
+                    pass
+        except ImportError:
+            warn("F-formats", "pyyaml unavailable; Sigma parse check skipped")
+        for r in _json:
+            try:
+                json.loads(r["assistant"]); _jok += 1
+            except Exception:                                      # noqa: BLE001
+                pass
+        _one = sum(1 for r in _tri if r["assistant"].strip().lower() in ("malicious", "benign"))
+        for r in _tri:
+            if r["assistant"].strip().lower() == "benign":
+                low = r["user"].lower()
+                if any(s in low for s in SIG if s != "enc") or "-enc " in low:
+                    _mis += 1
+        _LISTS[_label] = {"sigma": _sigma, "triage": _tri}
+        per_arm[_label] = {"sigma_yaml_valid": f"{_ok}/{len(_sigma)}", "json_valid": f"{_jok}/{len(_json)}",
+                           "triage_one_word": f"{_one}/{len(_tri)}", "suspicious_benign_labels": _mis,
+                           "sigma": len(_sigma), "json": len(_json), "triage": len(_tri)}
+        if _sigma and _ok / len(_sigma) < 0.95:
+            fail("F-formats", f"{_label}: only {_ok}/{len(_sigma)} Sigma rows parse schema-complete")
+        if _json and _jok != len(_json):
+            fail("F-formats", f"{_label}: {len(_json)-_jok} JSON answers do not parse")
+        if _tri and _one < len(_tri):
+            fail("F-formats", f"{_label}: {len(_tri)-_one} triage answers are not a single verdict word")
+        if _mis > 2:
+            warn("G-labels", f"{_label}: {_mis} rows labelled benign carry attack-like signatures")
+    rep["formats_both_arms"] = per_arm
+    rep["sigma_yaml_valid"] = per_arm["armA"]["sigma_yaml_valid"]          # kept for continuity
+    rep["json_valid"] = per_arm["armA"]["json_valid"]
+    rep["triage_one_word"] = per_arm["armA"]["triage_one_word"]
+    rep["suspicious_benign_labels"] = per_arm["armA"]["suspicious_benign_labels"]
+    print(f"  F/G both arms: {per_arm}")
 
     # H --- degeneracy
     loop = short = 0
@@ -410,13 +416,40 @@ def main():
     # tests that were missing: that a Sigma rule's logsource/selection AGREES with the handprint its prompt
     # names, and that the triage label is DETERMINISTIC in the telemetry. Both are re-derived here from the
     # builder's own tables and rule rather than eyeballed.
+    def _sigma_matches(row, BFS, _yaml, goal):
+        ls, product, field, value = BFS.HANDPRINT_SELECTION[goal]
+        try:
+            d = _yaml.safe_load(row["assistant"]) or {}
+        except Exception:                                          # noqa: BLE001
+            return False
+        got_ls = str((d.get("logsource") or {}).get("category") or "")
+        got_pr = str((d.get("logsource") or {}).get("product") or "")
+        sel = ((d.get("detection") or {}).get("selection") or {})
+        got_field = str(next(iter(sel), ""))
+        got_value = str(next(iter(sel.values()), ""))
+        return got_ls == ls and got_pr == product and got_field == field and str(value) in got_value
+
     try:
         import yaml as _yaml
         sys.path.insert(0, "v2")
         import build_format_set as BFS
         hp_checked = hp_ok = 0
-        for r in sigma:
-            goal = next((hp for hp in BFS.HANDPRINT_SELECTION if hp in r["user"]), None)
+        _hp_by_arm = {}
+        for _lbl, _ls in _LISTS.items():
+            _c = _o = 0
+            for r in _ls["sigma"]:
+                goal = next((hp for hp in BFS.HANDPRINT_SELECTION if hp in r["user"]), None)
+                if goal is None:
+                    continue
+                _c += 1
+                if _sigma_matches(r, BFS, _yaml, goal):
+                    _o += 1
+            _hp_by_arm[_lbl] = f"{_o}/{_c}"
+            hp_checked += _c
+            hp_ok += _o
+        rep["sigma_handprint_agreement_by_arm"] = _hp_by_arm
+        for r in []:
+            goal = None
             if goal is None:
                 continue
             hp_checked += 1
@@ -439,7 +472,8 @@ def main():
 
         det_checked = det_bad = 0
         pairs = {}
-        for r in triage:
+        _all_triage = [r for _ls in _LISTS.values() for r in _ls["triage"]]
+        for r in _all_triage:
             mp = re.search(r"dst=\S+:(\d+)", r["user"])
             mb = re.search(r"bytes=(\d+)", r["user"])
             if not (mp and mb):
