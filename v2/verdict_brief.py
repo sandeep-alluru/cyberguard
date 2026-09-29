@@ -153,6 +153,23 @@ def main() -> int:
             out.append("| " + " | ".join(cells) + " |")
         return "\n".join(out)
 
+    # D2 is the one item of the four that is NOT closed, so the CEO-facing brief states the numbers that make that
+    # concrete rather than only the verdict. Sourced from the receipt with a guarded fallback: this is a deliverable
+    # and one missing receipt must not be able to cost it.
+    try:
+        _d2r = load("v2/data/mixture/d2-diversity.receipt.json") or {}
+        _c2, _o2 = _d2r.get("control") or {}, _d2r.get("offensive") or {}
+        d2_line = (f"**{_c2.get('distinct_prompts')}** distinct control prompts against the plan's **≥1,000** target "
+                   f"(offensive side: **{_o2.get('distinct_prompts')}**), and a **{_d2r.get('length_gap_pct')} %** "
+                   f"mean-length gap against a **≤10 %** target. Receipted at `v2/data/mixture/d2-diversity.receipt.json` "
+                   f"and carried as an intrinsic asymmetry of the substitution design; the verdict states the "
+                   f"consequence, and no claim describes the control as matched."
+                   if _d2r else
+                   "receipted at `v2/data/mixture/d2-diversity.receipt.json` and carried as an intrinsic asymmetry "
+                   "of the substitution design (the receipt could not be read for this brief).")
+    except Exception as _e:                                         # noqa: BLE001
+        print(f"WARNING: D2 detail unavailable: {type(_e).__name__}: {_e}", file=sys.stderr)
+        d2_line = "carried as an intrinsic asymmetry of the substitution design (detail unavailable for this brief)."
     facts = load("v2/data/mixture/FACTS.json") or {}
     gh = ((facts.get("training_window") or {}).get("gpu_hours") or {})
     # The evaluation runs on the same GPUs AFTER the training window, and this brief used to describe its cost in
@@ -235,8 +252,7 @@ worst case {gh.get('worst_case_total_gpu_h', '?')} of {gh.get('authorization_gpu
 * The **evaluated artifact is a weights-only continuation with a restarted schedule, stopped mid-epoch** — one
   completed pass plus a partial second pass. No uninterrupted-training claim is made (`docs/SPEC-V2.md` §16).
 * The objective's Flash-Next **restore clause was superseded by the owner**; the stack remains evicted (§17).
-* **D2 is declared NOT MET** (distinct control prompts and answer-length gap), receipted and carried here as an
-  intrinsic asymmetry of the substitution design.
+* **D2 is declared NOT MET** — {d2_line}
 * The merge check's coverage boundaries and the per-module sensitivity limit are stated in the verdict itself.
 """
     if a.dry_run:
