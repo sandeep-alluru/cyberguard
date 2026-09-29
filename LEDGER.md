@@ -2449,3 +2449,19 @@ registration frozen at spec `75a909355bb9dc91`), and 77 GB free locally for the 
 
 This change needs no re-arm: the timeline invokes the metrics script by path, so the new behaviour takes effect at
 11:55 without touching the running process.
+
+## 2026-09-29 — the three artifacts the contract needs, confirmed to survive a time-boxed stop
+
+Following the `MAX_MINUTES` finding to its conclusion, because the time box is now known to be the stopping
+mechanism and it stops the run *for* the trainer rather than after it. `trainer.train()` returns normally when the
+TimeBox sets `should_training_stop`, and everything the contract consumes is written **after** that return:
+`trainer.save_model()` + `tok.save_pretrained()` (the 264 MB adapter the benchmark and the harvest need), then the
+receipt (`receipts/<run>.json`, with steps, wall clock and terminal LR — the verdict's only source for measured
+exposure), then `sys.exit(0)`. So a box stop is a normal completion, not an interrupted one, and stages 0a/0d/2
+will find exactly what they expect at 12:10.
+
+Checked rather than assumed, and the check had a point: had `save_model` sat inside a completion branch that a
+box stop skips, stage 0a would have failed with `exit 2` after training finished and the window would have had no
+evaluation. Also confirmed no stale receipt is sitting on either host for stage 2 to mistake for this run's
+(`receipts/cyberguard-lora-v2-arm*.json` does not exist yet on either machine), so the WARN-if-absent path is not
+hiding a stale file behind a successful pull.
