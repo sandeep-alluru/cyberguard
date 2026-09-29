@@ -343,13 +343,8 @@ print(f"  contract accepted: {decided} decided, {r['counts']['UNMEASURED']} unme
 PY
 }
 
-# ---------------------------------------------------------------- stage 6: harvest
-step 6 "harvest with per-file sha256"
-echo "  bash harvest-v2.sh   (prints HARVEST-COMPLETE only when every file is checksum-verified)"
-[ "$DRY" = 1 ] || { bash harvest-v2.sh | tail -3 || { bad "harvest failed"; exit 8; }; }
-
-# ---------------------------------------------------------------- stage 7: the verdict document
-step 7 "compose VERDICT-v2.md from the gate report and the harvest"
+# ---------------------------------------------------------------- stage 6: the verdict document
+step 6 "compose VERDICT-v2.md from the gate report and the harvest"
 echo "  python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals evals --out docs/VERDICT-v2.md"
 [ "$DRY" = 1 ] || {
   python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals evals \
@@ -358,6 +353,12 @@ echo "  python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals e
   [ -s docs/VERDICT-v2.md ] && ok "VERDICT-v2.md written ($(wc -c < docs/VERDICT-v2.md) bytes)" \
     || { bad "VERDICT-v2.md missing or empty"; exit 9; }
 }
+
+# ---------------------------------------------------------------- stage 7: harvest
+step 7 "harvest with per-file sha256"
+echo "  bash harvest-v2.sh   (prints HARVEST-COMPLETE only when every file is checksum-verified)"
+[ "$DRY" = 1 ] || { bash harvest-v2.sh | tail -3 || { bad "harvest failed"; exit 8; }; }
+
 
 echo
 if [ "$DRY" = 1 ]; then echo "  DRY RUN complete — nothing was executed"; else echo "  C24 CONTRACT COMPLETE"; fi
