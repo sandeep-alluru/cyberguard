@@ -3282,3 +3282,27 @@ rather than assumed: `_T0 = time.time()` (line 230) and `report["wall_seconds"]`
 `main` (defined at 217), no `return`/`raise`/`sys.exit` intervenes between them at that depth, and the field is set
 immediately before the same `json.dump` that writes the receipt. It cannot raise a `NameError`, and the whole
 repository compiles under `compile()` — which, unlike `ast.parse`, is the check that catches that class.
+
+## 2026-09-29 — a running bash script is not a snapshot, and the current instance was checked against that
+
+**Bash reads a script lazily from the file**, not into memory at start-up, so editing a script that is currently
+running can feed the live process changed text — and because the editors here truncate and rewrite in place (same
+inode, not a rename), the running process's file descriptor follows the change. Consequences range from a garbled
+command to a syntax error mid-execution. Seven re-arms of the timeline in this window all edited the file *first* and
+restarted *after*, which is the safe order, but nothing recorded *why* that order matters.
+
+So the running instances were checked against their files rather than assumed:
+
+* `v2/arm_c24_timeline.sh` — file mtime **07:35:50**, running process started **07:43:28** (relaunched by the guard
+  during the recovery test). The process postdates the last edit, so it is executing consistent content.
+* `v2/timeline_guard.sh` — edited **07:44:58**, guard started **07:45:27**. Same.
+* `harvest-v2.sh` (08:01:58) and the checkpoint scripts are each invoked as *fresh* processes at 12:10 and 08:50
+  respectively, so they read whatever is on disk at that moment — which is why editing them now is safe and editing
+  the timeline now is not.
+
+The rule this produces, recorded because the next agent will not infer it: **never edit a long-running script in
+place.** Either restart it after the edit (the timeline's lock and grace-skip make that safe — a restart reclaims the
+stale lock, skips anything more than five minutes past, and leaves future targets armed), or deploy it as a copy that
+is `exec`'d, so the running process holds its own file. Note also that the cheap-looking alternative — adding a
+comment to document the rule *in the running script* — would itself rewrite the file under the live process, which is
+the very hazard being documented. The rule lives here instead.
