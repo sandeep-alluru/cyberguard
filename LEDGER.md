@@ -2776,3 +2776,27 @@ the **frozen arm files**, which nothing writes after 12:03, and its expensive pa
 mixture audit, which would contend for CPU with the contract's own CPU-bound stages (the assembler, the gate layer
 and the verdict composer). A second instance would double that contention to monitor files that cannot change.
 Recorded as a considered decision, not an oversight.
+
+## 2026-09-29 — the one item that is not closed, stated with its numbers in the CEO-facing record
+
+Objective element 1 names D1–D4, and D2 is the one that is **not** closed: the plan's exit is *"≥1,000 distinct
+control prompts and ≤10 % mean-length difference"*, and the frozen arms measure **228** and **15.5 %**. Two checks
+followed from that.
+
+First, a hunt for the opposite failure — a deliverable claiming more than the evidence. Nothing claims all four items
+are closed: the verdict's D2 block declares UNMET with the exit booleans, and the CEO brief's open-items section
+already said "**D2 is declared NOT MET**". No false closure claim exists in either artifact.
+
+Second, that brief line named the dimensions but not the numbers, so a reader of the CEO-facing document could see
+*that* D2 failed without seeing *how far* from the target the arms actually are. It now interpolates them from the
+receipt — **228** distinct control prompts against the **≥1,000** target (offensive side **700**), and a **15.5 %**
+mean-length gap against a **≤10 %** target — with the consequence attached ("no claim describes the control as
+matched"). Sourced from `v2/data/mixture/d2-diversity.receipt.json` rather than hard-coded, so the brief cannot drift
+from the receipt, and guarded so a missing receipt degrades the sentence instead of costing the terminal brief:
+verified both ways, the fallback by running a copy of the composer in an isolated tree so the real receipt was never
+touched.
+
+Also re-swept the class that has already bitten this project once: **unmarked truncation** in the
+deliverable-producing code. The remaining `[:N]` slices across the four deliverable scripts are comments describing
+the historical defect, hash prefixes (`vsha[:16]`, a report id) and a revision prefix — no prose is cut without its
+marker, and the marked-truncation helper is still in use at seven call sites.
