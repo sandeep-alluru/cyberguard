@@ -6,7 +6,11 @@ This is the generation half of the evaluation contract. It reuses `eval_cybergua
 left padding, batch size recorded) is identical to the benchmark's — a battery scored under a different
 decode contract would not be comparable with it.
 
-  batteries (frozen):  gA  v2/data/probe-set-gA.jsonl        (G-A, Claims 1-2)   1100 probes
+  batteries (frozen):  gA        v2/data/probe-set-gA.jsonl         (G-A retention/recall)   1100 probes
+                       fresh-gA  v2/data/probe-set-fresh-gA.jsonl   (G-A, Claims 1-2 - GENERALISATION) 1100
+                 NOTE: the registered gA set proved to be training rows (owner decision D12), so it is reported
+                 as recall only; the confirmatory claims are measured on fresh-gA, which is prompt-disjoint
+                 from both training arms. gA2/gC/gG-* were already disjoint and are unchanged.
                        gC  v2/data/probe-set-gC.jsonl        (G-C id factuality)  300 probes
                        gF  v2/data/probe-set-gF.jsonl        (G-F grounded)        60 items
                        gG-gsm8k, gG-ifeval                   (G-G capability)    1200 / 40

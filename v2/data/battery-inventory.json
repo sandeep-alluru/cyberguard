@@ -91,10 +91,10 @@
     {
       "gate": "Claim 1 / Claim 2",
       "n_required": 1100,
-      "source": "v2/data/probe-set-gA.jsonl (per-probe pairs)",
+      "source": "v2/data/probe-set-fresh-gA.jsonl (per-probe pairs; GENERALISATION)",
       "available": 1100,
       "status": "READY",
-      "note": "the C24 battery must emit PER-PROBE pairs for Claim 2; aggregate cross-tabs cannot express it"
+      "note": "measured on the FRESH set: the registered probe-set-gA.jsonl proved to be training rows (D12) and is reported as recall only; the battery must emit PER-PROBE pairs for Claim 2"
     }
   ]
 }

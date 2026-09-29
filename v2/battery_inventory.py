@@ -100,9 +100,10 @@ def main() -> int:
          "READY" if holdout >= 500 else "PARTIAL", "observed: literal \\n count and raw/normalised F1"),
         ("G-J chat retention", 100, "v2/data/probe-set-gJ.jsonl (real user turns, offensive markers excluded)", gJ,
          "READY" if gJ >= 100 else "PARTIAL", "deterministic sample of 100 benign general instructions"),
-        ("Claim 1 / Claim 2", 1100, "v2/data/probe-set-gA.jsonl (per-probe pairs)",
+        ("Claim 1 / Claim 2", 1100, "v2/data/probe-set-fresh-gA.jsonl (per-probe pairs; GENERALISATION)",
          probes, "READY" if probes >= 1100 else "PARTIAL",
-         "the C24 battery must emit PER-PROBE pairs for Claim 2; aggregate cross-tabs cannot express it"),
+         "measured on the FRESH set: the registered probe-set-gA.jsonl proved to be training rows (D12) and is "
+         "reported as recall only; the battery must emit PER-PROBE pairs for Claim 2"),
     ]
 
     print(f"  {'gate':<22} {'n':>5} {'have':>5}  {'status':<9} source")
