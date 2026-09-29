@@ -396,20 +396,34 @@ for arm in ("armA", "armB"):
     # the same measurement reports a target module never merged at 0.06354 -- 32.6x the deviation. The tolerance
     # is therefore set an order of magnitude BELOW the smallest defect it exists to catch, rather than fitted to
     # the observation.
-    for k in ("merge_weight_max_abs", "merge_weight_elements", "merge_weight_control_module_dropped_ratio"):
+    # GATED IN bf16 ULPs OF THE IDEAL MERGED VALUE, on a ROBUST statistic. The first version of this check used
+    # an absolute tolerance of 0.01 and an absolute-error ratio; review #19 injected a REAL defect (adapter
+    # contributions multiplied by 0.9) with a discrepancy of 0.00635 and it PASSED - the tolerance admitted the
+    # very defect it existed to catch, while the resolution note claimed otherwise. The criterion is now
+    # scale-free and its separation is measured, not asserted:
+    #     correct merge                 0 of 3,633,315,840 elements beyond 2 ULP   (fraction 0)
+    #     contributions mis-scaled 10%  fraction 0.2768 beyond 2 ULP
+    #     a contribution dropped        fraction 0.8241 beyond 2 ULP
+    # A FRACTION rather than a max, because max_ulp explodes on elements where the ideal merged value is ~0
+    # (the controls reach ~1e26 ULP on those), so a single cancellation element could fail a max-based gate
+    # spuriously. Rounding noise gives a fraction of 0; a systematic defect moves most elements at once.
+    for k in ("merge_weight_frac_gt_2ulp", "merge_weight_elements", "merge_weight_max_ulp",
+              "merge_weight_control_scale_0p9_frac_gt_2ulp",
+              "merge_weight_control_module_dropped_frac_gt_2ulp"):
         if k not in e or e[k] is None:
             sys.exit(f"FATAL: {eq} records no {k} - the merge arithmetic is not checked by this artefact")
-    wm, we, wratio = float(e["merge_weight_max_abs"]), int(e["merge_weight_elements"]), float(e["merge_weight_control_module_dropped_ratio"])
-    if not math.isfinite(wm):
-        sys.exit(f"FATAL: {arm} merge_weight_max_abs is not finite ({e['merge_weight_max_abs']})")
+    frac, we = float(e["merge_weight_frac_gt_2ulp"]), int(e["merge_weight_elements"])
+    if not math.isfinite(frac):
+        sys.exit(f"FATAL: {arm} merge_weight_frac_gt_2ulp is not finite ({e['merge_weight_frac_gt_2ulp']})")
     if we < 100000:
         sys.exit(f"FATAL: {arm} the weight-level check covered only {we} elements; it must be exhaustive")
-    if wm > 0.01:
-        sys.exit(f"FATAL: {arm} merged weights deviate from base + scaling*(B@A) by {wm} (> 0.01) over {we} "
-                 f"elements - the merge arithmetic is wrong")
-    if wratio < 5.0:
-        sys.exit(f"FATAL: {arm} the weight check does not separate the measured deviation ({wm}) from a dropped "
-                 f"target module by >=5x (ratio {wratio:.2f}) - its tolerance is not meaningful")
+    if frac > 1e-6:
+        sys.exit(f"FATAL: {arm} {frac:.4%} of the {we} merged weights deviate by more than 2 bf16 ULP from "
+                 f"base + scaling*(B@A). A correct merge measures 0; a 10% mis-scaling measures 27.68% and a "
+                 f"dropped contribution 82.41% - this is a merge defect, not rounding")
+    print(f"    weight-level: {e['merge_weight_max_ulp']:.4f} max ULP, {frac:.2e} of {we} elements beyond 2 ULP "
+          f"(controls: 10%-scale {float(e['merge_weight_control_scale_0p9_frac_gt_2ulp']):.2%}, "
+          f"dropped {float(e['merge_weight_control_module_dropped_frac_gt_2ulp']):.2%})")
 
     # (b) SANITY, not the basis. Review #18: these can be passed by a defect, so they cannot establish
     # equivalence - they catch a grossly wrong model. Teacher-forced agreement over the assistant span.

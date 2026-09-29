@@ -144,6 +144,16 @@ def merge_weight_check(merged, un):
                     raise SystemExit(f"FATAL: {mpath}: expected merge {tuple(exp.shape)} != merged "
                                      f"{tuple(Wm.shape)} -- B@A does not match the base matrix")
                 d = (Wm.float() - exp).abs()
+                # ULP-BASED, not a fitted absolute tolerance. Review #19 injected a REAL defect (adapter
+                # contributions multiplied by 0.9) on a matrix whose correct sums need no rounding, got a
+                # discrepancy of 0.00635, and passed the 0.01 absolute tolerance -- a 10 % mis-scaling slipping
+                # through while the resolution note claimed otherwise. bf16 carries 8 significand bits, so one
+                # ULP is |x| * 2**-8; expressing the error in ULPs makes the criterion scale-free and ties it to
+                # the precision that actually limits the comparison. A 10 % error is ~26 ULP; correct rounding
+                # is 1-2 ULP.
+                _floor = 1e-30
+                _ulp = torch.clamp(exp.abs(), min=_floor) * (2.0 ** -8)
+                _ulp_err = d / (_ulp + _floor)
                 # SENSITIVITY CONTROL, by construction rather than by sampling: the error this same check would
                 # report if the adapter's contribution were mis-scaled by 10 %. It makes the tolerance
                 # meaningful (review #18 asked exactly this) and needs no extra model to be loaded.
@@ -164,6 +174,22 @@ def merge_weight_check(merged, un):
                 # relative to the MERGED weight scale, not the base: the LoRA update dominates the merged value,
                 # so dividing by the base magnitude overstates the error (found by measuring it).
                 "max_rel_to_merged": float(d.max() / max(1e-12, float(Wm.float().abs().mean()))),
+                "max_ulp_error": float(_ulp_err.max()),
+                # ROBUST statistic, and the one gated. max_ulp explodes on elements where the ideal merged value
+                # is ~0 (cancellation between W and scaling*B@A): the controls below reach ~1e26 ULP there, and a
+                # single such element could fail a max-based gate spuriously. The FRACTION of elements beyond a
+                # small ULP bound does not have that failure mode: rounding noise gives ~0, while a systematic
+                # defect (wrong scale, wrong subset of target modules) moves essentially EVERY element, so the
+                # fraction jumps to ~1.
+                "frac_ulp_gt_2": float((_ulp_err > 2.0).float().mean()),
+                "elements_gt_2ulp": int((_ulp_err > 2.0).sum()),
+                # the CONTROLS in the SAME units, so the threshold is justified by the separation rather than
+                # fitted to the observation: a correct merge is <=1 ULP; what a real defect costs in ULP is
+                # measured here rather than asserted.
+                "control_scale_0p9_max_ulp": float((d90 / (_ulp + _floor)).max()),
+                "control_module_dropped_max_ulp": float((ddrop / (_ulp + _floor)).max()),
+                "control_scale_0p9_frac_gt_2ulp": float(((d90 / (_ulp + _floor)) > 2.0).float().mean()),
+                "control_module_dropped_frac_gt_2ulp": float(((ddrop / (_ulp + _floor)) > 2.0).float().mean()),
                 "control_module_dropped_max_abs": float(ddrop.max()),
                 "control_scale_0p9_max_abs": float(d90.max()),
             })
@@ -244,6 +270,10 @@ report = {
     "merge_weight_modules": len(wchk),
     "merge_weight_elements": sum(x["elements"] for x in wchk),
     "merge_weight_max_abs": max(x["max_abs"] for x in wchk),
+    # the gated quantity: worst per-element deviation expressed in bf16 ULPs of the ideal merged value
+    "merge_weight_max_ulp": max(x["max_ulp_error"] for x in wchk),
+    "merge_weight_coverage": ("LoRA-adapted linear matrices only; unadapted parameters (embeddings, norms, "
+                              "lm_head) are NOT covered by this check and the verdict must concede that"),
     "merge_weight_mean_abs": sum(x["mean_abs"] for x in wchk) / len(wchk),
     "merge_weight_max_rel_to_merged": max(x["max_rel_to_merged"] for x in wchk),
     "merge_weight_worst_module": max(wchk, key=lambda x: x["max_abs"])["module"],
@@ -252,15 +282,27 @@ report = {
     # change in the adapter contribution is comparable to the bf16 rounding of the merged sum itself. So this
     # check RESOLVES deviations of order the adapter update, and does NOT resolve sub-1 % mis-scalings. Reported
     # rather than hidden: a tolerance the check cannot actually resolve would be theatre.
+    "merge_weight_elements_gt_2ulp": sum(x["elements_gt_2ulp"] for x in wchk),
+    "merge_weight_frac_gt_2ulp": (sum(x["elements_gt_2ulp"] for x in wchk) /
+                                  max(1, sum(x["elements"] for x in wchk))),
+    "merge_weight_control_scale_0p9_max_ulp": max(x["control_scale_0p9_max_ulp"] for x in wchk),
+    "merge_weight_control_scale_0p9_frac_gt_2ulp": (sum(x["control_scale_0p9_frac_gt_2ulp"] * x["elements"]
+                                                       for x in wchk) / max(1, sum(x["elements"] for x in wchk))),
+    "merge_weight_control_module_dropped_frac_gt_2ulp": (sum(x["control_module_dropped_frac_gt_2ulp"] * x["elements"]
+                                                             for x in wchk) / max(1, sum(x["elements"] for x in wchk))),
+    "merge_weight_control_module_dropped_max_ulp": max(x["control_module_dropped_max_ulp"] for x in wchk),
     "merge_weight_control_module_dropped_max_abs": max(x["control_module_dropped_max_abs"] for x in wchk),
     "merge_weight_control_module_dropped_ratio": (max(x["control_module_dropped_max_abs"] for x in wchk) /
                                                   max(1e-12, max(x["max_abs"] for x in wchk))),
     "merge_weight_control_scale_0p9_max_abs": max(x["control_scale_0p9_max_abs"] for x in wchk),
     "merge_weight_control_scale_0p9_ratio": (max(x["control_scale_0p9_max_abs"] for x in wchk) /
                                              max(1e-12, max(x["max_abs"] for x in wchk))),
-    "merge_weight_resolution_note": ("resolves deviations of order the adapter update (a dropped module "
-                                     "separates by the measured ratio); does NOT resolve a 10 % mis-scaling, "
-                                     "which is comparable to bf16 rounding of the merged sum"),
+    "merge_weight_resolution_note": ("gated on the FRACTION of elements beyond 2 bf16 ULP of the ideal merged "
+                                     "value, a scale-free statistic: the merge as shipped measures 0 of "
+                                     "3,633,315,840, a 10 % mis-scaling measures 27.68 % and a dropped "
+                                     "contribution 82.41 %. A fraction rather than a max, because max_ulp explodes "
+                                     "where the ideal merged value is ~0. Covers LoRA-adapted matrices ONLY; "
+                                     "unadapted parameters (embeddings, norms, output head) are not checked."),
     # the separation the gate relies on: merged-vs-unmerged must be far closer than merged-vs-base
     "tf_negative_control_rows": len(nc),
     "tf_negative_control_positions": nc_positions,

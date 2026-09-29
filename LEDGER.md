@@ -1430,3 +1430,44 @@ WARNING rather than being assumed either way.
 
 Verified four ways: a good report PASSES; a base-only report FAILS naming the fallback; a parent mismatch FAILS;
 a non-numeric tuned loss FAILS.
+
+## 2026-09-29 — review #19: NOT SOUND, and it found a real hole in my weight-level check
+
+#19 attacked the deterministic check with a *controlled* matrix (values exactly representable, so a correct merge
+needs no rounding at all) and injected genuine defects:
+
+| injected condition | max discrepancy | the conditions then in force |
+|---|---|---|
+| correct merge | 0 | pass |
+| **both contributions multiplied by 0.9** | **0.00635** | **PASS — a real 10 % mis-scaling slipped through** |
+| a contribution dropped | 0.0039 | PASS |
+
+It also observed that my own 10 %-control figure **contradicted** the resolution note I had written, and that the
+check "visits only LoRA-wrapped layers", leaving unadapted-parameter corruption uncovered and un-conceded.
+
+Both were right. An absolute tolerance of 0.01 admitted the very defect it existed to catch.
+
+### The criterion is now scale-free, with measured separation
+bf16 carries 8 significand bits, so the quantity is expressed in **bf16 ULPs of the ideal merged value**, and
+gated on a **fraction** rather than a maximum:
+
+| condition | elements beyond 2 ULP |
+|---|---|
+| merge as shipped | **0 of 3,633,315,840** (max 0.996 ULP) |
+| contributions mis-scaled 10 % | **27.68 %** |
+| a contribution dropped | **82.41 %** |
+
+Stage 2 now requires `merge_weight_frac_gt_2ulp <= 1e-6` over `>=100,000` elements, and **requires the two control
+fractions to be present**, so the tolerance can never be read without its separation. A *fraction* rather than a
+*max* because `max_ulp` explodes where the ideal merged value is ~0 — the controls reach ~1e26 ULP on those
+elements — so a single cancellation element could fail a max-based gate spuriously; rounding noise gives a
+fraction of 0 while a systematic defect moves most elements at once.
+
+Verified five ways: the shipped merge PASSES; **#19's 10 %-scaling counterexample now FAILS** (27.68 %); a dropped
+contribution FAILS (82.41 %); a handful of cancellation outliers (1e-8) PASSES, which is the robustness the
+fraction buys; and an absent statistic FAILS.
+
+### The coverage boundary is conceded, in the verdict
+The verdict now states that the check covers the **LoRA-adapted linear matrices only** and that unadapted
+parameters — embeddings, normalisation layers, the output head — are **not covered**, so it establishes the
+correctness of the merge on the adapted matrices and not of the entire merged model.

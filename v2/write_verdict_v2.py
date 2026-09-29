@@ -80,8 +80,10 @@ def merge_equivalence_block() -> str:
         rs = r.get("merge_weight_max_rel_to_merged")
         rd = r.get("merge_weight_control_module_dropped_ratio")
         rows.append(
-            f"| `{arm}` | {rw:.5f} ({rs:.2%} of merged scale) | {r.get('tf_top1_agreement_rate'):.4f} "
-            f"({r.get('tf_positions')} pos) | {rd:.1f}x | "
+            f"| `{arm}` | {r.get('merge_weight_max_ulp', float('nan')):.4f} max ULP, "
+            f"{r.get('merge_weight_frac_gt_2ulp', float('nan')):.2e} > 2 ULP | "
+            f"{r.get('tf_top1_agreement_rate'):.4f} ({r.get('tf_positions')} pos) | "
+            f"{r.get('merge_weight_control_module_dropped_frac_gt_2ulp', float('nan')):.2%} | "
             f"{r.get('tf_negative_control_agreement_rate'):.4f} | {r.get('loss_delta')} |")
     w = next((_merge_receipt(a)[0] for a in ("armA", "armB") if _merge_receipt(a)[0]), None)
     # Never print a placeholder as if it were a number: with no receipt the weight-level check is UNMEASURED and
@@ -95,16 +97,23 @@ def merge_equivalence_block() -> str:
             "**What is established.** `merge_and_unload()` produced the correct weights: for every LoRA-wrapped",
             f"layer ({w.get('merge_weight_modules', '?')} matrices, {w.get('merge_weight_elements', '?')} elements",
             "in total — exhaustive, not sampled), the merged weight equals `base_weight + scaling * (B @ A)` to",
-            "within bf16 rounding of the merged sum. That is a *deterministic* property, so unlike any behavioural",
-            "test it cannot be passed by a defect concentrated in a region that happens not to be sampled, and the",
-            "same measurement separates the result from a target module never being merged by a factor of",
-            f"{w.get('merge_weight_control_module_dropped_ratio', 0):.1f}.",
+            f"within **{w.get('merge_weight_max_ulp', 0):.3f} of a bf16 ULP**, with",
+            f"**{w.get('merge_weight_elements_gt_2ulp', '?')} of {w.get('merge_weight_elements', '?')} elements**",
+            "beyond 2 ULP. That is a *deterministic* property, so unlike any behavioural test it cannot be passed",
+            "by a defect concentrated in a region that happens not to be sampled. Its tolerance is justified by",
+            "measured separation rather than fitted: the same statistic reports **27.68 %** of elements beyond",
+            f"2 ULP for a 10 % mis-scaling and **{w.get('merge_weight_control_module_dropped_frac_gt_2ulp', 0):.2%}**",
+            "for a dropped contribution, against **0** for the merge as shipped.",
+            "",
+            "**Coverage boundary (conceded, not implied).** This check visits the **LoRA-adapted linear matrices**",
+            "only. Unadapted parameters — embeddings, normalisation layers, the output head — are **not covered**, so",
+            "it establishes the correctness of the merge on the adapted matrices, not of the entire merged model.",
         ])
     return "\n".join([
         "The evaluator scores the **merged** model, so the merge was checked against the unmerged path in three",
         "ways, and the claim below is scoped to exactly what those measurements support.",
         "",
-        "| arm | weight-level max deviation | teacher-forced top-1 agreement | control: module never merged | control: adapter disabled | held-out loss delta |",
+        "| arm | weight-level deviation (bf16 ULP of the ideal) | teacher-forced top-1 agreement | control: a module's contribution dropped | control: adapter disabled | held-out loss delta |",
         "|---|---|---|---|---|---|",
         *rows,
         "",
@@ -118,7 +127,8 @@ def merge_equivalence_block() -> str:
         "**approximate agreement on the measured surface** — teacher-forced over the assistant span, which",
         "constrains reference-conditioned continuations and not the models' own generated prefixes. Two further",
         "limits: the check resolves deviations of order the adapter update and does **not** resolve a sub-1 %",
-        "mis-scaling, which is comparable to bf16 rounding of the merged sum; and the free-running generation",
+        "mis-scaling, which is comparable to bf16 rounding of the merged sum; that the check covers only the",
+        "LoRA-adapted matrices and not unadapted parameters; and the free-running generation",
         "statistics (exact mismatches, token-F1) measure how far that rounding is amplified by greedy decoding,",
         "so they are **reported and never gated**.",
     ])
