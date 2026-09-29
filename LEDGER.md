@@ -3088,3 +3088,27 @@ epoch fractions, so the same three hits are available. Noted for the record: the
 without a hyphen (M2, M3, C24 all qualify) — a future label like `M4-look` would silently shift the token and could
 drop the hit count, which is the kind of latent trap worth writing down rather than leaving for whoever adds the next
 checkpoint.
+
+## 2026-09-29 — the litter of interrupted waits, and why tidying it carelessly would fire an event early
+
+Enumerating "who is running in this repo" by **working directory** rather than by command-line text (cmdline matching
+had already missed the guard and the watchdog, which are launched with relative paths) found exactly four kinds of
+process: the timeline, the guard, the watchdog, and **fifteen `sleep` processes**.
+
+Those sleeps are the interruptible waits — `wait_until` runs `sleep N & wait $!` so a trapped signal is not deferred
+until the child exits — and their parentage is the whole point:
+
+* **13 with `ppid=1`**: orphans left by earlier re-arms. Each interrupted wait released the lock and exited, but the
+  sleeper it had spawned was never reaped, so it lingers until its target time and then does nothing at all — nothing
+  is waiting on it. Harmless residue, but residue that looks alarming (durations of 26,279 s and 33,571 s, i.e.
+  "sleeping for seven and nine hours") to anyone who finds it without the explanation.
+* **2 with live parents**: `sleep 3991` under the timeline (its wait for M3) and `sleep 300` under the guard (its
+  poll interval).
+
+**The hazard is in the difference.** Killing a *live* wait child does not merely shorten a sleep: `wait $!` returns,
+`wait_until` returns 0, and the caller treats the target as reached — so the checkpoint, the C24 metrics or the
+contract would **fire ahead of schedule**. The orphans were terminated only after asserting `ppid=1` for every one of
+them, and the two live children were confirmed intact afterwards with the timeline still alive. Worth writing down
+because "there are stray sleeps in the repo" invites exactly the tidy-up that would trigger it, and because the
+implementation only reaps its sleeper on a trapped signal — a `SIGKILL` would leave one behind even if the trap were
+extended to clean up.
