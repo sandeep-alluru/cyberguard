@@ -18,7 +18,10 @@ ROOT = Path(os.environ["CYBERGUARD_ROOT"])
 DATA = ROOT / "data" / "trendyol-cybersec" / "CyberSec-Dataset_escaped.jsonl"
 BASE = ROOT / "models" / "Qwen3-4B-Instruct-2507"
 ADAPTER = ROOT / "adapters" / os.environ.get("RUN_NAME", "cyberguard-lora-v1")
-N, K = int(os.environ.get("EQ_N", 50)), int(os.environ.get("EQ_K", 5))
+# Review F19: zero generation mismatches in FIVE prompts carries a one-sided 95 % upper bound of ~45 % on the
+# mismatch rate, which is no support for a behavioural-equivalence claim. N=200 loss rows and K=100 generated
+# prompts bring that bound to ~3 % (both remain overridable via EQ_N / EQ_K).
+N, K = int(os.environ.get("EQ_N", 200)), int(os.environ.get("EQ_K", 100))
 
 tok = AutoTokenizer.from_pretrained(BASE)
 if tok.pad_token is None:

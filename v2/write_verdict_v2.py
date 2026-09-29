@@ -195,6 +195,14 @@ stating it.
 * Repetition, diversity and prompt-familiarity asymmetries between the arms are intrinsic to the substitution
   design and are carried here rather than argued away.
 
+## Merge equivalence: what is established
+
+The merged adapter is accepted against the unmerged one on measured tolerances (mean held-out loss difference
+<= 0.02, zero exact generation mismatches over a stated number of prompts, token-F1 floor >= 0.99). Two limits
+are stated rather than implied: the loss tolerance bounds the difference between **mean row losses**, not the
+maximum per-row difference, so cancellation between rows is possible; and the generation check is a **smoke
+test** over a sample, not a proof of numerical equivalence at the individual-example level.
+
 ## Harvest
 
 {manifest_summary()}

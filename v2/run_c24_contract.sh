@@ -190,9 +190,18 @@ for arm in ("armA", "armB"):
     if int(e["gen_exact_mismatches"]) != 0:
         sys.exit(f"FATAL: {arm} merged-vs-unmerged generations differ on "
                  f"{e['gen_exact_mismatches']} of {e.get('prompts_gen')} prompts")
-    f1 = e.get("gen_self_f1_min")
-    if f1 is not None and float(f1) < 0.99:
+    # F19: the F1 floor is UNCONDITIONAL (the reviewer showed an absent field was accepted), and the claim
+    # must rest on real support - zero mismatches in five prompts has a ~45 % one-sided upper bound.
+    if "gen_self_f1_min" not in e or e["gen_self_f1_min"] is None:
+        sys.exit(f"FATAL: {eq} records no gen_self_f1_min; the F1 floor cannot be enforced")
+    f1 = float(e["gen_self_f1_min"])
+    if f1 < 0.99:
         sys.exit(f"FATAL: {arm} merged-vs-unmerged token-F1 floor {f1} < 0.99")
+    if int(e.get("prompts_gen") or 0) < 100:
+        sys.exit(f"FATAL: {arm} merge equivalence rests on only {e.get('prompts_gen')} generated prompts; "
+                 f">=100 is required so a zero-mismatch result is evidence")
+    if int(e.get("rows_loss") or 0) < 100:
+        sys.exit(f"FATAL: {arm} loss equivalence rests on only {e.get('rows_loss')} rows; >=100 required")
     print(f"  {arm}: held_out_rows={rows}  merge-equiv ACCEPTED (loss_delta={e['loss_delta']}, "
           f"gen_mismatches={e['gen_exact_mismatches']}, self_f1_min={f1})")
 PY
