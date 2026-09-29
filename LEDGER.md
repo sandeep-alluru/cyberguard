@@ -2715,3 +2715,11 @@ With this, every producer/consumer boundary on the critical path has been checke
 against the rehearsal's synthetic ones: benchmark and merge receipts (stage 1→2), battery receipts (stage 3→4), the
 probe sets and their receipts, the gate registry versus the gate layer, and now the trainer receipt versus the
 verdict.
+
+The merge-equivalence receipt has **two** consumers with different appetites, and both were checked against the
+producer rather than just the one the contract's stage 2 uses: stage 2 reads `loss_delta`, `gen_exact_mismatches`
+and the ten `merge_weight_*` fields (verified earlier), while the verdict's own merge block reads
+`merge_weight_max_abs`, `merge_weight_max_rel_to_merged`, `merge_weight_control_module_dropped_ratio` and
+`wall_seconds` — each present exactly once in `merge_equiv.py`. A key the verdict needed but the producer did not
+write would have surfaced as a blank or a `None` in the one section that states what the merge check establishes,
+after the two hours of stage 1 had already been spent.
