@@ -112,14 +112,24 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
         # A prompt on disk does NOT prove a dispatch happened: `checkpoint_review.sh <label> --dry-run` writes the
         # prompt and stops. M1 was in exactly that state, and an earlier version of this line asserted
         # "DISPATCHED BUT NO OUTPUT" — a claim about a dispatch that the evidence (no `-review.log`, which a real
-        # dispatch always creates) contradicts. Both causes are named instead of one being assumed.
+        # dispatch always creates) contradicts. The two cases are separated now, because they mean opposite things.
+        #
+        # The log-present case is NOT a failure: the dispatch is `nohup codex exec ... &`, which returns at once, and
+        # the timeline deliberately dispatches the review *before* composing this brief so the status is visible. The
+        # reviewer's answer therefore usually has not landed yet, and saying "this checkpoint has none" would be
+        # false about a checkpoint whose review is running as this brief is written.
         _log = os.path.join(ROOT, f"research-tmp/reviews/checkpoint-{label}-review.log")
-        _how = ("a dispatch LOG exists, so the review was dispatched but produced no output"
-                if os.path.exists(_log) else
-                "no dispatch log exists, so this prompt may have come from a --dry-run")
-        review_line = (f"**NO REVIEW OUTPUT** for `{label}` (`checkpoint-{label}-review-prompt.md` exists, "
-                       f"`checkpoint-{label}-review.md` does not; {_how}) — the cadence requires a review and this "
-                       f"checkpoint has none")
+        if os.path.exists(_log):
+            review_line = (f"**DISPATCHED, OUTPUT NOT YET WRITTEN** — `checkpoint-{label}-review.log` exists, so the "
+                           f"Astra review is a background `codex exec` dispatched moments before this brief (the "
+                           f"timeline runs review, then brief, in that order); its answer lands at "
+                           f"`research-tmp/reviews/checkpoint-{label}-review.md`. At composition time this brief "
+                           f"cannot report the reviewer's findings.")
+        else:
+            review_line = (f"**NO REVIEW for this checkpoint** — `checkpoint-{label}-review-prompt.md` exists but "
+                           f"there is NO dispatch log, and a real dispatch always creates one, so this prompt came "
+                           f"from a `--dry-run` and no reviewer has seen it. The cadence requires an Astra review at "
+                           f"every checkpoint, and this one has none.")
     else:
         review_line = (f"**NO REVIEW ON DISK for `{label}`** in `research-tmp/reviews/` — the cadence requires "
                        f"an Astra review at every checkpoint")

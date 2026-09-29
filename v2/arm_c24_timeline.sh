@@ -99,8 +99,13 @@ while IFS= read -r _t; do
     continue
   fi
   say "checkpoint $_lab metrics"; bash v2/checkpoint_metrics.sh "$_lab" 2>&1 | tail -6 | tee -a "$LOG"
-  say "checkpoint $_lab brief"; python3 v2/checkpoint_brief.py "$_lab" 2>&1 | tail -3 | tee -a "$LOG"
+  # REVIEW BEFORE BRIEF. The cadence requires "an Astra review at every checkpoint", and each brief states its own
+  # review status — so composing the brief first made every brief read as though its checkpoint had NO review, when
+  # the dispatch happens moments later. The dispatch is `nohup codex exec ... &`, so it returns immediately and this
+  # order costs nothing: the brief then sees the dispatch log that a real dispatch always creates. (The review's
+  # OUTPUT still arrives minutes later, which the brief states as "dispatched, no output yet".)
   say "checkpoint $_lab review (Astra)"; bash v2/checkpoint_review.sh "$_lab" 2>&1 | tail -2 | tee -a "$LOG"
+  say "checkpoint $_lab brief"; python3 v2/checkpoint_brief.py "$_lab" 2>&1 | tail -3 | tee -a "$LOG"
 done < <(printf '%s\n' "$MID_AT" | tr ',' '\n')
 
 if wait_until "$(at "$C24_AT")"; then
@@ -110,12 +115,14 @@ else
 fi
 
 if wait_until "$(at "$BRIEF_AT")"; then
-  say "C24 brief"; python3 v2/checkpoint_brief.py C24 2>&1 | tail -3 | tee -a "$LOG"
   # The cadence is "an Astra review at EVERY checkpoint", and the mid-window loop dispatches one per checkpoint —
-  # but the C24 step, the terminal and most important checkpoint, had a brief and NO review. Dispatched here; it
-  # is a codex call with no GPU, so it runs concurrently with the contract starting at 12:10, and the contract is
-  # not gated on it (owner instruction).
+  # but the C24 step, the terminal and most important checkpoint, had a brief and NO review. Dispatched here BEFORE
+  # the brief so the brief can report the real status (a `nohup ... &` dispatch returns at once, so the brief still
+  # runs immediately); it is a codex call with no GPU, so it runs concurrently with the contract starting at 12:10,
+  # and the contract is not gated on it (owner instruction). Dispatched ONCE — a duplicated line here would run the
+  # reviewer twice and write two outputs for one checkpoint.
   say "C24 review (Astra)"; bash v2/checkpoint_review.sh C24 2>&1 | tail -2 | tee -a "$LOG"
+  say "C24 brief"; python3 v2/checkpoint_brief.py C24 2>&1 | tail -3 | tee -a "$LOG"
 else
   say "C24 brief ($BRIEF_AT) already passed — skipping (and its review, for the same reason)"
 fi
