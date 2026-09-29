@@ -3025,3 +3025,28 @@ that were *not* missing are `audit.receipt.json`, `leak-scan-c24.receipt.json`, 
 into the test destination before the check ran, including a real 264 MB pull from each host. No entry was silently
 skipped, and nothing unexpected was reported. The completeness check is behaving exactly as designed; my arithmetic
 was the thing that looked wrong, and the four "extra" entries were the harvest having done its job.
+
+## 2026-09-29 — the harvest did not require the file every number is cited from
+
+Three rounds of the same question — *does the deliverable contain the evidence for the claims made about it?* — and the
+last pass went at the **documents** rather than at symmetry between arms: which artifacts do the deliverables cite by
+name, and is each one in the manifest because it is required, or merely because it happened to be collected?
+
+Read out of the code rather than guessed: the verdict cites **`FACTS.json`** (the objective requires every number in
+it to come from there), the **D2 receipt** (its asymmetry section) and the **mask-proof receipt** (its mask caveat);
+the terminal brief cites the two **clearance receipts**. All five are collected by the script's globs, and **none was
+required** — so the manifest could be declared checksum-verified and complete with the file that every number in the
+verdict is cited from absent from it. They are now required.
+
+Verified two ways, because "it is collected today" is not the same as "it is required". First, the real run: all five
+appear in the manifest, collected, so nothing about the contract's behaviour changes. Second — and this is the one
+that tests the requirement — the script's **own** `REQUIRED` loop was run against a crafted manifest containing all
+55 other entries and none of these five, and it reported exactly:
+
+```
+FACTS.json  d2-diversity.receipt.json  mask-proof.receipt.json
+equivalence-clearance.receipt.json  muse-clearance.receipt.json
+```
+
+So the requirement is live and precisely scoped to the artifacts the documents cite, not merely satisfied by files
+that happen to be lying around.
