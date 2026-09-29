@@ -3483,3 +3483,33 @@ verdict, the per-arm benchmark receipts), glob and brace patterns naming *sets*,
 defect). The first attempt at that note was worse than useless: it said "done-means" in prose, which the C6 rule
 matched, and then — finding no table — reported **no C6 failure at all**, manufacturing a silent pass. The table is
 what makes C6's approval honest, and the note says so.
+
+## 2026-09-29 — the spec's unit exit commands, checked for executability rather than for presence
+
+`plan-validate.py` requires "every unit has an executable exit command" and reports PASS — but it can only check that
+a command is *present*, never that its flags exist. Last round's U4 correction (`--run v2`, silently ignored, defaulting
+to the v1 adapter) showed what hides behind that. So every one of the eleven unit rows was checked against the code.
+
+Five were wrong, and four of them in the same way — **flags passed to scripts that parse no arguments at all**:
+
+| unit | command as written | what is actually true |
+|---|---|---|
+| U3 | `MASK_PROOF=1 python3 train_cyberguard.py --smoke` | the trainer parses no flags; `MASK_PROOF=1` is the real switch (and the one stage 0c uses) |
+| U5 | `python3 cap_harness.py --phase P7 --n 1100 --rubric --paired --powered` | `cap_harness.py` is the **v1** harness — its own docstring says so — and parses no flags, so every option is ignored. The v2 measurement is the contract's stage 3 batteries over the frozen probe sets, consumed by the gate layer |
+| U7 | `python3 cap_harness.py --phases P2,P3,P4,P5 --powered` | same harness; v2 capability gates are measured by probe sets, not by phases of a v1 script |
+| U8 | `python3 cap_harness.py --phase P6 --protocol official --n 1200 --checkpoint C24` | same; G-G's reachable floor is GSM8K 1,200 + IFEval 40 with MMLU-lite declared UNMEASURED |
+| U13 | `build_mixture.py` | the script lives at `v2/build_mixture.py`; the bare name resolves nowhere |
+
+All five now carry an inline correction naming what the v2 mechanism is, in the same style the spec already used for
+its done-means row 4. The spec still reports **0 failures, 0 warnings**.
+
+Two further rows were checked and left, because the honest reading of them is historical rather than wrong:
+`id_validator.py` (U6) is absent everywhere but is **listed as DEFERRED to v2.1** in §4, and U2's
+`verify_unescape.py` is absent everywhere too — U2 is a *completed* data-preparation unit whose command records how
+it was verified at the time, and no pending unit depends on it. The distinction that matters: a command belonging to
+a **pending** unit is a live instruction and must run; a command belonging to a completed one is a record of what was
+run.
+
+This is the same class as the working-directory defect and the 1,580: a document asserting something the code does not
+support, where the check that would catch it upstream (C4 "executable exit command") cannot see flag existence. Four of
+the five would have let a reader execute the plan's own pass/fail condition, get exit 0, and measure the wrong thing.
