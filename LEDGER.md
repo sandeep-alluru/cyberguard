@@ -2723,3 +2723,33 @@ and the ten `merge_weight_*` fields (verified earlier), while the verdict's own 
 `wall_seconds` — each present exactly once in `merge_equiv.py`. A key the verdict needed but the producer did not
 write would have surfaced as a blank or a `None` in the one section that states what the merge check establishes,
 after the two hours of stage 1 had already been spent.
+
+## 2026-09-29 — the last single point of failure: nothing restarted the timeline
+
+Every other failure on the critical path had a second chance — the lock refuses duplicates, the stale-lock reclaim
+recovers a crash, the contract retries once, the harvest has a fallback, the brief is idempotent. The **timeline
+itself had none**. It is the only actor that runs the C24 evaluation contract, and nothing on this machine restarts
+it: no cron entry, no systemd timer (the timers here belong to other projects), and the watchdog is observational by
+design. An OOM kill or a stray signal before 12:10 would have ended the window with **no verdict, no harvest and no
+terminal brief** — the whole objective, lost to a process death.
+
+`v2/timeline_guard.sh` now re-launches it, and it is safe *because* of the lock rather than in spite of it: the
+timeline takes the lock atomically and refuses while a live timeline holds it (exit 75), reclaiming it only when the
+recorded pid is dead *and* its `/proc` cmdline no longer matches. So the guard's worst case is a no-op refusal and
+its best case is the recovery needed — and it asks the **lock**, not a process name, which is what makes a
+supervisor safe here instead of a second source of the duplicate-timeline hazard.
+
+Demonstrated rather than reasoned about, twice. With a live timeline the guard attempted **0** launches; with no live
+holder it launched on the first cycle. Then the real path was exercised end to end: **SIGTERM** the timeline (clean
+lock release) → guard detects → launches → holder returns; and **SIGKILL** (which leaves the lock behind) → guard
+detects → launches → the new timeline logs *"stale timeline lock from a dead holder (456438) - reclaiming"*, re-arms
+at **C24 11:55 | brief 11:57 | contract 12:10**, and grace-skips the 05:50 M2 checkpoint exactly as designed. The
+suite was then cleaned up and the production guard started (24-hour window, 300 s interval, heartbeat every ~30 min
+so a dead guard is distinguishable from a healthy quiet one). Final state verified by exact cmdline match: **one**
+guard (pid 457563) and **one** timeline (pid 457038), both orphaned to pid 1.
+
+One interaction is recorded rather than papered over: if the guard's new timeline arrives *while an orphaned
+contract is still running*, it will meet the contract's own lock, receive **exit 75** and stop — so the timeline's
+post-contract steps (harvest fallback, verdict brief, verifier) would not run. That is survivable because the
+contract is now self-sufficient: its stage 7 harvests and its stage 8 composes the terminal brief, so the
+deliverables still land. The guard's real job is the pre-12:10 window, where its recovery is complete.
