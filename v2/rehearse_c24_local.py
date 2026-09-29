@@ -44,12 +44,24 @@ EXPECTED_UNMEASURED = {"G-A severity", "G-D extraction", "G-I escape artifact",
 def build_inputs(d: str) -> None:
     """C24-shaped inputs: real receipts' schema, realistic numbers, per-battery probe ids."""
     os.makedirs(f"{d}/evals", exist_ok=True)
+    os.makedirs(f"{d}/receipts", exist_ok=True)
     hashes = {}
     for arm in ("armA", "armB"):
         ad = f"{d}/adapters/cyberguard-lora-v2-{arm}"
         os.makedirs(ad, exist_ok=True)
         open(f"{ad}/adapter_model.safetensors", "wb").write(f"weights-{arm}".encode())
         json.dump({"r": 8}, open(f"{ad}/adapter_config.json", "w"))
+        # The TRAINER's receipt, because the verdict's measured-exposure section reads it. It is created here so
+        # the rehearsal can assert the section reports MEASURED numbers rather than "UNMEASURED" — the gap that
+        # let a real ordering defect through on 2026-09-29 (stage 6 composes the verdict before stage 7's harvest
+        # pulls this file, so the receipt must be pulled by an earlier stage).
+        lh = [{"step": s, "loss": 0.8 - s / 100000, "grad_norm": 0.6, "learning_rate": 9.9e-5 - s * 1e-9,
+               "epoch": s / 5068} for s in (100, 200, 300, 400, 500)]
+        # named exactly as the trainer names it (`cyberguard-lora-v2-armA.json`), because that is what
+        # write_verdict_v2._trainer_receipt looks for
+        json.dump({"run": f"cyberguard-lora-v2-{arm}", "wall_seconds": 3600.0, "log_history": lh,
+                   "base_model": f"{d}/models/Qwen3-4B-Instruct-2507"},
+                  open(f"{d}/receipts/cyberguard-lora-v2-{arm}.json", "w"))
         hashes[arm] = hashlib.sha256(open(f"{ad}/adapter_model.safetensors", "rb").read()).hexdigest()
 
     def batt(b, arm, scores):
@@ -105,8 +117,11 @@ def build_inputs(d: str) -> None:
         shutil.copy(src, f"{d}/v2/data/corpus-escape-scan.json")
 
 
-def run(d: str, argv: list[str]) -> int:
-    p = subprocess.run(argv, cwd=d, capture_output=True, text=True)
+def run(d: str, argv: list[str], env: dict | None = None) -> int:
+    e = dict(os.environ)
+    if env:
+        e.update(env)
+    p = subprocess.run(argv, cwd=d, capture_output=True, text=True, env=e)
     if p.returncode != 0:
         print(f"  COMMAND FAILED ({p.returncode}): {' '.join(argv)}")
         print("  " + (p.stdout or "")[-600:] + (p.stderr or "")[-600:])
@@ -151,8 +166,11 @@ def main() -> int:
         # how a fully decided chain can still end in a document that says nothing. Compose it here and assert
         # that the sections the reviews made mandatory actually appear in the output.
         vout = f"{d}/VERDICT-v2.md"
+        # CYBERGUARD_ARTIFACT_ROOT points the composer at the fixture tree, so its receipts/evals are visible and
+        # the exposure section is exercised for real rather than silently degrading to UNMEASURED.
         if run(d, ["python3", f"{ROOT}/v2/write_verdict_v2.py", "--report", f"{d}/report.json",
-                   "--evals", f"{d}/evals", "--out", vout]) != 0:
+                   "--evals", f"{d}/evals", "--out", vout],
+               env={"CYBERGUARD_ARTIFACT_ROOT": d}) != 0:
             fails.append("the verdict composer exited non-zero on a DECIDED report — stage 6 would produce nothing")
         elif not os.path.exists(vout):
             fails.append("the verdict composer exited 0 but wrote no verdict")
@@ -171,11 +189,17 @@ def main() -> int:
                 ("approximate agreement on the measured surface", "the scoped merge-equivalence claim"),
                 ("reported and never gated", "the statement that the generation statistics are not gated"),
                 ("What is NOT established", "the explicit limitations of the merge check"),
+                # The exposure section must carry MEASURED numbers when the trainer receipt exists — a verdict
+                # that says "UNMEASURED" here would silently defeat review #14's requirement.
+                ("measured updates", "the measured-exposure table"),
             ):
                 if need not in v_txt:
                     fails.append(f"the composed verdict is missing {why}: {need!r}")
             if len(v_txt) < 2000:
                 fails.append(f"the composed verdict is suspiciously short ({len(v_txt)} bytes)")
+            if "exposure UNMEASURED" in v_txt:
+                fails.append("the composed verdict reports training exposure as UNMEASURED even though the fixture "
+                             "provides the trainer receipts — the verdict is being composed before they exist")
             else:
                 print(f"  verdict composed: {len(v_txt)} bytes, measured-exposure section present")
         if not any(isinstance(g.get("observed"), dict) and "retention_recall" in g["observed"] for g in rows):

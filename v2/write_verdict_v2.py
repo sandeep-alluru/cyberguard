@@ -29,10 +29,15 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Artifacts (receipts, evals, the harvest manifest) resolve under this root. It exists so the composer can be
+# exercised against a fixture tree: on 2026-09-29 the rehearsal's receipts were invisible to it because they
+# lived in a temp directory while the composer resolved everything from the repository, and a real ordering
+# defect (the verdict composed before the trainer receipts were pulled) therefore could not be caught there.
+ART = os.environ.get("CYBERGUARD_ARTIFACT_ROOT", ROOT)
 
 
 def load(path: str):
-    p = os.path.join(ROOT, path)
+    p = os.path.join(ART, path)
     if not os.path.exists(p):
         return None
     try:
@@ -42,7 +47,7 @@ def load(path: str):
 
 
 def manifest_summary() -> str:
-    p = os.path.join(ROOT, "research-tmp/harvest-v2/MANIFEST.sha256")
+    p = os.path.join(ART, "research-tmp/harvest-v2/MANIFEST.sha256")
     if not os.path.exists(p):
         return "the harvest manifest does not exist yet — the harvest has not run"
     lines = [l for l in open(p) if l.strip()]
@@ -80,11 +85,11 @@ def merge_equivalence_block() -> str:
         rs = r.get("merge_weight_max_rel_to_merged")
         rd = r.get("merge_weight_control_module_dropped_ratio")
         rows.append(
-            f"| `{arm}` | {r.get('merge_weight_max_ulp', float('nan')):.4f} | "
-            f"{r.get('merge_weight_frac_gt_2ulp', float('nan')):.2e} | "
-            f"{r.get('tf_top1_agreement_rate'):.4f} ({r.get('tf_positions')} pos) | "
-            f"{r.get('merge_weight_control_module_dropped_max_ulp', float('nan')):.3g} | "
-            f"{r.get('tf_negative_control_agreement_rate'):.4f} | {r.get('loss_delta')} |")
+            f"| `{arm}` | {_fmt(r.get('merge_weight_max_ulp'))} | "
+            f"{_fmt(r.get('merge_weight_frac_gt_2ulp'), '.2e')} | "
+            f"{_fmt(r.get('tf_top1_agreement_rate'))} ({r.get('tf_positions')} pos) | "
+            f"{_fmt(r.get('merge_weight_control_module_dropped_max_ulp'), '.3g')} | "
+            f"{_fmt(r.get('tf_negative_control_agreement_rate'))} | {r.get('loss_delta')} |")
     w = next((_merge_receipt(a)[0] for a in ("armA", "armB") if _merge_receipt(a)[0]), None)
     # Never print a placeholder as if it were a number: with no receipt the weight-level check is UNMEASURED and
     # the text says so rather than rendering "nan" beside real-looking units.
@@ -98,17 +103,17 @@ def merge_equivalence_block() -> str:
             f"`base_weight + scaling * (B @ A)` to within the stated tolerance at every element: across",
             f"{w.get('merge_weight_modules', '?')} matrices and {w.get('merge_weight_elements', '?')} elements",
             "(exhaustive, not sampled), the worst element deviates by",
-            f"**{w.get('merge_weight_max_ulp', 0):.3f} of a bf16 ULP** (half an ULP is the optimum for a",
+            f"**{_fmt(w.get('merge_weight_max_ulp'), '.3f')} of a bf16 ULP** (half an ULP is the optimum for a",
             f"correctly-rounded operation), with **{w.get('merge_weight_nonfinite_elements', '?')} non-finite weights**",
             f"and **{w.get('merge_weight_near_zero_elements', '?')} near-zero elements** bounded separately (max",
-            f"{w.get('merge_weight_near_zero_max_abs', 0):.3g} absolute, because a ULP ratio is meaningless at",
+            f"{_fmt(w.get('merge_weight_near_zero_max_abs'), '.3g')} absolute, because a ULP ratio is meaningless at",
             "subnormal scale). It is *deterministic*,",
             "so unlike any behavioural test it cannot be passed by a defect concentrated in a region that happens",
             "not to be sampled — including a SPARSE one: the gate is the element-wise maximum, because a",
             "fraction-only gate was rejected when it permitted 3,633 arbitrarily erroneous elements and passed a",
             "single weight corrupted to 1024 while detecting it. Its tolerance is justified by measured separation:",
-            f"the same statistic reports **{w.get('merge_weight_control_scale_0p9_max_ulp', 0):.3g}** ULP for a 10 %",
-            f"mis-scaling and **{w.get('merge_weight_control_module_dropped_max_ulp', 0):.3g}** ULP for a dropped",
+            f"the same statistic reports **{_fmt(w.get('merge_weight_control_scale_0p9_max_ulp'), '.3g')}** ULP for a 10 %",
+            f"mis-scaling and **{_fmt(w.get('merge_weight_control_module_dropped_max_ulp'), '.3g')}** ULP for a dropped",
             "contribution, against **0.5** as shipped. Non-finite weights are counted separately and gated at zero,",
             "because `NaN > 2` is False and would otherwise vanish from the count.",
             "",
@@ -139,6 +144,19 @@ def merge_equivalence_block() -> str:
         "statistics (exact mismatches, token-F1) measure how far that rounding is amplified by greedy decoding,",
         "so they are **reported and never gated**.",
     ])
+
+
+def _fmt(v, spec: str = ".4f") -> str:
+    """Format a number, or render `?` for a missing one.
+
+    The composer must NEVER raise on a partial receipt: stage 6 producing nothing means no verdict at all, which
+    is the one outcome this whole contract exists to avoid. Found 2026-09-29 by pointing the rehearsal at a
+    fixture receipt that lacked `tf_top1_agreement_rate` — `.get()` returned None and the f-string raised.
+    """
+    try:
+        return format(float(v), spec)
+    except (TypeError, ValueError):
+        return "?"
 
 
 def _merge_receipt(arm: str):

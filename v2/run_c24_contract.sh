@@ -343,6 +343,24 @@ done
 
 # ---------------------------------------------------------------- stage 2: verify the pulled artefacts
 step 2 "verify the pulled artefacts are measurements, not stubs"
+# The trainer's own receipt is the source of the MEASURED exposure the verdict must report (review #14: exposure
+# as measured updates, wall clock and terminal LR, never as a projection) — and stage 6 composes the verdict
+# BEFORE stage 7's harvest pulls it. Found 2026-09-29: without this pull the verdict reported exposure as
+# "UNMEASURED" while the receipts sat on the hosts. Pulled here. A loud WARNING rather than a hard failure if it
+# is absent: the adapters are hash-receipted independently and no gate depends on this file, so a missing
+# provenance file must not cost the verdict.
+for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+  [ "$DRY" = 1 ] && continue
+  mkdir -p receipts
+  if timeout 300 rsync -a -e "ssh -o BatchMode=yes" \
+       "$host:~/cyberguard/receipts/cyberguard-lora-v2-$arm.json" receipts/ 2>/dev/null \
+     && [ -s "receipts/cyberguard-lora-v2-$arm.json" ]; then
+    ok "trainer receipt pulled for $arm ($(wc -c < "receipts/cyberguard-lora-v2-$arm.json") bytes)"
+  else
+    echo "  WARN no trainer receipt for $arm on $host — the verdict will report its measured exposure as UNMEASURED"
+  fi
+done
+
 [ "$DRY" = 1 ] || python3 - <<'PY' || exit 4
 import json, math, os, sys
 for arm in ("armA", "armB"):

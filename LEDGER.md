@@ -1634,3 +1634,33 @@ silently extended to later commits, and the receipt says so.
 * the final learning proof pends as the contract's stage-0d gate; the reviewer did not re-run the full audit (a
   long-running job) and instead verified the PASS receipt is SHA-bound to the frozen arms and inspected its check
   code.
+
+## 2026-09-29 — the verdict would have reported exposure as UNMEASURED, and the composer could crash on a partial receipt
+
+Two defects found by inspecting stage ordering rather than by any gate:
+
+**1. Ordering: stage 6 composes the verdict before stage 7's harvest pulls the receipts.** `training_trajectory()`
+reads each arm's **trainer receipt** — the source of the MEASURED exposure (step count, wall clock, terminal LR)
+that review #14 required the verdict to report instead of a projection. But that receipt was pulled only by
+`harvest-v2.sh` at **stage 7**, while the verdict is composed at **stage 6**. So the verdict would have printed
+`receipt absent — exposure UNMEASURED` while the receipts sat on the hosts. Fixed: stage 2 now pulls both trainer
+receipts (`receipts/cyberguard-lora-v2-arm{A,B}.json`) before the verdict is composed. It warns loudly rather
+than failing — the adapters are hash-receipted independently and no gate depends on that file, so a missing
+provenance file must not cost the verdict.
+
+**2. The composer raised on a partial receipt.** `{r.get('tf_top1_agreement_rate'):.4f}` — with the key absent,
+`.get()` returns `None` and the f-string raises `TypeError`, and **stage 6 producing nothing means no verdict at
+all**, the one outcome the contract exists to avoid. Every numeric field in the merge section now goes through a
+`_fmt()` that renders `?` for a missing measurement instead of raising (9 call sites converted).
+
+Both were invisible to the rehearsal for a structural reason worth fixing too: the composer resolves artifacts
+from the **repository root**, while the rehearsal's fixture lives in a temp directory, so its receipts and evals
+were unreachable and the exposure section silently degraded to `UNMEASURED` in exactly the state the real run
+would have been in. Added `CYBERGUARD_ARTIFACT_ROOT` (defaults to the repo), and the rehearsal now
+* writes both trainer receipts into the fixture (named exactly as the trainer names them),
+* points the composer at the fixture tree,
+* and asserts the composed verdict contains the measured-exposure table and does **not** contain
+  `exposure UNMEASURED`.
+
+Proven discriminating rather than merely present: with the receipts unreachable the rehearsal fails on exactly
+`the composed verdict reports training exposure as UNMEASURED …`; with them reachable it passes.
