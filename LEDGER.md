@@ -3330,3 +3330,21 @@ receipts.
 
 Nothing was edited while doing this: `arm_c24_timeline.sh` is running, and editing a running script in place is the
 hazard recorded in the previous entry.
+
+## 2026-09-29 — the FACTS chain, checked end to end (and a lookup bug of mine found by the check)
+
+The objective's constraint is that "every number cited from `v2/data/mixture/FACTS.json`", so the chain that makes
+that meaningful was verified directly: **FACTS ↔ the arm files ↔ the audit receipt**.
+
+```
+armA.jsonl  rows=81074  sha=bc785b430551d831…   FACTS == file == audit
+armB.jsonl  rows=81074  sha=61c94262e3c48321…   FACTS == file == audit
+epoch_rows_per_arm = 81074  (both arms)
+```
+
+My first attempt reported `FACTS.arm_sha256 → None` and therefore `all agree: False`. The key is real; it is keyed by
+**filename** (`armA.jsonl`) rather than by arm label (`armA`), so my lookup returned nothing — the fifth time this
+window that a checker of mine, not the artifact, was what looked wrong. Redone with the right key: every arm file's
+sha256 equals both the FACTS entry and the audit receipt's, and both row counts equal `epoch_rows_per_arm`. The
+watchdog has been re-verifying the same hashes every five minutes for hours and reporting `hashes: MATCH`, which is
+independent corroboration rather than a substitute for looking.
