@@ -80,30 +80,78 @@ else
   bad "preflight failed ($PRE problem(s))"; exit 2
 fi
 
-# ---------------------------------------------------------------- stage 1: merge equivalence
-step 1 "merge equivalence — the tested artefact must be the shipped artefact"
-for a in armA armB; do
-  echo "  RUN_NAME=cyberguard-lora-v2-$a python3 merge_equiv.py"
+# ---------------------------------------------------------------- stage 0b: sync the evaluation surface
+# Added on the owner's instruction after a readiness audit of this path. Both eval scripts begin with
+# `ROOT = Path(os.environ["CYBERGUARD_ROOT"])`, and that variable exists only via ~/.cyberguard-env on the
+# HOSTS: this machine has no env file, no base-model weights, no peft/datasets, and a Pascal GPU that cannot do
+# the bfloat16 both scripts request. So stages 1-2 run on the hosts. Verified absent there: the four scripts,
+# and on spark-8cf2 the corpus as well (the corpus, 187 MB, exists only on spark-40ee).
+step 0b "sync the evaluation surface to the hosts"
+EVAL_FILES=(cyberguard_data.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh)
+for spec in "$S4" "$S8"; do
+  echo "  rsync -aR ${EVAL_FILES[*]} v2/holdout500.jsonl $spec:~/cyberguard/"
+  [ "$DRY" = 1 ] && continue
+  timeout 600 rsync -aR -e "ssh -o BatchMode=yes" "${EVAL_FILES[@]}" v2/holdout500.jsonl "$spec:~/cyberguard/" \
+    || { bad "sync to $spec failed"; exit 2; }
+  ok "eval surface synced to $spec"
 done
-[ "$DRY" = 1 ] || {
-  for a in armA armB; do
-    RUN_NAME="cyberguard-lora-v2-$a" python3 merge_equiv.py > "logs/merge-equiv-$a.log" 2>&1
-    rc=$?
-    f="evals/merge-equiv-cyberguard-lora-v2-$a.json"
-    [ $rc -eq 0 ] && [ -s "$f" ] && ok "$a merge-equiv written ($f)" || { bad "$a merge-equiv failed (rc=$rc)"; exit 3; }
-  done
-}
+[ "$DRY" = 1 ] || if ! timeout 60 ssh -o BatchMode=yes "$S8" \
+     '[ -f ~/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl ]'; then
+  echo "  corpus missing on $S8 — copying from $S4 over the direct link"
+  timeout 1800 ssh -o BatchMode=yes "$S8" \
+    "rsync -a --copy-links -e 'ssh -o BatchMode=yes' $S4:~/cyberguard/data/trendyol-cybersec/ ~/cyberguard/data/trendyol-cybersec/" \
+    || { bad "corpus copy to $S8 failed"; exit 2; }
+  ok "corpus copied to $S8"
+else
+  ok "corpus already present on $S8"
+fi
 
-# ---------------------------------------------------------------- stage 2: benchmark
-step 2 "paired benchmark on the 500 held-out (raw + normalized F1)"
-for a in armA armB; do echo "  RUN_NAME=cyberguard-lora-v2-$a N_GEN=500 python3 eval_cyberguard.py"; done
-[ "$DRY" = 1 ] || {
-  for a in armA armB; do
-    RUN_NAME="cyberguard-lora-v2-$a" N_GEN=500 python3 eval_cyberguard.py > "logs/eval-$a.log" 2>&1
-    f="evals/cyberguard-lora-v2-$a.json"
-    [ -s "$f" ] && ok "$a benchmark written" || { bad "$a benchmark produced no report"; exit 4; }
+# ---------------------------------------------------------------- stage 1: merge equivalence + benchmark
+step 1 "merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU)"
+PIDS=()
+for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+  RUN="cyberguard-lora-v2-$arm"
+  echo "  ssh $host: cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh"
+  [ "$DRY" = 1 ] && continue
+  ( timeout 25200 ssh -o BatchMode=yes "$host" "cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh" \
+      > "logs/eval-chain-$arm.log" 2>&1 ) &
+  PIDS+=($!)
+done
+# both hosts run in parallel; the chain waits for each trainer to release its GPU before starting
+[ "$DRY" = 1 ] || for p in "${PIDS[@]}"; do wait "$p" || true; done
+# run-eval-chain.sh always exits 0 (it records the inner exit codes in its own log), so the ARTEFACTS are the
+# evidence, not the exit status — the failure this replaces was a stage that "succeeded" while producing nothing.
+for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
+  RUN="cyberguard-lora-v2-$arm"
+  [ "$DRY" = 1 ] && continue
+  for f in "evals/$RUN.json" "evals/merge-equiv-$RUN.json"; do
+    timeout 900 rsync -a -e "ssh -o BatchMode=yes" "$host:~/cyberguard/$f" evals/ \
+      || { bad "$arm: $f did not arrive from $host (did the chain run?)"; exit 3; }
   done
-}
+  ok "$arm: benchmark + merge-equivalence pulled from $host"
+done
+
+# ---------------------------------------------------------------- stage 2: verify the pulled artefacts
+step 2 "verify the pulled artefacts are measurements, not stubs"
+[ "$DRY" = 1 ] || python3 - <<'PY' || exit 4
+import json, os, sys
+for arm in ("armA", "armB"):
+    run = f"cyberguard-lora-v2-{arm}"
+    bench = f"evals/{run}.json"
+    if not os.path.exists(bench) or os.path.getsize(bench) == 0:
+        sys.exit(f"FATAL: {bench} missing or empty — the benchmark did not run")
+    d = json.load(open(bench))
+    if not isinstance(d.get("base"), dict) or not isinstance(d.get("tuned"), dict):
+        sys.exit(f"FATAL: {bench} lacks base/tuned blocks; it is not an evaluator report")
+    rows = d.get("held_out_rows") or (d.get("quality") or {}).get("held_out_rows")
+    if not rows:
+        sys.exit(f"FATAL: {bench} records no held_out_rows; an empty benchmark is not a measurement")
+    eq = f"evals/merge-equiv-{run}.json"
+    if not os.path.exists(eq) or os.path.getsize(eq) == 0:
+        sys.exit(f"FATAL: {eq} missing or empty — merge equivalence was not recorded")
+    e = json.load(open(eq))
+    print(f"  {arm}: held_out_rows={rows}  merge-equiv keys={sorted(e)[:5]}")
+PY
 
 # ---------------------------------------------------------------- stage 3: batteries, split across machines
 step 3 "batteries (split: arm A on spark-40ee, arm B on spark-8cf2; shared base once)"
