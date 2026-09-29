@@ -120,7 +120,13 @@ fi
 # whose supporting evidence it had not collected - which is what rehearsing against the live hosts exposed.
 # Manifest SUBSTRINGS, not basenames: the two arms' adapter files share a basename, so a basename grep would be
 # satisfied by one arm alone. The trained adapters are required because they are the deliverable's subject.
-REQUIRED="gate-report-v2.json gate-inputs-armA.json VERDICT-v2.md audit.receipt.json \
+# SYMMETRY ACROSS THE ARMS. The list required both adapters - because the two arms are the deliverable - but only
+# `gate-inputs-armA.json`, while the same five lines below COLLECT all three assembled inputs. A manifest missing the
+# BASE or the ARM B gate inputs would therefore have printed HARVEST-COMPLETE, even though those are exactly the
+# inputs the paired contrast and the B-side gates are computed from. Requiring all three costs nothing (the
+# assembler writes them together) and makes the completeness claim as broad as the collection it describes.
+REQUIRED="gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json \
+          VERDICT-v2.md audit.receipt.json \
           leak-scan-c24.receipt.json adapters/armA/adapter_model.safetensors \
           adapters/armB/adapter_model.safetensors"
 MISSING=""

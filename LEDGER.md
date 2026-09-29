@@ -2947,3 +2947,18 @@ arms"*), `codex-review-15.log` / `codex-review-16.log` (the later re-clearances)
 Verified in both directions with a fixture containing **both** a reviewer output carrying a clearance and a prompt
 that only quotes one: the complete tree exits **0** with the output cited and the prompt cited **zero** times, and
 the real tree still exits **2** (awaiting the contract).
+
+## 2026-09-29 — the harvest required both adapters and one arm's gate inputs
+
+`harvest-v2.sh` demands the artifacts the deliverable is judged on, and it applies that principle across the arms
+where it counted: **both** adapters are in `REQUIRED`, because the two arms are the subject. The gate inputs were
+not — the list named `gate-inputs-armA.json` alone, while the same script five lines later **collects all three**
+(`gate-inputs-armA.json`, `gate-inputs-armB.json`, `gate-inputs-base.json`). A manifest missing the base or the B-side
+assembled inputs would therefore have printed **HARVEST-COMPLETE** — a success message for a harvest whose paired
+contrast and B-side gates had no inputs behind them in the manifest at all.
+
+All three are now required. It costs nothing to be strict here (the assembler writes them together in stage 4, and
+`collect_local` already copies all three), and the requirement was confirmed live rather than assumed: run against a
+fresh DEST the harvest exits 1 and its `HARVEST-INCOMPLETE` line lists `gate-inputs-armA.json`,
+`gate-inputs-armB.json` and `gate-inputs-base.json` as required-and-missing, i.e. the completeness check is now as
+broad as the collection it describes.
