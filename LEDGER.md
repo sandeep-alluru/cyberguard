@@ -3006,3 +3006,22 @@ there were previously none, and the merge-equivalence pulls now appear in the ru
 The distinction between this and the previous two entries is worth stating: those were *asymmetries* (the right
 requirement applied to one arm and not the others); this one was an **absence** — a claim in the headline document
 with no supporting artifact in the deliverable that is supposed to contain every artifact.
+
+## 2026-09-29 — the completeness requirement now equals the collection, and a count that looked wrong was right
+
+Following the absence found last round to its conclusion: the harvest **pulls all 42 battery receipts**
+(14 batteries × `armA`/`armB`/`base`) and required only the 15 fresh ones. The other 27 are the **registered**
+batteries, and they are precisely what the verdict's gate table is computed from — G-A refusal retention (`gA`),
+G-A2 (`gA2`), G-B (`gB`), G-C (`gC`), G-E (`gE`), G-F (`gF`), G-G (`gG-gsm8k`, `gG-ifeval`) and G-J (`gJ`), each on
+all three sides. A manifest missing any of them would have printed HARVEST-COMPLETE while a row of the gate table had
+been computed from an artifact the deliverable did not contain. All 42 are now required, which cannot fail a run that
+would otherwise succeed (stage 3 exits 5 on any battery failure on any side, so reaching the harvest implies all 42
+exist, and the harvest pulls each one itself).
+
+The verification had a wrinkle worth keeping. My first count said **51** entries were reported missing where the
+required list has **55**, and rather than assume the difference was benign I compared the two sets exactly: the four
+that were *not* missing are `audit.receipt.json`, `leak-scan-c24.receipt.json`, and **both
+`adapters/arm{A,B}/adapter_model.safetensors`** — i.e. artifacts the harvest had already successfully **collected**
+into the test destination before the check ran, including a real 264 MB pull from each host. No entry was silently
+skipped, and nothing unexpected was reported. The completeness check is behaving exactly as designed; my arithmetic
+was the thing that looked wrong, and the four "extra" entries were the harvest having done its job.

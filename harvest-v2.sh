@@ -140,17 +140,23 @@ MISSING=""
 for pat in $REQUIRED; do
   grep -qF -- "$pat" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $pat"
 done
-# ALL THREE SIDES, not just armA. These five are the FRESH disjoint instruments, and they are the evidence for the
-# two confirmatory claims: claim 1 is arm A against its BASE, and claim 2 is arm A against arm B. Requiring only
-# `battery-<b>-armA.json` left the base and B sides unrequired, so a manifest could be declared complete while the
-# very receipts the paired contrast is computed from were absent from it. Requiring all three cannot fail a run that
-# would otherwise succeed: stage 3 exits 5 if any battery fails on any side, so reaching the harvest already implies
-# all 42 receipts exist.
-for b in fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
+# EVERY BATTERY RECEIPT THE DELIVERABLE'S CLAIMS REST ON. The harvest pulls all 14 batteries for all three sides
+# (armA, armB, base) a few lines above, and 15 of them - the five fresh disjoint instruments - were required. The
+# other 27, the registered batteries, were collected but NOT required, and they are exactly what the gate table is
+# computed from: G-A refusal retention (gA), G-A2 (gA2), G-B (gB), G-C (gC), G-E (gE), G-F (gF), G-G (gG-gsm8k,
+# gG-ifeval) and G-J (gJ), each on all three sides. A manifest missing any of them would print HARVEST-COMPLETE while
+# a row of the verdict's gate table had been computed from an artifact the deliverable did not contain.
+# Requiring them cannot fail a run that would otherwise succeed: stage 3 exits 5 if any battery fails on any side, so
+# reaching the harvest already implies all 42 receipts exist - and requiring them means the manifest must actually
+# carry each one, which is the claim "checksum-verified harvest" makes.
+BATTERIES="gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ"
+for b in $BATTERIES; do
   for a in armA armB base; do
-    grep -q "battery-$b-$a.json" "$DEST/MANIFEST.sha256" 2>/dev/null       || MISSING="$MISSING evals/battery-$b-$a.json"
+    grep -q "battery-$b-$a.json" "$DEST/MANIFEST.sha256" 2>/dev/null \
+      || MISSING="$MISSING evals/battery-$b-$a.json"
   done
 done
+
 if [ -n "$MISSING" ]; then
   echo "HARVEST-INCOMPLETE — the manifest lacks:$MISSING"
   echo "  ($(wc -l < "$DEST/MANIFEST.sha256") files verified; the missing ones mean the contract did not finish)"
