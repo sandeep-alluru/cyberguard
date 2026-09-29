@@ -1978,3 +1978,25 @@ line with three states, all three tested:
 * in force — "no `8093` listener and no active serving unit";
 * **BREACH** — naming the host and its state, and saying plainly that the stack competes for the GPU if it returns;
 * not recorded — for a metrics file predating the check, stated as such rather than left blank.
+
+## 2026-09-29 — the plan of record's own artifact table still described the pre-re-cut single-arm plan
+
+`plan-validate` had reported "1 warning" on every run, and I had never looked at it. It pointed at the
+**"artifacts accounted for"** table, and reading that table found three real staleness defects — none of which the
+validator could see, because it only tests whether a path exists locally:
+
+| row | what it said | what is true |
+|---|---|---|
+| 3 | `~/cyberguard/adapters/cyberguard-lora-v2/` **on spark-40ee**, `receipts/cyberguard-lora-v2.json` | the two-arm re-cut means `cyberguard-lora-v2-armA` on **spark-40ee** *and* `-armB` on **spark-8cf2**, each with its own receipt. The named artifact will never exist, and a second host was omitted entirely |
+| 4 | `evals/cyberguard-lora-v2.json`, checked by `python3 eval_cyberguard.py --check …` | the real outputs are `evals/cyberguard-lora-v2-arm{A,B}.json` (the script names its output from `RUN_NAME`), and **`eval_cyberguard.py` has no `--check` mode at all** — the "executable check" was not executable |
+| 5 | the gate-presence check listed G-A…G-I | **G-J was missing**, so the check would have passed with the chat-retention gate absent from the verdict |
+
+Corrected to the artifacts that will actually exist, with the checks that actually exist: row 3 now names both
+arms and both hosts and points at the contract's stage 0a (completeness) and stage 0d (learning proof); row 4
+names the per-arm outputs and points at stage 2's assertions (finite `base` **and** `tuned` held-out losses, which
+is what rejects the `{"skipped": …}` fallback); row 5's list now covers every registered gate.
+
+Verified rather than asserted: row 1's check runs (`GATE-REPORT-OK`, exit 0); row 5's check is **live** (exits 1
+with no verdict written); and the corrected gate list was compared **programmatically** against
+`gates_v2.GATES` — no registered gate is missing. `plan-validate` now reports **0 failures, 0 warnings** (spec sha
+`e065cc170d3b6246…`), so any future warning stands out instead of being one of a standing pair.
