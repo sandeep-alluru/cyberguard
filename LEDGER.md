@@ -3838,3 +3838,24 @@ The one thing the check corrected was my own impression: `/tmp` holds 169 `tmp.*
 debris until I looked for my *fixtures* rather than for the directory name — none of them is mine, and none is inside
 the repo. Eleventh instance of the same lesson, and the reason the check was written to look for a signature rather
 than a naming pattern.
+
+## 2026-09-29 08:41 — the baseline the unattended endgame starts from
+
+The last full pass of this session, run three hours before the contract and ~9 minutes before M3:
+
+```
+registration  : PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+spec validate : 0 failure(s), 0 warning(s)          (PLAN-SEQUENCE: 11 C3 findings, documented in its own §4a)
+rehearsal     : PASS — the chain decides, binds identity, rests no decision on stub input
+dry-run       : exit 0, 15 stages, no lock taken
+verifier      : exit 2 — elements 1 and 2 PASS; 3, 4, 5 NOT-YET (awaiting the contract)
+compile       : 0 compile-time failures
+locks         : timeline 457038 held; contract free
+training      : armA 2692, armB 2606 of 5068 at ~7.97 s/it
+```
+
+Elements 1 and 2 are the window's delivered work, decided from receipts rather than from this ledger's narrative about
+them; 3, 4 and 5 are pending on events that have not happened. The session's round budget ends here, so the remaining
+work is the endgame as written down: the timeline fires M3 at 08:50, the C24 checkpoint at 11:55 (which waits for the
+trainers to exit at ~12:03), and the contract at 12:10 — supervised by the guard, self-sufficient through its own
+terminal brief, and verifiable afterwards with `python3 v2/verify_objective.py`.
