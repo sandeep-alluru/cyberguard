@@ -47,11 +47,24 @@ def load(path: str):
 
 
 def manifest_summary() -> str:
+    """What can honestly be said about the harvest from inside the document the harvest includes.
+
+    The harvest is the contract's LAST stage and it REQUIRES `docs/VERDICT-v2.md`, so it necessarily runs AFTER
+    this text is written, and its manifest records **this file's own sha256**. An earlier version therefore
+    rendered "the harvest manifest does not exist yet — the harvest has not run", a sentence that was already
+    false by the time anyone read it, and would have stayed false in every copy of the verdict. The ordering is
+    stated instead, and the count is reported only when a manifest exists (a re-run).
+    """
     p = os.path.join(ART, "research-tmp/harvest-v2/MANIFEST.sha256")
-    if not os.path.exists(p):
-        return "the harvest manifest does not exist yet — the harvest has not run"
-    lines = [l for l in open(p) if l.strip()]
-    return f"`research-tmp/harvest-v2/MANIFEST.sha256` lists **{len(lines)}** checksum-verified files"
+    if os.path.exists(p):
+        lines = [l for l in open(p) if l.strip()]
+        return (f"`research-tmp/harvest-v2/MANIFEST.sha256` lists **{len(lines)}** checksum-verified files "
+                f"(present when this document was composed)")
+    return ("The checksum-verified harvest runs as this contract's **final stage, after this document is written** "
+            "— necessarily so, because it verifies this file's own sha256 and therefore cannot be cited from "
+            "within. Its manifest is `research-tmp/harvest-v2/MANIFEST.sha256`, and the harness refuses to print "
+            "`HARVEST-COMPLETE` unless every file verifies, including this verdict and the re-audit and leakage "
+            "receipts. The count is stated in the CEO-desk brief written after the harvest.")
 
 
 def _trainer_receipt(arm: str):

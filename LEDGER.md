@@ -2024,3 +2024,25 @@ collected** where there were 0, zero superseded receipts included, and fail-clos
 Strengthened further: the audit and leak-scan receipts are now **required** for `HARVEST-COMPLETE`, so a harvest
 cannot certify a verdict whose supporting evidence it did not collect. Unit-tested both directions — satisfied
 when both are present, `HARVEST-INCOMPLETE` naming the audit receipt when it is removed.
+
+## 2026-09-29 — the verdict shipped a sentence that was false by the time anyone read it
+
+The verdict's Harvest section rendered, from `manifest_summary()`:
+
+> "the harvest manifest does not exist yet — the harvest has not run"
+
+The harvest is the contract's **final** stage and it **requires** `docs/VERDICT-v2.md`, so it necessarily runs
+*after* the document is composed — and its manifest records **the verdict's own sha256**. The sentence was
+therefore already false when written, and would have been false in every copy of the deliverable. There is no
+ordering that fixes this: composing the verdict after the harvest cannot work, because the harvest needs the
+verdict to exist.
+
+Fixed by stating the ordering rather than denying it: the verdict now says the harvest runs as the contract's
+final stage after this document is written, names the manifest path, and records that `HARVEST-COMPLETE` is only
+printed when every file verifies — including the verdict and the re-audit and leakage receipts. When a manifest
+*does* exist (a re-run) the count is reported with "present when this document was composed", so the two cases are
+distinguishable. Verified both paths (`7` files when present; the ordering statement when absent), the false
+sentence is gone, and the rehearsal passes.
+
+The count itself is carried by the **CEO-desk brief**, which runs after the harvest — which is where a reader
+should find it, rather than inside the artifact being checksummed.
