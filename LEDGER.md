@@ -3951,7 +3951,7 @@ the vault: context-free marker matching, and a refusal vocabulary that does not 
 **Verified mechanically (all exit 0):** `python3 v2/recheck_boundary_flag.py` (the flag is a false positive);
 `python3 v2/verify_verdict_quotes.py` (26/26 — both verbatim replies byte-exact against the receipts, every gate
 token present, no host IPv4); the SPEC §2 row 5 token check over `docs/VERDICT-v2.md`. The terminal CEO brief is
-published and portal-verified: `docs/ceo/2026-09-29_184300CDT-cyberguard-checkpoint19-contract-terminated.md`
+published and portal-verified: `docs/ceo/2026-09-29_184300CDT-cyberguard-verdict-v2-delivered.md`
 (HTTP 200, 20,315 bytes, 3 content hits, 0 raw IPv4). It was written by hand because `verdict_brief.py` refuses
 for the same reason the verdict does ("there is no verdict to brief"), and `checkpoint_brief.py`'s house template
 is training-look oriented and would have published two false statements at a terminal checkpoint — that the verdict

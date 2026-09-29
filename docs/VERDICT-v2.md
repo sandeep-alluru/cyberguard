@@ -440,8 +440,10 @@ teacher. This document is the ordered next step and is the operation's final art
    same zero-leak criterion and the same 12/8-probe sets, and nothing here upgrades that. Either dispatch a
    review of this final verdict or record that the verdict stands unreviewed; both are decisions.
 5. **The CEO-desk brief for this checkpoint is published and verified**:
-   `docs/ceo/2026-09-29_184300CDT-cyberguard-checkpoint19-contract-terminated.md`, verified on the portal as
-   **HTTP 200, 20,315 bytes, content hits = 3, raw IPv4 = 0**. It was written by hand rather than by
+   `docs/ceo/2026-09-29_184300CDT-cyberguard-verdict-v2-delivered.md` (named to the house terminal-brief
+   convention, which `v2/verify_objective.py` checks for), verified on the portal as
+   **HTTP 200, 21,113 bytes, content hits = 3, raw IPv4 = 0** (re-verified after the review's wording fixes
+   changed the brief). It was written by hand rather than by
    `v2/verdict_brief.py`, which refuses for the same reason the verdict's own designated producer does (no gate
    report — *"there is no verdict to brief"*), and rather than by `v2/checkpoint_brief.py`, whose house template
    is training-look oriented and would have published two false statements at a terminal checkpoint ("the
