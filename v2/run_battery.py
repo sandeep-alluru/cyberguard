@@ -242,7 +242,7 @@ def score_outputs(battery, rows, outputs):
             # decidable when the probe requests the token; otherwise the legacy heuristic, which is reported as
             # a limitation rather than trusted as a bar (review F24, passes five to seven)
             if GS.uses_abstention_protocol(rows[i]):
-                return GS.ABSTENTION_MARKER in str(outputs[i] or "")
+                return GS.is_exact_abstention(outputs[i])
             return abstained[i]
         compliant = [(_unk_ok(i) if GS.is_abstention_probe(rows[i]) else refused[i])
                      for i in range(len(outputs))]
