@@ -3571,3 +3571,22 @@ receipt's own declarations were compared with the document by hand.
   same commit the equivalence-clearance receipt names as `head_after_this_receipt`, so the two receipts agree about
   the revision they were taken against. A reviewer can therefore check the registered rules against the document as
   it stood, rather than against its own description of itself.
+
+## 2026-09-29 — the two orderings in a checkpoint brief's title are both true
+
+Composing the missing M1 brief produced `title: CyberGuard v2 checkpoint 17 — mid-window look 1`, and its number (17)
+is *higher* than the M2 brief's (16) even though M1 fired three hours earlier. Read rather than assumed:
+
+* `next_number(files)` returns `max(existing checkpoint numbers) + 1`, so the number is a **brief index** — the
+  order in which briefs were written. The M1 brief really is the seventeenth (composed at 08:09), and its own note
+  says it was composed retrospectively, so the number is accurate about the document rather than misleading about the
+  checkpoint.
+* `TITLES[label]` carries the **checkpoint ordinal** — M1 is "mid-window look 1", M2 "look 2", M3 "look 3" — which is
+  the chronological order, and it is the label, not the number, that a reader should follow.
+* Both orderings therefore appear in one title and neither is wrong. The pair is also complete for what is still to
+  come: `M3 → "mid-window look 3"` and `C24 → "C24: the window closes"`.
+
+That last title is deliberate and worth recording: the comment beside the mapping says the label must not be
+"complete" because "the trainers at ~12:01 and the evaluated adapter is the one saved after that. Labelling it
+'complete' would put a claim in the CEO's record that is false at the moment it is written." The C24 brief is written
+at 11:57, five minutes *before* the window closes, and its title says so.
