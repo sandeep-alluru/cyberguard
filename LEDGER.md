@@ -2046,3 +2046,13 @@ sentence is gone, and the rehearsal passes.
 
 The count itself is carried by the **CEO-desk brief**, which runs after the harvest — which is where a reader
 should find it, rather than inside the artifact being checksummed.
+
+## 2026-09-29 — verified the G-I claim in the verdict, rather than assuming staleness
+
+Line 412 of the verdict says "G-I's normalised-F1 producer does not exist". Checked rather than assumed:
+`v2/assemble_gate_inputs.py:522` states that `normalized_f1` "still has none, and stays null rather than being"
+fabricated, and `v2/gates_v2.py:811` requires the field to be *present*, with the F10 fix ensuring a null value
+**cannot clear G-I UNMEASURED**. The engine's own self-test covers both directions — "a newline count alone cannot
+clear G-I UNMEASURED" and "a complete measurement with 3 literal \n must FAIL". So the limitation is accurate and
+the gate cannot silently pass on half a measurement. No change needed; recorded so the claim is known to be
+checked rather than inherited.
