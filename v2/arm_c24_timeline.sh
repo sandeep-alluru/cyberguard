@@ -191,4 +191,14 @@ fi
 # brief that would announce a verdict which is not there - so a failed contract produces a logged refusal, not a
 # confident brief.
 say "verdict brief (the terminal checkpoint)"; python3 v2/verdict_brief.py 2>&1 | tail -3 | tee -a "$LOG"
+# OBJECTIVE COMPLETION, DECIDED BY ARTIFACTS. The line below once asked only whether one file exists, which is not
+# the objective: there are five elements, and this effort has repeatedly been bitten by a summary that outran its
+# evidence (a harvest requirement that could never be satisfied, a brief asserting a snapshot it never checked, a
+# sentence about the harvest that was true only when written). verify_objective.py answers per element from the
+# artifacts and distinguishes "awaiting artifacts" from "an element FAILED", so the last line of this log is a
+# check rather than a claim.
+say "objective verification (five elements, read from artifacts)"
+python3 v2/verify_objective.py 2>&1 | tail -30 | tee -a "$LOG"
+vrc=${PIPESTATUS[0]}
+say "verify_objective exit=$vrc (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)"
 say "timeline complete: VERDICT-v2 exists=$([ -s docs/VERDICT-v2.md ] && echo yes || echo NO)"

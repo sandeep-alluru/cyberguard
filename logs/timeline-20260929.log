@@ -66,3 +66,9 @@ review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review
 [2026-09-29 07:12:27 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
 [2026-09-29 07:12:27 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
 [2026-09-29 07:12:27 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 07:29:52 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 07:29:52 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 07:29:52 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 07:29:57 CDT] REFUSING to start: timeline pid 439499 is already running (exit 75).
+[2026-09-29 07:29:57 CDT]   A second timeline would race the harvest and truncate MANIFEST.sha256. Kill the incumbent first if you
+[2026-09-29 07:29:57 CDT]   really mean to re-arm.
