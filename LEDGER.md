@@ -3241,3 +3241,11 @@ The stale `$HOME/*.py` copies on 40ee are now unreachable from the chain and wer
 they are inert for this pipeline, and removing files from a production host is a larger act than the problem
 requires. They are recorded here as what they are — the previous deployment's files — in case anything else on that
 host still refers to them.
+
+The class was then closed rather than left at one instance. Every remote command the contract issues was listed and
+classified: stage 1 invokes `cd ~/cyberguard && … bash run-eval-chain.sh` (and the script now agrees); both stage-3
+battery invocations do `source ~/.cyberguard-env; cd $CYBERGUARD_ROOT && …`; the two host-side helper scripts are
+invoked by absolute path and `cd` themselves (`quarantine_host_evals.sh` → `cd "$HOME/cyberguard" || exit 1`,
+`check_eval_surface.sh` → `cd "$ROOT_HOME"`); stage 0d's learning proof does `cd ~/cyberguard && …`; and the remaining
+lines are `rsync`/`scp`/`sha256sum` over `~/cyberguard/...` absolute paths, for which no remote cwd matters. The only
+place a relative invocation depended on an unverified cwd was the one that was wrong.
