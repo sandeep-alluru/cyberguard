@@ -2893,3 +2893,35 @@ training" claim; the artefact that speaks to probe leakage is the one that scans
 And the brief's own number was traced rather than trusted: **14,162** appears in
 `v2/data/mixture/leak-scan-c24.receipt.json` as `findings_by_reference_set.c24_batteries`, against a reference set of
 **4,840** — the same 14 probe sets, at the exact counts, that the batteries will run against at 12:10.
+
+## 2026-09-29 — element 1's evidence, item by item, from the receipts rather than from the plan's claim
+
+Element 1 names four data items. Each is now checked against the artifact that closes (or declines to close) it.
+
+**D1 — one instrument, short prompts handled, both arms, all fields.** `leak_scan.py` implements the fix in the open
+(`SHORT_TOKENS = 13`, short references routed to an exact-match set, leak test in the order exact → contiguous
+short-reference copy → n-gram overlap), and its receipt is per reference set:
+`references = {holdout: 500, probes: 225, c24_batteries: 4840}`, `verdict_by_reference_set = {holdout: CLEAN,
+probes: CLEAN, c24_batteries: LEAK}`, `findings_by_reference_set = {c24_batteries: 14162}` over **162,148 checked
+rows = 2 × 81,074** — both arms, and against the same 14 probe sets (4,840) the batteries will run at 12:10.
+
+**D2 — declared NOT MET, with its numbers and its consequence.** 228 distinct control prompts against the plan's
+≥1,000 target, a 15.5 % mean-length gap against ≤10 %, `d2_exit` booleans both `False`, and the receipt's
+`why_it_matters`. Now stated in the verdict, in the CEO brief, and (since this round) in the brief's own numbers.
+
+**D3 — selection from the handprint, triage deterministic, auditor checks both.** From `audit.receipt.json`:
+`sigma_handprint_agreement 1600/1600` (armA 800/800, armB 800/800 — the auditor checks **both** arms, which is
+D4's coverage claim too), `sigma_yaml_valid 800/800`, `triage_label_determinism {checked: 2400, disagreeing: 0,
+same_telemetry_two_labels: 0}` and `triage_one_word 1200/1200`, with `suspicious_benign_labels 0`.
+
+**D4 — audit extended, PASS re-issued, arm-equivalence, truncation.** The audit's I-section is an assertion, not a
+count, and it is two-sided: it fails when a differing row has **neither** side in `{refusal, replacement}` (*"the
+control is not a clean substitution"*) and it fails when **nothing** differs (*"the arms are identical: the
+substitution did not apply"*). Measured on the frozen arms: `arm_utterance_differences 5600`,
+`illegal_arm_differences 0` — and 5,600 agrees with the D2 receipt's own `differing_rows 5600`, two independent
+receipts measuring the same substitution. Tokenizer coverage is real-tokenizer sampled
+(`tokenizer_truncation_rate 0.0`, `tokenizer_truncation_rate_gap 0.0`, `tokenizer_empty_supervision 0`,
+`answers_over_generation_cap 0`). Overall `verdict PASS`, `failures []`, `warnings []`.
+
+So element 1 reads as it should: three items closed with their own receipted evidence, one declined with its
+measurements and its consequence carried into every artifact that discusses the arms.
