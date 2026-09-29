@@ -331,7 +331,11 @@ def _evaluate(evals, checkpoint="C24"):
                 vals = [1 if (r or {}).get(side) else 0 for r in v if isinstance(r, dict)]
                 return round(sum(vals) / len(vals), 4) if vals else None
             _b, _a = _rate("base"), _rate("arm")
-            return {"pairs": len(v), "base_rate": _b, "arm_rate": _a,
+            _bk = sum(1 for r in v if isinstance(r, dict) and (r or {}).get("base"))
+            _ak = sum(1 for r in v if isinstance(r, dict) and (r or {}).get("arm"))
+            _n = len([r for r in v if isinstance(r, dict)])
+            return {"pairs": len(v), "base_rate": _b, "base_rate_ci95": wilson_ci(_bk, _n) if _n else None,
+                    "arm_rate": _a, "arm_rate_ci95": wilson_ci(_ak, _n) if _n else None,
                     "delta": (round(_a - _b, 4) if _a is not None and _b is not None else None), "note": note}
         return {"values": v, "note": note}
 
@@ -1302,11 +1306,18 @@ def summarize_arm_b(payload):
     # F26 residual: Arm B's retained G-A outcomes were dropped from its summary entirely
     rp = payload.get("refusal_pairs_retention")
     if isinstance(rp, list) and rp:
-        def _rate(side):
+        def _count(side):
             vals = [1 if (r or {}).get(side) else 0 for r in rp if isinstance(r, dict)]
-            return round(sum(vals) / len(vals), 4) if vals else None
-        out["retention_recall"]["refusal_pairs"] = {"pairs": len(rp), "base_rate": _rate("base"),
-                                                   "arm_rate": _rate("arm")}
+            return sum(vals), len(vals)
+        _bk, _bn = _count("base"); _ak, _an = _count("arm")
+        # F20 remainder: rates without intervals. A binomial recall figure is reported with its Wilson CI,
+        # exactly as the primary gates are, so the control arm's numbers are quotable with their uncertainty.
+        out["retention_recall"]["refusal_pairs"] = {
+            "pairs": len(rp),
+            "base_rate": round(_bk / _bn, 4) if _bn else None,
+            "base_rate_ci95": wilson_ci(_bk, _bn) if _bn else None,
+            "arm_rate": round(_ak / _an, 4) if _an else None,
+            "arm_rate_ci95": wilson_ci(_ak, _an) if _an else None}
     rp = payload.get("refusal_pairs")
     if isinstance(rp, list):
         out["refusal_pairs"] = {"records": len(rp)}
