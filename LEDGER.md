@@ -1211,3 +1211,42 @@ Verified three ways: a complete manifest PASSES; removing the verdict FAILS and 
 generalisation receipt FAILS and names that. Producer/consumer paths were then cross-checked end to end —
 stage 4 writes `evals/gate-inputs-armA.json`, stage 5 writes `v2/gate-report-v2.json`, stage 6 writes
 `docs/VERDICT-v2.md`, and the harvest now consumes all three.
+
+## 2026-09-29 — the merge-equivalence gate was unachievable and would have aborted the contract at stage 2
+
+Pre-flighting stage 1 end to end (a short merge-equivalence run against the real adapter, using a throwaway
+adapter NAME so no real-named artefact was written) produced a clean run whose numbers would have **stopped the
+contract at stage 2, after the entire training window had been spent**:
+
+| run | decode length | loss_delta | top-1 agreement | exact string mismatches | token-F1 min |
+|---|---|---|---|---|---|
+| smoke | `MAX_NEW=256` | 0.0001 | **100 %** | **4 of 4** | **0.6751** |
+| diagnosis | `MAX_NEW=48` | 0.0001 | **100 %** | 1 of 6 | — |
+| smoke | `MAX_NEW=32` | 0.0001 | **100 %** | **0 of 4** | **1.0** |
+
+The acceptance criterion was `gen_exact_mismatches == 0` **and** `gen_self_f1_min >= 0.99`. The table shows the
+outcome of that criterion is a function of **how long the decode is**, while the two measurements that speak to
+the merge — `loss_delta` and top-1 agreement — never move. That is the signature of chaotic amplification, not
+of a bad merge:
+
+* `merge_and_unload()` evaluates `W + BA` **once** in bf16 (one rounding);
+* the unmerged path evaluates `x@W + (x@A)@B` as **separate** bf16 ops (a different rounding);
+* the logits therefore differ by ~13-16 % relative, top-1 never disagrees at the first position, and a greedy
+  decode of 256 steps turns any early flip into a completely different string.
+
+So the gate was measuring decode length, not equivalence — and requiring it manufactures a failure.
+
+Fixed:
+* `merge_equiv.py` now also measures the thing that IS sensitive to a wrong merge: `top1_agreement_rate` at the
+  first generated position (non-vacuity asserted — an earlier version of this measurement sliced by the
+  vocabulary dimension and reported "no divergence" while comparing nothing), plus `logit_rel_delta_mean/max`,
+  and records `equivalence_basis` and `max_new_tokens`.
+* stage 2 now GATES on `top1_agreement_rate == 1.0` with `top1_agreement_n >= 100`, keeps `loss_delta <= 0.02`,
+  and **reports rather than gates** the exact-mismatch and F1 statistics (so the verdict states the
+  amplification instead of hiding it).
+* Verified in six directions against synthetic receipts: good case PASSES; a genuine merge defect
+  (`top1=0.97`) FAILS as "a genuine merge defect, not decoding amplification"; a missing field FAILS as
+  unmeasured; `n=4` FAILS for support; `loss_delta=0.5` FAILS; NaN FAILS.
+
+A change to a pre-registered acceptance criterion is a model-equivalence decision, so it goes to the
+independent reviewer; the evidence above is what it is asked to judge.

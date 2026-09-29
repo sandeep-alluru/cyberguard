@@ -68,6 +68,38 @@ sys.exit(0 if ok_bf16 else 1)
 PY
 fi
 
+# ---------------------------------------------------------------- the window's GPU premise
+# The plan's whole premise is a DEDICATED GPU for this window, and the serving stack must stay evicted for its
+# duration. Nothing checked either during the window. On 2026-09-29 an orphaned base-battery process (left by a
+# killed smoke test) was found holding 7.8 GB alongside the trainer - exactly the kind of stray the evaluation
+# would have contended with or OOM'd on. This runs at stage 0b, i.e. after the trainers have exited and before
+# any evaluation takes the GPU, when ZERO compute processes is the correct state.
+LISTEN=$(ss -ltn 2>/dev/null | grep -c ':8093')
+[ "$LISTEN" -eq 0 ] && chk yes "port 8093 has no listener (serving evicted)" \
+  || bad "port 8093 IS listening - the serving stack is back and will compete for the GPU"
+for u in spark-flash-next.service qwen-flash-guard.timer spark-rpc.service spark-rpc-guard.timer; do
+  st=$(systemctl show -p ActiveState "$u" 2>/dev/null | head -1)
+  case "$st" in
+    *not-found*|*ActiveState=inactive*|*ActiveState=failed*|"") ;;
+    *) bad "$u is $st — the serving stack must stay evicted for this window" ;;
+  esac
+done
+chk yes "serving units inactive (eviction in force)"
+gpu_pids=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null | tr -d ' ' | grep -v '^$' || true)
+if [ -z "$gpu_pids" ]; then
+  chk yes "no process holds the GPU (it is free for the evaluation)"
+else
+  bad "GPU is NOT free — ${ALLOW_GPU_PIDS:+allowed }process(es) holding it:"
+  for pp in $gpu_pids; do
+    echo "         pid $pp: $(tr '\0' ' ' < /proc/$pp/cmdline 2>/dev/null | cut -c1-90)"
+  done
+  if [ -n "${ALLOW_GPU_PIDS:-}" ]; then
+    for pp in $gpu_pids; do
+      case " $ALLOW_GPU_PIDS " in *" $pp "*) ok "pid $pp explicitly allowed by ALLOW_GPU_PIDS";; esac
+    done
+  fi
+fi
+
 # ---------------------------------------------------------------- the scoring authority
 # The authority decides whether a cited ATT&CK technique id is REAL. FOUND 2026-09-29: attack-stix.json (the
 # 53.8 MB MITRE STIX export) and build_mixture.py were absent on BOTH hosts, so authority() returned empty and
