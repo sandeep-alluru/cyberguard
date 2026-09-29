@@ -141,6 +141,9 @@ if [ -s docs/VERDICT-v2.md ] && [ -s v2/gate-report-v2.json ]; then
   say "VERDICT-v2 and the gate report already exist — NOT re-running the contract on this arm"
   rc=0
 else
+# The moment this attempt starts, so a later check can tell THIS attempt's verdict and gate report from an earlier
+# run's leftovers (`find -newermt`). Recorded before the contract runs.
+_attempt_t0=$(date +%s)
 bash v2/run_c24_contract.sh > logs/c24-contract.log 2>&1
 rc=$?
 tail -40 logs/c24-contract.log | tee -a "$LOG"
@@ -154,17 +157,38 @@ if [ "$rc" = 75 ]; then
   say "  without retrying and without touching the harvest, so the incumbent's manifest is not truncated"
   exit 75
 elif [ "$rc" != 0 ]; then
-  # ONE automatic re-run. The contract is ~11 h of unattended work across two hosts, and a single transient
-  # failure — an ssh blip, a momentary GPU error, a killed battery — would otherwise discard the entire window's
-  # evaluation. Stage 0pre quarantines the failed attempt's outputs (locally and on the hosts), so the re-run
-  # starts from a clean evals/ rather than consuming a partial result. A deterministic failure simply fails
-  # twice, for the cost of one more attempt.
-  say "contract FAILED (exit $rc) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs"
-  sleep 60 & wait $!   # interruptible, same reason as wait_until
-  bash v2/run_c24_contract.sh > logs/c24-contract-attempt2.log 2>&1
-  rc=$?
-  tail -40 logs/c24-contract-attempt2.log | tee -a "$LOG"
-  say "contract second attempt exit=$rc (full log logs/c24-contract-attempt2.log)"
+  # A PACKAGING-ONLY FAILURE MUST NOT COST A SECOND MEASUREMENT CAMPAIGN. Stage 7 is the harvest: a file copy that
+  # can fail on a network blip long after the expensive work is finished and the verdict is on disk. The re-run
+  # below would redo stage 1's merge+benchmark and all 42 battery runs — ~10 GPU-hours, against an authorization
+  # with 0.94 h left — in order to repeat the copy. The harvest fallback further down exists for exactly this case,
+  # so when this attempt itself produced the verdict AND the gate report, take that path instead.
+  #
+  # FRESHNESS IS REQUIRED, not just existence: a verdict left over from an earlier run would satisfy `-s`, and
+  # harvesting it alongside this attempt's battery receipts would package one window's document with another's
+  # measurements. Both files must have been written since this attempt started, which is only true once stages 5
+  # and 6 have completed.
+  _fresh=0
+  if [ -s docs/VERDICT-v2.md ] && [ -n "$(find docs/VERDICT-v2.md -newermt "@$_attempt_t0" 2>/dev/null)" ] \
+     && [ -s v2/gate-report-v2.json ] && [ -n "$(find v2/gate-report-v2.json -newermt "@$_attempt_t0" 2>/dev/null)" ]; then
+    _fresh=1
+  fi
+  if [ "$_fresh" = 1 ] && [ ! -s research-tmp/harvest-v2/MANIFEST.sha256 ]; then
+    say "contract exited $rc AFTER producing this attempt's verdict and gate report, with no manifest"
+    say "  => a packaging failure. SKIPPING the ~10 GPU-hour re-run and falling through to the harvest fallback,"
+    say "     which re-pulls the same receipts without re-measuring them"
+  else
+    # ONE automatic re-run. The contract is ~11 h of unattended work across two hosts, and a single transient
+    # failure — an ssh blip, a momentary GPU error, a killed battery — would otherwise discard the entire window's
+    # evaluation. Stage 0pre quarantines the failed attempt's outputs (locally and on the hosts), so the re-run
+    # starts from a clean evals/ rather than consuming a partial result. A deterministic failure simply fails
+    # twice, for the cost of one more attempt.
+    say "contract FAILED (exit $rc) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs"
+    sleep 60 & wait $!   # interruptible, same reason as wait_until
+    bash v2/run_c24_contract.sh > logs/c24-contract-attempt2.log 2>&1
+    rc=$?
+    tail -40 logs/c24-contract-attempt2.log | tee -a "$LOG"
+    say "contract second attempt exit=$rc (full log logs/c24-contract-attempt2.log)"
+  fi
 fi
 fi
 

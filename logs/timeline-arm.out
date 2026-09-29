@@ -57,3 +57,6 @@ review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review
 [2026-09-29 07:29:52 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
 [2026-09-29 07:29:52 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
 [2026-09-29 07:29:52 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 07:36:05 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 07:36:05 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 07:36:05 CDT]   overwrite its metrics snapshot or duplicate its brief
