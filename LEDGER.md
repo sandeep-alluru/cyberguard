@@ -3681,3 +3681,20 @@ prose, the instrument was wrong twice in one round, and the correct finding is t
 Recorded rather than quietly undone because the ledger's value is that it contains the corrections as well as the
 findings — and because this is the seventh time this window that my own check or edit, not the artifact, was the thing
 that needed fixing.
+
+## 2026-09-29 08:34 — the schedule re-checked against the live rate
+
+The one quantity that could still move the contract's start is the training end time, so it was re-derived from the
+arms' own progress lines rather than from the earlier projection:
+
+```
+armA: 2660/5068 steps, 7.97 s/it, elapsed 6:00:53, log-ETA 5:19:47  -> rate-ETA 13:53
+armB: 2573/5068 steps, 7.98 s/it, elapsed 6:00:54, log-ETA 5:31:45  -> rate-ETA 14:05
+box:  MAX_MINUTES=570 from ~02:33 -> 12:03
+```
+
+Two things follow. First, the rate is **unchanged** from the measurements taken hours ago (7.97/7.98 s/it against
+7.83/7.82 for epoch 1), so nothing has degraded. Second, both arms' rate-ETAs are **past** the box end, which confirms
+the earlier reading that the governing stop is the time box and not the 5,068-step cap: at 12:03 the arms will be at
+roughly **4,233** and **4,144** steps — an exposure gap of about 89 steps that the verdict's third caveat states from
+the receipts rather than from a projection. Stage 00 opens at 12:10 to find both gone.
