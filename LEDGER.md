@@ -1357,3 +1357,55 @@ with the review path, its sha256, and both revisions.
 cleared (`a91da33296ab` → `2ba31c158d23`, the merge-equivalence basis change under review by #18). Writing it now
 would bless a revision nobody cleared. The contract is not gated on the marker (owner instruction), and the
 verdict records the clearance state that actually obtained.
+
+## 2026-09-29 — review #18: NOT SOUND, and it was right for a deeper reason than #16
+
+#18 accepted the implementation (HEAD and spec hash matched, the comparison did use `held_out_loss`'s template
+and supervision boundary) and then rejected the **basis**, with an executed counterexample:
+
+> "An executed mathematical counterexample gives 800 tail disagreements across 20,000 positions, agreement
+> **0.96**, separation **0.3604**, unchanged gold-token loss and zero first-position disagreements: all stated
+> numerical conditions pass."
+> "NOT SOUND: revision 2ba31c158d23 constrains sampled reference-conditioned continuations, but its aggregate
+> tolerance and disabled-adapter control do not establish model behavioral equivalence or exclude concentrated
+> far-tail defects."
+
+That is correct, and it is a stronger objection than #16's: **no finite behavioural sample can establish
+behavioural equivalence.** Three revisions of the behavioural basis were therefore the wrong shape of answer.
+What *is* exactly decidable is what the evaluator actually depends on — did `merge_and_unload()` produce the
+correct **weights** from the trained adapter?
+
+### The deterministic basis, added
+For every LoRA-wrapped layer: `merged_weight == base_weight + scaling * (B @ A)` in float32. Measured on the real
+adapter:
+
+| quantity | measured |
+|---|---|
+| adapted matrices / elements compared | **252 / 3,633,315,840** (exhaustive, not sampled) |
+| max per-element deviation | **0.00195** |
+| mean per-element deviation | 2.49e-05 |
+| control: a target module NEVER MERGED | **0.06354 — 32.6x the measured deviation** |
+| control: adapter contribution mis-scaled 10 % | 0.00637 — only **3.3x** |
+
+The tolerance is therefore justified by the separation from the defect it must catch, and the resolution is
+stated rather than hidden: **this check resolves deviations of order the adapter update and does NOT resolve a
+sub-1 % mis-scaling**, which is comparable to bf16 rounding of the merged sum. Stage 2 now gates on
+`merge_weight_max_abs <= 0.01` over `>=100,000` elements **and** a dropped-module separation `>= 5x`; the
+behavioural conditions are retained only as **gross-error sanity bounds**, labelled as such, because #18 is right
+that they cannot establish equivalence.
+
+### The other #18 findings, each fixed
+* **controls not paired** (100 rows positive vs 25 negative) — the negative control now uses the **same rows**.
+* **the claimed "unconditional rejection of ragged logits" was not implemented** — #18 ran a local torch check
+  showing `(4,3)` and `(1,3)` broadcast silently. A real per-row shape assertion now raises.
+* **stale evidence on disk** — `research-tmp/smoke-evals/merge-equiv-smoke-equivalence.json` still held the
+  superseded first-position basis; refreshed with the current measurements.
+* **`diagnose_merge_equiv.py` overclaimed** — it equated a tiny aggregate loss difference with "statistically
+  the same model" and asserted a wrong merge diverges at position zero; both are disproved as general criteria by
+  the counterexample, and both are now scoped and point at the weight-level check.
+
+### The claim itself is now scoped, in the verdict and in the rehearsal
+The verdict's merge section no longer asserts equivalence. It states what is established (correct merge
+arithmetic, exhaustive), what is **NOT** established (general behavioural equivalence — with #18's counterexample
+cited), and that the free-running generation statistics are **reported and never gated**. The rehearsal asserts
+those sentences are present, and a negative control proves the assertion is not vacuous.

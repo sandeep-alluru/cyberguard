@@ -15,9 +15,14 @@ Two very different explanations fit that pair of numbers, and they have opposite
       decoding to flip a token, after which the two continuations diverge completely — chaotic amplification,
       not a modelling error.
 
-`loss_delta` at 1e-4 already points at (b), but that is inference. This measures it directly:
-  * LOGIT agreement on the same inputs — max/mean |Δlogit| and top-1 agreement. A correct merge in bf16 shows
-    tiny deltas and ~100 % top-1 agreement at EVERY position; a wrong merge does not.
+`loss_delta` at 1e-4 points at (b), but that is inference, and inference from an aggregate can be wrong. This
+measures the per-position agreement directly — while noting, per review #18, that agreement on sampled paths is
+evidence about those paths and not a proof of behavioural equivalence:
+  * LOGIT agreement on the same inputs — max/mean |Δlogit| and top-1 agreement. On the MEASURED surface a
+    correct merge shows small deltas and high top-1 agreement, and a grossly wrong merge degrades it. It cannot
+    do more than that: review #18 produced an executed counterexample that changed behaviour while passing every
+    agreement condition, so agreement over sampled paths can never exclude a defect concentrated outside them.
+    That is why the merge is ALSO checked at the WEIGHT level, exhaustively — see merge_equiv.merge_weight_check.
   * DIVERGENCE POINT in greedy decoding — the token index at which the two sequences first differ. Chaos shows
     as an early single flip followed by total divergence; a wrong merge shows divergence at index 0.
 

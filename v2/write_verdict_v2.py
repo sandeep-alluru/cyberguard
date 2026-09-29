@@ -59,6 +59,81 @@ def _trainer_receipt(arm: str):
     return None, None
 
 
+def merge_equivalence_block() -> str:
+    """What the merge check actually establishes, from the measured receipts, and what it does NOT.
+
+    Rewritten 2026-09-29 after independent review #16 and #18 both rejected earlier acceptance bases: the first
+    (zero exact generation mismatches, token-F1 >= 0.99) was unachievable - its outcome is a function of decode
+    length - and the second (first-position agreement) "permits unrestricted continuation changes". #18 then
+    produced an EXECUTED counterexample that passed every numerical condition while changing behaviour, and
+    concluded correctly that no finite behavioural sample establishes behavioural equivalence. So the claim here
+    is scoped to the two measurements that are actually load-bearing (an exhaustive weight-level check and
+    approximate agreement on the measured surface), and the limits are stated rather than implied.
+    """
+    rows = []
+    for arm in ("armA", "armB"):
+        r, _ = _merge_receipt(arm)
+        if r is None:
+            rows.append(f"| `{arm}` | **receipt absent — UNMEASURED** | | | | |")
+            continue
+        rw = r.get("merge_weight_max_abs")
+        rs = r.get("merge_weight_max_rel_to_merged")
+        rd = r.get("merge_weight_control_module_dropped_ratio")
+        rows.append(
+            f"| `{arm}` | {rw:.5f} ({rs:.2%} of merged scale) | {r.get('tf_top1_agreement_rate'):.4f} "
+            f"({r.get('tf_positions')} pos) | {rd:.1f}x | "
+            f"{r.get('tf_negative_control_agreement_rate'):.4f} | {r.get('loss_delta')} |")
+    w = next((_merge_receipt(a)[0] for a in ("armA", "armB") if _merge_receipt(a)[0]), None)
+    # Never print a placeholder as if it were a number: with no receipt the weight-level check is UNMEASURED and
+    # the text says so rather than rendering "nan" beside real-looking units.
+    if not w:
+        established = ("**What is established.** **Nothing yet** — no merge-equivalence receipt has been "
+                       "harvested, so the weight-level check and the behavioural comparison are both "
+                       "**UNMEASURED** for this verdict.")
+    else:
+        established = "\n".join([
+            "**What is established.** `merge_and_unload()` produced the correct weights: for every LoRA-wrapped",
+            f"layer ({w.get('merge_weight_modules', '?')} matrices, {w.get('merge_weight_elements', '?')} elements",
+            "in total — exhaustive, not sampled), the merged weight equals `base_weight + scaling * (B @ A)` to",
+            "within bf16 rounding of the merged sum. That is a *deterministic* property, so unlike any behavioural",
+            "test it cannot be passed by a defect concentrated in a region that happens not to be sampled, and the",
+            "same measurement separates the result from a target module never being merged by a factor of",
+            f"{w.get('merge_weight_control_module_dropped_ratio', 0):.1f}.",
+        ])
+    return "\n".join([
+        "The evaluator scores the **merged** model, so the merge was checked against the unmerged path in three",
+        "ways, and the claim below is scoped to exactly what those measurements support.",
+        "",
+        "| arm | weight-level max deviation | teacher-forced top-1 agreement | control: module never merged | control: adapter disabled | held-out loss delta |",
+        "|---|---|---|---|---|---|",
+        *rows,
+        "",
+        established,
+        "",
+        "**What is NOT established — stated, not implied.** This does **not** establish general behavioural",
+        "equivalence, and nothing in this verdict claims it. A finite behavioural sample cannot: independent",
+        "review #18 produced an executed counterexample that changed the last eight of 200 supervised positions in",
+        "every row while passing every numerical condition (0.96 agreement, 0.3604 separation, unchanged",
+        "gold-token loss, zero first-position disagreements). Behavioural agreement is therefore reported as",
+        "**approximate agreement on the measured surface** — teacher-forced over the assistant span, which",
+        "constrains reference-conditioned continuations and not the models' own generated prefixes. Two further",
+        "limits: the check resolves deviations of order the adapter update and does **not** resolve a sub-1 %",
+        "mis-scaling, which is comparable to bf16 rounding of the merged sum; and the free-running generation",
+        "statistics (exact mismatches, token-F1) measure how far that rounding is amplified by greedy decoding,",
+        "so they are **reported and never gated**.",
+    ])
+
+
+def _merge_receipt(arm: str):
+    """The merge-equivalence receipt for one arm, harvested first, then a local copy."""
+    for p in (f"research-tmp/harvest-v2/evals/merge-equiv-cyberguard-lora-v2-{arm}.json",
+              f"evals/merge-equiv-cyberguard-lora-v2-{arm}.json"):
+        r = load(p)
+        if r is not None:
+            return r, p
+    return None, None
+
+
 def training_trajectory() -> str:
     """Measured exposure per saved artefact — required by Codex review #14 (2026-09-29).
 
@@ -288,13 +363,9 @@ stating it.
 
 {mask_line}
 
-## Merge equivalence: what is established
+## Merge equivalence: what is established, and what is not
 
-The merged adapter is accepted against the unmerged one on measured tolerances (mean held-out loss difference
-<= 0.02, zero exact generation mismatches over a stated number of prompts, token-F1 floor >= 0.99). Two limits
-are stated rather than implied: the loss tolerance bounds the difference between **mean row losses**, not the
-maximum per-row difference, so cancellation between rows is possible; and the generation check is a **smoke
-test** over a sample, not a proof of numerical equivalence at the individual-example level.
+{merge_equivalence_block()}
 
 ## Harvest
 

@@ -74,6 +74,11 @@ def tf_agreement(m_model, u_model, tok, rows, max_rows):
         with torch.no_grad():
             lm = m_model(ids).logits[0].float()
             lu = u_model(ids).logits[0].float()
+        # Raggedness must be rejected explicitly: torch broadcasts (T,V) against (1,V) without complaint, so a
+        # shape mismatch would silently compare the wrong things. Review #18 verified the earlier claim of
+        # "unconditional rejection" was not in fact implemented.
+        if tuple(lm.shape) != tuple(lu.shape):
+            raise SystemExit(f"FATAL: ragged logits: merged {tuple(lm.shape)} vs unmerged {tuple(lu.shape)}")
         am = lm[lo:hi].argmax(dim=-1)
         au = lu[lo:hi].argmax(dim=-1)
         dis = am != au
@@ -89,6 +94,84 @@ def tf_agreement(m_model, u_model, tok, rows, max_rows):
     return out
 
 
+
+def merge_weight_check(merged, un):
+    """DETERMINISTIC check of the merge arithmetic: for every LoRA-wrapped linear layer, the merged model's
+    weight must equal `base_weight + scaling * (B @ A)` in float32, to bf16 rounding.
+
+    WHY THIS EXISTS (review #18, which rejected the previous basis): a sampled behavioural comparison -- even a
+    teacher-forced one over every supervised position -- only constrains the paths it samples, and #18 produced an
+    EXECUTED counterexample that changed the last eight of 200 supervised positions in every row yet passed all
+    of the numerical conditions (0.96 agreement, 0.3604 separation, unchanged gold loss, zero first-position
+    disagreements). The honest conclusion is that no finite behavioural sample establishes behavioural
+    equivalence. But equivalence is not the property the evaluator actually needs. The evaluator needs to know
+    that `merge_and_unload()` produced THE CORRECT WEIGHTS from the trained adapter -- and that IS decidable
+    exactly, over every element of every adapted matrix, with no sampling and no decoding:
+
+        expected = W_base + scaling * (B @ A)      in float32
+        measured = the merged model's own weight
+
+    A partial scaling error, a dropped target module, a wrong adapter order or a mangled shape all show up here
+    as a large per-element difference, where they could hide from any behavioural sample.
+
+    Returns a list of per-module results; raises if no LoRA-wrapped layer is found (an empty check must never be
+    reportable as exactness).
+    """
+    import torch
+    rows = []
+    for name, mod in un.named_modules():
+        if not (hasattr(mod, "lora_A") and hasattr(mod, "base_layer")):
+            continue
+        # PEFT wraps a target as base_model.model.<path>; the merged model has the bare <path>.
+        mpath = name.split("base_model.model.", 1)[-1] if "base_model.model." in name else name
+        try:
+            tgt = merged.get_submodule(mpath)
+        except AttributeError:
+            raise SystemExit(f"FATAL: merged model has no module {mpath!r} corresponding to {name!r} -- the "
+                             f"naming assumption behind the weight check is wrong and the check would be blind")
+        Wb = mod.base_layer.weight
+        Wm = tgt.weight
+        if tuple(Wm.shape) != tuple(Wb.shape):
+            raise SystemExit(f"FATAL: {mpath}: merged weight {tuple(Wm.shape)} != base weight {tuple(Wb.shape)}")
+        for adapter in mod.lora_A:
+            A = mod.lora_A[adapter].weight
+            B = mod.lora_B[adapter].weight
+            scaling = float(mod.scaling[adapter])
+            with torch.no_grad():
+                Wbf = Wb.float()
+                exp = Wbf + scaling * (B.float() @ A.float())
+                if tuple(exp.shape) != tuple(Wm.shape):
+                    raise SystemExit(f"FATAL: {mpath}: expected merge {tuple(exp.shape)} != merged "
+                                     f"{tuple(Wm.shape)} -- B@A does not match the base matrix")
+                d = (Wm.float() - exp).abs()
+                # SENSITIVITY CONTROL, by construction rather than by sampling: the error this same check would
+                # report if the adapter's contribution were mis-scaled by 10 %. It makes the tolerance
+                # meaningful (review #18 asked exactly this) and needs no extra model to be loaded.
+                upd = scaling * (B.float() @ A.float())
+                d90 = (Wm.float() - (Wbf + 0.90 * upd)).abs()
+                # CONTROL A: the adapter contribution dropped for this module entirely -- what "this target
+                # module was never merged" (a wrong subset of target modules) looks like.
+                ddrop = (Wm.float() - Wbf).abs()
+            rows.append({
+                "module": mpath,
+                "adapter": adapter,
+                "scaling": scaling,
+                "elements": int(Wm.numel()),
+                "max_abs": float(d.max()),
+                "mean_abs": float(d.mean()),
+                "base_abs_mean": float(Wbf.abs().mean()),
+                "merged_abs_mean": float(Wm.float().abs().mean()),
+                # relative to the MERGED weight scale, not the base: the LoRA update dominates the merged value,
+                # so dividing by the base magnitude overstates the error (found by measuring it).
+                "max_rel_to_merged": float(d.max() / max(1e-12, float(Wm.float().abs().mean()))),
+                "control_module_dropped_max_abs": float(ddrop.max()),
+                "control_scale_0p9_max_abs": float(d90.max()),
+            })
+    if not rows:
+        raise SystemExit("FATAL: no LoRA-wrapped layer found -- the weight-level check is empty, so it must not "
+                         "be reported as exactness")
+    return rows
+
 t0 = time.time()
 # Both paths stay resident so the teacher-forced comparison can read them position by position. Two bf16 4B
 # models plus activations fit comfortably (the window runs with ~67 GB free), and stage 1 runs with no battery
@@ -103,6 +186,8 @@ gc.do_sample = False; gc.num_beams = 1; gc.temperature = 1.0; gc.top_p = 1.0
 gc.repetition_penalty = 1.0
 un.eval()
 
+wchk = merge_weight_check(merged, un)
+
 tf = tf_agreement(merged, un, tok, rows, TF_ROWS)
 
 # NEGATIVE CONTROL. A threshold on tf_top1_agreement_rate is only meaningful if it SEPARATES "same model,
@@ -110,7 +195,9 @@ tf = tf_agreement(merged, un, tok, rows, TF_ROWS)
 # model (the adapter disabled): that is what a real merge defect -- a dropped merge, a wrong scale, wrong
 # target modules -- would look like. The gate is then justified by the measured gap rather than fitted to the
 # single observed number. Cheap: the base is already resident, only the adapter is switched off.
-NC_ROWS = int(os.environ.get("EQ_NC_ROWS", 25))
+# PAIRED: the control uses the same rows as the positive comparison, so the difference is a paired comparison
+# over identical support (review #18: with 100 rows positive and 25 negative, their difference was not paired).
+NC_ROWS = int(os.environ.get("EQ_NC_ROWS", TF_ROWS))
 try:
     with un.disable_adapter():
         nc = tf_agreement(merged, un, tok, rows, NC_ROWS)
@@ -153,6 +240,27 @@ report = {
     "tf_first_position_disagreements": first_disagree,
     "tf_first_disagreement_examples": [x["first_disagreement"] for x in tf if x["first_disagreement"] is not None][:5],
     "tf_per_position_max_delta_mean": (sum(x["per_position_max_delta_mean"] for x in tf) / len(tf)) if tf else None,
+    # ---- the DETERMINISTIC basis: the merge arithmetic, over every element of every adapted matrix
+    "merge_weight_modules": len(wchk),
+    "merge_weight_elements": sum(x["elements"] for x in wchk),
+    "merge_weight_max_abs": max(x["max_abs"] for x in wchk),
+    "merge_weight_mean_abs": sum(x["mean_abs"] for x in wchk) / len(wchk),
+    "merge_weight_max_rel_to_merged": max(x["max_rel_to_merged"] for x in wchk),
+    "merge_weight_worst_module": max(wchk, key=lambda x: x["max_abs"])["module"],
+    # Sensitivity, stated honestly. CONTROL A (a target module never merged) separates strongly -- that is the
+    # defect class the reviewer named. CONTROL B (a 10 % mis-scaling) separates by only ~3x, because a 10 %
+    # change in the adapter contribution is comparable to the bf16 rounding of the merged sum itself. So this
+    # check RESOLVES deviations of order the adapter update, and does NOT resolve sub-1 % mis-scalings. Reported
+    # rather than hidden: a tolerance the check cannot actually resolve would be theatre.
+    "merge_weight_control_module_dropped_max_abs": max(x["control_module_dropped_max_abs"] for x in wchk),
+    "merge_weight_control_module_dropped_ratio": (max(x["control_module_dropped_max_abs"] for x in wchk) /
+                                                  max(1e-12, max(x["max_abs"] for x in wchk))),
+    "merge_weight_control_scale_0p9_max_abs": max(x["control_scale_0p9_max_abs"] for x in wchk),
+    "merge_weight_control_scale_0p9_ratio": (max(x["control_scale_0p9_max_abs"] for x in wchk) /
+                                             max(1e-12, max(x["max_abs"] for x in wchk))),
+    "merge_weight_resolution_note": ("resolves deviations of order the adapter update (a dropped module "
+                                     "separates by the measured ratio); does NOT resolve a 10 % mis-scaling, "
+                                     "which is comparable to bf16 rounding of the merged sum"),
     # the separation the gate relies on: merged-vs-unmerged must be far closer than merged-vs-base
     "tf_negative_control_rows": len(nc),
     "tf_negative_control_positions": nc_positions,

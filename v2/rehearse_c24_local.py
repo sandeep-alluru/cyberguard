@@ -166,6 +166,11 @@ def main() -> int:
                 ("one continuous schedule",
                  "the explicit statement that this is not one continuous schedule"),
                 ("## Every gate", "the gate table"),
+                # The merge claim must stay SCOPED. Review #18 showed no behavioural sample establishes
+                # equivalence, so a composed verdict that loses these sentences would be overclaiming.
+                ("approximate agreement on the measured surface", "the scoped merge-equivalence claim"),
+                ("reported and never gated", "the statement that the generation statistics are not gated"),
+                ("What is NOT established", "the explicit limitations of the merge check"),
             ):
                 if need not in v_txt:
                     fails.append(f"the composed verdict is missing {why}: {need!r}")

@@ -364,8 +364,32 @@ for arm in ("armA", "armB"):
     # differed at 256. Requiring zero mismatches would therefore abort this contract after the window had been
     # spent, on evidence that is an artefact of precision rather than of the merge. The gate is now the
     # measurement that IS sensitive to a wrong merge: does merging change the model's FIRST decision?
-    # (b) review #16 rejected first-position agreement as TOO WEAK ("permits unrestricted continuation
-    # changes"), correctly. The basis is now TEACHER-FORCED per-position agreement over the assistant span -
+    # (0) THE DETERMINISTIC BASIS. Review #18 rejected every sampled behavioural basis, with an executed
+    # counterexample that passed all of them, and it was right: no finite behavioural sample establishes
+    # behavioural equivalence. What IS exactly decidable is whether merge_and_unload() produced the correct
+    # WEIGHTS from the trained adapter, and that is checked here over every element of every adapted matrix:
+    #     merged_weight  ==  base_weight + scaling * (B @ A)      in float32
+    # Measured on the real adapter: max deviation 0.00195 over 3,633,315,840 elements across 252 matrices, and
+    # the same measurement reports a target module never merged at 0.06354 -- 32.6x the deviation. The tolerance
+    # is therefore set an order of magnitude BELOW the smallest defect it exists to catch, rather than fitted to
+    # the observation.
+    for k in ("merge_weight_max_abs", "merge_weight_elements", "merge_weight_control_module_dropped_ratio"):
+        if k not in e or e[k] is None:
+            sys.exit(f"FATAL: {eq} records no {k} - the merge arithmetic is not checked by this artefact")
+    wm, we, wratio = float(e["merge_weight_max_abs"]), int(e["merge_weight_elements"]), float(e["merge_weight_control_module_dropped_ratio"])
+    if not math.isfinite(wm):
+        sys.exit(f"FATAL: {arm} merge_weight_max_abs is not finite ({e['merge_weight_max_abs']})")
+    if we < 100000:
+        sys.exit(f"FATAL: {arm} the weight-level check covered only {we} elements; it must be exhaustive")
+    if wm > 0.01:
+        sys.exit(f"FATAL: {arm} merged weights deviate from base + scaling*(B@A) by {wm} (> 0.01) over {we} "
+                 f"elements - the merge arithmetic is wrong")
+    if wratio < 5.0:
+        sys.exit(f"FATAL: {arm} the weight check does not separate the measured deviation ({wm}) from a dropped "
+                 f"target module by >=5x (ratio {wratio:.2f}) - its tolerance is not meaningful")
+
+    # (b) SANITY, not the basis. Review #18: these can be passed by a defect, so they cannot establish
+    # equivalence - they catch a grossly wrong model. Teacher-forced agreement over the assistant span.
     # the surface held_out_loss scores. The token sequence is fixed, so it is not subject to decoding chaos,
     # and it is sensitive to a change anywhere in the continuation.
     for k in ("tf_top1_agreement_rate", "tf_positions", "tf_negative_control_agreement_rate"):
