@@ -2356,3 +2356,27 @@ listener, serving units evicted, the scoring authority present **and matching it
 `--check-scoring`. The single failure is the GPU item, and it fails for the right reason: it names the live trainer
 pid on each host. Stage 00 of the contract waits for both trainers to exit, so by stage 0b that item clears on its
 own. The verified copy of the script was synced to both hosts, so stage 0b re-syncs the same file it was tested as.
+
+## 2026-09-29 — the producer/consumer contract for stage 2, verified by name before the expensive stage runs it
+
+Stage 1 costs the most (a merge plus a paired benchmark on both hosts, up to 12 h) and stage 2 is what refuses a
+stub afterwards, so a field-name disagreement between them is the most expensive class of mismatch left: stage 1
+would succeed and stage 2 would abort with `exit 4`, throwing away the window's evaluation. Checked by reading both
+sides rather than assuming, and then mechanically.
+
+**Benchmark receipt** (`eval_cyberguard.py`, synced to the hosts at stage 0b) writes exactly what stage 2 reads:
+`held_out_rows` (top level), `base` and `tuned` blocks each carrying `held_out_loss`, `{"skipped": …}` for the
+tuned side when no adapter exists (the shape stage 2 now rejects), and `parent_identity` with `train_base`,
+`eval_base` and `match` — including the `match is None` case for an unreadable trainer receipt, which stage 2 warns
+about instead of failing.
+
+**Merge-equivalence receipt** (`merge_equiv.py` → `evals/merge-equiv-<run>.json`, the same name stage 1 pulls):
+every one of the twelve keys stage 2 consumes exists in the producer's report — `loss_delta` (line 307),
+`gen_exact_mismatches` (372), and all ten `merge_weight_*` fields (319–350), including the two control fields
+(`merge_weight_control_scale_0p9_max_ulp`, `merge_weight_control_module_dropped_max_ulp`) that a first, narrower
+check of mine reported missing — that was my ±3,000-character window being too small, not the producer. Re-run over
+the whole file: **no key stage 2 requires is absent from the producer.**
+
+The files themselves are correctly absent on both hosts (`evals/cyberguard-lora-v2-arm*.json`,
+`evals/merge-equiv-*`) because stage 1 has not run yet; what is verified here is that when it does, its consumers
+will find the fields they require.
