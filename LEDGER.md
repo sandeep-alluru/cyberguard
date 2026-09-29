@@ -3173,3 +3173,33 @@ lines are the honest state — training completes at ~12:03, the contract opens 
 terminal brief do not exist yet. Reviewed together with the host-side checks run earlier today (eval surface, compile
 gate, probe-set hashes, held-out split, transfer mechanisms, and the eviction's durability), this is the state in
 which the contract will start.
+
+## 2026-09-29 — the cadence's own record, audited: one brief was missing and three reviews never happened
+
+The owner's cadence is not only about the numbers: it is "a checkpoint every 3 hours, **an Astra review at every
+checkpoint** with findings fixed before proceeding, and **a dated CEO-desk brief per checkpoint**". So the record was
+audited against the snapshots that exist rather than against the memory of having fired them:
+
+| checkpoint | snapshot | brief | review |
+|---|---|---|---|
+| C8 | yes | 1 | **none** |
+| C16 | yes | 1 | **none** |
+| M1 | yes | **0 → 1** | **none** |
+| M2 | yes | 2 (the duplicate) | output |
+| M3, C24 | pending | pending | pending |
+
+**The missing brief is now written.** `research-tmp/checkpoints/M1-metrics.json` has existed since 02:50 with no
+document to go with it, so `checkpoint_brief.py M1` was run with a note recording why: *"Composed retrospectively at
+08:09 CDT … no brief was written for it when the checkpoint fired … it carries the STALE marker above rather than the
+freshness a brief composed at the checkpoint would have had."* The staleness guard earned its place here — it fired
+on a real case ("M1-metrics.json is 5.3 h old — the brief marks its own numbers STALE"), so the document states its
+own limitation instead of presenting six-hour-old numbers as a live look. Written, 4,001 bytes, and **portal-verified
+PASS** (HTTP 200, 3 content hits, 0 raw IPv4).
+
+**The missing reviews are disclosed, not fabricated.** C8, C16 and M1 were fired before the timeline had a review
+step, so no reviewer saw them. Dispatching three reviews *now* would create artifacts dated six hours after the
+checkpoints they name, implying oversight that did not happen at the time — and a review performed later is not the
+checkpoint review the cadence describes, in the same way a reviewed artifact that is not the shipped artifact has not
+been reviewed. The gap is in this record, in each of those briefs' own review-status lines, and in the M1 brief's
+retrospective note. M2 has an output and M3's is dispatched by the timeline at 08:50; the cadence is complete from M2
+onward, and its earlier incompleteness is dated rather than implied away.
