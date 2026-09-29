@@ -136,8 +136,37 @@ def element_training() -> tuple[str, list[str]]:
         d = load(r) or {}
         ev.append(f"  {os.path.basename(r)}: steps={d.get('steps') or (d.get('train_metrics') or {}).get('steps')} "
                   f"wall_seconds={d.get('wall_seconds') or (d.get('train_metrics') or {}).get('wall_seconds')}")
+    # Element 3 also requires the Flash-Next serving stack EVICTED for the whole window, and its "restore with a
+    # verified probe" clause was SUPERSEDED by the owner (the stack stays down until the owner says otherwise). Both
+    # facts have artifact homes, so both are checked here rather than left to narration: each checkpoint snapshot
+    # records the live per-host eviction, and the supersession is in the ledger.
+    import glob as _g
+    shots = sorted(_g.glob(p("research-tmp/checkpoints/*-metrics.json")), key=os.path.getmtime) \
+        if os.path.isdir(p("research-tmp/checkpoints")) else []
+    eviction_ok = None
+    if shots:
+        try:
+            _d = json.load(open(shots[-1], encoding="utf-8"))
+        except Exception:                                          # noqa: BLE001
+            _d = {}
+        _ev = _d.get("eviction") or {}
+        if _ev:
+            eviction_ok = all(int(v.get("port_8093", 1)) == 0 and not v.get("active_units")
+                              for v in _ev.values() if isinstance(v, dict))
+            ev.append(f"serving evicted (live record in {os.path.basename(shots[-1])}): {json.dumps(_ev, sort_keys=True)}"
+                      f" -> {'in force' if eviction_ok else '*** NOT IN FORCE ***'}")
+        else:
+            ev.append(f"checkpoint snapshot {os.path.basename(shots[-1])} carries no eviction record")
+    else:
+        ev.append("no checkpoint snapshot exists to evidence the eviction")
+    _led = text("LEDGER.md")
+    ev.append("restore clause: " + ("SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)"
+                                    if "superseded the restore" in _led else
+                                    "no supersession of the restore clause found in the ledger"))
     if not within:
         return "FAIL", ev + ["FACTS says the spend is NOT within authorization"]
+    if eviction_ok is False:
+        return "FAIL", ev + ["a checkpoint recorded the serving stack BACK, which the window's requirement forbids"]
     if len(recs) < 2:
         return "NOT-YET", ev
     return "PASS", ev
