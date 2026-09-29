@@ -3590,3 +3590,27 @@ That last title is deliberate and worth recording: the comment beside the mappin
 "complete" because "the trainers at ~12:01 and the evaluated adapter is the one saved after that. Labelling it
 'complete' would put a claim in the CEO's record that is false at the moment it is written." The C24 brief is written
 at 11:57, five minutes *before* the window closes, and its title says so.
+
+## 2026-09-29 — the checkpoint verification turned into an instrument before the next checkpoint needs it
+
+Each checkpoint's three deliverables have been checked by hand as they landed, which means verifying M3 and C24 would
+depend on remembering what to look for. `v2/verify_checkpoint.py` now checks them mechanically:
+
+* **the snapshot** — exists, parses, carries `arms`/`exposure`/`facts`/`eviction`, records the serving stack evicted,
+  and is *fresh* (default tolerance 30 min, because the timeline writes it about two minutes before the brief);
+* **the review** — a dispatch log means dispatched (a NOTE, since the answer lands minutes later, and the brief is now
+  composed *after* the dispatch precisely so this state is visible), an output means present, and its **closing line**
+  is checked to be a verdict rather than prose;
+* **the brief** — exists, carries its sections ("Verified at this checkpoint", "What is open", the numbers table),
+  contains no raw IPv4, and **its leakage count is compared against the receipt it comes from** rather than trusted;
+* **the portal** — the brief is fetched through the same report id the brief's own verification computes, requiring
+  HTTP 200, at least two content hits and no raw IPv4.
+
+One piece of honesty is built into the instrument itself: the receipt-sourced features landed at ~08:20 today, so
+those items are only *enforced* for a brief written after that, and a brief that predates them is reported as a NOTE
+rather than failed for lacking something that did not exist when it was written.
+
+Tested in both directions: against M2 it passes 10 items and fails only freshness (136 minutes old, correct for a
+historical checkpoint — widening the tolerance with `--max-age-min 500` turns it green); against a label with nothing
+on disk it fails exactly the three deliverables with exit 1. Written before M3 fires so both remaining checkpoints are
+verified the same way.
