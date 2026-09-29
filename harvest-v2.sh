@@ -29,6 +29,11 @@ for pair in "$H1 armA" "$H2 armB"; do
   set -- $pair; host=$1; arm=$2
   pull "$host" "receipts/cyberguard-lora-v2-$arm.json" receipts || true
   pull "$host" "evals/cyberguard-lora-v2-$arm.json" evals || true
+  # THE MERGE-EQUIVALENCE RECEIPT. The verdict states a merge-equivalence claim - a scoped one, with its conceded
+  # limits - and that claim is grounded in this receipt, which stage 2 enforces. The harvest never collected it, so
+  # the delivered "every v2 artifact" set contained no evidence at all for the equivalence section: a reader of the
+  # manifest could not check the claim it makes.
+  pull "$host" "evals/merge-equiv-cyberguard-lora-v2-$arm.json" evals || true
   # THE TRAINED ADAPTER — the artifact the whole window exists to produce. It was ABSENT from this harvest,
   # whose own description says "every v2 artifact": 264,308,896 bytes per arm, and a verifier reading the
   # manifest would not have found the model itself. One subdir per arm because both files share a basename.
@@ -128,7 +133,9 @@ fi
 REQUIRED="gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json \
           VERDICT-v2.md audit.receipt.json \
           leak-scan-c24.receipt.json adapters/armA/adapter_model.safetensors \
-          adapters/armB/adapter_model.safetensors"
+          adapters/armB/adapter_model.safetensors \
+          receipts/cyberguard-lora-v2-armA.json receipts/cyberguard-lora-v2-armB.json \
+          evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json"
 MISSING=""
 for pat in $REQUIRED; do
   grep -qF -- "$pat" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $pat"

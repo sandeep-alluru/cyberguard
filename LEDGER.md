@@ -2981,3 +2981,28 @@ checked rather than eyeballed.
 
 With this and the gate inputs, the harvest's completeness requirement is now symmetric across both arms **and** the
 shared base side, in both places where the scripts had applied symmetry to the adapters and not to the measurements.
+
+## 2026-09-29 — the harvest had no evidence for one of the verdict's own claims
+
+Two rounds of symmetry fixes led to the question the symmetry fixes were proxies for: **is the harvest's evidence set
+actually the set of things the verdict claims?** It was not.
+
+* The **merge-equivalence receipts were never collected at all.** The verdict states a merge-equivalence claim — a
+  scoped one, with its conceded limits — and stage 2 enforces the receipt behind it, but `harvest-v2.sh` pulled
+  neither `evals/merge-equiv-cyberguard-lora-v2-armA.json` nor its armB twin, and nothing required them. The
+  delivered "every v2 artifact" set therefore contained **no evidence whatsoever** for one of the sections the verdict
+  is built on: a reader of the manifest could not check the claim, only read it. Both are now pulled per arm in the
+  same loop that pulls the benchmark receipt, and both are required.
+* The **trainer receipts were collected but not required.** They are the evidence for review #14's "measured
+  exposure" — the verdict reads the update count, wall clock and terminal LR out of them, and says "exposure
+  UNMEASURED" when they are absent. A manifest could therefore have been declared complete with that column empty.
+  Both are now required. This also converts a silently-omitted receipt into a retry rather than a gap: the timeline's
+  harvest fallback re-runs this script and re-attempts the pull.
+
+Verified live against a fresh DEST: the `HARVEST-INCOMPLETE` line names `receipts/cyberguard-lora-v2-armA.json`,
+`…-armB.json`, `evals/merge-equiv-cyberguard-lora-v2-armA.json` and `…-armB.json` — four provenance entries where
+there were previously none, and the merge-equivalence pulls now appear in the run's own log.
+
+The distinction between this and the previous two entries is worth stating: those were *asymmetries* (the right
+requirement applied to one arm and not the others); this one was an **absence** — a claim in the headline document
+with no supporting artifact in the deliverable that is supposed to contain every artifact.
