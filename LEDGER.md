@@ -2601,3 +2601,29 @@ was run against the **real** repo with the rehearsal's report: the live loss-mas
 (273/598 supervised tokens, identical on both arms), the D2 block renders the real figures, Muse's caveats appear,
 **zero fallback lines**, no crash, 12 decided rows. The real composition path is therefore exercised, and the
 rehearsal's fidelity gap is recorded rather than left to be rediscovered.
+
+## 2026-09-29 — the retry that would have spent the last GPU hour re-copying files
+
+The timeline retries the contract once on any non-zero exit, which is right for a transient failure in stages 0-6
+and wrong for the one failure that does not invalidate the measurement. **Stage 7 is the harvest — a file copy.**
+It can fail on a network blip minutes after the verdict is on disk, and the retry would then redo stage 1's merge
+and benchmark and all **42 battery runs**: roughly **10 GPU-hours, against an authorization with 0.94 h left**, to
+repeat a copy. The harvest fallback further down the timeline exists for precisely this case, so the contract's
+failure path now falls through to it when the attempt itself produced the verdict and the gate report.
+
+**Freshness is required, not existence.** A verdict left over from an earlier run satisfies `-s`, and harvesting it
+alongside *this* attempt's battery receipts would package one window's document with another window's measurements —
+so both files must have been written since this attempt started (`find -newermt "@$_attempt_t0"`, with the timestamp
+recorded before the contract runs). A branch that *skips* a retry is not something to trust by reading, so all five
+combinations were run: fresh verdict + fresh gate report + no manifest → **skip**; both stale → retry; verdict fresh
+but gate report stale → retry; both fresh *with* a manifest → retry (something else failed); no verdict at all →
+retry. The timeline was re-armed on the change (pid 448210, incumbent stopped in **0 s**, M2 grace-skipped).
+
+Also confirmed this round, in the same "what else could act on its own" spirit: the **watchdog is purely
+observational** — it hashes the arms, runs the leak scan and the mixture audit, and writes alerts. It has no
+`Popen`, no relaunch path and no trainer handling, so when the trainers exit at ~12:03 nothing on this machine
+restarts them and stage 0b's "GPU is free" premise holds. And the batteries' input integrity is enforced rather than
+assumed: `run_battery.load_probes` hard-stops on a missing receipt, a receipt without `sha256`, or a hash mismatch
+(the F17 fix), and all **14 probe sets match their receipts locally and on both hosts**.
+
+The endgame therefore has exactly two automated actors: the locked timeline, and a watchdog that only watches.
