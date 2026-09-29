@@ -3859,3 +3859,35 @@ them; 3, 4 and 5 are pending on events that have not happened. The session's rou
 work is the endgame as written down: the timeline fires M3 at 08:50, the C24 checkpoint at 11:55 (which waits for the
 trainers to exit at ~12:03), and the contract at 12:10 — supervised by the guard, self-sufficient through its own
 terminal brief, and verifiable afterwards with `python3 v2/verify_objective.py`.
+
+## 2026-09-29 08:42 — session close: what is delivered, what is scheduled, and what needs a person
+
+**Delivered and verified from artifacts, not from this ledger's account of itself:**
+
+* **Element 1 — D1–D4.** D1: the unified instrument in one place (`leak_scan.py`: exact → contiguous short-reference
+  copy → n-gram overlap, with `SHORT_TOKENS = 13` routing short references to exact match) reporting per reference set
+  — holdout CLEAN, probes CLEAN, `c24_batteries` 14,162 findings over 4,840 references across 162,148 checked rows
+  (both arms). D2: **declared NOT MET** with its numbers and consequence — 228 distinct control prompts against
+  ≥1,000, a 15.5 % mean-length gap against ≤10 % — carried in the verdict, the CEO brief and the harvest. D3:
+  handprint agreement 1600/1600 on both arms, triage determinism 2400 rows / 0 disagreements. D4: a two-sided
+  arm-equivalence assertion (5,600 intended differences, 0 illegal) and real-tokenizer truncation 0.0 with gap 0.0.
+* **Element 2.** The audit PASS receipt with its full check set, Astra's clearances (review #17 chain and review #25
+  equivalence basis, each naming its revision, the frozen spec text retrievable from commit `107b408`) and Muse's
+  frozen-arms clearance, whose own "FIXED" claims were re-derived — one of which was only half-applied.
+
+**Scheduled, not done:** elements 3, 4 and 5. Training ends at ~12:03 by its own time box; the C24 checkpoint at
+11:55 waits for that; the contract opens at 12:10 and runs for hours, supervised by a guard that cannot duplicate the
+timeline, self-sufficient through stages 7 and 8, and verifiable afterwards with `python3 v2/verify_objective.py`.
+
+**The one defect of this session that would have cost the evaluation:** `run-eval-chain.sh` ran from `$HOME` while
+invoking the evaluation steps by relative name — on spark-8cf2 there is no such file, so stage 1 would have failed
+with no evals at all; on spark-40ee a stale 2026-09-27 evaluator would have run instead. Fixed, synced to both hosts
+(sha `21e256394ec3055d`), and verified by resolving all four steps under `$CYBERGUARD_ROOT` on each.
+
+**Needs a person:** the C24 review's findings; the diagnosis if the contract fails; and the three declared deviations
+(D2 NOT MET, the owner's supersession of the restore clause, the arms' unequal exposure) which are decisions, not
+defects. The two estimates in the record — the contract's duration and D2's effect on the A-vs-B contrast — are
+labelled as estimates wherever they appear.
+
+The goal remains **active**: the round budget is spent, the remaining work is scheduled rather than blocked, and
+neither completing it nor pausing it is a decision this session may take on its own.
