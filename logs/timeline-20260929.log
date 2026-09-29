@@ -23,3 +23,15 @@ prompt written: research-tmp/reviews/checkpoint-M2-review-prompt.md
 review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review.md
 [2026-09-29 02:52:15 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
 [2026-09-29 05:29:58 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 05:50:00 CDT] checkpoint M2 metrics
+  M2: A 1409 steps @ 8.06s/it alive=1 gpu=95% | B 1339 steps @ 7.88s/it alive=1 gpu=95%
+  eviction in force: both hosts report no 8093 listener and no active serving unit
+    arm A: 22544 samples = 0.278 epoch | 2664 refusal presentations | 24 h projection 2.12 epochs, 20275 refusal presentations
+    arm B: 21424 samples = 0.264 epoch | 2532 refusal presentations | 24 h projection 2.16 epochs, 20738 refusal presentations
+    (declared FACTS basis: 0.968288 s/sample -> epoch 21.8 h)
+[2026-09-29 05:50:05 CDT] checkpoint M2 brief
+  wrote docs/ceo/2026-09-29_055000CDT-cyberguard-checkpoint14-m2-look.md (2775 bytes)
+  portal verification: PASS — HTTP 200 (16747 bytes), content hits=3, raw IPv4=0 -> http://127.0.0.1:3100/ceo/report/bb98ae64332aea5d8c6b
+[2026-09-29 05:50:05 CDT] checkpoint M2 review (Astra)
+prompt written: research-tmp/reviews/checkpoint-M2-review-prompt.md
+review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review.md
