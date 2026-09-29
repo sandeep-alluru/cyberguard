@@ -653,3 +653,28 @@ is UNMEASURED; the real receipt still gives a measured 0 and PASSes (control).
 
 Every fix in this round is encoded in `--selftest` (which is how F21 and F22 were able to hide: the suite was
 green before them).
+
+## 2026-09-29 — Amendment A1: the schedule the evaluated artifacts actually satisfy
+
+**Normative text is `docs/SPEC-V2.md` §16; this is the plan-of-record pointer to it.** The registration
+pre-registered **one continuous 24 h run per arm** with a **5,577-step schedule horizon** "so the run is never
+re-scheduled mid-flight". The executed window does not satisfy that, for reasons that are all receipted:
+
+* epoch 1 completed and saved its adapter at 21:26/21:25 on 2026-09-28, then **both** processes crashed writing
+  the training receipt (`NameError: '_canon'` in ARMS mode at `train_cyberguard.py:296` — since fixed);
+* the 23:29 relaunch resumed with `PeftModel.from_pretrained(…, is_trainable=False)`, which **froze every LoRA
+  parameter**: `trainable params: 0`, `grad_norm 0` for 3.01 h per arm, **6.02 GPU-h spent learning nothing**;
+* that was diagnosed from the log, fixed (`is_trainable=True` plus a guard that refuses to start on zero
+  trainable parameters), and a repaired continuation was relaunched at **02:32:53 with a 570-minute box**.
+
+The evaluated artifacts are therefore a **weights-only continuation with a restarted optimizer and LR schedule,
+stopped mid-epoch**: **one completed pass plus a partial second pass**. The two pre-registered confirmatory
+analyses (Arm A @ C24 vs base; Arm A vs Arm B @ C24) are unchanged in content and are now explicitly scoped to
+this artifact. **No uninterrupted-training claim is made.** Exposure is reported as measured per artifact
+(step count, wall clock, **terminal LR**) from each run's own receipt, and the frozen interval is excluded from
+learning exposure while remaining in the cost accounting: **28.0604 GPU-h spent, worst case 47.0604 of the 48
+authorized**.
+
+Review #15 withheld clearance on exactly this inconsistency while finding **no intrinsic training-validity
+defect** in the continuation or the mid-epoch stop; the remedy applied is to correct the registration rather
+than re-describe the artifact.

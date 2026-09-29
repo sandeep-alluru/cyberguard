@@ -1250,3 +1250,29 @@ Fixed:
 
 A change to a pre-registered acceptance criterion is a model-equivalence decision, so it goes to the
 independent reviewer; the evidence above is what it is asked to judge.
+
+## 2026-09-29 — review #15: NOT CLEARED, on a registration inconsistency (now amended)
+
+Review #15 assessed the frozen arms' lineage and returned:
+
+> No intrinsic training-validity defect in weights-only continuation or a predetermined mid-epoch stop is
+> established here. Evaluation can proceed under the documented repaired regimen once the final learning
+> condition passes; uninterrupted-training and equal-update-exposure claims remain unsupported.
+>
+> NOT CLEARED: Revision `ad5d2c44e53c` documents the repaired lineage but retains an explicit preregistered
+> uninterrupted schedule that the evaluated continuation does not satisfy.
+
+That is a correct and precise objection, not a design dispute: `docs/SPEC-V2.md` §5/U3, §6 and §8 pre-registered
+**one continuous 24 h run** with a **5,577-step horizon** that is "never re-scheduled mid-flight", and the
+evaluated artifact is a **weights-only continuation with a restarted schedule, stopped mid-epoch**. A
+registration that does not describe the evaluated artifact is not a registration.
+
+Remedy (before the confirmatory analysis, which has not run): **Amendment A1** added as `docs/SPEC-V2.md` §16,
+with a pointer entry in `docs/PLAN-SEQUENCE.md`. It records the executed timeline with evidence, states what the
+artifacts therefore ARE, scopes both pre-registered confirmatory analyses to them, **withdraws any
+uninterrupted-training claim**, and requires exposure to be reported as measured per artifact from each run's own
+receipt. `plan-validate.py` PASSES on the amended spec (sha256 now `2d2872dd…`).
+
+A delta confirmation pass (#17) is requested against the amended revision. The contract remains ungated on the
+clearance marker per the owner's 2026-09-29 instruction, and the verdict records the clearance state that
+actually obtained.

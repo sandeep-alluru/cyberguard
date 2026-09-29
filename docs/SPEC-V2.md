@@ -650,3 +650,52 @@ parallel; **28,808 evaluation generations ≈ 8.07 h**; the benchmark **2,000 ge
 2,000–4,000-row conversational-replay slice. Superseded values to ignore wherever they appear:
 11,400 / 13,204 / 28,608 generations; 3.19 / 3.70 / 8.01 h; ceilings ≤12 h and ≤14 h; the
 87,284–100,784-row mixture; and any statement that Arm B is "Arm A minus the refusal set".
+
+## 16. Amendment A1 — the training schedule the evaluated artifacts actually satisfy (2026-09-29)
+
+**This section changes a PRE-REGISTERED element, and it is made BEFORE the confirmatory analysis.** It exists
+because the executed window could not satisfy the registration as written, and a registration that does not
+describe the evaluated artifact is not a registration. Independent review #15 withheld clearance on precisely
+this inconsistency while stating that **no intrinsic training-validity defect** in the weights-only
+continuation or the mid-epoch stop was established; the remedy is therefore to correct the registration, not to
+re-describe the artifact as something it is not.
+
+### What was registered (superseded for this window)
+Row U3 of §5, together with §6 and §8, pre-registered **one continuous 24 h run per arm** with
+**schedule horizon = 5,577 steps (24 h)**, "so the run is never re-scheduled mid-flight", and C8/C16/C24 as
+checkpoints **inside that single run**.
+
+### What was actually executed
+| event | time (CDT) | evidence |
+|---|---|---|
+| run launched (both hosts) | 2026-09-28 10:24 | first log line of each arm |
+| **epoch 1 completed, adapter saved** | 21:26:14 (A) / 21:25:20 (B) | adapter mtime; `trainable params: 66,060,288`; grad_norm ≈0.60–0.66 |
+| **both processes crashed writing the training receipt** | 21:26 | `NameError: name '_canon' is not defined` at `train_cyberguard.py:296` — in ARMS mode `_canon` is never bound (fixed) |
+| relaunch attempted with `RESUME_ADAPTER` | 23:29:36 (A) / 23:29:45 (B) | log: `RESUMED LoRA adapter from …` |
+| **that run trained nothing for 3.01 h per arm** | 23:29 → 02:30 | `PeftModel.from_pretrained` defaults to `is_trainable=False`: `trainable params: 0`, `grad_norm` 0 on all 99 logged lines; **6.02 GPU-h** |
+| frozen run stopped; defect fixed | 02:30–02:32 | `is_trainable=True` plus a guard that refuses to start when the trainable count is 0; `v2/data/mixture/noop-resume.receipt.json` |
+| **repaired continuation relaunched, 570-minute box** | 02:32:53 | `trainable params: 66,060,288` re-verified; box ends 12:02:53 |
+
+### What the evaluated artifacts therefore ARE (all §6/§8 claims are read through this)
+1. **A weights-only continuation.** The run was initialised from the epoch-1 adapter; optimizer and LR schedule
+   were **restarted, not resumed**. True optimizer/scheduler state existed on disk (`checkpoint-5068`) and was
+   deliberately not used — a described choice, not a necessity.
+2. **One completed pass plus a partial second pass.** Epoch 1 traversed all 81,074 rows once; the continuation
+   re-traverses the mixture until the time box stops it **mid-epoch**. Total exposure is therefore neither
+   "2 epochs" nor one continuous schedule.
+3. **The 5,577-step horizon and the "never re-scheduled mid-flight" clause do not hold for this window.** The
+   evaluated checkpoint's own step count, wall clock and **terminal LR** are reported as **measured** values
+   from each run's receipt (`v2/write_verdict_v2.py`, section "Training trajectory and measured exposure") —
+   never as projections.
+4. **The two pre-registered confirmatory analyses are unchanged in content and are now explicitly scoped to
+   this artifact:** (i) Arm A @ C24 vs its base; (ii) Arm A vs Arm B @ C24. **No claim of uninterrupted
+   training is supported by this window, and none is made.** No claim of equal update exposure or equal terminal
+   LR between arms is made unless each arm's own receipt is read and shown to support it.
+5. **The frozen interval is excluded from learning exposure and retained in the cost accounting:** 28.0604
+   GPU-h spent before the repair, worst case 47.0604 of the **48 authorized** (24 h × 2).
+
+### Standing
+`research-tmp/reviews/codex-review-15.md` withheld clearance solely on the inconsistency removed above. A delta
+confirmation pass (#17) is requested against this revision. Because the contract is not gated on a clearance
+marker (owner instruction of 2026-09-29: *"if the review doesnt work you move forward dont stop with the work"*),
+evaluation proceeds either way, and the verdict records the clearance state that actually obtained.
