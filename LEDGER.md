@@ -2380,3 +2380,38 @@ the whole file: **no key stage 2 requires is absent from the producer.**
 The files themselves are correctly absent on both hosts (`evals/cyberguard-lora-v2-arm*.json`,
 `evals/merge-equiv-*`) because stage 1 has not run yet; what is verified here is that when it does, its consumers
 will find the fields they require.
+
+## 2026-09-29 — the cadence could not see its own review, and the brief could not see its own snapshot
+
+Two defects in the *reporting* of the owner's cadence, both found by exercising the next scheduled checkpoint rather
+than waiting for it. Neither affects a measurement; both would have put false statements into CEO-facing artifacts.
+
+**The brief was composed before the review it reports on.** The timeline ran metrics → brief → review, and each brief
+states its own review status. So every brief asked "is there a review?" *before* the dispatch existed and answered
+"this checkpoint has none" — for a checkpoint whose review was dispatched seconds later. Worse, the log-present case
+was worded as a failure ("dispatched but produced no output"), when the dispatch is `nohup codex exec ... &` and
+therefore returns immediately while the answer lands minutes afterwards: the reviewer is usually *still running* as
+the brief is written. Fixed in two places: the timeline now dispatches the review **before** composing the brief (the
+dispatch is backgrounded, so this costs no time, and the brief then sees the dispatch log a real dispatch always
+creates), and the brief distinguishes three cases that mean different things — output present; dispatch log present
+("DISPATCHED, OUTPUT NOT YET WRITTEN", naming where the answer will land); prompt with no log (a `--dry-run`, so no
+reviewer has seen it). All three branches verified with a synthetic label, leaving M2's real evidence untouched.
+
+**The brief asserted its numbers came from "the scheduled moment" without checking.** It loads
+`research-tmp/checkpoints/<label>-metrics.json`, which it does not itself write, and nothing enforced that the metrics
+step had just run: had it failed, the brief would have rendered an older checkpoint's numbers under a heading saying
+they were this checkpoint's. The snapshot's own mtime is the evidence, so the brief now reports the snapshot time and
+its age, and marks its own numbers **STALE SNAPSHOT** (with a logged warning) when the snapshot is older than 30 min.
+Verified three ways: a fresh snapshot renders normally; a snapshot backdated 5 h makes the brief mark itself stale and
+warn; a 25-minute-old snapshot is *not* flagged, so the guard does not cry wolf.
+
+Also re-verified the next checkpoint's dispatch end to end: `checkpoint_review.sh M3` refuses without an M3 metrics
+snapshot (so metrics → review → brief is a required order, and it is the order now coded), and with one it writes a
+10,172-byte prompt with **zero** unsubstituted placeholders that names the live revision `a44230a` and states the
+review boundary. The scratch snapshot and prompt were removed afterwards so 08:50 produces the first real ones.
+
+The live timeline was re-armed on the corrected code: the incumbent stopped in **1 s** on SIGTERM and released its
+lock — the interruptible-wait fix working in production, not just in a test — and the new instance (pid 416229) holds
+`v2/.c24-timeline.lock`, grace-skipped the 05:50 M2 checkpoint, and is armed for C24 11:55 / brief 11:57 / contract
+12:10. One self-inflicted error caught immediately: the reorder first produced **two** C24 dispatch lines, which would
+have run the reviewer twice for one checkpoint; the count is now asserted at two sites (one per path).
