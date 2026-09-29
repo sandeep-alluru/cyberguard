@@ -170,6 +170,13 @@ def training_trajectory() -> str:
         "training. Exposure is reported as **measured**, from each run's own receipt — never as a projection —",
         "and the frozen interval is excluded from learning exposure while remaining in the cost accounting.",
         "",
+        "Two caveats on these measured figures, both raised by independent review (Muse, 2026-09-29) and recorded",
+        "rather than smoothed over. The **terminal LR** column is the LAST LOGGED learning rate: whether the final",
+        "optimiser step coincides with the last logging interval is not verified, so it bounds the terminal LR",
+        "rather than reproducing it exactly. And the **live loss-mask evidence is one sampled batch per host**",
+        "(273/598 supervised tokens, identical on both arms), which settles that the mask is assistant-only but",
+        "does not enumerate every batch.",
+        "",
         "| artefact | measured updates | measured wall clock | terminal LR (peak) | steps with nonzero grad_norm | receipt |",
         "|---|---|---|---|---|---|",
     ]

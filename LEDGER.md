@@ -1601,3 +1601,36 @@ equivalence, which #18 established no finite sample can establish) — I record 
 at that point the difference is the wording of an already-scoped claim, not the validity of the measurement, and
 the contract is not gated on this review. Six rounds have each found something real; the criterion is now grounded
 in the arithmetic's own optimum rather than in a threshold I chose, and the remaining room is tolerance semantics.
+
+## 2026-09-29 — MUSE CLEARED THE FROZEN ARMS (objective step 2's second half)
+
+`~/.local/bin/muse exec` was re-run on the frozen arms with the changes since Muse's 2026-09-28 pass. Muse re-derived
+the overlap **itself** and reproduced the original objection's numbers (300/300, 60/60, 99/100, 20/20), verified all
+five fresh sets are **0-overlap in both arms**, and closed its own objection:
+
+| item | severity | verdict |
+|---|---|---|
+| 2026-09-28 objection: frozen G-B/G-E/G-J (+G-F unanswerable) are training rows and cannot be capability PASSes | BLOCKER | **RESOLVED** — D12 repurposes them as retention/recall, the fresh sets are 0-overlap in both arms |
+
+> **FROZEN ARMS CLEARED 35e9166fa0d4**
+
+With this, **both clearances the objective names now exist**: Astra (Codex) cleared the chain on the registration
+amendment (#17: `CHAIN CLEARED a91da33296ab`) and Muse cleared the frozen arms. Receipt:
+`v2/data/mixture/muse-clearance.receipt.json`. Both are recorded **with the revisions they name** — neither is
+silently extended to later commits, and the receipt says so.
+
+### Muse's two minor findings, both fixed
+1. **SPEC §7 arithmetic**: the prose said the fresh sets total **1,580** prompts; the files contain **1,620**
+   (1,100 + 300 + 60 + 60 + 100) — verified independently. Fixed in the spec, with the composition written out so
+   it can be re-checked.
+2. **U3/§8 gave no inline pointer to the superseding §16 (Amendment A1)** — a reader of the registration rows would
+   not know they are superseded for the executed window. Supersession pointers now added to **U3, §6 and both §8
+   rows**; `plan-validate.py` still PASSES (spec sha now `4be59c51…`).
+
+### Muse's carried limitations are now in the verdict, not just in a log
+* the **live loss-mask evidence is one sampled batch per host** — stated in the verdict;
+* the reported **terminal LR is the last LOGGED learning rate**, with final-step correspondence unverified — now
+  stated as bounding the terminal LR rather than reproducing it exactly;
+* the final learning proof pends as the contract's stage-0d gate; the reviewer did not re-run the full audit (a
+  long-running job) and instead verified the PASS receipt is SHA-bound to the frozen arms and inspected its check
+  code.
