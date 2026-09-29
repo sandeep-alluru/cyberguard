@@ -133,8 +133,16 @@ MISSING=""
 for pat in $REQUIRED; do
   grep -qF -- "$pat" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $pat"
 done
+# ALL THREE SIDES, not just armA. These five are the FRESH disjoint instruments, and they are the evidence for the
+# two confirmatory claims: claim 1 is arm A against its BASE, and claim 2 is arm A against arm B. Requiring only
+# `battery-<b>-armA.json` left the base and B sides unrequired, so a manifest could be declared complete while the
+# very receipts the paired contrast is computed from were absent from it. Requiring all three cannot fail a run that
+# would otherwise succeed: stage 3 exits 5 if any battery fails on any side, so reaching the harvest already implies
+# all 42 receipts exist.
 for b in fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
-  grep -q "battery-$b-armA.json" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING evals/battery-$b-armA.json"
+  for a in armA armB base; do
+    grep -q "battery-$b-$a.json" "$DEST/MANIFEST.sha256" 2>/dev/null       || MISSING="$MISSING evals/battery-$b-$a.json"
+  done
 done
 if [ -n "$MISSING" ]; then
   echo "HARVEST-INCOMPLETE — the manifest lacks:$MISSING"

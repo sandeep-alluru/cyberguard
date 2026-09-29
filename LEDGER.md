@@ -2962,3 +2962,22 @@ All three are now required. It costs nothing to be strict here (the assembler wr
 fresh DEST the harvest exits 1 and its `HARVEST-INCOMPLETE` line lists `gate-inputs-armA.json`,
 `gate-inputs-armB.json` and `gate-inputs-base.json` as required-and-missing, i.e. the completeness check is now as
 broad as the collection it describes.
+
+## 2026-09-29 — the generalisation instruments were required for one arm only
+
+The same one-sidedness as the gate inputs, one level down: the harvest required
+`battery-fresh-g{A,B,E,F,J}-armA.json` and nothing else. Those five batteries are the **fresh disjoint instruments** —
+the ones D12 designates as carrying generalisation, and the evidence for the two confirmatory claims: claim 1 is
+**arm A against its base**, claim 2 is **arm A against arm B**. Requiring only the armA receipts left both the base
+and the B side of every generalisation instrument unrequired, so a manifest could be declared complete while the very
+receipts the paired contrast is computed from were absent from it — the exact failure the REQUIRED list exists to
+prevent.
+
+Now all **15** are required (5 instruments × `armA`/`armB`/`base`), and requiring them cannot fail a run that would
+otherwise succeed: stage 3 exits 5 if any battery fails on any side, so reaching the harvest already implies all 42
+receipts exist. Verified live against a fresh DEST — the `HARVEST-INCOMPLETE` line names all fifteen
+(`battery-fresh-gA-armA`, `…-armA`/`…-armB`/`…-base` through `fresh-gJ-base`), and the earlier count/list was
+checked rather than eyeballed.
+
+With this and the gate inputs, the harvest's completeness requirement is now symmetric across both arms **and** the
+shared base side, in both places where the scripts had applied symmetry to the adapters and not to the measurements.
