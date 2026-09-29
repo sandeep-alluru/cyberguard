@@ -99,6 +99,27 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
     # incomplete review was invisible in the record: M1's dispatch left a prompt on disk with no output, and
     # C8/C16/C24 had no review step at all (C24's is now dispatched by the timeline). Each brief now states its
     # own review status, including when the answer is "none" or "dispatched but no output".
+    # READ THE LEAKAGE COUNTS FROM THE RECEIPT. This sentence carried "14,162 findings against the battery reference
+    # set" as literal text while `v2/data/mixture/leak-scan-c24.receipt.json` is the artifact that measures it (and is
+    # re-run whenever the scan is). The same class as the mask numbers in the verdict: a measured quantity a reader
+    # would take as this window's, typed once and left. Now read out, with the reference-set size the prose left
+    # vague, and an honest fallback if the receipt cannot be read.
+    try:
+        _ls = json.load(open(os.path.join(ROOT, "v2/data/mixture/leak-scan-c24.receipt.json"), encoding="utf-8"))
+        _lf = (_ls.get("findings_by_reference_set") or {}).get("c24_batteries")
+        _lr = (_ls.get("references") or {}).get("c24_batteries")
+        if isinstance(_lf, int) and isinstance(_lr, int):
+            leak_finding = (f"the registered batteries are present in the training data (**{_lf:,}** findings against "
+                            f"a reference set of **{_lr:,}** battery strings), which is why they are reported as "
+                            f"recall and not as generalisation")
+        else:
+            leak_finding = ("the registered batteries are present in the training data (the receipt carries no "
+                            "countable findings for this brief), which is why they are reported as recall and not as "
+                            "generalisation")
+    except Exception:                                               # noqa: BLE001
+        leak_finding = ("the registered batteries are present in the training data (the leak-scan receipt could not "
+                        "be read for this brief, so its counts are not quoted), which is why they are reported as "
+                        "recall and not as generalisation")
     _rev_out = os.path.join(ROOT, f"research-tmp/reviews/checkpoint-{label}-review.md")
     _rev_prompt = os.path.join(ROOT, f"research-tmp/reviews/checkpoint-{label}-review-prompt.md")
     if os.path.exists(_rev_out) and os.path.getsize(_rev_out) > 0:
@@ -212,8 +233,7 @@ Projection to 24 h from the same file: **{exp.get('A', {}).get('projected_24h_ep
 * Known measurement limitations carried into the verdict: G-D extraction is declared zero-shot; G-I's
   normalised-F1 producer does not exist; MMLU-lite is declared UNMEASURED; the two confirmatory claims are
   scoped to the composed fresh G-A instrument with no inherited power figure (review F27).
-* Leakage instrument finding: the registered batteries are present in the training data (14,162 findings against
-  the battery reference set), which is why they are reported as recall and not as generalisation.
+* Leakage instrument finding: {leak_finding}.
 
 ## Cost to date
 

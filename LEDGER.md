@@ -3425,3 +3425,30 @@ explicitly no assistant-only-everywhere claim; no receipt ⇒ counts not quoted 
 
 Verified both ways, and the rehearsal passes with all nine mandatory sections present and no occurrence of the
 hardcoded number anywhere in the composed verdict.
+
+## 2026-09-29 — every checkpoint brief carried a typed leakage count
+
+A sweep for the class found by the mask-number defect — **measured quantities typed into deliverable prose** — turned
+up one more, and in the document that composes next. Every checkpoint brief said:
+
+> Leakage instrument finding: the registered batteries are present in the training data (14,162 findings against the
+> battery reference set), which is why they are reported as recall and not as generalisation.
+
+`14,162` is what `v2/data/mixture/leak-scan-c24.receipt.json` measures, and that receipt is re-written whenever the
+scan runs. A brief would have kept asserting the old figure after a re-scan, and the prose never even said how large
+the reference set was. It is now read out, with the set size:
+
+> … (**14,162** findings against a reference set of **4,840** battery strings) …
+
+Verified three ways rather than one, because "it renders correctly today" is what a hardcoded number also does: with
+the real receipt it prints 14,162 / 4,840; with no receipt it says *"the leak-scan receipt could not be read for this
+brief, so its counts are not quoted"*; and **with a receipt carrying deliberately different counts (7 findings over a
+99-string reference set) it printed 7 and 99** — which is the check that proves the sentence tracks the artifact
+rather than merely looking right with the current one.
+
+**Two other numeric literals were examined and deliberately left.** The verdict's G-A scope text carries
+`1,100`/`700`/`400`, but those are *registered* constants rather than measurements, and both are pinned by machinery:
+the registration check compares `n_req` against the live `GATES` registry field by field, and the 700/400 split is a
+property of a frozen probe set whose receipt hash every battery run verifies before it will execute. A number that
+cannot drift silently does not need to be read at runtime. The distinction is the point: measured values must be
+read, registered values are enforced.
