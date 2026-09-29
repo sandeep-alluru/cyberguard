@@ -147,6 +147,32 @@ def main() -> int:
         roles = json.load(open(f"{d}/evals/gate-inputs-armA.json")).get("instrument_roles") or {}
         if not roles.get("generalisation") or not roles.get("retention_recall"):
             fails.append(f"instrument roles not recorded: {roles}")
+        # Stage 6 composes VERDICT-v2.md from this report, and until now that stage was UNREHEARSED — which is
+        # how a fully decided chain can still end in a document that says nothing. Compose it here and assert
+        # that the sections the reviews made mandatory actually appear in the output.
+        vout = f"{d}/VERDICT-v2.md"
+        if run(d, ["python3", f"{ROOT}/v2/write_verdict_v2.py", "--report", f"{d}/report.json",
+                   "--evals", f"{d}/evals", "--out", vout]) != 0:
+            fails.append("the verdict composer exited non-zero on a DECIDED report — stage 6 would produce nothing")
+        elif not os.path.exists(vout):
+            fails.append("the verdict composer exited 0 but wrote no verdict")
+        else:
+            v_txt = open(vout, encoding="utf-8").read()
+            for need, why in (
+                ("Training trajectory and measured exposure (review #14)",
+                 "the measured-exposure section review #14 requires"),
+                ("one completed pass over the mixture followed by a",
+                 "review #14's required description of the training trajectory"),
+                ("one continuous schedule",
+                 "the explicit statement that this is not one continuous schedule"),
+                ("## Every gate", "the gate table"),
+            ):
+                if need not in v_txt:
+                    fails.append(f"the composed verdict is missing {why}: {need!r}")
+            if len(v_txt) < 2000:
+                fails.append(f"the composed verdict is suspiciously short ({len(v_txt)} bytes)")
+            else:
+                print(f"  verdict composed: {len(v_txt)} bytes, measured-exposure section present")
         if not any(isinstance(g.get("observed"), dict) and "retention_recall" in g["observed"] for g in rows):
             fails.append("no row carries the labelled retention/recall evidence")
         if not pq.startswith("compliant"):
