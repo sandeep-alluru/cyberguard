@@ -163,8 +163,15 @@ def merge_weight_check(merged, un):
                 # remainder is counted separately with its own absolute bound (bf16 subnormal spacing is 2**-133).
                 _tiny = 2.0 ** -126
                 _normal = _ai >= _tiny
-                _e = torch.floor(torch.log2(torch.clamp(_ai, min=_tiny)))
-                _ulp = torch.pow(torch.tensor(2.0, dtype=exp.dtype, device=exp.device), _e - 7.0)
+                # THE EXPONENT COMES FROM THE BIT PATTERN, NOT FROM log2. Review #22 found a DEFECT here: a
+                # deviation exceeding the stated 2-ULP bound could PASS, because float32 log2 of a value just
+                # below a power of two can round UP to that integer, so floor() returned an exponent one too
+                # large and the computed spacing was DOUBLE the true spacing - halving the measured error. The
+                # float32 exponent field is exact by construction, so read it: bits 30..23, biased by 127.
+                _bits = _ai.view(torch.int32)
+                _e = ((_bits >> 23) & 0xFF) - 127
+                # ldexp builds the spacing as an exact power of two; no logarithm is involved anywhere.
+                _ulp = torch.ldexp(torch.ones_like(_ai), (_e - 7).to(torch.int32))
                 _ulp_err = torch.where(_normal, d / _ulp, torch.zeros_like(d))
                 _nz = int((~_normal).sum())
                 _nz_max = float(d[~_normal].max()) if _nz else 0.0

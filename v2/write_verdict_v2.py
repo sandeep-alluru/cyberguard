@@ -119,7 +119,7 @@ def merge_equivalence_block() -> str:
             "",
             "**Coverage boundary (conceded, not implied).** This check visits the **LoRA-adapted linear matrices**",
             "only. Unadapted parameters — embeddings, normalisation layers, the output head — are **not covered**, so",
-            "it establishes the correctness of the merge on the adapted matrices, and not of the entire merged model.",
+            "it bounds the deviation on the adapted matrices to the stated tolerance, and says nothing about the rest of the merged model.",
         ])
     return "\n".join([
         "The evaluator scores the **merged** model, so the merge was checked against the unmerged path in three",

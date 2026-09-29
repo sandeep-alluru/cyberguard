@@ -207,6 +207,14 @@ for f in v2/data/probe-set-gA.jsonl v2/data/probe-set-gC.jsonl v2/data/probe-set
   [ -s "$f" ] && ok "probe set present: $f" || { bad "probe set missing: $f"; PRE=$((PRE+1)); }
 done
 [ -s "$FACTS" ] && ok "FACTS present (every number is cited from it)" || { bad "FACTS missing"; PRE=$((PRE+1)); }
+# The ULP spacing used by the merge check must be exact. Review #22 found a DEFECT where a float32 log2 estimate
+# doubled the computed spacing for values just below a power of two, halving the measured error and letting a
+# >2-ULP deviation pass. The exponent now comes from the exponent FIELD; this verifies that at contract time.
+if python3 v2/test_ulp_spacing.py > /tmp/ulp-spacing.log 2>&1; then
+  ok "ULP spacing is exact ($(grep -c . /tmp/ulp-spacing.log) lines of evidence)"
+else
+  bad "ULP spacing test FAILED - the merge check's denominator is not the true bf16 spacing"; PRE=$((PRE+1))
+fi
 # Review F15: the driver once returned each G-B probe's GOLD LABEL as the prompt (and one fixed Sigma rule for
 # all 60 G-E items), so those batteries would have scored the answer to nothing. This is machine-checked here
 # because the defect was invisible to inspection: it lived in the real prompt path, not in the stubs.

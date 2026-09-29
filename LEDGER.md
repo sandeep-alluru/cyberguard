@@ -1664,3 +1664,34 @@ would have been in. Added `CYBERGUARD_ARTIFACT_ROOT` (defaults to the repo), and
 
 Proven discriminating rather than merely present: with the receipts unreachable the rehearsal fails on exactly
 `the composed verdict reports training exposure as UNMEASURED …`; with them reachable it passes.
+
+## 2026-09-29 — review #22: a DEFECT in the measurement apparatus (float32 log2 doubled the ULP spacing)
+
+#22 classified its main finding as a **DEFECT**, not a limitation — a deviation exceeding the stated 2-ULP bound
+could PASS — and it was right:
+
+> "NOT SOUND: revision 08b78e0b31df accepts an adapted-matrix deviation exceeding its stated two-ULP bound
+> because float32 logarithm rounding can double the computed spacing."
+
+The exponent was `floor(log2(|x|))` computed in float32. For a value just **below** a power of two, float32
+`log2` can round **up** to that integer, so `floor` returned an exponent one too large and the spacing came out
+**twice** the truth — halving the measured error and letting a >2-ULP deviation pass.
+
+Fixed by removing the logarithm entirely: the exponent is now read from the float32 **exponent field**
+(bits 30..23, bias 127), which is exact by construction, and the spacing is built with `ldexp` as an exact power
+of two.
+
+`v2/test_ulp_spacing.py` demonstrates the defect class and guards the fix: across **720 magnitudes**, the
+bit-pattern exponent is correct **in every case**, while the `log2` route is **wrong for 236 of them** — exactly
+the "just below a power of two" cases — producing a spacing **2.0× too large**. The test is wired into the
+contract's preflight, so the apparatus is verified at run time rather than trusted.
+
+Re-measured with exact spacing: the **merge as shipped is unchanged at 0.5 ULP** (half an ULP, the optimum), but
+the **controls moved from 4.1e36 to 8.27e36** (10 % mis-scaling) and **4.1e37 to 8.27e37** (dropped contribution)
+— i.e. the old estimator had been *understating the defects* by up to 2×, which is precisely the direction that
+would have let one through.
+
+Also fixed: #22's second finding, that the verdict still said the check "establishes the correctness of the merge
+on the adapted matrices". It now says the check **bounds the deviation to the stated tolerance** on those
+matrices and says nothing about the rest of the model. (Rehearsal PASS; the stage-2 gate re-verified against the
+new control magnitudes.)
