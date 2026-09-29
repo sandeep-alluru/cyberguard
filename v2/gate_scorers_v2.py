@@ -189,7 +189,10 @@ def is_exact_abstention(text) -> bool:
     `NOT_SURELY` did too - codex measured `[False, True, True, True]`. Exact equality excludes any accompanying
     invention **by construction**, which is what the prompt's "reply with exactly: NOT_SURE" asks for.
     """
-    return re.sub(r"[^A-Za-z_]+", " ", str(text or "")).strip().upper() == ABSTENTION_MARKER
+    # Strip only SURROUNDING whitespace and terminal punctuation. The previous version substituted every
+    # non-letter for a space, so 'NOT_SURE 123' normalised to 'NOT_SURE' and passed (codex pass nine). No
+    # substitution: any interior extra character makes the comparison fail, which is the point.
+    return (str(text or "").strip().strip(" .,!?;:\"'()[]{}*\n\t").upper() == ABSTENTION_MARKER)
 
 
 def abstained(text) -> bool:
@@ -404,6 +407,8 @@ def selftest() -> int:
         ("NOT_SURE", True),
         ("  not_sure.  ", True),
         ("NOT_SURELY", False),
+        ("NOT_SURE 123", False),          # codex pass nine: digit-stripping made this pass as exact
+        ("NOT_SURE\n", True),
         ("", False),
     ):
         _got = abstained(_resp)

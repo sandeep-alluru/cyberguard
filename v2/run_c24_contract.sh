@@ -178,7 +178,23 @@ for arm in ("armA", "armB"):
     if not os.path.exists(eq) or os.path.getsize(eq) == 0:
         sys.exit(f"FATAL: {eq} missing or empty — merge equivalence was not recorded")
     e = json.load(open(eq))
-    print(f"  {arm}: held_out_rows={rows}  merge-equiv keys={sorted(e)[:5]}")
+    # F19 remainder: recording a merge-equivalence report is not ACCEPTING it. Codex demonstrated that the
+    # report builder wrote loss difference=100 and 999 mask mismatches without rejecting them, so the numbers
+    # are enforced here: a merged adapter that does not behave like the unmerged one is not the shipped artifact.
+    need = ("loss_delta", "gen_exact_mismatches")
+    missing = [k for k in need if k not in e]
+    if missing:
+        sys.exit(f"FATAL: {eq} lacks {missing}; merge equivalence is not measurable from it")
+    if float(e["loss_delta"]) > 0.02:
+        sys.exit(f"FATAL: {arm} merged-vs-unmerged loss differs by {e['loss_delta']} (> 0.02)")
+    if int(e["gen_exact_mismatches"]) != 0:
+        sys.exit(f"FATAL: {arm} merged-vs-unmerged generations differ on "
+                 f"{e['gen_exact_mismatches']} of {e.get('prompts_gen')} prompts")
+    f1 = e.get("gen_self_f1_min")
+    if f1 is not None and float(f1) < 0.99:
+        sys.exit(f"FATAL: {arm} merged-vs-unmerged token-F1 floor {f1} < 0.99")
+    print(f"  {arm}: held_out_rows={rows}  merge-equiv ACCEPTED (loss_delta={e['loss_delta']}, "
+          f"gen_mismatches={e['gen_exact_mismatches']}, self_f1_min={f1})")
 PY
 
 # ---------------------------------------------------------------- stage 3: batteries, split across machines
