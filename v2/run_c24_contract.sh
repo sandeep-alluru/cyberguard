@@ -154,10 +154,11 @@ for arm in ("armA", "armB"):
 PY
 
 # ---------------------------------------------------------------- stage 3: batteries, split across machines
-step 3 "batteries (split: arm A on spark-40ee, arm B on spark-8cf2; shared base once)"
-# base side is shared and run once, then copied, because both arms are paired against the same base
+step 3 "batteries (split: arm A on spark-40ee, arm B on spark-8cf2; base once, on spark-40ee)"
+# every leg of this stage runs on a HOST: the adapters, the base-model weights and the bf16 GPUs are all there
+# and none of them are here. The base side is shared, so it runs once and its receipts are copied back.
 for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
-  echo "  base   : python3 v2/run_battery.py --battery $b --arm base"
+  echo "  base@40ee : ssh spark-40ee: python3 v2/run_battery.py --battery $b --arm base --out evals"
 done
 for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
   echo "  armA@40ee : python3 v2/run_battery.py --battery $b --arm armA --adapter adapters/cyberguard-lora-v2-armA"
@@ -180,12 +181,22 @@ done
       || { bad "could not copy $ARM battery receipts back"; exit 5; }
     ok "$ARM batteries complete and copied back"
   done
-  # the shared base side: one run, copied to both hosts' recipe (kept local for assembly)
+  # the shared base side: one run, ON A HOST, then the receipts are copied back. It used to run locally, which
+  # cannot work for the same reason stages 1-2 moved: this machine has no base-model weights, no peft and no
+  # bf16-capable GPU. Base is the reference for G-A/G-A2/G-G/G-J, so running it locally would have failed every
+  # one of those gates after the arm batteries had already spent their GPU hours.
+  H=$S4
+  timeout 300 rsync -a v2/data/probe-set-*.jsonl v2/run_battery.py v2/gate_scorers_v2.py \
+    "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
+    || { bad "rsync of battery inputs to $H failed"; exit 5; }
   for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
-    python3 v2/run_battery.py --battery "$b" --arm base > "logs/battery-$b-base.log" 2>&1 \
-      || { bad "base battery $b failed"; exit 5; }
+    timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
+      \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
+      > "logs/battery-$b-base.log" 2>&1 || { bad "base battery $b failed on $H"; exit 5; }
   done
-  ok "base batteries complete"
+  timeout 600 rsync -a "$H:~/cyberguard/evals/battery-*-base.json" evals/ 2>/dev/null \
+    || { bad "could not copy the base battery receipts back"; exit 5; }
+  ok "base batteries complete on $H and copied back"
 }
 
 # ---------------------------------------------------------------- stage 4: assemble
