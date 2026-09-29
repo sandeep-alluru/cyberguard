@@ -3551,3 +3551,23 @@ My first attempt at that check was wrong, in the by-now familiar way: it derived
 this hour. Switched to `ps -o etimes=` and the arithmetic is trivial and exact. Sixth time this window that a
 checker of mine, not the artifact, was what looked wrong — and the reason I re-derive every such number from a second
 source before recording it.
+
+## 2026-09-29 — the pre-registration's two claims, and whether its spec pin can actually be audited
+
+The registered rules are the one thing in this window that cannot be re-derived after the fact: SPEC §7 clause 2 fixes
+the two confirmatory claims' bars and the gate table fixes each gate's n and threshold, and a verdict decided on a
+different rule is not the same verdict. `check_registration_rules.py` verifies the **code** against the receipt — the
+gate registry field by field, the claim literals textually — but nothing in that check reads the *spec*, so the
+receipt's own declarations were compared with the document by hand.
+
+* **Multiplicity matches.** The receipt says "two separate marginal claims, each with its own 95 % interval,
+  adjudicated independently, no joint correction (declared in SPEC 7 clause 2)"; SPEC §7 says the two are *separate
+  marginal claims*, each with its own 95 % interval, each adjudicated independently, with **no joint correction** —
+  they answer different questions. Same statement, same scope, no drift.
+* **And the pin is real, not nominal.** The receipt records `spec_sha256_at_freeze = 75a909355bb9dc91…`; the spec's
+  *current* hash is `ee037a0938a3036a…` (it has been amended since — §16, §17, and today's corrections), which is what
+  "at freeze" means. The question worth asking is whether the frozen text still exists to be diffed against, and it
+  does: **commit `107b408` contains a revision of `docs/SPEC-V2.md` whose sha256 is exactly the recorded one** — the
+  same commit the equivalence-clearance receipt names as `head_after_this_receipt`, so the two receipts agree about
+  the revision they were taken against. A reviewer can therefore check the registered rules against the document as
+  it stood, rather than against its own description of itself.
