@@ -2667,3 +2667,25 @@ claim rows, the composite co-secondary row and the safety sentence; six declared
 §7 gates unmeasurable by construction: G-A severity, G-D extraction, G-E detection and utility, G-H harm, G-I escape
 artifact). A gate silently missing from the layer would have produced a verdict that looked complete while an
 element of the contract had no row at all.
+
+## 2026-09-29 — "checksum-verified" was true for one half of the harvest and a claim for the other
+
+The deliverable is a *checksum-verified harvest*, so the verification itself was read rather than assumed. The
+remote path is genuine: `pull()` asks the **host** for `sha256sum`, hashes the local copy, and writes the manifest
+line **only when they match**, failing otherwise — a real cross-machine check.
+
+The local path was not. `collect_local()` hashed the source, ran `cp`, and wrote the manifest line regardless of
+what the copy contained — its own message admitted as much ("sha verified against itself"). A truncated or failed
+`cp` would therefore have put the **source's** hash into the manifest beside a path pointing at a *different* file:
+an entry that is wrong about the file it names, which is the one thing a checksum-verified harvest must not contain
+— and the same shape as F17, where "a hash is recorded" was mistaken for "a hash is checked". Both local paths
+(`collect_local` and the verdict copy) now re-hash the **deposited** copy and require equality with the source
+before writing anything, exactly as the remote case already did.
+
+Verified by running the real harvest into an isolated DEST: **15** local entries written, **0** failures, and every
+one of the 15 re-hashed from the deposited file and compared against the manifest line — **no discrepancies**. The
+same run exercised the fail-closed path by construction, since the contract has not run: it exited **1** with
+`HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json VERDICT-v2.md
+evals/battery-fresh-g{A,B,E,F,J}-armA.json` and the note "22 files verified; the missing ones mean the contract did
+not finish" — naming precisely the artifacts that do not exist yet, which is what the contract's stage 7 will read
+at 12:10. The real DEST was confirmed untouched afterwards.
