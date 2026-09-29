@@ -186,9 +186,15 @@ done
   # the adapters and the GPU live on the hosts, so the arm batteries run THERE and the receipts come back
   for spec in "$S4 armA" "$S8 armB"; do set -- $spec; H=$1; ARM=$2
     echo "  --- $ARM on $H ---"
-    timeout 300 rsync -a v2/data/probe-set-*.jsonl v2/run_battery.py v2/gate_scorers_v2.py \
+    # Three separate destinations, because a single rsync into v2/ FLATTENS the data files: the sets landed
+    # in v2/probe-set-*.jsonl while the driver looks for v2/data/probe-set-*.jsonl (reproduced on both hosts:
+    # FileNotFoundError on the first battery). Receipts travel with the sets, because load_probes refuses to run
+    # a frozen set without its receipt.
+    timeout 300 rsync -a -e "ssh -o BatchMode=yes" v2/data/probe-set-*.jsonl v2/data/probe-set-*.receipt.json \
+      "$H:~/cyberguard/v2/data/" 2>/dev/null || { bad "rsync of probe sets+receipts to $H failed"; exit 5; }
+    timeout 300 rsync -a -e "ssh -o BatchMode=yes" v2/run_battery.py v2/gate_scorers_v2.py \
       "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
-      || { bad "rsync of battery inputs to $H failed"; exit 5; }
+      || { bad "rsync of the driver to $H failed"; exit 5; }
     for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
       timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
         \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
@@ -204,9 +210,13 @@ done
   # bf16-capable GPU. Base is the reference for G-A/G-A2/G-G/G-J, so running it locally would have failed every
   # one of those gates after the arm batteries had already spent their GPU hours.
   H=$S4
-  timeout 300 rsync -a v2/data/probe-set-*.jsonl v2/run_battery.py v2/gate_scorers_v2.py \
+  # BOTH the sets and their receipts: load_probes refuses to run a frozen set without its receipt, so
+    # syncing only the .jsonl would have aborted the very first battery with "FATAL: no receipt".
+    timeout 300 rsync -a -e "ssh -o BatchMode=yes" v2/data/probe-set-*.jsonl v2/data/probe-set-*.receipt.json \
+    "$H:~/cyberguard/v2/data/" 2>/dev/null || { bad "rsync of probe sets+receipts to $H failed"; exit 5; }
+  timeout 300 rsync -a -e "ssh -o BatchMode=yes" v2/run_battery.py v2/gate_scorers_v2.py \
     "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
-    || { bad "rsync of battery inputs to $H failed"; exit 5; }
+    || { bad "rsync of the driver to $H failed"; exit 5; }
   for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
     timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
       \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
