@@ -38,7 +38,7 @@ for f in train-cyberguard-lora-v2-armA.log train-cyberguard-lora-v2-armB.log eva
 done
 # battery receipts live on the host that ran them (arm A on 40ee, arm B on 8cf2); the combined base side
 for pair in "$H1" "$H2"; do
-  for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
+  for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
     for a in armA armB base; do
       pull "$pair" "evals/battery-$b-$a.json" evals || true
     done
@@ -56,4 +56,20 @@ for rel in evals/gate-inputs-armA.json evals/gate-inputs-base.json evals/gate-in
     echo "  MISS $rel (local)"
   fi
 done
-echo "HARVEST-COMPLETE  $(wc -l < "$DEST/MANIFEST.sha256") files verified"
+# Fail closed on the artifacts the verdict actually needs: "HARVEST-COMPLETE" printed over a manifest that is
+# missing the gate report or the fresh generalisation receipts would be a success message for a failed run.
+REQUIRED="v2/gate-report-v2.json evals/gate-inputs-armA.json docs/VERDICT-v2.md"
+MISSING=""
+for rel in $REQUIRED; do
+  base=$(basename "$rel")
+  grep -q "  evals/$base" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $rel"
+done
+for b in fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
+  grep -q "battery-$b-armA.json" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING evals/battery-$b-armA.json"
+done
+if [ -n "$MISSING" ]; then
+  echo "HARVEST-INCOMPLETE — the manifest lacks:$MISSING"
+  echo "  ($(wc -l < "$DEST/MANIFEST.sha256") files verified; the missing ones mean the contract did not finish)"
+  exit 1
+fi
+echo "HARVEST-COMPLETE  $(wc -l < "$DEST/MANIFEST.sha256") files verified, including every generalisation instrument"
