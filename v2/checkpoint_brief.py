@@ -79,9 +79,17 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
         review_line = (f"present — `research-tmp/reviews/checkpoint-{label}-review.md`, closing line: "
                        f"{_last[:160]}")
     elif os.path.exists(_rev_prompt):
-        review_line = (f"**DISPATCHED BUT NO OUTPUT** (`checkpoint-{label}-review-prompt.md` exists, "
-                       f"`checkpoint-{label}-review.md` does not) — the review did not complete, and the cadence "
-                       f"requires one per checkpoint")
+        # A prompt on disk does NOT prove a dispatch happened: `checkpoint_review.sh <label> --dry-run` writes the
+        # prompt and stops. M1 was in exactly that state, and an earlier version of this line asserted
+        # "DISPATCHED BUT NO OUTPUT" — a claim about a dispatch that the evidence (no `-review.log`, which a real
+        # dispatch always creates) contradicts. Both causes are named instead of one being assumed.
+        _log = os.path.join(ROOT, f"research-tmp/reviews/checkpoint-{label}-review.log")
+        _how = ("a dispatch LOG exists, so the review was dispatched but produced no output"
+                if os.path.exists(_log) else
+                "no dispatch log exists, so this prompt may have come from a --dry-run")
+        review_line = (f"**NO REVIEW OUTPUT** for `{label}` (`checkpoint-{label}-review-prompt.md` exists, "
+                       f"`checkpoint-{label}-review.md` does not; {_how}) — the cadence requires a review and this "
+                       f"checkpoint has none")
     else:
         review_line = (f"**NO REVIEW ON DISK for `{label}`** in `research-tmp/reviews/` — the cadence requires "
                        f"an Astra review at every checkpoint")

@@ -2162,3 +2162,25 @@ The honest position on the earlier checkpoints: their state is frozen and a revi
 *current* state, not C8's — so labelling one "the C8 review" would be false. What the chain reviews (#1–#25, on
 the spec, the design and the evaluation contract) covered in that period was the artifact under change, not the
 metrics snapshot; this entry records the difference rather than papering over it.
+
+## 2026-09-29 — a claim I made in the previous entry was wrong, and the evidence was one file away
+
+The previous entry said "**M1's dispatch left a prompt on disk with no output**". Checking that claim instead of
+carrying it forward: a real dispatch runs `nohup codex exec … > checkpoint-<label>-review.log`, so it **always**
+leaves a log. `research-tmp/reviews/checkpoint-M1-review.log` **does not exist** — so M1 was **never dispatched**.
+
+What actually happened is that I ran `checkpoint_review.sh M1 **--dry-run**` in an earlier round to test the prompt
+construction, and that mode writes the prompt and stops. So the state I described as a failed dispatch was my own
+test artefact, and the brief's line for it asserted `DISPATCHED BUT NO OUTPUT` — a claim about an event the
+evidence contradicts.
+
+Corrected in two places:
+* the brief's wording no longer assumes a dispatch: a prompt without output now reads **"NO REVIEW OUTPUT for
+  `<label>` … no dispatch log exists, so this prompt may have come from a `--dry-run`"**, and it distinguishes the
+  two causes by the presence of the log — both states exercised against real and fixture artifacts;
+* the record above, which now says what the files show rather than what I assumed: **M1 has no review**, C8 and C16
+  have none, and the only reviews that actually ran for a checkpoint were the mid-window dispatches (M2's, whose
+  log and output both exist) and the C24 one now armed.
+
+This is the second time in this session that a "finding" dissolved when tested, and the first where the wrong
+claim was mine rather than the code's. Both are recorded for the same reason.
