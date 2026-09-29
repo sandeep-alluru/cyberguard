@@ -3631,3 +3631,24 @@ own outputs are all still tracked, and the working copies of the untracked bulk 
 This is hygiene, not correctness — the contract never touches git, and the disk has 77 GB free — but the failure mode
 is the same shape as the rest of this window: a rule stated in one place (the ignore file's comment) and not applied
 where it mattered.
+
+## 2026-09-29 — the cadence's published briefs checked against the snapshots they cite
+
+The briefs are the CEO-facing record, and each one says its numbers come from `checkpoint_metrics.sh <label>` — so the
+claim was checked rather than assumed, for the one checkpoint that produced two of them:
+
+```
+brief (06:14)  steps 1596 | 1513   s/step 7.98 | 7.57   samples 25536 | 24208
+snapshot M2    steps 1596 | 1513   s/step 7.98 | 7.57   samples 25536 | 24208   -> identical
+brief (05:50)  steps 1409 | 1339                                                 -> its OWN snapshot's numbers
+```
+
+Both are right, and they are right in different ways: the 06:14 brief matches the snapshot that exists, while the
+05:50 brief carries the numbers of the snapshot it was written from — which no longer exists, because the duplicate
+fire **overwrote `M2-metrics.json`**. That is precisely the incident the timeline's grace-skip was built for: a restart
+more than five minutes past a checkpoint now skips it, so it "cannot overwrite its metrics snapshot or duplicate its
+brief" (the words the timeline logs). The earlier brief is why the loss is recoverable at all — the numbers survived
+in the document even though the snapshot they came from did not.
+
+Nothing to fix here; what this round establishes is that the record's numbers are traceable to the artifacts the
+record says they come from, which is the property the whole window has been about.
