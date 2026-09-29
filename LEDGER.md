@@ -3789,3 +3789,22 @@ rather than asserted:
 Five rounds of budget remain and M3 fires in about fourteen minutes at the current clock, so the checkpoint and the
 contract will most likely run after this session's rounds end — which is why the guard, the lock discipline, the
 self-sufficient contract and the handover exist.
+
+## 2026-09-29 — my verification of the untracking was wrong; the untracking itself was right
+
+Checking last round's repo-hygiene fix, I grepped the tracked files for `_rebuild|review6_changes` and got **9 hits**,
+which read as a partial fix. It was not: the nine are the rebuild rounds' **scripts and logs** (546 B – 1.8 KB —
+`review5_rebuild.py`, `review6_rebuild.log`, …), which are exactly the provenance worth keeping, and my own
+`.gitignore` pattern ends in a slash (`research-tmp/reviews/*_rebuild/`) so it matches directories only and never
+touched them. Verified properly:
+
+```
+research-tmp/reviews/review{5,6,7,8,10}_rebuild/   -> 0 tracked files each
+on disk                                            -> 2.2 GB (unchanged; the fix kept the files)
+ignored by git                                     -> reported as ignored, not deleted
+tracked under research-tmp/reviews/                -> 408 files, 225 of them review outputs and logs
+```
+
+So the fix did what it claimed and my check was the tenth instrument fault of this window — a name-matching pattern
+that could not distinguish a 1.8 KB log from a 194 MB JSONL. The record keeps both facts: the bulk is out of git and
+on disk, and the scripts that produced it are still tracked.
