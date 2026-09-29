@@ -3742,3 +3742,23 @@ which omits **exit 3**, the code used by *both* stage 00 (trainers still running
 130/143 signals). Extracted from the script with comments stripped, the table is now exact — and one apparent `exit 9`
 in stage 8 turned out to be prose *about* exit 9 inside a comment, the same instrument fault that has recurred all
 window.
+
+## 2026-09-29 08:36 — the supervision chain checked against the deliverables it watches for
+
+The guard's terminal condition and its watch paths had been tested with *overrides*, not with the defaults it is
+actually running under — so the defaults were read and matched against what the contract writes:
+
+```
+guard defaults:  LOCK    = v2/.c24-timeline.lock
+                 VERDICT = docs/VERDICT-v2.md
+                 GATREP  = v2/gate-report-v2.json
+                 CTLOCK  = v2/.c24-contract.lock
+contract writes: gates_v2.py --out v2/gate-report-v2.json   (stage 5)
+                 stage 6 composes docs/VERDICT-v2.md         (and stage 8 composes the brief)
+running guard:   pid 463554, elapsed 50:14, defaults (no overrides on its command line)
+```
+
+So the chain is: the guard re-launches the timeline whenever no live holder owns the lock, and stops re-launching once
+the verdict and gate report exist with no contract still running — which is exactly the pair stage 5 and stage 6 write.
+Between them they mean the contract completes even if this session ends first, and the guard stops rather than
+"recovering" a finished job.
