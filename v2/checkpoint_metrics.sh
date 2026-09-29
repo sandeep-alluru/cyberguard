@@ -31,6 +31,48 @@ collect() {   # host, arm
   " 2>/dev/null | tail -1
 }
 
+probe_alive() {   # host -> 1 if a trainer process is live there, else 0
+  timeout 60 ssh -o BatchMode=yes "$1" '
+    alive=0
+    for p in /proc/[0-9]*; do
+      e=$(readlink -f $p/exe 2>/dev/null) || continue
+      case "$e" in *python*) ;; *) continue;; esac
+      while IFS= read -r -d "" a; do case "$a" in */train_cyberguard.py) alive=1;; esac; done < $p/cmdline 2>/dev/null
+    done
+    echo $alive
+  ' 2>/dev/null | tail -1
+}
+
+# C24 IS THE END OF THE WINDOW, so its snapshot must be taken AFTER the trainers stop. The trainer enforces its own
+# box (MAX_MINUTES=570 via a wall-clock TimeBox callback), which ends the run ~12:03, while the timeline's C24 step
+# fires at 11:55 — so this snapshot would otherwise record a MOMENT INSIDE the run under a "the window closes"
+# heading, reporting a step count ~60 steps short of the final one and disagreeing with the receipt-based numbers
+# the verdict quotes. Polling here makes the snapshot the real end of the window. BOUNDED, and its timeout only
+# warns: a trainer that never exits must not stall the timeline (the contract's stage 00 waits separately, and the
+# contract is unconditional).
+if [ "$LABEL" = "C24" ]; then
+  WAIT_MIN="${C24_WAIT_MIN:-20}"
+  _dl=$(( $(date +%s) + WAIT_MIN * 60 ))
+  while :; do
+    _a=$(probe_alive "$S4"); _b=$(probe_alive "$S8")
+    # "0" is EXITED and "" is UNREACHABLE, and they must not be conflated: an unreachable host returns an empty
+    # string, so a `!= 1` test would read a dead ssh connection as "the trainer has exited" and stop the wait with
+    # a claim the evidence does not support. Only an explicit 0 on both hosts closes the window.
+    _say() { case "$1" in 1) echo running ;; 0) echo exited ;; *) echo UNREACHABLE ;; esac; }
+    echo "  [$(date +%T)] waiting for the window to close: armA=$(_say "$_a") armB=$(_say "$_b") (bounded ${WAIT_MIN} min)"
+    if [ "$_a" = 0 ] && [ "$_b" = 0 ]; then
+      echo "  both trainers have exited (both hosts reported 0) — this C24 snapshot IS the end of the window"
+      break
+    fi
+    if [ "$(date +%s)" -ge "$_dl" ]; then
+      echo "  WARNING: ${WAIT_MIN} min elapsed with a trainer still running — snapshotting anyway (a live trainer is"
+      echo "  reported in the table below, and the brief states the snapshot time, so the record stays honest)"
+      break
+    fi
+    sleep 30 & wait $!   # interruptible, so a stop signal is not deferred until the poll ends
+  done
+fi
+
 A=$(collect "$S4" A); B=$(collect "$S8" B)
 
 # The plan requires the Flash-Next serving stack EVICTED for the whole window (it is Restart=always and enabled,
