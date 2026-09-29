@@ -45,6 +45,17 @@ for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
   ok "$arm adapter pulled — adapter_model.safetensors sha256 ${sha:0:16}…"
 done
 
+# ---------------------------------------------------------------- stage 0c: live loss-mask proof
+# The trainer's MASK_PROOF mode asserts assistant-only supervision on a real collated batch and exits before any
+# optimizer step. It was NEVER RUN for this window (zero "MASK PROOF" lines in either host's logs), so no captured
+# evidence existed that the live loss mask was correct - an independent review's objection. It needs the GPU, so
+# it runs HERE: after the trainers stop and before the evaluation takes the GPU.
+step 0c "live loss-mask proof on both hosts (needs the GPU, so it runs after training stops)"
+echo "  bash v2/verify_training_mask.sh   (MASK_PROOF=1; exits before any optimizer step)"
+[ "$DRY" = 1 ] || { bash v2/verify_training_mask.sh > logs/mask-proof.log 2>&1 \
+  && ok "MASK PROOF: PASS on both hosts (receipt v2/data/mixture/mask-proof.receipt.json)" \
+  || { bad "mask proof failed or is missing - see logs/mask-proof.log"; exit 2; } }
+
 # ---------------------------------------------------------------- preflight
 step 0 "preflight"
 PRE=0
