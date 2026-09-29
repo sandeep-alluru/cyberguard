@@ -1529,3 +1529,40 @@ the separation that justifies it.
 Verified seven ways: as-measured PASSES; **#20's sparse corruption FAILS** (both with its 9.5e-7 fraction and with
 the fraction reported as 0, proving the max is what catches it); all-NaN FAILS; a dense 10 % mis-scaling FAILS;
 non-separating controls FAIL; and non-exhaustive coverage FAILS.
+
+## 2026-09-29 — measured battery throughput: the per-battery ceiling would have KILLED the big batteries
+
+Pre-flighting stage 3 (the most expensive stage) by timing a real battery rather than trusting the plan's basis:
+
+```
+run_battery.py --battery fresh-gJ --arm armB    (100 probes)
+WALL_SECONDS=925
+```
+
+**9.25 s per probe**, measured while training was contending for the GPU. Extrapolated:
+
+| battery | probes | measured rate | contention-free estimate (3 s/probe) |
+|---|---|---|---|
+| `gG-gsm8k` | 1,200 | **185 min** | 60 min |
+| `gA` / `fresh-gA` | 1,100 | **170 min** | 55 min |
+| one full side (all 14 batteries) | 4,840 | **12.4 h** | 4.0 h |
+
+The per-battery ceiling was **5400 s = 90 min**. The two largest batteries would therefore have been **killed
+mid-run**, stage 3 would have exited 5, and the contract would have produced **no verdict** — after the whole
+training window. This is the same shape as the other late failures: nothing in the plan's arithmetic flagged it,
+and only a measurement did.
+
+Fixed: stage 1's ceiling 25200 s → **43200 s (12 h)**; both per-battery ceilings 5400 s → **21600 s (6 h)**, i.e.
+twice the worst *measured* battery and still bounded, so a genuine hang is still caught.
+
+**Critical path, stated rather than assumed.** With contention removed, one side ≈ 4.0 h. The contract runs armA
+and base on `spark-40ee` (two sides ≈ 8 h) and armB on `spark-8cf2` (one side ≈ 4 h), so stage 3 ≈ 8 h and the
+whole contract ≈ 11 h (stage 1 ≈ 2 h + stage 3 ≈ 8 h + assembly/verdict/harvest ≈ 0.5 h), i.e. 12:10 → ≈23:00.
+Splitting the base side across both hosts would cut this to ≈6 h, and I decided **against** it: it would restructure
+the most expensive stage for a 2-hour gain with no deadline at stake, and an untested parallel-branch bug there
+costs the entire verdict. Recorded as a considered option, not an oversight.
+
+**Budget note, for the verdict.** The owner's *training* authorization (24 h × 2 = 48 GPU-h) is untouched at
+28.06 spent / 47.06 worst case. The evaluation is a separate, planned cost in the plan of record
+(`docs/SPEC-V2.md`: 28,808 evaluation generations ≈ 8.01 h split across both machines); the measured throughput is
+consistent with that budget rather than in addition to it.

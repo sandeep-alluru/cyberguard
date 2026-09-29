@@ -378,3 +378,8 @@
 [2026-09-29 04:24:44] cycle 144 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
 [2026-09-29 04:29:45] cycle 145 | hashes: MATCH | leak_scan: LEAK (full) | audit: PASS (full)
     ALERT LEAK: unified leak scan found a hit
+[2026-09-29 04:45:11] cycle 146 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+    RESOLVED LEAK (condition no longer holds)
+[2026-09-29 04:50:12] cycle 147 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+[2026-09-29 04:55:13] cycle 148 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+[2026-09-29 05:00:14] cycle 149 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)

@@ -320,7 +320,10 @@ for spec in "$S4 armA" "$S8 armB"; do set -- $spec; host=$1; arm=$2
   RUN="cyberguard-lora-v2-$arm"
   echo "  ssh $host: cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh"
   [ "$DRY" = 1 ] && continue
-  ( timeout 25200 ssh -o BatchMode=yes "$host" "cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh" \
+  # 12 h, not 7. Measured 2026-09-29: a 100-probe battery took 925 s WITH training contending for the GPU;
+  # merge_equiv (200 loss rows, 100 generations, 100 teacher-forced rows) plus eval_cyberguard (500 generations
+  # per model) is hours of GPU work, and a timeout here discards the whole window's evaluation.
+  ( timeout 43200 ssh -o BatchMode=yes "$host" "cd ~/cyberguard && N_GEN=500 RUN_NAME=$RUN bash run-eval-chain.sh" \
       > "logs/eval-chain-$arm.log" 2>&1 ) &
   PIDS+=($!)
 done
@@ -524,7 +527,7 @@ done
       "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
       || { bad "rsync of the driver to $H failed"; exit 5; }
     for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
-      timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
+      timeout 21600 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
         \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
         --adapter adapters/cyberguard-lora-v2-$ARM --out evals" > "logs/battery-$b-$ARM.log" 2>&1 \
         || { bad "$ARM battery $b failed on $H"; exit 5; }
@@ -546,7 +549,7 @@ done
     "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
     || { bad "rsync of the driver to $H failed"; exit 5; }
   for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
-    timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
+    timeout 21600 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
       \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
       > "logs/battery-$b-base.log" 2>&1 || { bad "base battery $b failed on $H"; exit 5; }
   done
