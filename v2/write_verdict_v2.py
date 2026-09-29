@@ -260,6 +260,7 @@ def training_trajectory(evals_dir: str = "evals") -> str:
         "|---|---|---|---|---|---|",
     ]
     missing: list[str] = []
+    _steps_by_arm: dict[str, int] = {}
     for arm in ("armA", "armB"):
         r, p = _trainer_receipt(arm)
         if r is None:
@@ -278,11 +279,30 @@ def training_trajectory(evals_dir: str = "evals") -> str:
         # peak as if it were the terminal rate would misstate where in the schedule the artefact was saved.
         lr_s = f"{lrs[-1]:.3e} (peak {max(lrs):.3e})" if lrs else "?"
         up_s = str(max(steps)) if steps else "?"
+        if steps:
+            _steps_by_arm[arm] = max(steps)
         out.append(f"| `{arm}` | {up_s} | {wall_s} | {lr_s} | {nonzero} of {len(gns)} | `{p}` |")
     if missing:
         out += ["", f"**Exposure for {', '.join('`' + m + '`' for m in missing)} is UNMEASURED**: the trainer's",
                 "receipt was not harvested, so no measured update count or terminal LR exists for that artefact.",
                 "Per review #14 this is reported as a gap, not filled with a projection."]
+    # M2's Caution, made explicit in the artifact. The M2 checkpoint review (Astra, 2026-09-29) recorded that "B's
+    # reported step rate is 5.42% faster, but A leads by 83 steps ... exposure is unequal, but material impact on the
+    # paired contrast is unestablished by these numbers". A reader can see the inequality in the table above, but the
+    # table does not say what it means for the A-vs-B claim, and a contrast between two artifacts with different
+    # update counts is exactly the kind of thing a verdict must not leave to inference. Stated with the measured
+    # numbers when both receipts are present.
+    if len(_steps_by_arm) == 2:
+        _a, _b = _steps_by_arm["armA"], _steps_by_arm["armB"]
+        _d = abs(_a - _b)
+        out += ["",
+                "**Third caveat, raised by the M2 checkpoint review (Astra, 2026-09-29): the two arms' measured "
+                "exposure is not equal.** ArmA stopped at "
+                f"**{_a}** measured updates and armB at **{_b}**, a difference of **{_d}** "
+                f"({_d / max(_a, _b) * 100:.1f} %). The confirmatory A-vs-B claim therefore compares artefacts with "
+                "different update counts, and the reviewer's finding was that the material impact on the paired "
+                "contrast is **unestablished by the exposure numbers alone**. It is stated here rather than smoothed "
+                "over, and it is a property of the two runs as they were time-boxed, not of the evaluation."]
     if inc:
         out += ["",
                 "The frozen resume of 2026-09-28/29 is recorded in `v2/data/mixture/FACTS.json`",

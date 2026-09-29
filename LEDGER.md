@@ -2841,3 +2841,26 @@ The composed body also carried the two lines added earlier this window: the snap
 unit"). All scratch artifacts were removed and the review directory confirmed free of them.
 
 So the next scheduled event has been exercised as a unit, not just as four tested parts.
+
+## 2026-09-29 — M2's Caution spent two checkpoints as a table
+
+The cadence requires an Astra review at every checkpoint **with findings fixed before proceeding**, so the M2 review
+was read in full rather than skimmed for a verdict. It closed "no training-validity objection" and raised no blocking
+finding — but its first row is a **Caution**: *"B's reported step rate is 5.42 % faster, but A leads by 83 steps /
+1,328 samples … exposure is unequal, but material impact on the paired contrast is unestablished by these numbers."*
+
+The verdict displayed both arms' measured updates side by side in its exposure table, so the inequality was
+*visible* — but no sentence in the document said what it means, and the confirmatory **A-vs-B claim compares two
+artefacts trained to different update counts**. That is precisely the kind of thing a verdict must not leave to
+inference, and it is the review's own finding, so it now appears as a **third caveat** in the measured-exposure
+section, computed from the receipts rather than narrated: `ArmA stopped at **N** measured updates and armB at **M**,
+a difference of **D** (X %) … the reviewer's finding was that the material impact on the paired contrast is
+**unestablished by the exposure numbers alone** … a property of the two runs as they were time-boxed, not of the
+evaluation.` The figure follows the receipts, so it cannot drift from the numbers above it; verified by rendering it
+from realistic receipts (4100 vs 3800 → "300 (7.3 %)"), and the rehearsal still passes with all nine mandatory
+sections present and the caveat rendering inside the composed verdict.
+
+The other M2 rows were already satisfied by design and were checked rather than assumed: the Limitation that live
+counters "do not establish saved-artifact exposure, terminal LR or weight change" is exactly what review #14's rule
+addresses (measured per-artefact exposure from each run's own receipt), and the Conditional is the budget arithmetic
+— 28.0604 + 2 × 570/60 = 47.0604, leaving 0.9396 within 48 — which `verify_objective.py` now also reads from FACTS.
