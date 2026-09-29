@@ -406,6 +406,63 @@ def main():
     print(f"  J2 both-arms content: armA {_cmA}")
     print(f"                        armB {_cmB}")
 
+    # J3 --- D3 remainder (Muse): sections F/G are structural/heuristic. The objective's exit names two
+    # tests that were missing: that a Sigma rule's logsource/selection AGREES with the handprint its prompt
+    # names, and that the triage label is DETERMINISTIC in the telemetry. Both are re-derived here from the
+    # builder's own tables and rule rather than eyeballed.
+    try:
+        import yaml as _yaml
+        sys.path.insert(0, "v2")
+        import build_format_set as BFS
+        hp_checked = hp_ok = 0
+        for r in sigma:
+            goal = next((hp for hp in BFS.HANDPRINT_SELECTION if hp in r["user"]), None)
+            if goal is None:
+                continue
+            hp_checked += 1
+            ls, product, field, value = BFS.HANDPRINT_SELECTION[goal]
+            try:
+                d = _yaml.safe_load(r["assistant"]) or {}
+            except Exception:                                     # noqa: BLE001
+                continue
+            got_ls = str((d.get("logsource") or {}).get("category") or "")
+            got_pr = str((d.get("logsource") or {}).get("product") or "")
+            sel = ((d.get("detection") or {}).get("selection") or {})
+            got_field = str(next(iter(sel), ""))
+            got_value = str(next(iter(sel.values()), ""))
+            if got_ls == ls and got_pr == product and got_field == field and str(value) in got_value:
+                hp_ok += 1
+        rep["sigma_handprint_agreement"] = f"{hp_ok}/{hp_checked}"
+        if hp_checked and hp_ok != hp_checked:
+            fail("J3-handprint", f"{hp_checked - hp_ok}/{hp_checked} Sigma rules disagree with the handprint "
+                                 f"their prompt names")
+
+        det_checked = det_bad = 0
+        pairs = {}
+        for r in triage:
+            mp = re.search(r"dst=\S+:(\d+)", r["user"])
+            mb = re.search(r"bytes=(\d+)", r["user"])
+            if not (mp and mb):
+                continue
+            det_checked += 1
+            port, byt = int(mp.group(1)), int(mb.group(1))
+            want = "malicious" if (port in (4444, 5985) or byt > 5_000_000) else "benign"   # mirrors gen_log_line
+            got = r["assistant"].strip().lower()
+            if got != want:
+                det_bad += 1
+            pairs.setdefault((port, byt), set()).add(got)
+        conflicting = sum(1 for v in pairs.values() if len(v) > 1)
+        rep["triage_label_determinism"] = {"checked": det_checked, "disagreeing": det_bad,
+                                          "same_telemetry_two_labels": conflicting}
+        if det_bad:
+            fail("J3-labels", f"{det_bad}/{det_checked} triage labels disagree with the deterministic rule")
+        if conflicting:
+            fail("J3-labels", f"{conflicting} telemetry tuples carry BOTH labels")
+        print(f"  J3 (D3): sigma handprint {hp_ok}/{hp_checked}, triage determinism "
+              f"{det_checked - det_bad}/{det_checked}, tuples with two labels {conflicting}")
+    except Exception as e:                                        # noqa: BLE001
+        warn("J3", f"D3 agreement/determinism checks unavailable: {e}")
+
     rep["arm_sha256"] = {"armA": _sha(os.path.join(args.dir, "armA.jsonl")),
                          "armB": _sha(os.path.join(args.dir, "armB.jsonl"))}
     rcpt = {"checks": rep, "failures": FAILS, "warnings": WARNS,
