@@ -3722,3 +3722,23 @@ What can be said honestly, and what is worth knowing:
 Recorded because the rest of this window has been about separating measured quantities from asserted ones, and this is
 the clearest case of my own assertion: a projection with a single unmeasured input, quoted in the ledger as though it
 were arithmetic.
+
+## 2026-09-29 08:36 — a handover, because the contract outlives this session
+
+The contract starts at 12:10 and runs for hours; the goal's round budget does not reach that far. So the endgame was
+written down for whoever reads next, in `research-tmp/HANDOVER-endgame.md`: the four things that run unattended and
+what protects each (the timeline's lock and grace-skip, the guard's lock-based supervision, the observational
+watchdog, and the contract's fifteen fail-closed stages), the schedule, where every deliverable lands, the two
+verifiers and what their exit codes mean, and — the part that matters most — **the four things that need a person**:
+the C24 review's findings (a background call nothing fixes automatically), a failed contract's diagnosis (with the
+exit code → stage table read out of the script, not remembered), the **declared** deviations that must not be "fixed"
+(D2 NOT MET, the owner's supersession of the restore clause, the arms' unequal exposure), and the two estimates that
+are not measurements (the contract's duration, and D2's effect on the A-vs-B contrast).
+
+Building it caught an error in my own summary: I had written the exit-code mapping from memory as "2 quarantine/sync,
+4 learning proof or stub artefacts, 5 batteries, 6 assembler, 7 verdicts, 8 harvest, 9 composed-verdict sections" —
+which omits **exit 3**, the code used by *both* stage 00 (trainers still running at the deadline) and stage 1
+(merge/benchmark incomplete after its retry), and omits the four pre-stage codes (64 bad argument, 75 lock refusal,
+130/143 signals). Extracted from the script with comments stripped, the table is now exact — and one apparent `exit 9`
+in stage 8 turned out to be prose *about* exit 9 inside a comment, the same instrument fault that has recurred all
+window.
