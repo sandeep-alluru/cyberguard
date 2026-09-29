@@ -199,6 +199,10 @@ for arm in ("armA", "armB"):
     missing = [k for k in need if k not in e]
     if missing:
         sys.exit(f"FATAL: {eq} lacks {missing}; merge equivalence is not measurable from it")
+    # Review F19 (pass eleven): NaN passed every comparison, so the stated tolerances were not enforced.
+    import math
+    if not math.isfinite(float(e["loss_delta"])):
+        sys.exit(f"FATAL: {arm} loss_delta is not finite ({e['loss_delta']})")
     if float(e["loss_delta"]) > 0.02:
         sys.exit(f"FATAL: {arm} merged-vs-unmerged loss differs by {e['loss_delta']} (> 0.02)")
     if int(e["gen_exact_mismatches"]) != 0:
@@ -209,6 +213,8 @@ for arm in ("armA", "armB"):
     if "gen_self_f1_min" not in e or e["gen_self_f1_min"] is None:
         sys.exit(f"FATAL: {eq} records no gen_self_f1_min; the F1 floor cannot be enforced")
     f1 = float(e["gen_self_f1_min"])
+    if not math.isfinite(f1):
+        sys.exit(f"FATAL: {arm} gen_self_f1_min is not finite ({e['gen_self_f1_min']})")
     if f1 < 0.99:
         sys.exit(f"FATAL: {arm} merged-vs-unmerged token-F1 floor {f1} < 0.99")
     if int(e.get("prompts_gen") or 0) < 100:

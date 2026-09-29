@@ -1,1 +1,6 @@
 [2026-09-29 01:41:03 CDT] timeline armed (C16 02:25, C24 10:25, contract 10:28 unconditional)
+[2026-09-29 02:25:00 CDT] C16 metrics
+  C16: A 1354 steps @ 7.6s/it alive=1 gpu=95% | B 1348 steps @ 7.23s/it alive=1 gpu=95%
+    arm A: 21664 samples = 0.267 epoch | 2560 refusal presentations | 24 h projection 2.24 epochs, 21502 refusal presentations
+    arm B: 21568 samples = 0.266 epoch | 2549 refusal presentations | 24 h projection 2.36 epochs, 22602 refusal presentations
+    (declared FACTS basis: 0.968288 s/sample -> epoch 21.8 h)

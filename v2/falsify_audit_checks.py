@@ -66,6 +66,16 @@ def main() -> int:
             print("  FAIL: E3-arm-equivalence (fires on an asymmetric truncation profile)")
         else:
             fails.append("E3-arm-equivalence did not fire on a 12.5 % truncation-rate gap")
+    # codex pass eleven: a prompt long enough to consume the whole budget leaves ZERO supervised assistant
+    # tokens. The old metric measured the answer's raw length and reported empty_supervision=0.
+    with tempfile.TemporaryDirectory() as d:
+        long_prompt = dict(GOOD, user=" ".join(["word"] * 4000))
+        write_arms(d, [GOOD] * 4 + [long_prompt], [GOOD] * 4 + [long_prompt])
+        out = run_audit(d)
+        if "FAIL: E3-empty" in out:
+            print("  FAIL: E3-empty (fires when truncation removes ALL assistant supervision)")
+        else:
+            fails.append("E3-empty did not fire on a prompt that consumes the whole token budget")
     if fails:
         print("\nFALSIFICATION: FAIL — these checks did not fire on violating data:")
         for f in fails:

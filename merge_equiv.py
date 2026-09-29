@@ -48,7 +48,10 @@ loss_u, mask_u = held_out_loss(un, tok, rows)
 outs_u = [generate(un, tok, "", r["user"]) for r in rows[:K]]
 
 f1s = [tok_f1(m, u) for m, u in zip(outs_m, outs_u)]
-report = {"rows_loss": N, "prompts_gen": K,
+# Review F19 (pass eleven): reporting the REQUESTED N and K overstated support under the permitted EQ_N/EQ_K
+# overrides - with EQ_N=100, EQ_K=200 the slicing used 100 prompts but the report claimed 200. Report what was
+# actually measured, and keep the request alongside it for traceability.
+report = {"rows_loss": len(rows), "prompts_gen": len(outs_u), "requested_eq": {"EQ_N": N, "EQ_K": K},
           "loss_merged": loss_m, "loss_unmerged": loss_u,
           "loss_delta": round(abs(loss_m - loss_u), 6),
           "mask_check_merged": mask_m, "mask_check_unmerged": mask_u,

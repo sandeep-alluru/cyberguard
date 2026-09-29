@@ -336,16 +336,22 @@ def main():
                 ids = tok(str(r.get("system") or "") + "\n" + str(r["user"]),
                           add_special_tokens=False)["input_ids"]
                 sup = tok(str(r["assistant"]), add_special_tokens=False)["input_ids"]
-                if len(ids) + len(sup) + 8 > MAX_SEQ:   # +8 for template/special tokens
+                prompt_len = len(ids) + 8               # +8 for template/special tokens
+                if prompt_len + len(sup) > MAX_SEQ:
                     _trunc += 1
-                if not sup:
+                # Review F19 (pass eleven): counting the ANSWER's raw tokens misses supervision that truncation
+                # removes entirely - a 3,015-token prompt leaves zero supervised assistant tokens while the old
+                # check reported empty_supervision=0. Compute what SURVIVES the budget.
+                _surviving = max(0, min(prompt_len + len(sup), MAX_SEQ) - prompt_len)
+                if _surviving == 0:
                     _empty += 1
             _e3[_label] = {"sampled": len(_sample), "stride": _stride, "includes_system": True,
                            "truncation_rate": round(_trunc / max(1, len(_sample)), 4),
                            "empty_supervision": _empty}
             if _e3[_label]["empty_supervision"]:
-                fail("E3-empty", f"{_label}: {_e3[_label]['empty_supervision']} sampled rows have EMPTY "
-                                 f"assistant supervision - the model would be trained on nothing")
+                fail("E3-empty", f"{_label}: {_e3[_label]['empty_supervision']} sampled rows lose ALL "
+                                 f"assistant supervision to the {MAX_SEQ}-token budget - the model would be "
+                                 f"trained on nothing for those rows")
             if _e3[_label]["truncation_rate"] > 0.02:
                 warn("E3-tokenizer", f"{_label}: {_e3[_label]['truncation_rate']:.2%} of sampled rows exceed "
                                      f"{MAX_SEQ} real tokens and would lose assistant supervision")
