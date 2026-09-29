@@ -112,6 +112,16 @@ def main() -> int:
         return "\n".join(out)
 
     claims = [g for g in gates if g["gate"].startswith("Claim")]
+    _mp = load("v2/data/mixture/mask-proof.receipt.json")
+    if _mp:
+        _pass = all("MASK PROOF: PASS" in (d.get("output") or "") for d in (_mp.get("hosts") or {}).values())
+        mask_line = ("The trainer's `MASK_PROOF` mode (assistant-only supervision on a real collated batch, "
+                     f"before any optimizer step) **{'PASSED on both hosts' if _pass else 'did NOT pass'}** "
+                     f"(`v2/data/mixture/mask-proof.receipt.json`, captured {_mp.get('captured_at')}).")
+    else:
+        mask_line = ("**UNVERIFIED for this window.** The trainer ships a `MASK_PROOF` mode that asserts "
+                     "assistant-only supervision, but no proof receipt exists, so the live loss mask was not "
+                     "demonstrated for these runs.")
     _d2 = load("v2/data/mixture/d2-diversity.receipt.json")
     if _d2:
         _c, _o = _d2.get("control", {}), _d2.get("offensive", {})
@@ -194,6 +204,10 @@ stating it.
 * G-A severity has no v2 rubric producer, so it is reported UNMEASURED rather than reconstructed.
 * Repetition, diversity and prompt-familiarity asymmetries between the arms are intrinsic to the substitution
   design and are carried here rather than argued away.
+
+## Live loss mask
+
+{mask_line}
 
 ## Merge equivalence: what is established
 

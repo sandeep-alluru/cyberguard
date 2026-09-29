@@ -20,7 +20,6 @@ res = {"captured_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "mode": "MASK_PROOF=
        "why": "the proof was never run for this window; this is the settling evidence", "hosts": {}}
 for arm, host in HOSTS.items():
     cmd = ("cd ~/cyberguard && source ~/.cyberguard-env && "
-           "ARM=$(echo %s | tr -d 'armA B'); " % arm +
            "RUN_NAME=cyberguard-lora-v2-%s MASK_PROOF=1 timeout 900 "
            "$CYBERGUARD_VENV/bin/python train_cyberguard.py 2>&1 | grep -E 'MASK PROOF|Error|error' | tail -6" % arm)
     try:
