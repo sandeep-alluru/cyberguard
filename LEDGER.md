@@ -1495,3 +1495,37 @@ Added `v2/quarantine_host_evals.sh` (runs on a host, archives, never deletes, ex
 outside the archive) and wired it into contract stage 0pre for both hosts, so every run starts with clean host
 directories as well as a clean local one. Applied now: 40ee archived its 5 files, 8cf2 archived 0, and both report
 `evals/ json now: 0`.
+
+## 2026-09-29 — review #20: NOT SOUND again, and it broke the fraction gate twice over
+
+#20 accepted nothing and attacked the fraction criterion from two directions, both executed:
+
+1. **A SPARSE defect evades it.** It replaced ONE weight with `1024`: the comparison *detected* it (4,194,048
+   ULP), the exceedance fraction was **9.5e-7**, and the `<= 1e-6` threshold **discarded it**. At that threshold
+   the criterion permitted **3,633 arbitrarily erroneous elements** inside the adapted matrices — and nothing
+   restricted them to cancellation locations. Separation against two *dense* defects says nothing about *sparse*
+   ones.
+2. **NaN disappears from the count.** `NaN > 2` is `False`, so a model whose merged weights were **all NaN**
+   reported a fraction of `0`, a maximum of `NaN`, and passed. One infinity also passed.
+
+It also objected that the "ULP" statistic was not literal ULP spacing — the denominator was a relative-error
+scale with an absolute floor — and that the conceded coverage boundary still omitted sparse,
+unrestricted-magnitude corruption *within* adapted matrices.
+
+### All three fixed
+* The denominator is now **literal bf16 ULP spacing** (`2^(floor(log2|x|) - 7)` computed per element), so the
+  statistic is a true ULP distance rather than a proxy.
+* The gate is the **element-wise maximum**, which has neither a sparse blind spot nor a NaN blind spot.
+* **Non-finite weights are counted** (`merge_weight_nonfinite_elements`) and gated at zero, because a NaN
+  comparison is False and would otherwise vanish.
+
+Measured on the real adapter after the change: **0.5 ULP at the worst element over 3,633,315,840 elements**, and
+0 non-finite. Half an ULP is the *optimum* for a correctly-rounded operation, so the gate is as tight as the
+arithmetic permits and cannot fail spuriously — while the controls sit at **3.8e26** (10 % mis-scaling) and
+**3.8e27** (dropped contribution) ULP. Stage 2 requires `max <= 2` ULP, `elements >= 100,000`,
+`nonfinite == 0`, and both control maxima to be **finite and >= 100**, so the tolerance can never be read without
+the separation that justifies it.
+
+Verified seven ways: as-measured PASSES; **#20's sparse corruption FAILS** (both with its 9.5e-7 fraction and with
+the fraction reported as 0, proving the max is what catches it); all-NaN FAILS; a dense 10 % mis-scaling FAILS;
+non-separating controls FAIL; and non-exhaustive coverage FAILS.

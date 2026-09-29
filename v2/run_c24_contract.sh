@@ -421,23 +421,39 @@ for arm in ("armA", "armB"):
     # A FRACTION rather than a max, because max_ulp explodes on elements where the ideal merged value is ~0
     # (the controls reach ~1e26 ULP on those), so a single cancellation element could fail a max-based gate
     # spuriously. Rounding noise gives a fraction of 0; a systematic defect moves most elements at once.
-    for k in ("merge_weight_frac_gt_2ulp", "merge_weight_elements", "merge_weight_max_ulp",
-              "merge_weight_control_scale_0p9_frac_gt_2ulp",
-              "merge_weight_control_module_dropped_frac_gt_2ulp"):
+    # GATED ON THE ELEMENT-WISE MAXIMUM, in literal bf16 ULP spacing of the ideal merged value. Review #20
+    # broke the previous fraction-only gate by injecting a SPARSE defect: one weight replaced with 1024 was
+    # DETECTED (4.2e6 ULP) but its exceedance fraction was 9.5e-7, below the 1e-6 threshold, so acceptance
+    # discarded it - and at that threshold the criterion permitted 3,633 arbitrarily erroneous elements. #20 also
+    # showed that `NaN > 2` is False, so an all-NaN merged model reported a fraction of 0 and passed.
+    # The max has no sparse blind spot and no NaN blind spot, and it cannot fail spuriously: a correct merge
+    # measured **0.5 ULP max over 3,633,315,840 elements**, which is the optimum for a correctly-rounded
+    # operation, while a 10% mis-scaling measures 3.8e26 and a dropped contribution 3.8e27.
+    for k in ("merge_weight_max_ulp", "merge_weight_elements", "merge_weight_nonfinite_elements",
+              "merge_weight_control_scale_0p9_max_ulp", "merge_weight_control_module_dropped_max_ulp"):
         if k not in e or e[k] is None:
             sys.exit(f"FATAL: {eq} records no {k} - the merge arithmetic is not checked by this artefact")
-    frac, we = float(e["merge_weight_frac_gt_2ulp"]), int(e["merge_weight_elements"])
-    if not math.isfinite(frac):
-        sys.exit(f"FATAL: {arm} merge_weight_frac_gt_2ulp is not finite ({e['merge_weight_frac_gt_2ulp']})")
+    mx, we = float(e["merge_weight_max_ulp"]), int(e["merge_weight_elements"])
+    nf = int(e["merge_weight_nonfinite_elements"])
+    if not math.isfinite(mx):
+        sys.exit(f"FATAL: {arm} merge_weight_max_ulp is not finite ({e['merge_weight_max_ulp']}) - a non-finite "
+                 f"comparison must never be readable as agreement")
     if we < 100000:
         sys.exit(f"FATAL: {arm} the weight-level check covered only {we} elements; it must be exhaustive")
-    if frac > 1e-6:
-        sys.exit(f"FATAL: {arm} {frac:.4%} of the {we} merged weights deviate by more than 2 bf16 ULP from "
-                 f"base + scaling*(B@A). A correct merge measures 0; a 10% mis-scaling measures 27.68% and a "
-                 f"dropped contribution 82.41% - this is a merge defect, not rounding")
-    print(f"    weight-level: {e['merge_weight_max_ulp']:.4f} max ULP, {frac:.2e} of {we} elements beyond 2 ULP "
-          f"(controls: 10%-scale {float(e['merge_weight_control_scale_0p9_frac_gt_2ulp']):.2%}, "
-          f"dropped {float(e['merge_weight_control_module_dropped_frac_gt_2ulp']):.2%})")
+    if nf != 0:
+        sys.exit(f"FATAL: {arm} the merged model has {nf} non-finite weight(s); NaN compares False against every "
+                 f"tolerance and would otherwise vanish from the exceedance count")
+    if mx > 2.0:
+        sys.exit(f"FATAL: {arm} the worst merged weight deviates from base + scaling*(B@A) by {mx:.6g} bf16 ULP "
+                 f"over {we} elements. A correct merge measures 0.5 (half an ULP, the optimum for correct "
+                 f"rounding); a 10% mis-scaling measures 3.8e26 and a dropped contribution 3.8e27")
+    # The tolerance must never be readable without the separation that justifies it.
+    csc, cdr = float(e["merge_weight_control_scale_0p9_max_ulp"]), float(e["merge_weight_control_module_dropped_max_ulp"])
+    if not (math.isfinite(csc) and math.isfinite(cdr)) or min(csc, cdr) < 100.0:
+        sys.exit(f"FATAL: {arm} the control defects do not separate from the tolerance (10%-scale {csc:.6g}, "
+                 f"dropped {cdr:.6g} ULP); a tolerance whose separation is unmeasured is theatre")
+    print(f"    weight-level: max {mx:.4f} of a bf16 ULP over {we} elements, {nf} non-finite "
+          f"(controls: 10%-scale {csc:.3g} ULP, dropped {cdr:.3g} ULP)")
 
     # (b) SANITY, not the basis. Review #18: these can be passed by a defect, so they cannot establish
     # equivalence - they catch a grossly wrong model. Teacher-forced agreement over the assistant span.

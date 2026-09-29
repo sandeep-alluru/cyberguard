@@ -80,10 +80,10 @@ def merge_equivalence_block() -> str:
         rs = r.get("merge_weight_max_rel_to_merged")
         rd = r.get("merge_weight_control_module_dropped_ratio")
         rows.append(
-            f"| `{arm}` | {r.get('merge_weight_max_ulp', float('nan')):.4f} max ULP, "
-            f"{r.get('merge_weight_frac_gt_2ulp', float('nan')):.2e} > 2 ULP | "
+            f"| `{arm}` | {r.get('merge_weight_max_ulp', float('nan')):.4f} | "
+            f"{r.get('merge_weight_frac_gt_2ulp', float('nan')):.2e} | "
             f"{r.get('tf_top1_agreement_rate'):.4f} ({r.get('tf_positions')} pos) | "
-            f"{r.get('merge_weight_control_module_dropped_frac_gt_2ulp', float('nan')):.2%} | "
+            f"{r.get('merge_weight_control_module_dropped_max_ulp', float('nan')):.3g} | "
             f"{r.get('tf_negative_control_agreement_rate'):.4f} | {r.get('loss_delta')} |")
     w = next((_merge_receipt(a)[0] for a in ("armA", "armB") if _merge_receipt(a)[0]), None)
     # Never print a placeholder as if it were a number: with no receipt the weight-level check is UNMEASURED and
@@ -97,23 +97,27 @@ def merge_equivalence_block() -> str:
             "**What is established.** `merge_and_unload()` produced the correct weights: for every LoRA-wrapped",
             f"layer ({w.get('merge_weight_modules', '?')} matrices, {w.get('merge_weight_elements', '?')} elements",
             "in total — exhaustive, not sampled), the merged weight equals `base_weight + scaling * (B @ A)` to",
-            f"within **{w.get('merge_weight_max_ulp', 0):.3f} of a bf16 ULP**, with",
-            f"**{w.get('merge_weight_elements_gt_2ulp', '?')} of {w.get('merge_weight_elements', '?')} elements**",
-            "beyond 2 ULP. That is a *deterministic* property, so unlike any behavioural test it cannot be passed",
-            "by a defect concentrated in a region that happens not to be sampled. Its tolerance is justified by",
-            "measured separation rather than fitted: the same statistic reports **27.68 %** of elements beyond",
-            f"2 ULP for a 10 % mis-scaling and **{w.get('merge_weight_control_module_dropped_frac_gt_2ulp', 0):.2%}**",
-            "for a dropped contribution, against **0** for the merge as shipped.",
+            f"within **{w.get('merge_weight_max_ulp', 0):.3f} of a bf16 ULP** at the worst element, with",
+            f"**{w.get('merge_weight_nonfinite_elements', '?')} non-finite weights**. Half an ULP is the optimum for",
+            "a correctly-rounded operation, so this is the strongest form the check can take. It is *deterministic*,,",
+            "so unlike any behavioural test it cannot be passed by a defect concentrated in a region that happens",
+            "not to be sampled — including a SPARSE one: the gate is the element-wise maximum, because a",
+            "fraction-only gate was rejected when it permitted 3,633 arbitrarily erroneous elements and passed a",
+            "single weight corrupted to 1024 while detecting it. Its tolerance is justified by measured separation:",
+            f"the same statistic reports **{w.get('merge_weight_control_scale_0p9_max_ulp', 0):.3g}** ULP for a 10 %",
+            f"mis-scaling and **{w.get('merge_weight_control_module_dropped_max_ulp', 0):.3g}** ULP for a dropped",
+            "contribution, against **0.5** as shipped. Non-finite weights are counted separately and gated at zero,",
+            "because `NaN > 2` is False and would otherwise vanish from the count.",
             "",
             "**Coverage boundary (conceded, not implied).** This check visits the **LoRA-adapted linear matrices**",
             "only. Unadapted parameters — embeddings, normalisation layers, the output head — are **not covered**, so",
-            "it establishes the correctness of the merge on the adapted matrices, not of the entire merged model.",
+            "it establishes the correctness of the merge on the adapted matrices, and not of the entire merged model.",
         ])
     return "\n".join([
         "The evaluator scores the **merged** model, so the merge was checked against the unmerged path in three",
         "ways, and the claim below is scoped to exactly what those measurements support.",
         "",
-        "| arm | weight-level deviation (bf16 ULP of the ideal) | teacher-forced top-1 agreement | control: a module's contribution dropped | control: adapter disabled | held-out loss delta |",
+        "| arm | worst-element deviation (literal bf16 ULP) | fraction beyond 2 ULP | teacher-forced top-1 agreement | control: a module's contribution dropped (ULP) | control: adapter disabled | held-out loss delta |",
         "|---|---|---|---|---|---|",
         *rows,
         "",
