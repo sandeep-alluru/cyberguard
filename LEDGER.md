@@ -3762,3 +3762,30 @@ So the chain is: the guard re-launches the timeline whenever no live holder owns
 the verdict and gate report exist with no contract still running — which is exactly the pair stage 5 and stage 6 write.
 Between them they mean the contract completes even if this session ends first, and the guard stops rather than
 "recovering" a finished job.
+
+## 2026-09-29 08:36 — readiness, stated once, before the window closes
+
+The objective is **not** complete and this is not a completion claim: elements 3, 4 and 5 depend on the training window
+ending and on a contract that has not started. What can be stated is the state of the machinery, each item verified
+rather than asserted:
+
+* **Objective** — `verify_objective.py` exit **2**: elements 1 (D1–D4) and 2 (both clearances) **PASS**, decided from
+  receipts; 3, 4, 5 awaiting artifacts.
+* **Training** — both arms alive at ~7.97 s/it, **2,678** and **2,592** of 5,068 steps; the time box governs, so they
+  stop at ~12:03 at roughly 4,233 / 4,144 steps. FACTS records the worst-case training spend at **47.0604 of 48**.
+* **Supervision** — the timeline (457038) holds its lock and its live wait targets 08:50:00 exactly; the guard (463554)
+  watches the two deliverable paths the contract writes; nothing else on either machine can relaunch training or take
+  the GPU.
+* **The contract** — dry-run green at 15 stages; every stage's inputs verified on both hosts (probe sets at their
+  registered counts and hashes, base model, corpus, held-out split, scoring authority matching its receipt, transfers
+  measured at 264 MB in 10 s through both mechanisms); every producer/consumer pair checked against real artifacts; and
+  the one defect that would have cost the evaluation — `run-eval-chain.sh` running the wrong directory — found, fixed
+  and synced.
+* **The record** — the spec validates clean; the sequence companion documents its own validator findings and carries a
+  by-reference done-means table; the harvest's required set now equals what its claims rest on; the briefs' and the
+  verdict's numbers are read from receipts rather than typed; the handover in `research-tmp/HANDOVER-endgame.md` names
+  what runs unattended, how to check it and what needs a person.
+
+Five rounds of budget remain and M3 fires in about fourteen minutes at the current clock, so the checkpoint and the
+contract will most likely run after this session's rounds end — which is why the guard, the lock discipline, the
+self-sufficient contract and the handover exist.
