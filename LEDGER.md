@@ -3348,3 +3348,31 @@ window that a checker of mine, not the artifact, was what looked wrong. Redone w
 sha256 equals both the FACTS entry and the audit receipt's, and both row counts equal `epoch_rows_per_arm`. The
 watchdog has been re-verifying the same hashes every five minutes for hours and reporting `hashes: MATCH`, which is
 independent corroboration rather than a substitute for looking.
+
+## 2026-09-29 — the script that runs next, read in full
+
+`checkpoint_review.sh` fires at 08:50 (M3) and again at ~12:03 (C24), and it had only been grepped. Read in full:
+
+* It **refuses without the metrics file** (`exit 2`), which is why the timeline's order is metrics → review → brief
+  and why that order is a requirement rather than a preference — confirmed by measurement earlier today.
+* The prompt is built from the checkpoint's own evidence: the `arms`/`exposure`/`facts` blocks of the metrics file,
+  the live `training_window` from FACTS, and `git log -8`, so the reviewer sees the recent history rather than a
+  snapshot in a vacuum.
+* The **boundary statement** matches the standing one — training method, parent initialisation, hyperparameters,
+  mixture and support, sequence and mask, checkpoint and arm policy, the evaluation contract, model equivalence; not
+  licence terms, attribution, admission engineering, leakage-pipeline design, receipts, validators, release process or
+  agent operations, "one line and stop if you feel the pull" — with no design authority.
+* The task is four questions the numbers can actually answer (progress parity and whether any divergence is material
+  to a paired contrast; contradiction with the FACTS basis or the measured epoch-1 wall clock; whether the run is
+  within the 24 h × 2 authorization; any substantiable training-validity objection), and the output format demands a
+  findings table plus **exactly one** closing line — "no training-validity objection", or the objection — with
+  "do not manufacture a clearance, and do not manufacture an objection".
+* Dispatch is `nohup codex exec -s read-only --skip-git-repo-check -C "$ROOT" -o "$OUT" -` with the prompt on stdin,
+  backgrounded after a 4-second check, which is why the brief can report "DISPATCHED, OUTPUT NOT YET WRITTEN" rather
+  than "no review". The `-o` file is exactly what the brief's review-status line reads, and the last-line format is
+  exactly what it quotes.
+
+The context the prompt carries is consistent with FACTS: epoch 1 at 11.03 h/11.01 h, 66,060,288 trainable params,
+`grad_norm ~0.6`, the 23:29–02:30 frozen interval with `is_trainable=False`, the repaired 570-minute relaunch at
+02:32:53, and review #14's two conditions (a measured exposure description and the tensor-level learning proof) which
+stages 0d and 6 implement.
