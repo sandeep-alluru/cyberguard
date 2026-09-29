@@ -3249,3 +3249,12 @@ invoked by absolute path and `cd` themselves (`quarantine_host_evals.sh` → `cd
 `check_eval_surface.sh` → `cd "$ROOT_HOME"`); stage 0d's learning proof does `cd ~/cyberguard && …`; and the remaining
 lines are `rsync`/`scp`/`sha256sum` over `~/cyberguard/...` absolute paths, for which no remote cwd matters. The only
 place a relative invocation depended on an unverified cwd was the one that was wrong.
+
+The *output* side of the same class was checked in the same pass, since a right input path with a wrong output path
+would fail just as quietly. `merge_equiv.py` writes `ROOT/"evals"/f"merge-equiv-{ADAPTER.name}.json"` and
+`eval_cyberguard.py` writes `ROOT/"evals"/f"{ADAPTER.name}.json"`, both derived from `CYBERGUARD_ROOT` — absolute and
+therefore cwd-independent, which is why the `cd` bug could only ever have broken the two scripts' *location*, never
+their writes. Those are precisely the two names stage 1 pulls (`evals/$RUN.json`,
+`evals/merge-equiv-$RUN.json` from `$host:~/cyberguard/`), and the inputs they read —
+`models/Qwen3-4B-Instruct-2507`, `data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl`, `v2/holdout500.jsonl` — were
+confirmed present under `$CYBERGUARD_ROOT` on both hosts, with the adapters in place for both arms.
