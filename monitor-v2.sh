@@ -3,6 +3,9 @@
 # attempt is not evidence about this one — CRAFT-O-01/A15).
 # Usage: bash monitor-v2.sh <A|B> [cycles] [interval_s]
 set -uo pipefail
+# Same reason as run-v2-arm.sh: it reads `logs/…` and `/proc` by relative name, so its cwd must not depend on the
+# caller.
+cd "$HOME/cyberguard"
 ARM="${1:?}"; CYCLES="${2:-288}"; IV="${3:-300}"
 ROOT=""
 for c in "$HOME/cyberguard" "$HOME/AgentHub/cyberguard" "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; do

@@ -3,6 +3,11 @@
 # Usage: bash run-v2-arm.sh <A|B> [minutes]        (run ON the training host)
 #   A -> spark-40ee, armA.jsonl (designed mix)      B -> spark-8cf2, armB.jsonl (control)
 set -euo pipefail
+# ESTABLISH THE CWD. This script names its mixture and trainer by relative path, so it trained from whatever directory
+# its caller happened to be in. `v2/relaunch_window.sh` does `cd ~/cyberguard && bash run-v2-arm.sh …`, which is why
+# the running arms work — but a launch from anywhere else would have trained from the wrong mixture (or found no
+# trainer) with no error. Same class, and the same fix, as `run-eval-chain.sh`'s `cd "$CYBERGUARD_ROOT"`.
+cd "$HOME/cyberguard"
 ARM="${1:?usage: run-v2-arm.sh <A|B> [minutes]}"
 MINUTES="${2:-1440}"
 ROOT=""
