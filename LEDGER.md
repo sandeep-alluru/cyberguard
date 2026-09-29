@@ -3698,3 +3698,27 @@ Two things follow. First, the rate is **unchanged** from the measurements taken 
 the earlier reading that the governing stop is the time box and not the 5,068-step cap: at 12:03 the arms will be at
 roughly **4,233** and **4,144** steps — an exposure gap of about 89 steps that the verdict's third caveat states from
 the receipts rather than from a projection. Stage 00 opens at 12:10 to find both gone.
+
+## 2026-09-29 — the one projection in the record whose basis I had not checked
+
+Earlier this window I recorded a critical path of "stage 3 ≈ 8 h, whole contract ≈ 11 h → 12:10 → ≈23:00", derived from
+a **3 s/probe** contention-free rate. Checking where that number came from: it appears **only in that table**. The
+measured point is 9.25 s/probe *with the trainer holding the GPU*, and the other rates in FACTS — 0.968 s/sample
+declared and 0.4897 s/sample measured for epoch 1 — are *training* throughput, not generation, so they cannot
+substitute. The 3 s/probe figure is therefore an **estimate**, labelled as one in that table and nowhere derived.
+
+What can be said honestly, and what is worth knowing:
+
+* **Each battery is bounded by its ceiling**: 21,600 s (6 h) against the largest measured battery of 185 minutes, so no
+  single run can silently hang past its budget — that part is a measured relation, not an estimate.
+* **The whole contract is not bounded by anything except time.** If full GPU access gave no speed-up over the 9.25 s/probe
+  measured under contention, stage 3 would take roughly a day rather than eight hours. The 3 s/probe figure is
+  plausible — a 3.1× gain from going from a 95 %-busy shared GPU to a dedicated one — but plausible is not measured.
+* **Nothing depends on the estimate.** The per-battery ceilings, stage 1's 12-hour ceiling, and the timelines' re-run
+  paths all hold either way; the deliverables do not carry a duration claim. The only consequence is that the contract
+  may finish later than ≈23:00, which matters to nobody's deadline and is covered by the guard's 24-hour window for the
+  pre-contract stretch it exists to protect.
+
+Recorded because the rest of this window has been about separating measured quantities from asserted ones, and this is
+the clearest case of my own assertion: a projection with a single unmeasured input, quoted in the ledger as though it
+were arithmetic.
