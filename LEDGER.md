@@ -1845,3 +1845,23 @@ rehearsal — **not** `merge_equiv.py` and not stage 2's merge gates, which rema
 **checked-out** revision, and none does (registration `a91da33296ab`, equivalence `44c7cbb3a52c`, HEAD moved on).
 The contract is not gated on the marker (owner instruction of 2026-09-29), and the verdict records both
 clearances with the revisions they name rather than a marker implying more than was given.
+
+## 2026-09-29 — the acceptance rules are now BOUND to the pre-registration by a machine check
+
+The two confirmatory claims and every gate are **pre-registered**: SPEC §7 clause 2 fixes Claim 1 at a paired
+95 % lower bound `> −10 pp` and Claim 2 at a 95 % CI lower bound `> 15 pp`, each at n=1,100, and the §7 gate table
+fixes each gate's n and threshold. Reading `gates_v2.py` confirms the implementation matches exactly — including
+that the thresholds are **hard-coded** ("Nothing in the input may raise or lower these"), so no receipt can move a
+bar.
+
+But that was a **reading**, not a check, and nothing stopped a later edit of one number from silently deciding a
+claim on a different rule. Now:
+
+* `v2/data/mixture/registered-rules.receipt.json` freezes the transcription — 12 gate rules and 2 claim rules,
+  with the SPEC hash at freeze (`75a90935…`);
+* `v2/check_registration_rules.py` compares the implementation against it, checking the gate table field by field
+  and asserting each claim's **rule literal** (`c1 = low > -0.10`, `lo > 0.15`) is still present;
+* the contract's **preflight runs it**, so drift is caught before anything is evaluated.
+
+Verified discriminating: tampering Claim 1's bar to `−0.25` fails, and tampering G-B's bar from `0.90` to `0.80`
+fails — each naming the drifted rule.

@@ -210,6 +210,15 @@ done
 # The ULP spacing used by the merge check must be exact. Review #22 found a DEFECT where a float32 log2 estimate
 # doubled the computed spacing for values just below a power of two, halving the measured error and letting a
 # >2-ULP deviation pass. The exponent now comes from the exponent FIELD; this verifies that at contract time.
+# The acceptance rules are PRE-REGISTERED (SPEC §7 clause 2 for the two confirmatory claims, the §7 gate table
+# for each gate's n and threshold). A verdict decided on a different rule than the one registered is not a
+# verdict, and nothing stopped a later edit to a number in gates_v2.py from silently moving a bar. Checked here.
+if python3 v2/check_registration_rules.py > /tmp/reg-rules.log 2>&1; then
+  ok "$(tail -1 /tmp/reg-rules.log)"
+else
+  bad "the acceptance rules have DRIFTED from the pre-registration:"; sed 's/^/     /' /tmp/reg-rules.log | tail -4
+  PRE=$((PRE+1))
+fi
 if python3 v2/test_ulp_spacing.py > /tmp/ulp-spacing.log 2>&1; then
   ok "ULP spacing is exact ($(grep -c . /tmp/ulp-spacing.log) lines of evidence)"
 else
