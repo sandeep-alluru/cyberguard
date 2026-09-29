@@ -322,20 +322,28 @@ def _evaluate(evals, checkpoint="C24"):
                   ("triage_retention", "sigma_retention", "grounded_counts_retention",
                    "chat_counts_retention", "refusal_pairs_retention")}
 
+    def _retention_block(v):
+        """The retention/recall evidence, formatted ONCE so both attach paths agree (F26 residual: the
+        observed=None path had its own formatting and reported only a pair count)."""
+        note = "registered instrument contains training rows — RECALL/regression only, never generalisation"
+        if isinstance(v, list):
+            def _rate(side):
+                vals = [1 if (r or {}).get(side) else 0 for r in v if isinstance(r, dict)]
+                return round(sum(vals) / len(vals), 4) if vals else None
+            _b, _a = _rate("base"), _rate("arm")
+            return {"pairs": len(v), "base_rate": _b, "arm_rate": _a,
+                    "delta": (round(_a - _b, 4) if _a is not None and _b is not None else None), "note": note}
+        return {"values": v, "note": note}
+
     def with_retention(observed, key):
         v = _retention.get(key)
         if v is None:
             return observed
         if not isinstance(observed, dict):
-            # F26: a retained measurement with no fresh counterpart still has to be reported, labelled — it was
-            # dropped entirely (observed=None) when only the retained instrument existed.
-            return {"retention_recall": {"values": v if not isinstance(v, list) else {"pairs": len(v)},
-                                         "note": "retained instrument contains training rows — RECALL only, "
-                                                 "never generalisation"}}
+            # a retained measurement with no fresh counterpart still has to be reported, labelled
+            return {"retention_recall": _retention_block(v)}
         out = dict(observed)
-        note = ("registered instrument contains training rows — RECALL/regression only, never generalisation")
-        out["retention_recall"] = ({"pairs": len(v), "note": note} if isinstance(v, list)
-                                   else {"values": v, "note": note})
+        out["retention_recall"] = _retention_block(v)
         return out
 
     def emit(gid, support_ok, rule_holds, observed, detail, has_bar=True):
@@ -1291,6 +1299,14 @@ def summarize_arm_b(payload):
                                 if payload.get(k + "_retention") is not None}}
     if payload.get("refusal_n") is not None:
         out["generalisation"]["refusal_n"] = payload["refusal_n"]
+    # F26 residual: Arm B's retained G-A outcomes were dropped from its summary entirely
+    rp = payload.get("refusal_pairs_retention")
+    if isinstance(rp, list) and rp:
+        def _rate(side):
+            vals = [1 if (r or {}).get(side) else 0 for r in rp if isinstance(r, dict)]
+            return round(sum(vals) / len(vals), 4) if vals else None
+        out["retention_recall"]["refusal_pairs"] = {"pairs": len(rp), "base_rate": _rate("base"),
+                                                   "arm_rate": _rate("arm")}
     rp = payload.get("refusal_pairs")
     if isinstance(rp, list):
         out["refusal_pairs"] = {"records": len(rp)}
