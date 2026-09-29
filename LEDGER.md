@@ -3652,3 +3652,32 @@ in the document even though the snapshot they came from did not.
 
 Nothing to fix here; what this round establishes is that the record's numbers are traceable to the artifacts the
 record says they come from, which is the property the whole window has been about.
+
+## 2026-09-29 — a fix I made on a misreading, reverted, and why the record says so
+
+Sweeping for the working-directory class found `run-v2-arm.sh` and `monitor-v2.sh` invoking scripts by bare name, and I
+"fixed" both with a `cd "$HOME/cyberguard"`, committing the claim that they "named their inputs by relative path and
+relied on the caller".
+
+**That was wrong, and the fix was worse than the problem.** Reading the scripts instead of their first lines:
+
+```
+for c in "$HOME/cyberguard" "$HOME/AgentHub/cyberguard" "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; do
+  if [ -f "$c/train_cyberguard.py" ]; then ROOT="$c"; break; fi
+done
+```
+
+Both **already** locate the repository themselves across three candidates and then use `$ROOT/…` absolute paths
+(`$ROOT/v2/data/mixture/armA.jsonl`, `$ROOT/logs/…`). They were cwd-independent, which is exactly why the arms are
+running. My edit added two hazards: a `cd` that **fails on any machine where the repo is not at `$HOME/cyberguard`**
+(this one included — it lives at `$HOME/AgentHub/cyberguard`), and, under `set -euo pipefail`, a failing `cd` **aborts
+the script** — destroying the very portability the candidate search exists to provide, and doing it to the script that
+launches training.
+
+Reverted in full: `git diff HEAD~2 -- run-v2-arm.sh monitor-v2.sh` is empty, both parse, and the tree is clean. The
+sweep's two hits were also **usage comments** ("`bash run-v2-arm.sh <A|B>`"), not invocations — so the sweep matched
+prose, the instrument was wrong twice in one round, and the correct finding is that these scripts were fine.
+
+Recorded rather than quietly undone because the ledger's value is that it contains the corrections as well as the
+findings — and because this is the seventh time this window that my own check or edit, not the artifact, was the thing
+that needed fixing.
