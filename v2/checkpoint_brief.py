@@ -26,6 +26,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -74,6 +75,23 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
         raise SystemExit(f"FATAL: {mp} does not exist - run v2/checkpoint_metrics.sh {label} first")
     m = json.load(open(mp))
     facts = m.get("facts", {})
+    # SNAPSHOT AGE. This brief claims its numbers "come from checkpoint_metrics.sh <label> at the scheduled moment",
+    # and it loaded them from a file it did not itself write. The timeline runs metrics ~2 min before the brief, but
+    # nothing enforced that: if the metrics step failed, the brief would silently render whatever snapshot was last
+    # on disk - an older checkpoint's numbers - under a heading asserting they were this checkpoint's. The file's
+    # own mtime is the evidence, so it is reported, and a snapshot older than the tolerance is called out as NOT
+    # describing this checkpoint instead of being presented as if it did.
+    SNAPSHOT_TOLERANCE_MIN = 30
+    _age_min = (time.time() - os.path.getmtime(mp)) / 60.0
+    _shot = dt.datetime.fromtimestamp(os.path.getmtime(mp)).strftime("%Y-%m-%d %H:%M:%S")
+    if _age_min > SNAPSHOT_TOLERANCE_MIN:
+        _snap = (f"**STALE SNAPSHOT: taken {_shot}, {_age_min / 60:.1f} h before this brief.** "
+                 f"`checkpoint_metrics.sh {label}` did not refresh it for this checkpoint, so the numbers above "
+                 f"describe the snapshot time shown here and NOT this checkpoint's moment.")
+        print(f"WARNING: {label}-metrics.json is {_age_min / 60:.1f} h old - the brief marks its own numbers STALE")
+    else:
+        _snap = (f"taken {_shot}, {_age_min:.0f} min before this brief (the timeline writes a fresh snapshot "
+                 f"~2 min before composing it)")
     # The plan requires the Flash-Next serving stack evicted for the whole window, and checkpoint_metrics.sh now
     # collects it per host. It was never surfaced in the brief, so the requirement went unmentioned in the record
     # the CEO reads - reported here, with a breach stated plainly rather than buried.
@@ -171,7 +189,7 @@ Projection to 24 h from the same file: **{exp.get('A', {}).get('projected_24h_ep
 {gov}
 ## Verified at this checkpoint
 
-* Live trainer state and the numbers above come from `checkpoint_metrics.sh {label}` at the scheduled moment.
+* Live trainer state and the numbers above come from `checkpoint_metrics.sh {label}`; the snapshot is {_snap}
 * Watchdog, last cycle: `{_cut(wd, 150)}`
 * Repository revision: `{_cut(head, 150)}`
 * **Serving posture (plan requirement):** {ev_line}
