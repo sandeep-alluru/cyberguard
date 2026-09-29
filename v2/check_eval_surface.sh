@@ -119,6 +119,16 @@ PYAUTH
     *PASS*) chk yes "scorer selftest on this host: $(echo "$st" | tr -s ' ')";;
     *)      bad "scorer selftest on this host: ${st:-no output}" ;;
   esac
+  # The battery driver and the family scoring dispatch, run against THIS host's copies. The contract checks
+  # these locally, which is how a host-side divergence (the empty authority above) went unnoticed: the modules
+  # that produce the verdict's numbers are these, here.
+  for probe in --check-driver --check-scoring; do
+    out=$("$PY" v2/run_battery.py "$probe" 2>&1 | tail -1)
+    case "$out" in
+      *PASS*) chk yes "run_battery $probe on this host";;
+      *)      bad "run_battery $probe on this host: ${out:-no output}" ;;
+    esac
+  done
 fi
 
 echo

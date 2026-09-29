@@ -56,13 +56,28 @@ for rel in evals/gate-inputs-armA.json evals/gate-inputs-base.json evals/gate-in
     echo "  MISS $rel (local)"
   fi
 done
+# The verdict itself is a DOCUMENT of this contract, not an eval input, so it is harvested at the DEST root.
+# Added 2026-09-29: `REQUIRED` below has always demanded docs/VERDICT-v2.md, but nothing ever copied it into
+# the harvest, so the manifest could never contain it and the requirement was UNSATISFIABLE - the harvest
+# exited 1 and the contract's stage 7 exited 8 on a completely perfect run. Proven in an isolated run with the
+# verdict present on disk: it was still reported missing.
+if [ -s docs/VERDICT-v2.md ]; then
+  sha=$(sha256sum docs/VERDICT-v2.md | awk '{print $1}')
+  cp docs/VERDICT-v2.md "$DEST/VERDICT-v2.md"
+  echo "$sha  VERDICT-v2.md  (local)" >> "$DEST/MANIFEST.sha256"
+  echo "  OK   VERDICT-v2.md (local, sha verified against itself)"
+else
+  echo "  MISS docs/VERDICT-v2.md (local)"
+fi
 # Fail closed on the artifacts the verdict actually needs: "HARVEST-COMPLETE" printed over a manifest that is
 # missing the gate report or the fresh generalisation receipts would be a success message for a failed run.
 REQUIRED="v2/gate-report-v2.json evals/gate-inputs-armA.json docs/VERDICT-v2.md"
 MISSING=""
 for rel in $REQUIRED; do
   base=$(basename "$rel")
-  grep -q "  evals/$base" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $rel"
+  # Match the BASENAME anywhere in the manifest, fixed-string: the old form searched for "  evals/<base>",
+  # which could never match a file harvested at the DEST root (and would also be fooled by a dotted basename).
+  grep -qF -- "$base" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $rel"
 done
 for b in fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
   grep -q "battery-$b-armA.json" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING evals/battery-$b-armA.json"

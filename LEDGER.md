@@ -1187,3 +1187,27 @@ Also settled this round: **`MASK PROOF: PASS` on both hosts** (273/598 tokens su
 is a real assistant answer, identical geometry on both arms). That is the check whose absence an independent
 review objected to — it had never been run for this window. It ran concurrently with training without
 disturbing it, and it confirms the run's objective was correct from the start.
+
+## 2026-09-29 — the harvest's own requirement was UNSATISFIABLE (would have failed stage 7 at ~12:15)
+
+`harvest-v2.sh` has always failed closed on three required artifacts — `v2/gate-report-v2.json`,
+`evals/gate-inputs-armA.json` and `docs/VERDICT-v2.md` — plus the five fresh generalisation receipts. But
+**nothing ever copied `docs/VERDICT-v2.md` into the harvest**: the manifest could not contain it, so the
+requirement was unsatisfiable and the harvest exited 1 on a completely perfect run. The contract's stage 7
+does `bash harvest-v2.sh || { bad "harvest failed"; exit 8; }`, so a flawless evaluation would have been
+reported as a **failed** one at the last step, after the verdict had already been written.
+
+Proven in isolation, not by reading: with `docs/VERDICT-v2.md` present on disk and the other required files
+stubbed, the run still printed `HARVEST-INCOMPLETE — the manifest lacks: docs/VERDICT-v2.md ...`.
+
+Two fixes:
+
+| change | why |
+|---|---|
+| the verdict is now harvested to the DEST root with its own sha256 manifest line | makes the declared requirement satisfiable |
+| `REQUIRED` now matches the **basename** as a fixed string, not `"  evals/<basename>"` | the old form could never match a file harvested at the DEST root, and an unescaped dotted basename is a regex |
+
+Verified three ways: a complete manifest PASSES; removing the verdict FAILS and names it; removing one fresh
+generalisation receipt FAILS and names that. Producer/consumer paths were then cross-checked end to end —
+stage 4 writes `evals/gate-inputs-armA.json`, stage 5 writes `v2/gate-report-v2.json`, stage 6 writes
+`docs/VERDICT-v2.md`, and the harvest now consumes all three.
