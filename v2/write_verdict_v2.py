@@ -26,6 +26,7 @@ import datetime as dt
 import glob
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -242,6 +243,38 @@ def training_trajectory(evals_dir: str = "evals") -> str:
     facts = load("v2/data/mixture/FACTS.json") or {}
     tw = facts.get("training_window") or {}
     inc = ((tw.get("incidents") or {}).get("noop_resume") or {})
+    # READ THE MASK NUMBERS FROM THE RECEIPT, don't hardcode them. This sentence said "273/598 supervised tokens"
+    # as literal text while stage 0c RE-RUNS the proof after training stops and overwrites
+    # `v2/data/mixture/mask-proof.receipt.json`. So a re-run with a different sampled batch would have been reported
+    # with the previous run's numbers, and if the re-run failed the verdict would have cited the earlier capture
+    # without saying when it was taken. Both are now read out, with the capture time, and the sentence degrades
+    # honestly when the receipt is missing or its log line cannot be parsed.
+    _mk = load("v2/data/mixture/mask-proof.receipt.json") or {}
+    _pairs: list[str] = []
+    for _arm in ("armA", "armB"):
+        _h = ((_mk.get("hosts") or {}).get(_arm) or {})
+        _m = re.search(r"supervised (\d+)/(\d+)", str(_h.get("output") or ""))
+        if _m:
+            _pairs.append(f"{_m.group(1)}/{_m.group(2)}")
+    _cap = _mk.get("captured_at")
+    # The CONCLUSION is part of the evidence string, not a fixed tail. The first version appended "which settles that
+    # the mask is assistant-only" unconditionally, so the no-receipt branch read "no receipt could be read ..., which
+    # settles that the mask is assistant-only" - a claim of settledness immediately after saying the evidence was
+    # missing. Each branch now states exactly what its own evidence supports.
+    if not _pairs:
+        _mask_evidence = ("**no mask-proof receipt could be read for this verdict**, so the supervised-token counts "
+                          "are not quoted and **no assistant-only claim is made for this window**.")
+    elif len(set(_pairs)) == 1:
+        _mask_evidence = (f"**{_pairs[0]}** supervised tokens, identical on both arms"
+                          + (f", captured {_cap}" if _cap else "")
+                          + ". Stage 0c re-runs this after training stops, so an older capture means that re-run did "
+                            "not complete. It settles that the mask is assistant-only but does not enumerate every "
+                            "batch.")
+    else:
+        _mask_evidence = (f"per-arm supervised tokens **differ** ({', '.join(_pairs)})"
+                          + (f", captured {_cap}" if _cap else "")
+                          + " - so the mask is not identical across the arms and **no assistant-only-everywhere "
+                            "claim is made**.")
     out = [
         "The evaluated artefacts are the product of **one completed pass over the mixture followed by a",
         "partial second data pass, with fresh optimizer state and a restarted LR schedule** (Codex review",
@@ -252,9 +285,8 @@ def training_trajectory(evals_dir: str = "evals") -> str:
         "Two caveats on these measured figures, both raised by independent review (Muse, 2026-09-29) and recorded",
         "rather than smoothed over. The **terminal LR** column is the LAST LOGGED learning rate: whether the final",
         "optimiser step coincides with the last logging interval is not verified, so it bounds the terminal LR",
-        "rather than reproducing it exactly. And the **live loss-mask evidence is one sampled batch per host**",
-        "(273/598 supervised tokens, identical on both arms), which settles that the mask is assistant-only but",
-        "does not enumerate every batch.",
+        "rather than reproducing it exactly. And the **live loss-mask evidence is one sampled batch per host**:",
+        f"{_mask_evidence}",
         "",
         "| artefact | measured updates | measured wall clock | terminal LR (peak) | steps with nonzero grad_norm | receipt |",
         "|---|---|---|---|---|---|",

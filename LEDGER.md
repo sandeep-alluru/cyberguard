@@ -3397,3 +3397,31 @@ and `qwen-flash-guard.timer` are both inactive *and* disabled, alongside their s
 
 Nothing was run to test this: `pool_control.sh restore` would bring the serving stack up mid-window, so the check was
 a read of the script, the units' state, and the port.
+
+## 2026-09-29 — the verdict hardcoded the mask numbers that stage 0c re-measures
+
+Reading the last unread stage (0c, the live loss-mask proof) led to the sentence it feeds. Stage 0c **re-runs** the
+proof after training stops and **overwrites** `v2/data/mixture/mask-proof.receipt.json` — while the verdict's
+measured-exposure caveat contained `"(273/598 supervised tokens, identical on both arms)"` as **literal text**. Two
+consequences, both wrong in the way this window keeps finding: a re-run whose sampled batch differed would have been
+reported with the *previous* run's numbers, and if the re-run failed the verdict would have cited the earlier capture
+(02:55, nine hours before the contract) without saying when it was taken. The mask section further down already read
+the receipt and cited `captured_at`; the caveat simply did not.
+
+It now reads the receipt: the per-arm supervised-token counts are parsed out of the proof output and required to
+**agree across arms**, and the sentence carries `captured_at` plus the diagnostic that matters — *"stage 0c re-runs
+this after training stops, so an older capture means that re-run did not complete."* Real rendering:
+
+> **273/598** supervised tokens, identical on both arms, captured 2026-09-29T02:55:24-0500. Stage 0c re-runs this
+> after training stops, so an older capture means that re-run did not complete. It settles that the mask is
+> assistant-only but does not enumerate every batch.
+
+**My first version of the fix was itself wrong, in the way it was meant to prevent.** It appended "which settles that
+the mask is assistant-only" unconditionally, so the missing-receipt branch read *"no mask-proof receipt could be read
+for this verdict … which settles that the mask is assistant-only"* — a claim of settledness one clause after saying
+the evidence was absent. The conclusion is now part of the evidence string, and each branch states only what its own
+evidence supports: counts identical across arms ⇒ assistant-only settled on the sampled batch; counts differing ⇒
+explicitly no assistant-only-everywhere claim; no receipt ⇒ counts not quoted and no claim made.
+
+Verified both ways, and the rehearsal passes with all nine mandatory sections present and no occurrence of the
+hardcoded number anywhere in the composed verdict.
