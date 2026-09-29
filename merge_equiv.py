@@ -24,7 +24,7 @@ sensitive to a change ANYWHERE in the continuation; and it is reported with the 
 so it cannot be vacuous. `loss_delta` remains a second, distributional line of evidence. The free-running
 generation statistics are REPORTED, never gated, because they measure amplification rather than equivalence.
 """
-import json, os, sys, time
+import json, math, os, sys, time
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import torch
@@ -156,14 +156,25 @@ def merge_weight_check(merged, un):
                 # significand bits, so for 2^e <= |x| < 2^(e+1) the spacing to the next representable value is
                 # 2^(e-7). Computed per element so the statistic is a true ULP distance.
                 _ai = exp.abs()
-                _e = torch.floor(torch.log2(torch.clamp(_ai, min=1e-30)))
-                _ulp = torch.clamp(torch.pow(torch.tensor(2.0, dtype=exp.dtype, device=exp.device), _e - 7.0),
-                                   min=1e-30)
-                _ulp_err = d / _ulp
+                # NEAR-ZERO ELEMENTS ARE HANDLED EXPLICITLY, not through an arbitrary floor. Review #21: a
+                # clamp at 1e-30 made the denominator LARGER than the true bf16 spacing below that magnitude, so
+                # errors on subnormal-scale ideals were understated. bf16's smallest NORMAL magnitude is 2**-126,
+                # so the ULP statistic is applied only where the ideal is normal, and the subnormal/near-zero
+                # remainder is counted separately with its own absolute bound (bf16 subnormal spacing is 2**-133).
+                _tiny = 2.0 ** -126
+                _normal = _ai >= _tiny
+                _e = torch.floor(torch.log2(torch.clamp(_ai, min=_tiny)))
+                _ulp = torch.pow(torch.tensor(2.0, dtype=exp.dtype, device=exp.device), _e - 7.0)
+                _ulp_err = torch.where(_normal, d / _ulp, torch.zeros_like(d))
+                _nz = int((~_normal).sum())
+                _nz_max = float(d[~_normal].max()) if _nz else 0.0
                 # NaN and inf must be COUNTED, not compared: `NaN > 2` is False, so a model whose weights were all
                 # NaN reported an exceedance fraction of 0 and passed the fraction gate (review #20 executed
-                # exactly that). These are counted explicitly and gated at zero.
+                # exactly that). _nf counts them in the WEIGHTS; _nfc counts them in the COMPARISON ITSELF, because
+                # review #21 showed that a non-finite per-module value could be DISCARDED by the aggregate `max`
+                # (Python's max is order-dependent with NaN, so max(0.5, nan) is 0.5).
                 _nf = int((~torch.isfinite(Wm)).sum())
+                _nfc = int((~torch.isfinite(d)).sum())
                 # SENSITIVITY CONTROL, by construction rather than by sampling: the error this same check would
                 # report if the adapter's contribution were mis-scaled by 10 %. It makes the tolerance
                 # meaningful (review #18 asked exactly this) and needs no extra model to be loaded.
@@ -186,6 +197,9 @@ def merge_weight_check(merged, un):
                 "max_rel_to_merged": float(d.max() / max(1e-12, float(Wm.float().abs().mean()))),
                 "max_ulp_error": float(_ulp_err.max()),
                 "nonfinite_merged_elements": _nf,
+                "nonfinite_comparisons": _nfc,
+                "near_zero_elements": _nz,
+                "near_zero_max_abs": _nz_max,
                 # ROBUST statistic, and the one gated. max_ulp explodes on elements where the ideal merged value
                 # is ~0 (cancellation between W and scaling*B@A): the controls below reach ~1e26 ULP there, and a
                 # single such element could fail a max-based gate spuriously. The FRACTION of elements beyond a
@@ -282,8 +296,14 @@ report = {
     "merge_weight_elements": sum(x["elements"] for x in wchk),
     "merge_weight_max_abs": max(x["max_abs"] for x in wchk),
     # the gated quantity: worst per-element deviation expressed in bf16 ULPs of the ideal merged value
+    # NaN-SAFE aggregate: every per-module value is checked for finiteness FIRST, because `max` with a NaN
+    # operand is order-dependent and could discard it (review #21).
     "merge_weight_max_ulp": max(x["max_ulp_error"] for x in wchk),
+    "merge_weight_any_nonfinite_module": any(not math.isfinite(x["max_ulp_error"]) for x in wchk),
     "merge_weight_nonfinite_elements": sum(x["nonfinite_merged_elements"] for x in wchk),
+    "merge_weight_nonfinite_comparisons": sum(x["nonfinite_comparisons"] for x in wchk),
+    "merge_weight_near_zero_elements": sum(x["near_zero_elements"] for x in wchk),
+    "merge_weight_near_zero_max_abs": max(x["near_zero_max_abs"] for x in wchk),
     "merge_weight_coverage": ("LoRA-adapted linear matrices only; unadapted parameters (embeddings, norms, "
                               "lm_head) are NOT covered by this check and the verdict must concede that"),
     "merge_weight_mean_abs": sum(x["mean_abs"] for x in wchk) / len(wchk),

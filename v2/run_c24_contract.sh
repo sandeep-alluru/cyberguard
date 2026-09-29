@@ -433,6 +433,8 @@ for arm in ("armA", "armB"):
     # measured **0.5 ULP max over 3,633,315,840 elements**, which is the optimum for a correctly-rounded
     # operation, while a 10% mis-scaling measures 3.8e26 and a dropped contribution 3.8e27.
     for k in ("merge_weight_max_ulp", "merge_weight_elements", "merge_weight_nonfinite_elements",
+              "merge_weight_nonfinite_comparisons", "merge_weight_any_nonfinite_module",
+              "merge_weight_near_zero_elements", "merge_weight_near_zero_max_abs",
               "merge_weight_control_scale_0p9_max_ulp", "merge_weight_control_module_dropped_max_ulp"):
         if k not in e or e[k] is None:
             sys.exit(f"FATAL: {eq} records no {k} - the merge arithmetic is not checked by this artefact")
@@ -446,6 +448,21 @@ for arm in ("armA", "armB"):
     if nf != 0:
         sys.exit(f"FATAL: {arm} the merged model has {nf} non-finite weight(s); NaN compares False against every "
                  f"tolerance and would otherwise vanish from the exceedance count")
+    # Review #21: a non-finite per-module COMPARISON could be discarded by the aggregate `max` (order-dependent
+    # with NaN), so both the comparison-level count and a per-module finiteness flag are gated here.
+    if int(e["merge_weight_nonfinite_comparisons"]) != 0 or bool(e["merge_weight_any_nonfinite_module"]):
+        sys.exit(f"FATAL: {arm} {e['merge_weight_nonfinite_comparisons']} non-finite weight COMPARISON(s) "
+                 f"(any_nonfinite_module={e['merge_weight_any_nonfinite_module']}) - a non-finite comparison must "
+                 f"never be discarded before acceptance")
+    # Near-zero (subnormal-scale) ideals are excluded from the ULP statistic and bounded absolutely instead,
+    # because a ULP ratio is meaningless there. bf16's largest subnormal is ~1.2e-38.
+    nz_abs = float(e["merge_weight_near_zero_max_abs"])
+    if not math.isfinite(nz_abs) or nz_abs > 1e-38:
+        sys.exit(f"FATAL: {arm} {e['merge_weight_near_zero_elements']} near-zero adapted weight(s) deviate by "
+                 f"{nz_abs} in absolute terms (> 1e-38); the ULP statistic does not cover those elements")
+    # NOTE ON WHAT THIS PROVES (review #21): a tolerance necessarily admits deviations below itself. The claim
+    # this gate supports is therefore NOT "the merged weights are correct" but "every merged weight equals
+    # base + scaling*(B@A) to within 2 bf16 ULP", with 0.5 ULP measured as shipped and controls at 4.1e36/4.1e37.
     if mx > 2.0:
         sys.exit(f"FATAL: {arm} the worst merged weight deviates from base + scaling*(B@A) by {mx:.6g} bf16 ULP "
                  f"over {we} elements. A correct merge measures 0.5 (half an ULP, the optimum for correct "

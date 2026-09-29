@@ -1566,3 +1566,38 @@ costs the entire verdict. Recorded as a considered option, not an oversight.
 28.06 spent / 47.06 worst case. The evaluation is a separate, planned cost in the plan of record
 (`docs/SPEC-V2.md`: 28,808 evaluation generations ≈ 8.01 h split across both machines); the measured throughput is
 consistent with that budget rather than in addition to it.
+
+## 2026-09-29 — review #21: three more findings, all narrow, all fixed; and a decision rule for further rounds
+
+#21 rejected revision `35e9166fa0d4` on three points, each correct:
+
+1. **"can discard non-finite module comparisons before acceptance"** — a REAL hole. `merge_weight_max_ulp` was
+   `max(per-module values)`, and Python's `max` is order-dependent with NaN (`max(0.5, nan)` is `0.5`), so a
+   module whose *comparison* was non-finite could vanish from the aggregate. I had counted non-finite values in
+   `Wm` but not in the comparison itself.
+2. **"understates near-zero errors through an absolute spacing floor"** — my `min=1e-30` clamp made the ULP
+   denominator *larger* than the true bf16 spacing below that magnitude, understating errors there.
+3. **"accepts incorrect finite adapted weights"** — true of any tolerance; the fault was the *claim*. The verdict
+   said `merge_and_unload()` "produced the correct weights", which no tolerance can establish.
+
+Fixed:
+* the ULP statistic now applies only where the ideal is **normal** (`|x| >= 2^-126`); the near-zero remainder is
+  **counted separately** with its own absolute bound (bf16 subnormal spacing is `2^-133`), removing the arbitrary
+  floor entirely. Measured: **5 near-zero elements with a maximum absolute deviation of exactly 0**;
+* **comparison-level** non-finites are counted (`merge_weight_nonfinite_comparisons`), a NaN-safe per-module
+  finiteness flag is aggregated (`merge_weight_any_nonfinite_module`), and stage 2 fails on either;
+* the verdict's wording is now an explicit **tolerance, not a claim of correctness**: every merged weight equals
+  `base_weight + scaling*(B@A)` **to within 0.5 ULP at the worst element** (half an ULP being the optimum for a
+  correctly-rounded operation), against controls at 4.1e36 (10 % mis-scaling) and 4.1e37 (dropped contribution).
+
+Verified against **every counterexample from #19, #20 and #21** plus the degenerate cases: as-measured PASSES;
+sparse corruption FAILS; non-finite comparisons FAIL; a NaN module flag FAILS; a near-zero error above the
+subnormal bound FAILS; all-NaN weights FAIL; non-separating controls FAIL.
+
+**Decision rule stated in advance, so it is not invented under pressure.** If review #22 reports a *soundness*
+hole — a defect that PASSES the check — I fix the check. If it reports a *limitation* — something the check does
+not cover that the verdict already concedes (unadapted parameters; sub-tolerance deviations; behavioural
+equivalence, which #18 established no finite sample can establish) — I record it as a documented dissent, because
+at that point the difference is the wording of an already-scoped claim, not the validity of the measurement, and
+the contract is not gated on this review. Six rounds have each found something real; the criterion is now grounded
+in the arithmetic's own optimum rather than in a threshold I chose, and the remaining room is tolerance semantics.
