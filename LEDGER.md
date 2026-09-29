@@ -1471,3 +1471,27 @@ fraction buys; and an absent statistic FAILS.
 The verdict now states that the check covers the **LoRA-adapted linear matrices only** and that unadapted
 parameters — embeddings, normalisation layers, the output head — are **not covered**, so it establishes the
 correctness of the merge on the adapted matrices and not of the entire merged model.
+
+## 2026-09-29 — the HOSTS' evals/ directories were never quarantined either
+
+Stage 0pre quarantines the local `evals/` because "a measurement from a previous run is not evidence about this
+one". The **hosts'** `evals/` directories were never treated the same way — and spark-40ee was found holding five
+stale files:
+
+```
+cyberguard-lora-v1.json            (2026-09-27)
+cyberguard-lora-v1.partial.json    (2026-09-27 — from a crashed run)
+merge-equiv-cyberguard-lora-v1.json(2026-09-27)
+merge-equiv-smoke-equivalence.json (2026-09-29 — one of my own smoke artefacts)
+smoke-refactor-check.json          (2026-09-26)
+```
+
+This matters because **stage 3 pulls battery receipts back from the hosts with a NAME GLOB**
+(`rsync .../evals/battery-*-$ARM.json`): a stale file whose name matches that glob would be pulled and consumed as
+this window's measurement. None of these five happen to match, so nothing was actually contaminated — but that is
+luck, not a control, and the same directory has accumulated files from three different days.
+
+Added `v2/quarantine_host_evals.sh` (runs on a host, archives, never deletes, exits non-zero if anything is left
+outside the archive) and wired it into contract stage 0pre for both hosts, so every run starts with clean host
+directories as well as a clean local one. Applied now: 40ee archived its 5 files, 8cf2 archived 0, and both report
+`evals/ json now: 0`.

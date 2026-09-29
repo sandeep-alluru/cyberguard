@@ -110,6 +110,20 @@ if [ -d evals ]; then
   fi
 fi
 
+# The HOSTS' evals/ directories get the same treatment, because stage 3 pulls battery receipts back with a NAME
+# GLOB from them and a stale file whose name matches that glob would be consumed as this window's measurement.
+# spark-40ee was found holding five stale files from 09-26/09-27 plus one of my own smoke artefacts.
+for spec in "$S4" "$S8"; do
+  echo "  ssh $spec: bash v2/quarantine_host_evals.sh"
+  [ "$DRY" = 1 ] && continue
+  timeout 300 rsync -a -e "ssh -o BatchMode=yes" v2/quarantine_host_evals.sh "$spec:~/cyberguard/v2/" 2>/dev/null \
+    || { bad "could not install the host quarantine script on $spec"; exit 2; }
+  q_out=$(timeout 300 ssh -o BatchMode=yes -o ConnectTimeout=10 "$spec" \
+          "bash ~/cyberguard/v2/quarantine_host_evals.sh" 2>&1); q_rc=$?
+  printf '%s\n' "$q_out"
+  [ "$q_rc" = 0 ] || { bad "host evals quarantine failed on $spec"; exit 2; }
+done
+
 # ---------------------------------------------------------------- stage 0d: learning proof
 # Codex review #14 (2026-09-29) accepted that the repaired resume is TRAINABLE (trainable params 66,060,288
 # against the frozen run's 0) but refused to accept that it is LEARNING:
