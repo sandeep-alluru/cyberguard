@@ -19,9 +19,13 @@ HOSTS = {"armA": "clawerdigi2@spark-40ee", "armB": "clawerdigi1@spark-8cf2"}
 res = {"captured_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "mode": "MASK_PROOF=1 (exits before any optimizer step)",
        "why": "the proof was never run for this window; this is the settling evidence", "hosts": {}}
 for arm, host in HOSTS.items():
+    # Mirror the launcher EXACTLY: CYBERGUARD_ARMS selects the mixture (RUN_NAME only names the output), so a
+    # proof run without it would not reproduce these arms' configuration (codex pass eleven).
     cmd = ("cd ~/cyberguard && source ~/.cyberguard-env && "
-           "RUN_NAME=cyberguard-lora-v2-%s MASK_PROOF=1 timeout 900 "
-           "$CYBERGUARD_VENV/bin/python train_cyberguard.py 2>&1 | grep -E 'MASK PROOF|Error|error' | tail -6" % arm)
+           "CYBERGUARD_ROOT=$HOME/cyberguard CYBERGUARD_ARMS=$HOME/cyberguard/v2/data/mixture/arm%s.jsonl "
+           "RUN_NAME=cyberguard-lora-v2-arm%s MASK_PROOF=1 timeout 900 "
+           "$CYBERGUARD_VENV/bin/python train_cyberguard.py 2>&1 | grep -E 'MASK PROOF|Error|error' | tail -6"
+           % (arm[-1], arm))
     try:
         p = subprocess.run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, cmd],
                            capture_output=True, text=True, timeout=1200)

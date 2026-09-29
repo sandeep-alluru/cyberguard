@@ -174,7 +174,27 @@ lora = LoraConfig(
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                     "gate_proj", "up_proj", "down_proj"],
 )
-model = get_peft_model(model, lora)
+_RESUME = os.environ.get("RESUME_ADAPTER", "")
+if _RESUME and Path(_RESUME).exists():
+    from peft import PeftModel
+    # is_trainable=True is MANDATORY. PeftModel.from_pretrained defaults to is_trainable=False, which sets
+    # requires_grad=False on every LoRA parameter: the run then reports "trainable params: 0", logs
+    # grad_norm 0 for its entire duration, and saves an artefact that behaves exactly like its input.
+    # That is precisely what the 2026-09-28 23:29 relaunch did on BOTH arms - 3.05 GPU-h per arm spent
+    # proving nothing, caught only by reading one log line. Do NOT re-wrap with get_peft_model either:
+    # wrapping a PeftModel in another does not make the inner adapters trainable.
+    model = PeftModel.from_pretrained(model, _RESUME, is_trainable=True)
+    log(f"RESUMED LoRA adapter from {_RESUME} (is_trainable=True)")
+else:
+    model = get_peft_model(model, lora)
+# Refuse to spend GPU on a run that cannot learn. Asserting on the OUTCOME (the trainable parameter count)
+# rather than on the code path is what makes this class of defect unrepeatable.
+_trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+if _trainable <= 0:
+    raise SystemExit(
+        "REFUSING TO TRAIN: 0 trainable parameters. A frozen run burns the whole budget and yields an "
+        "artefact that learned nothing (2026-09-28 23:29 is_trainable=False incident)."
+    )
 model.print_trainable_parameters()
 
 callbacks = []
@@ -293,8 +313,8 @@ receipt = {
     "dataset": str(DATA),
     "arms": ARMS or None,
     "arms_sha256": (_arm_sha if ARMS else None),
-    "rows_total": len(_canon), "rows_train": len(train_rows), "rows_eval": len(eval_rows),
-    "rows_after_prompt_dedupe": len(_canon), "max_rows_cap": MAX_ROWS,
+    "rows_total": (len(_canon) if not ARMS else len(train_rows)), "rows_train": len(train_rows), "rows_eval": len(eval_rows),
+    "rows_after_prompt_dedupe": (len(_canon) if not ARMS else len(train_rows)), "max_rows_cap": MAX_ROWS,
     "config": {
         "max_seq": MAX_SEQ, "epochs": EPOCHS, "lr": LR, "batch": BATCH,
         "grad_accum": GRAD_ACC, "lora_r": LORA_R, "seed": SEED,

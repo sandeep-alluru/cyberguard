@@ -32,10 +32,13 @@ for arm, (host, label) in HOSTS.items():
         "echo LOG_TAIL:; tr '\\r' '\\n' < logs/train-cyberguard-lora-v2-arm%s.log | grep -E 'loss' | tail -1 | cut -c1-200; "
         "echo CHECKPOINTS:; ls -d adapters/cyberguard-lora-v2-arm*/checkpoint-* 2>/dev/null | tr '\\n' ' '; "
         "echo ADAPTER_FILES:; ls adapters/cyberguard-lora-v2-arm*/ 2>/dev/null | grep -E 'safetensors|json' | tr '\\n' ' '; "
+        "echo EFFECTIVE_ENV:; tr '\\0' '\\n' < /proc/$(pgrep -f 'train_cyberguard[.]py' | head -1)/environ 2>/dev/null | grep -E 'CYBERGUARD_ARMS|MAX_MINUTES|RUN_NAME|CYBERGUARD_ROOT' | tr '\\n' '|'; "
+        "echo PROC_START:; ps -o lstart=,etime= -p $(pgrep -f 'train_cyberguard[.]py' | head -1) 2>/dev/null; "
+        "echo EPOCH_PROGRESS:; tr '\\r' '\\n' < logs/train-cyberguard-lora-v2-arm%s.log | grep -oE \"'epoch': '[0-9.]+'\" | sed -n '1p;$p' | tr '\\n' ' '; "
         "echo MASK_CODE:; grep -nE 'MASK PROOF|labels\[|DataCollator|-100|label_mask' train_cyberguard.py | head -16 | tr '\\n' '|'; "
         "echo TRAINER_SHA:; sha256sum train_cyberguard.py | cut -d' ' -f1; "
         "echo LAUNCHER_SHA:; sha256sum run-v2-arm.sh 2>/dev/null | cut -d' ' -f1"
-    ) % (arm[-1], arm[-1], arm[-1], arm[-1])
+    ) % (arm[-1], arm[-1], arm[-1], arm[-1], arm[-1])
     try:
         p = subprocess.run(["ssh"] + ssh_opts + [host, q], capture_output=True, text=True, timeout=120)
         raw = (p.stdout or "") + (p.stderr or "")

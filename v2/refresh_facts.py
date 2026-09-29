@@ -53,6 +53,16 @@ for hours in (8, 16, 24):
         "refusal_passes_per_unique_row_projected": round(rp / sum(UNIQUE.values()), 2),
     }
 old = json.load(open(os.path.join(D, "FACTS.json"))) if os.path.exists(os.path.join(D, "FACTS.json")) else {}
+# `training_window` records OBSERVED runtime facts — measured wall clock, the no-op-resume incident, and the
+# GPU-hour accounting. None of it is derivable from the built mixture, so a refresh must CARRY IT FORWARD:
+# regenerating from scratch silently deleted the only machine-readable record of a 6.02 GPU-hour incident that
+# the verdict is required to cite from this file. Assert on the outcome, not on the intent.
+PRESERVE = ("training_window",)
+for _k in PRESERVE:
+    if _k in old:
+        facts[_k] = old[_k]
+_dropped = [_k for _k in PRESERVE if _k in old and _k not in facts]
+assert not _dropped, f"FACTS refresh would drop preserved section(s): {_dropped}"
 json.dump(facts, open(os.path.join(D, "FACTS.json"), "w"), indent=2)
 print(f"  FACTS refreshed: rows/arm {old.get('epoch_rows_per_arm')} -> {n}")
 print(f"    refusal slots {slots} ({facts['refusal_share']:.4%} of epoch), unique {facts['refusal_unique_rows']}")

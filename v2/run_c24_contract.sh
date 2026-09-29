@@ -22,6 +22,66 @@ ok()   { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
 bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; }
 step() { echo; echo "=== stage $1: $2 ==="; }
 
+# ---------------------------------------------------------------- stage 00: wait for the trainers to exit
+# Added 2026-09-29. Stages 0a/0c both need training to be OVER on both hosts: 0a rsyncs the adapter (a live
+# trainer still writes adapter_model.safetensors, so the pull can capture a torn file of the right NAME and size
+# - the completeness check on lines 40-42 would pass it), and 0c runs a MASK_PROOF that needs the GPU the
+# trainer is holding. The contract was scheduled for 10:25 while the epoch boundary falls ~10:29, i.e. it would
+# have pulled four minutes early. This waits, and FAILS LOUDLY rather than proceeding on a torn artefact: a
+# contract that runs anyway produces a complete-looking verdict for an adapter that was never finished.
+TRAINER_WAIT_MIN="${TRAINER_WAIT_MIN:-45}"
+step 00 "wait for both trainers to exit (deadline ${TRAINER_WAIT_MIN} min)"
+trainer_state() { # $1=host -> RUNNING | GONE | UNREACHABLE
+  out=$(timeout 30 ssh -o BatchMode=yes -o ConnectTimeout=10 "$1" \
+        "pgrep -f '[t]rain_cyberguard\.py' >/dev/null 2>&1 && echo RUNNING || echo GONE" 2>/dev/null) || true
+  echo "${out:-UNREACHABLE}"
+}
+waited=0
+while :; do
+  sa=$(trainer_state "$S4"); sb=$(trainer_state "$S8")
+  echo "  t+${waited}s  armA@40ee=$sa  armB@8cf2=$sb"
+  # A --dry-run is a plan preview, not an execution: it samples the gate once and continues, so previewing
+  # cannot sit here for the whole deadline. The real run keeps the fail-closed wait below.
+  [ "$DRY" = 1 ] && { echo "  DRY-RUN: sampling the gate once instead of waiting"; break; }
+  [ "$sa" = GONE ] && [ "$sb" = GONE ] && break
+  if [ "$sa" = UNREACHABLE ] || [ "$sb" = UNREACHABLE ]; then
+    bad "a training host is UNREACHABLE - cannot prove training finished; not proceeding on an unverified adapter"
+    exit 3
+  fi
+  if [ "$waited" -ge $((TRAINER_WAIT_MIN * 60)) ]; then
+    bad "trainers still running after ${TRAINER_WAIT_MIN} min (armA=$sa armB=$sb) - refusing to evaluate a live adapter"
+    echo "     raise TRAINER_WAIT_MIN or re-run once the runs have exited and written their receipts"
+    exit 3
+  fi
+  sleep 60; waited=$((waited + 60))
+done
+# Say only what was observed. In a dry-run nothing has been proven to have exited, and printing "OK both
+# trainers have exited" there would be exactly the kind of unearned success line this contract exists to avoid.
+if [ "$DRY" = 1 ]; then
+  echo "  DRY-RUN: trainer state sampled, not proven (armA=$sa armB=$sb) — the real run waits for GONE"
+else
+  ok "both trainers have exited"
+fi
+# Record what "exited" rests on, so the verdict cites evidence rather than a live process check that is gone by
+# the time anyone reads it.
+if [ "$DRY" != 1 ]; then
+  mkdir -p v2/data/mixture
+  { echo "{"
+    echo "  \"checked_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
+    echo "  \"waited_seconds\": $waited,"
+    for pair in "$S4 armA" "$S8 armB"; do set -- $pair; host=$1; arm=$2
+      sha=$(timeout 60 ssh -o BatchMode=yes "$host" \
+            "sha256sum ~/cyberguard/adapters/cyberguard-lora-v2-$arm/adapter_model.safetensors 2>/dev/null | cut -d' ' -f1" 2>/dev/null)
+      mt=$(timeout 60 ssh -o BatchMode=yes "$host" \
+            "stat -c %Y ~/cyberguard/adapters/cyberguard-lora-v2-$arm/adapter_model.safetensors 2>/dev/null" 2>/dev/null)
+      echo "  \"${arm}_adapter_sha256\": \"${sha:-MISSING}\", \"${arm}_adapter_mtime\": ${mt:-0},"
+    done
+    echo "  \"trainer_process_gone_on_both\": true"
+    echo "}"
+  } > v2/data/mixture/trainer-exit.receipt.json
+  ok "receipt v2/data/mixture/trainer-exit.receipt.json (adapter hashes as of exit)"
+fi
+
 # ---------------------------------------------------------------- stage 0a: pull the adapters
 # Added while preparing C24, because the contract as written could NOT have run: stages 1-2 (merge equivalence
 # and the benchmark) execute LOCALLY, while the trained adapters exist only on the training hosts — so

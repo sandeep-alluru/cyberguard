@@ -4,3 +4,7 @@
     arm A: 21664 samples = 0.267 epoch | 2560 refusal presentations | 24 h projection 2.24 epochs, 21502 refusal presentations
     arm B: 21568 samples = 0.266 epoch | 2549 refusal presentations | 24 h projection 2.36 epochs, 22602 refusal presentations
     (declared FACTS basis: 0.968288 s/sample -> epoch 21.8 h)
+[2026-09-29 02:27:00 CDT] C16 brief
+  wrote docs/ceo/2026-09-29_022700CDT-cyberguard-checkpoint11-c16-look.md (2751 bytes)
+  portal verification: PASS — HTTP 200 (16784 bytes), content hits=3, raw IPv4=0 -> http://127.0.0.1:3100/ceo/report/ede0ad6cebc37ff0547c
+[2026-09-29 02:35:29 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
