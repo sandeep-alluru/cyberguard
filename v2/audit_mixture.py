@@ -345,6 +345,51 @@ def main():
     def _sha(path):
         import hashlib
         return hashlib.sha256(open(path, "rb").read()).hexdigest()
+    # ---- J2 --- content checks on BOTH arms (independent review, Muse, 2026-09-28: every content check
+    # above scans arm A only, mostly on samples, while the audit's PASS covers both arms only for structure).
+    # This section computes the content metrics for BOTH arms and asserts what must hold on each, plus the
+    # one difference that is by design (Arm B substitutes the refusal content, so its abstention/refusal
+    # profile is expected to differ in a stated direction, not to match).
+    def _content_metrics(rows, label):
+        esc = dup = deg = absten = 0
+        seen_k = collections.Counter()
+        for r in rows:
+            u, a = str(r.get("user", "")), str(r.get("assistant", ""))
+            if chr(92) + "n" in u or chr(92) + "n" in a:
+                esc += 1
+            seen_k[" ".join(u.lower().split())] += 1
+            if re.search(r"(.)\1{7,}", a) or (len(a.split()) >= 20 and
+                                               collections.Counter(w.lower() for w in a.split()).most_common(1)[0][1]
+                                               / max(1, len(a.split())) > 0.5):
+                deg += 1
+            low = a.lower()
+            if "i'm sorry" in low or "i can't assist" in low or "i cannot assist" in low or "i do not know" in low:
+                absten += 1
+        dup = sum(c - max(1, 1) for c in seen_k.values() if c > 1)
+        m = {"rows": len(rows), "literal_escapes": esc, "repeated_user_rows": dup,
+             "degenerate_answers": deg, "abstention_like_answers": absten}
+        return m
+
+    _cmA, _cmB = _content_metrics(A, "armA"), _content_metrics(B, "armB")
+    rep["content_both_arms"] = {"armA": _cmA, "armB": _cmB}
+    for _label, _m in (("armA", _cmA), ("armB", _cmB)):
+        if _m["literal_escapes"]:
+            fail("J2-escaping", f"{_label}: {_m['literal_escapes']} rows contain a literal backslash-n")
+        if _m["rows"] and _m["degenerate_answers"] / _m["rows"] > 0.02:
+            fail("J2-degeneracy", f"{_label}: {_m['degenerate_answers']} degenerate answers "
+                                  f"({_m['degenerate_answers'] / _m['rows']:.2%})")
+        if _m["rows"] and _m["repeated_user_rows"] / _m["rows"] > 0.35:
+            fail("J2-duplicates", f"{_label}: {_m['repeated_user_rows']} repeated user rows "
+                                  f"({_m['repeated_user_rows'] / _m['rows']:.2%})")
+    # the designed difference: Arm B has no refusal training, so its refusal-shaped answers must not exceed
+    # Arm A's. If the substitution had not taken effect, these two numbers would move together.
+    if _cmB["abstention_like_answers"] > _cmA["abstention_like_answers"]:
+        fail("J2-arm-equivalence", f"arm B shows MORE refusal-shaped answers than arm A "
+                                   f"({_cmB['abstention_like_answers']} vs {_cmA['abstention_like_answers']}); "
+                                   f"the refusal substitution is not visible in the data")
+    print(f"  J2 both-arms content: armA {_cmA}")
+    print(f"                        armB {_cmB}")
+
     rep["arm_sha256"] = {"armA": _sha(os.path.join(args.dir, "armA.jsonl")),
                          "armB": _sha(os.path.join(args.dir, "armB.jsonl"))}
     rcpt = {"checks": rep, "failures": FAILS, "warnings": WARNS,
