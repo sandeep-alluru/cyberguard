@@ -9,12 +9,30 @@
 # The work is SPLIT ACROSS BOTH MACHINES because the plan says so: arm A's batteries on spark-40ee, arm B's on
 # spark-8cf2, with the shared base side run once and copied.
 #
-# Usage: bash v2/run_c24_contract.sh [--dry-run] [--stage N]
+# Usage: bash v2/run_c24_contract.sh [--dry-run]
 set -uo pipefail
 ROOT="$HOME/AgentHub/cyberguard"
 cd "$ROOT"
-DRY=0; ONLY=""
-for a in "$@"; do case "$a" in --dry-run) DRY=1;; --stage) ONLY="next";; [0-9]) ONLY="$a";; esac; done
+# ARGUMENTS ARE CHECKED, not silently ignored. The usage line advertised `--stage N`, and the parser collected
+# the value into a variable that was NEVER READ: `--stage 3` would therefore have run the ENTIRE ~11 h contract -
+# including stage 0pre, which quarantines the previous run's outputs - while the caller believed they were
+# re-running a single stage. Found by reading the script before trusting it. Rather than implement a selector
+# whose labels are not ordinal (the 0x stages execute 00, 0pre, 0d, 0a, 0c, 0, 0b), the flag is removed and any
+# unrecognised argument is a hard error. Recovery paths that DO exist: the timeline re-runs the contract once on
+# failure, and --dry-run previews every stage without executing anything.
+DRY=0
+for a in "$@"; do
+  case "$a" in
+    --dry-run) DRY=1 ;;
+    *)
+      printf 'FATAL: unknown argument: %s\n' "$a" >&2
+      printf '  usage: bash v2/run_c24_contract.sh [--dry-run]\n' >&2
+      printf '  (%s is not a supported selector. An earlier version advertised --stage N and ignored it, which\n' "$a" >&2
+      printf '   would have run the whole contract. Use --dry-run to preview, or the timeline, which re-runs\n' >&2
+      printf '   the contract once automatically on a non-zero exit.)\n' >&2
+      exit 64 ;;
+  esac
+done
 
 S4=clawerdigi2@spark-40ee; S8=clawerdigi1@spark-8cf2
 FACTS="v2/data/mixture/FACTS.json"

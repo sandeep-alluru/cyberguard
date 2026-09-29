@@ -1865,3 +1865,18 @@ claim on a different rule. Now:
 
 Verified discriminating: tampering Claim 1's bar to `−0.25` fails, and tampering G-B's bar from `0.90` to `0.80`
 fails — each naming the drifted rule.
+
+## 2026-09-29 — the contract advertised a stage selector it did not implement
+
+Reading the script before trusting it (rather than after it failed) found that `--stage N` was **parsed and then
+ignored**: the value went into a variable that is never read anywhere in the file. The consequences of the trap
+are not cosmetic — `--stage 3`, the natural thing to type when re-running just the evaluation stage, would have
+run the **entire ~11-hour contract**, including **stage 0pre, which quarantines the previous run's outputs**, so a
+recovery attempt would have destroyed the partial run it was meant to resume.
+
+Removed rather than implemented: the stage labels are **not ordinal** (the 0x stages execute `00, 0pre, 0d, 0a,
+0c, 0, 0b`), so a numeric selector would be ambiguous exactly where it matters. The usage line now advertises only
+`[--dry-run]`, any unrecognised argument exits **64** with a message explaining what happened and which recovery
+paths do exist (the timeline's automatic single re-run; `--dry-run` for a preview). Verified: `--dry-run` prints
+all 14 stages and exits 0; `--stage 3`, `3` and `--bogus` each exit 64; both timeline invocations pass no
+arguments and are unaffected.
