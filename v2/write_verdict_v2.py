@@ -112,6 +112,18 @@ def main() -> int:
         return "\n".join(out)
 
     claims = [g for g in gates if g["gate"].startswith("Claim")]
+    _d2 = load("v2/data/mixture/d2-diversity.receipt.json")
+    if _d2:
+        _c, _o = _d2.get("control", {}), _d2.get("offensive", {})
+        _d2_block = (f"| | control (Arm B) | offensive (Arm A) |\n|---|---|---|\n"
+                     f"| distinct prompts | **{_c.get('distinct_prompts')}** | {_o.get('distinct_prompts')} |\n"
+                     f"| presentations per prompt | {_c.get('reps_per_prompt')} | {_o.get('reps_per_prompt')} |\n"
+                     f"| distinct answers | **{_c.get('distinct_answers')}** | — |\n"
+                     f"| mean answer length (words) | {_c.get('mean_answer_words')} | {_o.get('mean_answer_words')} |\n"
+                     f"\nLength gap **{_d2.get('length_gap_pct')} %** against a 10 % target; exit verdict "
+                     f"**{_d2.get('verdict')}**.")
+    else:
+        _d2_block = "(the D2 diversity receipt is absent — the asymmetry is unmeasured for this verdict)"
     now = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S-05:00")
     doc = f"""---
 title: CyberGuard v2 — VERDICT (C24)
@@ -137,6 +149,17 @@ training rows are labelled as recall.
 preserve *support* and comparability; they do **not** transport the original power figure, because paired
 variance depends on discordance and template-family variability is unmeasured. No inherited power number is
 quoted here, and the unmeasured bias directions are wording sensitivity and recognition of fictional entities.
+
+## Known asymmetries between the arms (measured — D2 is declared UNMET)
+
+The control arm's design target was ">=1,000 distinct control prompts and <=10 % length gap". Measured on the
+frozen arms (`v2/data/mixture/d2-diversity.receipt.json`):
+
+{_d2_block}
+
+The Arm A vs Arm B contrast therefore carries a **residual prompt-diversity and answer-length asymmetry
+intrinsic to the substitution design**. No claim in this verdict describes the control as "matched" without
+stating it.
 
 ## Every gate
 

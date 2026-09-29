@@ -339,6 +339,16 @@ registers, and the verdict must state them).**
   therefore assessed **per task** (1,200 / 40) rather than one number for every task — applying 1,200 to IFEval
   would have called its own registered size a shortfall.
 
+**D2 — the control arm's "matched" construction is NOT met, and is declared rather than assumed.** The
+objective's exit for D2 was *"≥1,000 distinct control prompts and ≤10 % length gap"*. Measured on the frozen arms
+(`v2/data/mixture/d2-diversity.receipt.json`, method recorded there): the 5,600 substituted rows carry **228
+distinct control prompts** (24.6 presentations each) drawn from **72 distinct answers** (~78× each), against
+**700 distinct offensive prompts** (8.0 each), and the control answers average **59.6 words vs 70.5** — a
+**15.5 % gap**. Both halves of the exit are therefore **unmet**, and the data is frozen and already training, so
+this cannot be repaired in this window. Consequence for the verdict: the Arm A vs Arm B contrast carries a
+**residual prompt-diversity and answer-length asymmetry intrinsic to the substitution design**, and no report may
+describe the control as "matched" without stating it. This is a declared miss, not a closed item.
+
 **Third re-registration (2026-09-28 22:02 CDT, owner-approved): generalisation instruments vs retention
 instruments.** Independent review (Muse) withheld clearance because the frozen batteries turned out to be
 **training rows**, verified here by measurement against both arms:
