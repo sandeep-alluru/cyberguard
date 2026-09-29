@@ -2307,3 +2307,29 @@ both signal stops (0 s, lock released), `--dry-run` not refused and taking no lo
 idempotence in both directions. The live timeline was then restarted **under the locked code** at 06:59:58: it holds
 `v2/.c24-timeline.lock`, correctly grace-skipped the 05:50 M2 checkpoint, and a deliberate second start was refused
 with exit 75.
+
+## 2026-09-29 — the harvest log was reporting evidence missing that was present
+
+Two follow-ups from checking that every `REQUIRED` substring in `harvest-v2.sh` is *satisfiable*, since an
+unsatisfiable entry fails the harvest at the end of an ~11 h contract and costs the checksum-verified deliverable.
+
+The requirement itself is sound: `gate-report-v2.json`, `gate-inputs-armA.json` and `VERDICT-v2.md` are local
+`collect_local` inputs; the two trained adapters are pulled from
+`adapters/cyberguard-lora-v2-arm{A,B}/adapter_model.safetensors`, which **exist on both hosts** at exactly that path
+(264,308,896 bytes each, verified by ssh); the five fresh generalisation batteries come from stage 3; and
+`audit.receipt.json` / `leak-scan-c24.receipt.json` come from the local `v2/data/mixture/*.receipt.json` glob. All
+seven are reachable.
+
+What was wrong was two lines just above that glob: `audit.receipt.json` and `leak-scan.receipt.json` were being
+pulled **from the hosts**, where — as the comment three lines below them says in as many words — the evidence
+receipts do not exist, because they were produced on this machine. Both pulls were therefore guaranteed failures,
+and their `|| true` turned that into `MISS ... (not present on host)` lines in the harvest log: a log that reports
+evidence missing when the evidence is present and is collected a few lines later. The dead pulls are removed; the
+local glob already supplies both.
+
+Also checked while in there: no live script contains the `arm$arm` concatenation that left stray
+`cyberguard-lora-v2-armarmA` / `armarmB` directories on both hosts (the residue is from an older, since-fixed
+script), so nothing is pulling an adapter from the wrong directory.
+
+Re-verified after the edit: harvest syntax; both required receipt names present as manifest substrings via the local
+glob; the local rehearsal still passes (12 decided, 6 unmeasured, exit 0).

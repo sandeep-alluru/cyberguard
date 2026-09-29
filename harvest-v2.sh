@@ -38,8 +38,12 @@ for pair in "$H1 armA" "$H2 armB"; do
   # the MIXTURE is not an adapter: filing it under adapters/ made `adapters/armA.jsonl` look like one.
   pull "$host" "v2/data/mixture/$arm.jsonl" mixture || true
 done
-pull "$H1" "v2/data/mixture/audit.receipt.json" receipts || true
-pull "$H1" "v2/data/mixture/leak-scan.receipt.json" receipts || true
+# NOTE: audit.receipt.json and leak-scan.receipt.json were being pulled FROM THE HOSTS here. They do not exist
+# there - the note below records that the evidence receipts were always local to this machine - so both pulls were
+# guaranteed to fail, and `|| true` turned that into two "MISS ... (not present on host)" lines in the harvest log.
+# A reader of that log would see evidence reported missing when it is present, and the local glob below already
+# collects every one of them (that is how the D1 leak-scan and the re-audit PASS satisfy REQUIRED). The dead pulls
+# are removed so the log says only what happened.
 for f in train-cyberguard-lora-v2-armA.log train-cyberguard-lora-v2-armB.log eval-cyberguard-lora-v2-armA.log eval-cyberguard-lora-v2-armB.log; do
   pull "$H1" "logs/$f" logs || true
 done
