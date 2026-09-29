@@ -2656,3 +2656,14 @@ instead of "ABSENT", and a `scp` non-zero that was "file not found" rather than 
 by asking what the evidence actually said rather than accepting the first answer — but the pattern is now explicit:
 in this environment, **a pipeline reports the last element's status, a regex reports only what its pattern can
 match, and a failing transfer reports only that it failed.** Checks are written to name their reason.
+
+## 2026-09-29 — the gate registry checked against the gate layer, id by id
+
+Element 4 is "the two pre-registered confirmatory claims plus the nine gates", so the plan's §3 registry was compared
+mechanically with the code that composes the report: the plan names **G-A, G-A2, G-B, G-C, G-D, G-E, G-F, G-G, G-H,
+G-I, G-J** and `gates_v2.py` mentions exactly that set — **no registered gate is unimplemented and no unregistered
+gate is implemented**. The rehearsal's composed report carries a row for each (twelve decided rows including the two
+claim rows, the composite co-secondary row and the safety sentence; six declared-UNMEASURED rows, which are the SPEC
+§7 gates unmeasurable by construction: G-A severity, G-D extraction, G-E detection and utility, G-H harm, G-I escape
+artifact). A gate silently missing from the layer would have produced a verdict that looked complete while an
+element of the contract had no row at all.
