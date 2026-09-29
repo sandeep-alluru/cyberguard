@@ -570,10 +570,20 @@ done
       "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
       || { bad "rsync of the driver to $H failed"; exit 5; }
     for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
-      timeout 21600 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
-        \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
-        --adapter adapters/cyberguard-lora-v2-$ARM --out evals" > "logs/battery-$b-$ARM.log" 2>&1 \
-        || { bad "$ARM battery $b failed on $H"; exit 5; }
+      # ONE RETRY per battery. This stage is ~42 sequential runs over a measured ~8 h on the critical path, and a
+      # single transient failure (an ssh blip, a momentary GPU hiccup, a lost CUDA context) would otherwise exit 5
+      # and cost the entire verdict after the whole window. A deterministic failure simply fails twice for the
+      # cost of one extra battery; a transient one is recovered. The battery writes its receipt atomically, so a
+      # retry cannot corrupt a partial result.
+      b_ok=0
+      for b_try in 1 2; do
+        timeout 21600 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
+          \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
+          --adapter adapters/cyberguard-lora-v2-$ARM --out evals" > "logs/battery-$b-$ARM.log" 2>&1 && { b_ok=1; break; }
+        echo "  attempt $b_try failed for $b on $H — retrying once"
+        [ "$b_try" = 1 ] && sleep 20
+      done
+      [ "$b_ok" = 1 ] || { bad "$ARM battery $b failed on $H after 2 attempts"; exit 5; }
     done
     timeout 600 rsync -a "$H:~/cyberguard/evals/battery-*-$ARM.json" evals/ 2>/dev/null \
       || { bad "could not copy $ARM battery receipts back"; exit 5; }
@@ -592,9 +602,16 @@ done
     "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
     || { bad "rsync of the driver to $H failed"; exit 5; }
   for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
-    timeout 21600 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
-      \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
-      > "logs/battery-$b-base.log" 2>&1 || { bad "base battery $b failed on $H"; exit 5; }
+    # one retry, for the same reason as the arm loop above
+    b_ok=0
+    for b_try in 1 2; do
+      timeout 21600 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
+        \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
+        > "logs/battery-$b-base.log" 2>&1 && { b_ok=1; break; }
+      echo "  attempt $b_try failed for base/$b on $H — retrying once"
+      [ "$b_try" = 1 ] && sleep 20
+    done
+    [ "$b_ok" = 1 ] || { bad "base battery $b failed on $H after 2 attempts"; exit 5; }
   done
   timeout 600 rsync -a "$H:~/cyberguard/evals/battery-*-base.json" evals/ 2>/dev/null \
     || { bad "could not copy the base battery receipts back"; exit 5; }

@@ -73,6 +73,19 @@ bash v2/run_c24_contract.sh > logs/c24-contract.log 2>&1
 rc=$?
 tail -40 logs/c24-contract.log | tee -a "$LOG"
 say "contract exit=$rc (full log logs/c24-contract.log)"
+if [ "$rc" != 0 ]; then
+  # ONE automatic re-run. The contract is ~11 h of unattended work across two hosts, and a single transient
+  # failure — an ssh blip, a momentary GPU error, a killed battery — would otherwise discard the entire window's
+  # evaluation. Stage 0pre quarantines the failed attempt's outputs (locally and on the hosts), so the re-run
+  # starts from a clean evals/ rather than consuming a partial result. A deterministic failure simply fails
+  # twice, for the cost of one more attempt.
+  say "contract FAILED (exit $rc) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs"
+  sleep 60
+  bash v2/run_c24_contract.sh > logs/c24-contract-attempt2.log 2>&1
+  rc=$?
+  tail -40 logs/c24-contract-attempt2.log | tee -a "$LOG"
+  say "contract second attempt exit=$rc (full log logs/c24-contract-attempt2.log)"
+fi
 
 say "harvest"; bash harvest-v2.sh 2>&1 | tail -5 | tee -a "$LOG"
 say "timeline complete: VERDICT-v2 exists=$([ -s docs/VERDICT-v2.md ] && echo yes || echo NO)"
