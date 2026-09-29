@@ -34,8 +34,52 @@ for a in "$@"; do
   esac
 done
 
+# ------------------------------------------------------------------ SINGLE-INSTANCE LOCK
+# WHY. The timeline restarts are a NORMAL event (it has been re-armed six times while the CLI, the trainer patch
+# and the checkpoints changed), and its contract step is deliberately NOT grace-skipped - it is unconditional.
+# That combination has a hole: if the timeline is restarted while the contract is RUNNING, the guard at the
+# timeline's contract step (which looks for VERDICT-v2 + the gate report) has nothing to find yet, so it starts a
+# SECOND contract. Two contracts mean two merges and two benchmark passes on the same GPU - real spend the owner
+# did not authorise ("no GPU spend beyond the recorded 24 h x 2") - and two stage-0pre quarantines racing over one
+# evals/ directory. `mkdir` is atomic, so it is the lock; the owner PID inside it distinguishes a live holder from
+# a stale one left by a SIGKILL, and the cmdline check guards against PID reuse.
+# A duplicate exits 75 (EX_TEMPFAIL: "another instance holds the lock"), which is NOT a failure - the timeline
+# must not treat a refusal as a broken contract and re-run it.
+LOCK="${CT_LOCK:-v2/.c24-contract.lock}"
+lock_holder_alive() {  # 1 if the recorded PID is a live run_c24_contract.sh
+  local p; p=$(cat "$LOCK/pid" 2>/dev/null) || return 1
+  [ -n "$p" ] && [ -d "/proc/$p" ] || return 1
+  tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null | grep -q 'run_c24_contract\.sh'
+}
+release_lock() { [ -d "$LOCK" ] && [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; }
+# The signal traps must EXIT. `trap release_lock TERM` alone swallows the signal - the trap runs and the script
+# carries on, so a `timeout`, a Ctrl-C or an operator kill would no longer stop an ~11 h contract that is holding
+# the GPU. Found by running the lock through a bounded test, where the contract survived its own timeout.
+trap release_lock EXIT
+trap 'release_lock; exit 143' TERM HUP
+trap 'release_lock; exit 130' INT
+if [ "$DRY" = 0 ]; then
+  if mkdir "$LOCK" 2>/dev/null; then
+    echo $$ > "$LOCK/pid"
+  elif lock_holder_alive; then
+    printf 'FATAL (exit 75): another run_c24_contract.sh holds %s (pid %s).\n' "$LOCK" "$(cat "$LOCK/pid" 2>/dev/null)" >&2
+    printf '  Not starting a second contract: two would double the merge+benchmark GPU spend and race stage 0pre\n' >&2
+    printf '  over one evals/ directory. Exit 75 = refused, NOT failed; do not auto-retry this.\n' >&2
+    exit 75
+  else
+    echo "  stale lock from a dead holder ($(cat "$LOCK/pid" 2>/dev/null)) - reclaiming" >&2
+    rm -rf "$LOCK"; mkdir "$LOCK" || { echo "FATAL: cannot take $LOCK" >&2; exit 75; }
+    echo $$ > "$LOCK/pid"
+  fi
+fi
+
 S4=clawerdigi2@spark-40ee; S8=clawerdigi1@spark-8cf2
 FACTS="v2/data/mixture/FACTS.json"
+# INTERRUPTIBLE SLEEP. A foreground `sleep N` defers a trapped signal until the child exits, so with a trap that
+# cleans up the lock this script kept sleeping through SIGTERM (measured: still alive 50 s after the signal) and an
+# operator stop could not interrupt an 11 h, GPU-holding contract. Backgrounding the sleep and `wait`ing lets the
+# trap run at the next command boundary.
+nap()  { sleep "$1" & wait $!; }
 ok()   { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
 bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; }
 step() { echo; echo "=== stage $1: $2 ==="; }
@@ -71,7 +115,7 @@ while :; do
     echo "     raise TRAINER_WAIT_MIN or re-run once the runs have exited and written their receipts"
     exit 3
   fi
-  sleep 60; waited=$((waited + 60))
+  nap 60; waited=$((waited + 60))
 done
 # Say only what was observed. In a dry-run nothing has been proven to have exited, and printing "OK both
 # trainers have exited" there would be exactly the kind of unearned success line this contract exists to avoid.
@@ -391,7 +435,7 @@ for s1_try in 1 2; do
   fi
   if [ "$s1_try" = 1 ]; then
     echo "  attempt 1 incomplete:${s1_missing} — retrying the benchmark stage once"
-    sleep 30
+    nap 30
   else
     bad "benchmark stage incomplete after 2 attempts:${s1_missing}"
     bad "  (see logs/eval-chain-armA.log and logs/eval-chain-armB.log)"
@@ -638,7 +682,7 @@ done
           \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
           --adapter adapters/cyberguard-lora-v2-$ARM --out evals" > "logs/battery-$b-$ARM.log" 2>&1 && { b_ok=1; break; }
         echo "  attempt $b_try failed for $b on $H — retrying once"
-        [ "$b_try" = 1 ] && sleep 20
+        [ "$b_try" = 1 ] && nap 20
       done
       [ "$b_ok" = 1 ] || { bad "$ARM battery $b failed on $H after 2 attempts"; exit 5; }
     done
@@ -666,7 +710,7 @@ done
         \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
         > "logs/battery-$b-base.log" 2>&1 && { b_ok=1; break; }
       echo "  attempt $b_try failed for base/$b on $H — retrying once"
-      [ "$b_try" = 1 ] && sleep 20
+      [ "$b_try" = 1 ] && nap 20
     done
     [ "$b_ok" = 1 ] || { bad "base battery $b failed on $H after 2 attempts"; exit 5; }
   done
@@ -794,6 +838,26 @@ if [ "$DRY" != 1 ]; then
   hrc=$?
   tail -3 logs/harvest.log
   [ "$hrc" = 0 ] || { bad "harvest FAILED (exit $hrc) - the checksum-verified harvest is a deliverable (see logs/harvest.log)"; exit 8; }
+fi
+
+# ---------------------------------------------------------------- stage 8: the terminal brief
+# The owner's cadence is "a dated CEO-desk brief per checkpoint", and the terminal one is the brief that announces
+# the headline deliverable. It was composed only by the timeline - but the timeline runs this contract as a
+# FOREGROUND child for ~11 h and is an orphaned process (ppid 1) that nothing restarts, so a reboot, an OOM kill
+# or a stray signal during those 11 h would leave VERDICT-v2 delivered with no CEO-facing brief and no second
+# chance. Composing it here makes the deliverable self-contained. It is safe to call from both places: the brief
+# is idempotent on the verdict's sha256 (`brief_already_delivered`), so whichever runs second reports a no-op
+# instead of writing the duplicate-brief defect that already bit this window's M2 checkpoint.
+step 8 "terminal CEO brief for the verdict"
+echo "  python3 v2/verdict_brief.py   (idempotent on the verdict sha256; refuses if the verdict/harvest are absent)"
+if [ "$DRY" != 1 ]; then
+  python3 v2/verdict_brief.py > logs/verdict-brief.log 2>&1
+  brc=$?
+  tail -3 logs/verdict-brief.log
+  # NOT fatal: the verdict, the gate report and the harness are the contract's deliverables, and the timeline
+  # composes this brief again afterwards. A missing brief is a packaging failure and is reported as such, but it
+  # must not mark a complete measurement campaign as a failed contract (`exit 9` would also discard attempt 1).
+  [ "$brc" = 0 ] || bad "terminal brief NOT written (exit $brc) - see logs/verdict-brief.log; the verdict itself is unaffected"
 fi
 
 

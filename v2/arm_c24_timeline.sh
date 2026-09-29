@@ -26,6 +26,39 @@ CONTRACT_AT="${CONTRACT_AT:-today 12:10}"
 LOG="${TIMELINE_LOG:-logs/timeline-$(date +%Y%m%d).log}"
 say() { echo "[$(date '+%F %T %Z')] $*" | tee -a "$LOG"; }
 
+# ------------------------------------------------------------------ SINGLE-INSTANCE LOCK
+# WHY. Restarting this timeline is a normal event, but a restart that does NOT first kill the incumbent leaves TWO
+# timelines. Both would reach the contract step at 12:10 (it is unconditional), and both would then run the
+# harvest fallback at the same time - `harvest-v2.sh` truncates MANIFEST.sha256 at the start of every run, so the
+# second pass would leave whatever the first had pulled so far, i.e. a SHORTER manifest that still verifies,
+# silently downgrading the checksum-verified harvest. The contract has its own lock; this one stops the duplicate
+# timeline from touching the manifest, the briefs and the harvest at all. Stale locks (SIGKILL) are reclaimed via
+# the recorded PID + cmdline check, so a restart after a crash still works.
+LOCK="${TL_LOCK:-v2/.c24-timeline.lock}"
+tl_holder_alive() {
+  local p; p=$(cat "$LOCK/pid" 2>/dev/null) || return 1
+  [ -n "$p" ] && [ -d "/proc/$p" ] || return 1
+  tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null | grep -q 'arm_c24_timeline\.sh'
+}
+tl_release() { [ -d "$LOCK" ] && [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; }
+# Signal traps EXIT as well as clean up (see the same note in run_c24_contract.sh): a trap that only releases the
+# lock makes this script unkillable, so a bounded/operator stop would leave it to fire the contract at 12:10.
+trap tl_release EXIT
+trap 'tl_release; exit 143' TERM HUP
+trap 'tl_release; exit 130' INT
+if mkdir "$LOCK" 2>/dev/null; then
+  echo $$ > "$LOCK/pid"
+elif tl_holder_alive; then
+  say "REFUSING to start: timeline pid $(cat "$LOCK/pid" 2>/dev/null) is already running (exit 75)."
+  say "  A second timeline would race the harvest and truncate MANIFEST.sha256. Kill the incumbent first if you"
+  say "  really mean to re-arm."
+  exit 75
+else
+  say "stale timeline lock from a dead holder ($(cat "$LOCK/pid" 2>/dev/null)) - reclaiming"
+  rm -rf "$LOCK"; mkdir "$LOCK" || { say "FATAL: cannot take $LOCK"; exit 75; }
+  echo $$ > "$LOCK/pid"
+fi
+
 # GRACE-SKIP. A re-arm is a normal event (this script has been restarted three times while the CLI, the
 # trainer patch and the checkpoints changed), and plain `wait_until` treats a time already in the past as
 # "fire now" — so restarting at 06:14 RE-RAN the 05:50 checkpoint, overwriting its metrics snapshot and writing
@@ -36,7 +69,10 @@ wait_until() {  # epoch seconds; returns 1 if the target already passed by more 
   local now; now=$(date +%s)
   local d=$(( $1 - now ))
   [ "$d" -lt $(( -GRACE_MIN * 60 )) ] && return 1
-  [ "$d" -gt 0 ] && sleep "$d"
+  # INTERRUPTIBLE. A foreground `sleep "$d"` defers a trapped signal until the child exits - so with a wait of up
+  # to hours this script ignored SIGTERM until its target time and could not be stopped before it fired the
+  # contract. Sleeping in the background and `wait`ing lets the trap run at once.
+  [ "$d" -gt 0 ] && { sleep "$d" & wait $!; }
   return 0
 }
 at() { date -d "$1" +%s; }
@@ -102,14 +138,22 @@ bash v2/run_c24_contract.sh > logs/c24-contract.log 2>&1
 rc=$?
 tail -40 logs/c24-contract.log | tee -a "$LOG"
 say "contract exit=$rc (full log logs/c24-contract.log)"
-if [ "$rc" != 0 ]; then
+if [ "$rc" = 75 ]; then
+  # REFUSED, not failed: the contract's single-instance lock reports that another contract is already running.
+  # Retrying would be pointless (the holder is still there) and re-running it as "attempt 1 of 2" would turn a
+  # correct refusal into a logged contract failure. This timeline is the duplicate; the incumbent owns the
+  # deliverables, so stop here rather than racing it over the manifest, the briefs and stage 0pre.
+  say "contract REFUSED (exit 75): another instance holds the lock — this timeline is the duplicate; stopping"
+  say "  without retrying and without touching the harvest, so the incumbent's manifest is not truncated"
+  exit 75
+elif [ "$rc" != 0 ]; then
   # ONE automatic re-run. The contract is ~11 h of unattended work across two hosts, and a single transient
   # failure — an ssh blip, a momentary GPU error, a killed battery — would otherwise discard the entire window's
   # evaluation. Stage 0pre quarantines the failed attempt's outputs (locally and on the hosts), so the re-run
   # starts from a clean evals/ rather than consuming a partial result. A deterministic failure simply fails
   # twice, for the cost of one more attempt.
   say "contract FAILED (exit $rc) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs"
-  sleep 60
+  sleep 60 & wait $!   # interruptible, same reason as wait_until
   bash v2/run_c24_contract.sh > logs/c24-contract-attempt2.log 2>&1
   rc=$?
   tail -40 logs/c24-contract-attempt2.log | tee -a "$LOG"

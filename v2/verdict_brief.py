@@ -65,6 +65,36 @@ def sha_and_size(path: str) -> tuple[str, int]:
     return hashlib.sha256(data).hexdigest(), len(data)
 
 
+def brief_already_delivered(vsha: str, out_dir: str = CEO) -> str | None:
+    """Return the path of an existing terminal brief for this exact verdict, else None.
+
+    WHY. The brief is now composed from BOTH the timeline (its last act) and the contract (its final stage), so
+    that an 11-hour unattended contract still delivers the terminal brief if the timeline dies mid-run — the
+    timeline is an orphaned process and nothing restarts it. Two callers would otherwise write two
+    `*-cyberguard-verdict-v2-delivered.md` files for one verdict, which is the duplicate-brief defect again (it
+    already produced a duplicate M2 brief in this window). The name carries a timestamp, so the match is on the
+    verdict's sha256, recorded in the frontmatter for exactly this purpose.
+    """
+    # Scan the directory the brief would actually be WRITTEN to (--out-dir), not always docs/ceo: with the default
+    # the two agree, but a test or a redirected run writes elsewhere and the guard must still see its own output.
+    if not os.path.isdir(out_dir):
+        return None
+    for f in sorted(os.listdir(out_dir)):
+        if not f.endswith("-cyberguard-verdict-v2-delivered.md"):
+            continue
+        p = os.path.join(out_dir, f)
+        try:
+            head = open(p, encoding="utf-8", errors="replace").read(4096)
+        except OSError:
+            continue
+        if f"verdict_sha256: {vsha}" in head:
+            return os.path.join(out_dir, f)
+        # Legacy briefs (written before the field existed) state the short hash in the one-line summary.
+        if f"sha256 `{vsha[:16]}" in head:
+            return os.path.join(out_dir, f)
+    return None
+
+
 def verify(fname: str) -> tuple[bool, str]:
     rid = hashlib.sha1(f"cyberguard/{fname}".encode()).hexdigest()[:20]
     url = PORTAL + rid
@@ -99,6 +129,13 @@ def main() -> int:
         return _refuse(f"{a.manifest} is missing or empty — the checksum-verified harvest is a deliverable")
 
     vsha, vsize = sha_and_size(vpath)
+    # IDEMPOTENT: the contract's final stage composes this brief too, so a re-run (or a timeline that outlives the
+    # contract and composes it again) must not write a second brief for the same verdict.
+    _prev = brief_already_delivered(vsha, a.out_dir)
+    if _prev:
+        print(f"verdict brief ALREADY DELIVERED for verdict sha256 {vsha[:16]}… -> {_prev}")
+        print("  not writing a duplicate (the deliverable exists; this is a no-op, not a failure)")
+        return 0
     rows = rep.get("gates") or []
     counts = rep.get("counts") or {}
     claims = [g for g in rows if str(g.get("gate", "")).startswith("Claim")]
@@ -131,6 +168,7 @@ project: CyberGuard
 status: current
 kind: result
 supersedes: {newest_brief() or 'none'}
+verdict_sha256: {vsha}
 ---
 
 # VERDICT-v2 delivered — {decided} of {len(rows)} gate rows decided

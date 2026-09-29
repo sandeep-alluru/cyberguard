@@ -2261,3 +2261,49 @@ own docstring and the already-marked `vsha[:16]…`.
 
 Nothing about the underlying data changed: the full detail lives in `v2/gate-report-v2.json`, which the harvest
 checksums. What changed is that a reader of the verdict can now tell an excerpt from the whole thing.
+
+## 2026-09-29 — a restart is a normal event, and it had two ways to duplicate ~11 h of work
+
+Verifying the armed timeline turned up something I had been treating as routine: it had been started **six** times
+(the "timeline re-armed" line prints at start-up), each restart leaving the incumbent running. Two consequences,
+both real:
+
+1. **Two timelines race the harvest.** `harvest-v2.sh` truncates `MANIFEST.sha256` at the start of every run, so a
+   second pass leaves whatever the first had pulled *so far* — a **shorter manifest that still verifies**. The
+   checksum-verified-harvest deliverable would be silently downgraded rather than broken.
+2. **Two contracts double the GPU spend.** The timeline's contract step is deliberately not grace-skipped, and its
+   only guard looks for `VERDICT-v2` + the gate report — which do not exist yet while attempt 1 is running. A
+   restart mid-contract therefore starts a *second* merge + benchmark pass on the same GPU, which is spend the owner
+   did not authorise ("no GPU spend beyond the recorded 24 h × 2"), plus two stage-0pre quarantines racing over one
+   `evals/` directory.
+
+Both are now closed with atomic `mkdir` locks (`v2/.c24-timeline.lock`, `v2/.c24-contract.lock`) carrying the owner
+PID; a stale lock from a SIGKILL is reclaimed via the PID **plus** a `/proc/<pid>/cmdline` check, so PID reuse cannot
+steal a live lock. A duplicate exits **75**, and the timeline treats 75 as a refusal rather than a failure so it does
+not auto-retry a correct refusal.
+
+Two defects were **self-inflicted while fixing this**, and both were caught by running a bounded test rather than by
+reading the patch:
+
+* `trap release_lock EXIT INT TERM HUP` **swallows the signal** — cleanup ran and the script carried on, so a
+  `timeout`, a Ctrl-C or an operator kill no longer stopped an 11 h, GPU-holding contract. Traps are now split:
+  `EXIT` cleans up, `INT`/`TERM`/`HUP` clean up **and exit**.
+* Even with that fixed, a foreground `sleep N` defers a trapped signal until the child exits. Measured: the contract
+  was **still alive 50 s after SIGTERM**, and the timeline's `wait_until` sleeps until its target — i.e. until 08:50 —
+  so it could not be stopped before it fired the contract at 12:10. All long waits are now `sleep N & wait $!`
+  (`nap` in the contract), which runs the trap at the next command boundary. Measured after the fix: **0 s** to stop,
+  lock released.
+
+Finally, the **terminal brief** had a single owner — the timeline — which runs the contract as a foreground child for
+~11 h and is an orphan (`ppid 1`) that nothing restarts. A reboot or an OOM kill in that window would leave
+`VERDICT-v2` delivered with no CEO-facing brief and no second chance. The contract now composes it as **stage 8**
+(non-fatal: a packaging failure must not mark a complete measurement campaign as a failed contract), and the brief was
+made **idempotent on the verdict's sha256** so two callers cannot repeat the duplicate-brief defect that already
+produced a second M2 brief in this window. Verified: the same verdict no-ops with an explicit "ALREADY DELIVERED"
+line and writes one file; a changed verdict still writes a new one.
+
+Verified by test, not by inspection — 11 checks: both live-holder refusals (75 + message), both stale-lock reclaims,
+both signal stops (0 s, lock released), `--dry-run` not refused and taking no lock (15 stages, exit 0), and the brief's
+idempotence in both directions. The live timeline was then restarted **under the locked code** at 06:59:58: it holds
+`v2/.c24-timeline.lock`, correctly grace-skipped the 05:50 M2 checkpoint, and a deliberate second start was refused
+with exit 75.
