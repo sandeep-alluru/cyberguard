@@ -2562,3 +2562,42 @@ The verifier is now the timeline's last act, so the unattended log ends with a p
 question of whether one file exists. The timeline was re-armed on that code: the incumbent stopped in **0 s** on
 SIGTERM and released its lock, the new instance (pid 439499) holds `v2/.c24-timeline.lock`, grace-skipped M2, and a
 deliberate second start was refused with exit 75.
+
+## 2026-09-29 — the declared miss stated as a miss, and the plan of record checked against the filesystem
+
+**D2 was declared UNMET but its exit targets were not in the artifact.** The plan of record fixes D2's exit as
+*"≥1,000 distinct control prompts and ≤10 % mean-length difference"*; the frozen arms measure **228** distinct
+control prompts and a **15.5 %** length gap. The verdict reported those numbers honestly, but a reader had to know
+the targets from elsewhere to see they were missed — and with only the table in front of them, "228 vs 700" invites
+exactly the wrong conclusion about a matched control. The block now prints both targets with their measured values
+and the receipt's own exit booleans (`False`, `False`), the words **Exit verdict NOT MET**, and the receipt's
+`why_it_matters` consequence: *any claim of a MATCHED control must state this asymmetry*. D2 remains the one item of
+the four that is not closed, and it is closed in the only way the remaining authorization allows: measured, named,
+and carried. Re-verified: rehearsal PASS, all nine mandatory sections present.
+
+**The plan of record's own artifact table, checked against the filesystem.** §4 lists 26 rows and carries a note
+that an earlier revision mis-reported three of them, so every row was checked: all 20 DONE rows exist, all three
+DEFERRED rows are correctly absent, and `docs/VERDICT-v2.md` is correctly pending. The only row my checker flagged
+was `VERDICT-v2.md` — because the checker asserted existence for a row the table marks "pending", i.e. the defect
+was in my instrument, not the table (third time this window that a pattern I wrote was the thing that was wrong).
+
+**The environment the remote commands assume, and the quarantine that protects the assembler.** Stage 3 runs
+`$CYBERGUARD_VENV/bin/python` in a plain non-interactive ssh shell, where both `CYBERGUARD_VENV` and
+`CYBERGUARD_ROOT` are **unset** — the commands work only because they `source ~/.cyberguard-env` first (verified:
+the file defines both on each host, and the venv interpreter is executable), and `run-eval-chain.sh` sources it for
+itself. Stage 0pre's stale-input filter keys off `CONTRACT_START` through `find ! -newermt "@$CONTRACT_START"`: with
+an **empty** value `find` errors, `2>/dev/null` swallows it, the count reads 0, and the stage would report "no
+pre-existing eval json to archive" while stale measurements sat in `evals/` for the assembler to consume. Tested
+that failure mode directly (0 matched with an empty value, 1 with a real epoch) and confirmed the guard:
+`CONTRACT_START="${CONTRACT_START:-$(date +%s)}"` supplies a real epoch even for an empty value. The host
+quarantine **archives, never deletes**, and fails closed if anything is left outside the archive.
+
+**The rehearsal's blind spot, explained rather than assumed.** The rehearsal's composed verdict says the D2 receipt
+"is absent" — with the receipt very much present. Cause: `ART = CYBERGUARD_ARTIFACT_ROOT or ROOT` exists precisely so
+the composer can be run against a fixture tree, and the rehearsal points it at its scratch directory, so
+repo-relative receipts are invisible there. That is the safe (pessimistic) branch, not a defect — but it means the
+rehearsal cannot exercise the blocks that read repo receipts, including the one I had just changed. So the composer
+was run against the **real** repo with the rehearsal's report: the live loss-mask evidence renders with real numbers
+(273/598 supervised tokens, identical on both arms), the D2 block renders the real figures, Muse's caveats appear,
+**zero fallback lines**, no crash, 12 decided rows. The real composition path is therefore exercised, and the
+rehearsal's fidelity gap is recorded rather than left to be rediscovered.
