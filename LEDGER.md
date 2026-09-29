@@ -1325,3 +1325,35 @@ placeholders, and refuses to dispatch otherwise. Its own test proves the earlier
 
 Against the frozen run's `trainable params: 0`, `grad_norm 0` and **zero** distinct grad_norm values. Receipt:
 `v2/data/mixture/learning-proof-early.receipt.json`. Stage 0d re-proves it on the final artefact at 12:10.
+
+## 2026-09-29 — review #17 CLEARED the chain; the gate that records it could never fire (and had a false-clearance hole)
+
+Review #17 (delta confirmation of Amendment A1) returned:
+
+> "The registration objection is resolved. No additional training-validity blocker is established by this delta;
+> evaluation remains conditional on the existing final-learning check. Clearance here does not certify
+> measurements that have not yet been obtained."
+>
+> **CHAIN CLEARED a91da33296ab**
+
+Running `v2/chain_gate.py` to record it exposed two defects in the gate itself:
+
+1. **It could never fire.** The gate globbed `codex-evalchain-review*.md` only, so it reported
+   *"newest review: codex-evalchain-review11.md"* while review #17 sat on disk holding the clearance. A gate that
+   can never be satisfied is not a safety property. It now scans every markdown review, matches the clearance
+   line **anchored to the start of a line** (so the phrase appearing in prose, or inside a quoted objection,
+   cannot clear anything), and accepts only a clearance whose revision matches the checked-out revision —
+   reporting every clearance found and why each was accepted or rejected.
+2. **A prompt could have cleared the chain.** With the glob fixed, the gate matched
+   `codex-review-17-prompt.md` — because a dispatch prompt contains the *prescribed* clearance line as its output
+   format. Scanning prompts would let a prompt clear the chain with no reviewer involved. Prompt files are now
+   excluded: a prompt is not a review.
+
+Verified four ways: a clearance for a different revision is refused; a clearance mentioned in prose is refused;
+a clearance in a prompt-named file is refused; the same content in a real review file clears and writes the marker
+with the review path, its sha256, and both revisions.
+
+**The marker is deliberately still absent.** `docs/CHAIN-CLEARED` is revision-bound, and HEAD moved after #17
+cleared (`a91da33296ab` → `2ba31c158d23`, the merge-equivalence basis change under review by #18). Writing it now
+would bless a revision nobody cleared. The contract is not gated on the marker (owner instruction), and the
+verdict records the clearance state that actually obtained.
