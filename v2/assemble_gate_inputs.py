@@ -416,24 +416,37 @@ def build(extra_eval_dirs=()):
         # could never appear in a report. They are folded in now. They inform the report; the registered
         # decisions remain Arm A's gates plus Claim 2 (A vs B), which is why these use B's own keys and do not
         # enter Arm A's payload.
-        _gBb = bat.get(("gB", "armB"))
-        if _gBb and isinstance(_gBb.get("scores"), dict) and {"tp", "fp", "tn", "fn"} <= set(_gBb["scores"]):
-            ARMB["triage"] = {k: _gBb["scores"][k] for k in ("tp", "fp", "tn", "fn")}
+        # Arm B follows the SAME convention as Arm A (review F26): the fresh generalisation instrument is the
+        # primary value, and the retained (training-row) instrument is kept under `_retention` with a label.
+        # Before this, B's retained measurements arrived in ordinary measurement fields with no recall label.
+        for _field, _reg, _fresh, _mk in (
+            ("triage", "gB", "fresh-gB",
+             lambda s: {k: s[k] for k in ("tp", "fp", "tn", "fn")} if {"tp","fp","tn","fn"} <= set(s) else None),
+            ("sigma", "gE", "fresh-gE",
+             lambda s: {"n": s.get("n", 0), "parsed_rate": s.get("parsed_rate", 0.0),
+                        "schema_complete_rate": s.get("schema_complete_rate", 0.0)}),
+            ("grounded_counts", "gF", "fresh-gF", lambda s: s),
+            ("chat_counts", "gJ", "fresh-gJ",
+             lambda s: {"base": (bat.get((_reg, "base")) or {}).get("scores") or {}, "tuned": s}),
+        ):
+            _r = bat.get((_reg, "armB"))
+            _f = bat.get((_fresh, "armB"))
+            if _r and isinstance(_r.get("scores"), dict):
+                _v = _mk(_r["scores"])
+                if _v is not None:
+                    ARMB[_field + "_retention"] = _v
+                    # the retained instrument exists for arm B too, so the role map must say so (review F26)
+                    _gate_of = {"triage": "G-B triage", "sigma": "G-E sigma",
+                                "grounded_counts": "G-F grounded qa", "chat_counts": "G-J chat retention"}
+                    if _gate_of[_field] not in roles["retention_recall"]:
+                        roles["retention_recall"].append(_gate_of[_field])
+            if _f and isinstance(_f.get("scores"), dict):
+                _v = _mk(_f["scores"])
+                if _v is not None:
+                    ARMB[_field] = _v
         _gCb = bat.get(("gC", "armB"))
         if _gCb and isinstance(_gCb.get("scores"), dict):
             ARMB["ids"] = {"n": _gCb["scores"].get("n", 0), "invalid": _gCb["scores"].get("invalid", 0)}
-        _gEb = bat.get(("gE", "armB"))
-        if _gEb and isinstance(_gEb.get("scores"), dict):
-            ARMB["sigma"] = {"n": _gEb["scores"].get("n", 0),
-                             "parsed_rate": _gEb["scores"].get("parsed_rate", 0.0),
-                             "schema_complete_rate": _gEb["scores"].get("schema_complete_rate", 0.0)}
-        _gFb = bat.get(("gF", "armB"))
-        if _gFb and isinstance(_gFb.get("scores"), dict):
-            ARMB["grounded_counts"] = _gFb["scores"]
-        _gJb = bat.get(("gJ", "armB"))
-        if _gJb and isinstance(_gJb.get("scores"), dict):
-            ARMB["chat_counts"] = {"base": (bat.get(("gJ", "base")) or {}).get("scores") or {},
-                                   "tuned": _gJb["scores"]}
         _gA2b = bat.get(("gA2", "armB"))
         if _gA2b and isinstance(_gA2b.get("scores"), dict):
             ARMB["defensive_scores"] = _gA2b["scores"]
@@ -515,6 +528,9 @@ def build(extra_eval_dirs=()):
             if esc.get("literal_backslash_n") is not None:
                 support["G-I escape artifact"] = 500
                 current_gates.add("G-I escape artifact")
+    for _g in ("G-A2 defensive", "G-C id factuality", "G-G general"):
+        if _g not in roles["generalisation"]:
+            roles["generalisation"].append(_g)     # these sets were already disjoint and are unchanged
     A["instrument_roles"] = roles
     hist = classify_gates(prov, current_gates)
     A["_provenance"] = dict(prov)

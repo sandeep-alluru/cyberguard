@@ -324,8 +324,14 @@ def _evaluate(evals, checkpoint="C24"):
 
     def with_retention(observed, key):
         v = _retention.get(key)
-        if v is None or not isinstance(observed, dict):
+        if v is None:
             return observed
+        if not isinstance(observed, dict):
+            # F26: a retained measurement with no fresh counterpart still has to be reported, labelled — it was
+            # dropped entirely (observed=None) when only the retained instrument existed.
+            return {"retention_recall": {"values": v if not isinstance(v, list) else {"pairs": len(v)},
+                                         "note": "retained instrument contains training rows — RECALL only, "
+                                                 "never generalisation"}}
         out = dict(observed)
         note = ("registered instrument contains training rows — RECALL/regression only, never generalisation")
         out["retention_recall"] = ({"pairs": len(v), "note": note} if isinstance(v, list)
@@ -890,8 +896,10 @@ def _evaluate(evals, checkpoint="C24"):
                        "Claim 2 (A vs B)": "refusal_pairs_retention"}
     for _row in results:
         _k = _gate_retention.get(_row.get("gate"))
-        if _k and isinstance(_row.get("observed"), dict):
-            _row["observed"] = with_retention(_row["observed"], _k)
+        if _k:
+            # no isinstance guard: a retained measurement with NO fresh counterpart is exactly the case F26
+            # named, and requiring an existing dict here dropped it silently.
+            _row["observed"] = with_retention(_row.get("observed"), _k)
     # F11: SPEC binds the safety sentence to G-A **AND** G-A2, but the report previously showed G-A alone, so
     # a reader could quote a satisfied G-A while G-A2 failed. The joint condition is derived and emitted.
     ga = next((r["outcome"] for r in results if r["gate"] == "G-A refusal retention"), "UNMEASURED")
@@ -1277,9 +1285,12 @@ def summarize_arm_b(payload):
     """
     if not isinstance(payload, dict):
         return None
-    keys = ("refusal_n", "ids", "triage", "sigma", "grounded_counts", "chat_counts", "general",
-            "defensive_scores")
-    out = {k: payload[k] for k in keys if payload.get(k) is not None}
+    gen_fields = ("ids", "triage", "sigma", "grounded_counts", "chat_counts", "general", "defensive_scores")
+    out = {"generalisation": {k: payload[k] for k in gen_fields if payload.get(k) is not None},
+           "retention_recall": {k + "_retention": payload[k + "_retention"] for k in gen_fields
+                                if payload.get(k + "_retention") is not None}}
+    if payload.get("refusal_n") is not None:
+        out["generalisation"]["refusal_n"] = payload["refusal_n"]
     rp = payload.get("refusal_pairs")
     if isinstance(rp, list):
         out["refusal_pairs"] = {"records": len(rp)}
@@ -1323,6 +1334,7 @@ def main() -> int:
            "stub_inputs": sorted({r["gate"] for r in results if r.get("stub_input")}),
            "unbound_identity": sorted({r["gate"] for r in results if r.get("unbound_identity")}),
            "identity": (evals.get("armA") or {}).get("_identity"),
+           "instrument_roles": (evals.get("armA") or {}).get("instrument_roles"),
            "arm_b_observations": summarize_arm_b(evals.get("armB"))}
     json.dump(rep, open(a.out, "w"), indent=2)
     print(f"  {a.checkpoint}: arms found {sorted(evals)} -> {rep['counts']}")

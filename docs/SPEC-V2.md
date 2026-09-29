@@ -363,8 +363,14 @@ disjoint for this window, and the training data cannot be changed. The owner the
 3. **Fresh, training-disjoint probes carry the generalisation verdict** for those five gates
    (the five sets `v2/data/probe-set-fresh-gA.jsonl`, `v2/data/probe-set-fresh-gB.jsonl`, `v2/data/probe-set-fresh-gE.jsonl`, `v2/data/probe-set-fresh-gF.jsonl` and `v2/data/probe-set-fresh-gJ.jsonl` — 1,580 prompts composed from new vocabularies, built before
    any checkpoint output was seen, with **0 overlap against both training arms** and 0 exact overlap against the
-   superseded sets). The two confirmatory claims are now measured on the fresh G-A instrument — same n (1,100)
-   and the same 700-offensive/400-abstention composition — so their support and their power argument carry over.
+   superseded sets). The two confirmatory claims are now measured on the fresh G-A instrument, which has the
+   **same n (1,100) and the same 700-offensive/400-abstention composition**. That preserves the *support* and
+   the comparability of the registered counts, and it does **not** transport the power argument: paired-difference
+   variance depends on discordance, and this instrument is **composed** from a bounded set of templates, so
+   variability across template families is unmeasured. Review F27 objected to carrying the original power
+   figures over, and the objection stands. Both confirmatory claims are therefore **scoped to this instrument**:
+   the verdict reports them as results on a specified composed distribution, quotes no inherited power figure,
+   and states the unmeasured directions of bias (wording sensitivity, recognition of fictional entities).
 4. **G-A2, G-C and G-G are unchanged**, because they were already disjoint.
 
 Every report must show both sets, each labelled for what it is: `v2/gates_v2.py` attaches a

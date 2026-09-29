@@ -64,34 +64,34 @@ def norm(s: str) -> str:
     return s.strip(" \"'.?!:;\n\t")
 
 
-# The sets do NOT share a field name (gA/gB/gE/gJ use `prompt`, gsm8k uses `question`, holdout uses
-# `prompt`). The first version of this file read `user` for everything and reported n=0 with a PASS for every
-# battery - a vacuous instrument, which is worse than no instrument. The field is now detected per file and
-# reported, so a silent mismatch cannot look like a clean result again.
+# Review F25: the first version detected ONE field for the whole file and silently skipped rows that did not
+# carry it. The driver evaluates `prompt or question`, so a training prompt placed in the fallback field stayed
+# an evaluated item while disappearing from the overlap denominator. The field is now chosen PER ROW, the same
+# way the driver chooses it, rows that yield nothing are counted and fail the check rather than being skipped.
 CANDIDATE_FIELDS = ("prompt", "question", "user")
 
 
-def prompts(path: str) -> tuple[list[str], str | None]:
+def prompts(path: str) -> tuple[list[str], dict, int]:
+    """Return (normalised item texts, field-usage counts, rows with no usable text)."""
     out: list[str] = []
-    field = None
+    fields: dict = {}
+    skipped = 0
     with open(os.path.join(ROOT, path), encoding="utf-8") as f:
         for line in f:
             if not line.strip():
                 continue
             row = json.loads(line)
-            if field is None:
-                for cand in CANDIDATE_FIELDS:
-                    if isinstance(row.get(cand), str) and row[cand].strip():
-                        field = cand
-                        break
-                if field is None:
-                    return [], None
-            v = row.get(field)
-            if isinstance(v, str) and v.strip():
-                out.append(norm(v))
-    if not out:
-        return [], field
-    return out, field
+            v = None
+            for cand in CANDIDATE_FIELDS:                      # per row, exactly what prompt_of() does
+                if isinstance(row.get(cand), str) and row[cand].strip():
+                    v, _use = row[cand], cand
+                    fields[cand] = fields.get(cand, 0) + 1
+                    break
+            if v is None:
+                skipped += 1
+                continue
+            out.append(norm(v))
+    return out, fields, skipped
 
 
 def main() -> int:
@@ -100,13 +100,16 @@ def main() -> int:
     ap.add_argument("--examples", type=int, default=2, help="overlapping examples to show per battery")
     a = ap.parse_args()
 
-    train, trainf = {}, {}
+    train, trainf, train_skipped = {}, {}, {}
     for arm, p in TRAINING.items():
-        ps, fld = prompts(p)
+        ps, fld, sk = prompts(p)
         if not ps:
-            raise SystemExit(f"FATAL: read 0 prompts from {p} (field detection failed) - refusing to report PASS")
-        train[arm], trainf[arm] = set(ps), fld
-    hps, hfld = prompts(HOLDOUT)
+            raise SystemExit(f"FATAL: read 0 prompts from {p} - refusing to report PASS")
+        if sk:
+            raise SystemExit(f"FATAL: {p} has {sk} rows with no usable text field; the driver would still "
+                             f"evaluate them, so a disjointness claim over a partial read is not admissible")
+        train[arm], trainf[arm], train_skipped[arm] = set(ps), fld, sk
+    hps, hfld, _hsk = prompts(HOLDOUT)
     hold = set(hps)
     print(f"  fields read: training={trainf} holdout={hfld!r}")
     all_train = train["armA"] | train["armB"]
@@ -116,9 +119,12 @@ def main() -> int:
     print(f"  {'battery':<11} {'role':<15} {'n':>5} {'in armA':>8} {'in armB':>8} {'in train':>9}  verdict")
     bad_general, retention_report = [], []
     for name, path in BATTERIES.items():
-        ps, fld = prompts(path)
+        ps, fld, sk = prompts(path)
         if not ps:
-            raise SystemExit(f"FATAL: read 0 prompts from {path} (field {fld!r}) - refusing to report PASS")
+            raise SystemExit(f"FATAL: read 0 prompts from {path} - refusing to report PASS")
+        if sk:
+            raise SystemExit(f"FATAL: {path} has {sk} rows with no usable text field; the driver evaluates "
+                             f"prompt-or-question per row, so skipping them would understate the overlap")
         nt = sum(1 for p in ps if p in all_train)
         na = sum(1 for p in ps if p in train["armA"])
         nb = sum(1 for p in ps if p in train["armB"])
