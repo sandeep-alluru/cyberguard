@@ -306,19 +306,35 @@ def main():
     try:
         from transformers import AutoTokenizer
         tok = AutoTokenizer.from_pretrained("v2/tokenizer")
-        truncated = empty = 0
-        for r in A[: min(len(A), 20000)]:
-            ids = tok(str(r["user"]), add_special_tokens=False)["input_ids"]
-            sup = tok(str(r["assistant"]), add_special_tokens=False)["input_ids"]
-            if len(ids) + len(sup) + 8 > MAX_SEQ:      # +8 for template/special tokens
-                truncated += 1
-            if not sup:
-                empty += 1
-        rep["tokenizer_truncation_rate"] = round(truncated / max(1, min(len(A), 20000)), 4)
-        rep["tokenizer_empty_supervision"] = empty
-        if rep["tokenizer_truncation_rate"] > 0.02:
-            warn("E3-tokenizer", f"{rep['tokenizer_truncation_rate']:.2%} of sampled rows exceed "
-                                 f"{MAX_SEQ} real tokens and would lose assistant supervision")
+        # D4 (Muse): this sampled arm A only. The objective asks for a tokenizer truncation check AND an
+        # arm-equivalence assertion, so both arms are measured and the two profiles are compared: the
+        # refusal-content substitution must not change how much assistant supervision is lost to truncation.
+        _e3 = {}
+        for _label, _rows in (("armA", A), ("armB", B)):
+            _sample = _rows[: min(len(_rows), 20000)]
+            _trunc = _empty = 0
+            for r in _sample:
+                ids = tok(str(r["user"]), add_special_tokens=False)["input_ids"]
+                sup = tok(str(r["assistant"]), add_special_tokens=False)["input_ids"]
+                if len(ids) + len(sup) + 8 > MAX_SEQ:   # +8 for template/special tokens
+                    _trunc += 1
+                if not sup:
+                    _empty += 1
+            _e3[_label] = {"sampled": len(_sample),
+                           "truncation_rate": round(_trunc / max(1, len(_sample)), 4),
+                           "empty_supervision": _empty}
+            if _e3[_label]["truncation_rate"] > 0.02:
+                warn("E3-tokenizer", f"{_label}: {_e3[_label]['truncation_rate']:.2%} of sampled rows exceed "
+                                     f"{MAX_SEQ} real tokens and would lose assistant supervision")
+        rep["tokenizer_both_arms"] = _e3
+        rep["tokenizer_truncation_rate"] = _e3["armA"]["truncation_rate"]      # kept for continuity
+        rep["tokenizer_empty_supervision"] = _e3["armA"]["empty_supervision"]
+        _gap = abs(_e3["armA"]["truncation_rate"] - _e3["armB"]["truncation_rate"])
+        rep["tokenizer_truncation_rate_gap"] = round(_gap, 4)
+        if _gap > 0.01:
+            fail("E3-arm-equivalence", f"truncation rates differ by {_gap:.2%} between the arms; the "
+                                       f"substitution must not change the supervision-loss profile")
+        print(f"  E3 tokenizer (both arms): {_e3}")
     except Exception as e:                              # noqa: BLE001
         rep["tokenizer_truncation_rate"] = f"SKIPPED-no-tokenizer ({type(e).__name__})"
         warn("E3-tokenizer", f"real-token truncation unmeasured: {e}")
