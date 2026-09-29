@@ -3069,3 +3069,22 @@ And the two halves agree on the numbers that matter: `GATES` carries
 registry or the literal fails one of the two checks, so a drifted bar cannot pass silently. What the check cannot
 police — a *third* comparison added later that overrides the pinned one — is a code-review matter, not a registration
 one, and the reviewer boundary already covers the evaluation contract.
+
+## 2026-09-29 — the next checkpoint's two external dependencies, checked before it needs them
+
+The M3 brief is *portal-verified*: `checkpoint_brief.py` returns 0 only when the brief exists **and** the portal
+renders it with HTTP 200, at least two content hits and no raw IPv4. Two dependencies therefore have to hold at
+08:50, and neither is under the timeline's control, so both were checked now rather than discovered then.
+
+**The portal is up.** `http://127.0.0.1:3100/` returns HTTP 200 (12,377 bytes), and a published brief still renders
+through its report id — `/ceo/report/d728d6dbbf7a77366cbc` (the M2 brief) returns HTTP 200, 16,776 bytes, with the
+expected content. So the verification path the timeline exercises at 08:50 is live.
+
+**The content rule is satisfied by construction, not by luck.** The check searches the rendered page for three
+strings — the label taken as `fname.split("-")[-3]`, `"checkpoint"` and `"epoch"` — and demands at least two. For the
+M2 brief the filename is `…-cyberguard-checkpoint16-m2-look.md`, so the label token is `m2`, and the run recorded
+`hits=3`. For M3 the filename carries `…-checkpoint17-m3-look.md` → `m3`, and the body contains "checkpoint" and the
+epoch fractions, so the same three hits are available. Noted for the record: the `[-3]` indexing assumes labels
+without a hyphen (M2, M3, C24 all qualify) — a future label like `M4-look` would silently shift the token and could
+drop the hit count, which is the kind of latent trap worth writing down rather than leaving for whoever adds the next
+checkpoint.
