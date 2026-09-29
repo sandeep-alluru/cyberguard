@@ -31,7 +31,8 @@ import urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CEO = os.path.join(ROOT, "docs/ceo")
 PORTAL = "http://127.0.0.1:3100/ceo/report/"
-TITLES = {"C8": "the C8 look", "C16": "the C16 look", "C24": "C24: training complete"}
+TITLES = {"C8": "the C8 look", "C16": "the C16 look", "C24": "C24: training complete",
+          "M1": "mid-window look 1", "M2": "mid-window look 2", "M3": "mid-window look 3"}
 IPV4 = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
 
 
@@ -152,10 +153,18 @@ def verify(fname: str) -> tuple[bool, str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("label", choices=["C8", "C16", "C24"])
+    # Any checkpoint label, not just the three plan-mandated ones: the owner's cadence is a checkpoint every
+    # 3 hours, which falls between C8/C16/C24 as well. compose() already handles any label (it resolves
+    # research-tmp/checkpoints/<label>-metrics.json and falls back to the label as the title), so restricting
+    # the CLI only made the mandated intermediate checkpoints impossible to brief.
+    ap.add_argument("label")
     ap.add_argument("--notes", default=None, help="extra markdown for the 'verified' section")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+    # validate AFTER parsing, and after looking at the real value — a check placed before parse_args cannot
+    # work at all (it referenced an unbound name) and would have crashed every scheduled checkpoint brief.
+    if not a.label.replace("-", "").isalnum():
+        raise SystemExit(f"FATAL: label {a.label!r} must be alphanumeric (it becomes a path component)")
     fname, body = compose(a.label, a.notes)
     if a.dry_run:
         print(body[:2000])

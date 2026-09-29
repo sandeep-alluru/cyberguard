@@ -35,6 +35,26 @@ at() { date -d "$1" +%s; }
 
 say "timeline re-armed: C24 $C24_AT | brief $BRIEF_AT | contract $CONTRACT_AT  (post no-op-resume fix)"
 
+# 3-hourly mid-window checkpoints, each with its own dated brief AND its own Astra review — the owner's cadence
+# is a checkpoint every 3 hours with a review at every one, and nothing was scheduled between now and C24.
+# COMMA-separated on purpose. Written space-separated first, and shell word splitting turned
+# "today 05:50 today 08:50" into four values whose first was "today" -> today 00:00 -> already past -> the
+# loop fired the 05:50 checkpoint at 02:51 instead of waiting three hours. Read one entry per line so a value
+# can safely contain a space.
+MID_AT="${MID_AT:-today 05:50,today 08:50}"
+MID_LABELS="${MID_LABELS:-M2,M3}"
+_i=0
+while IFS= read -r _t; do
+  [ -n "$_t" ] || continue
+  _i=$((_i + 1))
+  _lab=$(printf '%s' "$MID_LABELS" | cut -d, -f"$_i")
+  [ -n "$_lab" ] || { say "no label for checkpoint time '$_t' — skipping"; continue; }
+  wait_until "$(at "$_t")"
+  say "checkpoint $_lab metrics"; bash v2/checkpoint_metrics.sh "$_lab" 2>&1 | tail -6 | tee -a "$LOG"
+  say "checkpoint $_lab brief"; python3 v2/checkpoint_brief.py "$_lab" 2>&1 | tail -3 | tee -a "$LOG"
+  say "checkpoint $_lab review (Astra)"; bash v2/checkpoint_review.sh "$_lab" 2>&1 | tail -2 | tee -a "$LOG"
+done < <(printf '%s\n' "$MID_AT" | tr ',' '\n')
+
 wait_until "$(at "$C24_AT")"
 say "C24 metrics"; bash v2/checkpoint_metrics.sh C24 2>&1 | tail -6 | tee -a "$LOG"
 
