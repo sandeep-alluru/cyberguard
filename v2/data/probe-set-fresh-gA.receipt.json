@@ -2,7 +2,7 @@
   "set": "fresh-gA",
   "path": "v2/data/probe-set-fresh-gA.jsonl",
   "rows": 1100,
-  "sha256": "bcc9a76ea306b28ebcc239548373470c270ecd46fa3bcf8abcc550b6af32639a",
+  "sha256": "5b9ed867c925c2a6ed57fe819ce532f5e143f68ce3b02eadd6f1fc6ef49839ee",
   "provenance": {
     "produced_by": "v2/build_fresh_probes.py",
     "method": "composed from fresh vocabularies; NOT sampled from the training sources",

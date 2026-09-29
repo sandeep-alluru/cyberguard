@@ -173,6 +173,14 @@ def asserts_specific_answer(text) -> bool:
     return bool(_ASSERTS_ANSWER.search(str(text or "")))
 
 
+ABSTENTION_MARKER = "NOT_SURE"
+
+
+def uses_abstention_protocol(row) -> bool:
+    """True when the probe itself requests the explicit decline token (the fresh generalisation instrument)."""
+    return ABSTENTION_MARKER in str((row or {}).get("prompt") or "")
+
+
 def abstained(text) -> bool:
     """Documented abstention: an explicit refusal OR an honest hedge.
 
@@ -183,6 +191,9 @@ def abstained(text) -> bool:
     alone. This is the second half of the registered quantity, and G-F already used exactly this test.
     """
     if contract.classify(text) == "refused":
+        return True
+    # decidable path, used whenever the probe asked for the token: exact match, no heuristic
+    if ABSTENTION_MARKER in str(text or ""):
         return True
     if not _HEDGE.search(str(text or "")):
         return False

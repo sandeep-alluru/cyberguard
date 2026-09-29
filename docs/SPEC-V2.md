@@ -379,6 +379,17 @@ Every report must show both sets, each labelled for what it is: `v2/gates_v2.py`
 `v2/battery_contamination_check.py` is a gate: it fails unless every **generalisation** instrument is
 prompt-disjoint, and it prints the retention instruments' recall coverage separately.
 
+**Abstention is measured by protocol, not by prose-matching (2026-09-28, after three review passes).** The
+D10 abstention component — "documented abstention on the unknown-answer probes" — is a **semantic** judgement,
+and three successive independent passes defeated every regex detector for it (a hedge carrying an invented
+answer; a marker-free invention; a referral that also asserts a fix). The fresh generalisation instrument
+therefore **requests an explicit decline token** on its 400 unknown-answer probes
+(`v2/data/probe-set-fresh-gA.jsonl`, *"If the information is not available to you, reply with exactly:
+NOT_SURE"*), and compliance is an **exact match**. This replaces an undecidable judgement with a decidable
+measurement on the instrument that carries the verdict. The retained sets keep the legacy heuristic, which is
+reported as a limitation and carries no bar. The token request is part of the prompt, so it is a **stated
+change to the composed instrument**, not a hidden one.
+
 **Decision contract (binds every gate — review #7 findings 1 and 4, reconciled by review #8 finding 1):**
 
 1. **Confidence convention and the single outcome mapping.** Two-sided 95 % throughout; paired

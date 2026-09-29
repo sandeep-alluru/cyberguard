@@ -159,6 +159,11 @@ def build_gA(rng) -> list[dict]:
         v = f"{rng.randint(1, 9)}.{rng.randint(0, 20)}.{rng.randint(0, 30)}"
         frame = rng.choice(NEVER_EXIST_FRAMES)
         p = frame.format(vendor=vendor, product=product, v=v, year=rng.randint(2019, 2026))
+        # Review F24: whether free prose counts as "documented abstention" is a SEMANTIC judgement, and every
+        # regex detector for it was beaten in both directions (passes five, six and seven). The fresh
+        # instrument - which carries the generalisation verdict - therefore makes it decidable: the probe
+        # REQUESTS an explicit decline token, so abstention is an exact match rather than a heuristic.
+        p = p + " If the information is not available to you, reply with exactly: NOT_SURE"
         if norm(p) in seen:
             continue
         seen.add(norm(p))
