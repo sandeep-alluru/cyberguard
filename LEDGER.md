@@ -3452,3 +3452,34 @@ the registration check compares `n_req` against the live `GATES` registry field 
 property of a frozen probe set whose receipt hash every battery run verifies before it will execute. A number that
 cannot drift silently does not need to be read at runtime. The distinction is the point: measured values must be
 read, registered values are enforced.
+
+## 2026-09-29 — the plan of record cited an adapter that no longer exists and a flag that never did
+
+Checking Muse's "FIXED" claim about the fresh-set arithmetic (1,580 → 1,620) found the fix applied to **one document and
+not its sibling**: `docs/SPEC-V2.md` says 1,620 with a provenance note, while `docs/PLAN-SEQUENCE.md` still said
+1,580. Corrected there too, and the files were counted again to be sure: 1,100+300+60+60+100 = **1,620**.
+
+Then a wider sweep of path citations in the plan of record turned up three more, all of the same shape — a document
+asserting something the code does not support:
+
+* `docs/PLAN-SEQUENCE.md`'s phase-6 exit named `evals/cyberguard-lora-v2.json`, the **pre-two-arm-cut** path. Corrected
+  to the per-arm pair, with the correction dated (the spec's done-means row 4 already carried exactly this note, so
+  the precedent is the plan's own).
+* Its U4 row cited `python3 eval_cyberguard.py --check evals/cyberguard-lora-v2.json` → 0.
+* **`docs/SPEC-V2.md`'s U4 row cited `python3 eval_cyberguard.py --run v2` → exit 0.** This is worse than a broken
+  command: `eval_cyberguard.py` has **no argument parsing at all** — it takes no flags and reads `RUN_NAME` from the
+  environment — so `--run v2` is *silently ignored* and the run **defaults to the v1 adapter**. A reader executing the
+  plan's own exit condition would have measured the wrong model and seen exit 0. Its second command was also
+  unexecutable: `f1_normalized` and `merged` asserted against that file, keys the script never writes (its F1 field is
+  `ref_token_f1_mean`; the merged representation is named in the merge-equivalence receipt). Corrected in place, with
+  the reason, to the per-arm invocation the host chain uses plus the checks the contract's stage 2 actually gates.
+
+**`plan-validate.py` reports PASS on the spec (0 failures, 0 warnings) and 11 findings on the sequence companion.**
+Rather than contort a record to satisfy a tool written for the other document, the companion now carries a
+**by-reference done-means table** — the seven with their executable checks, explicitly sourced to SPEC §2, which stays
+authoritative — plus a scope note itemising the C3 findings by kind: artifacts cited as *pending by design* (the
+verdict, the per-arm benchmark receipts), glob and brace patterns naming *sets*, artifacts explicitly marked
+**DEFERRED to v2.1**, a `file:line` citation, and one path named *because it was wrong* (the account of a prompt-path
+defect). The first attempt at that note was worse than useless: it said "done-means" in prose, which the C6 rule
+matched, and then — finding no table — reported **no C6 failure at all**, manufacturing a silent pass. The table is
+what makes C6's approval honest, and the note says so.
