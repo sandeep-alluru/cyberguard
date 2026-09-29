@@ -60,6 +60,16 @@ done
 # Review F15: the driver once returned each G-B probe's GOLD LABEL as the prompt (and one fixed Sigma rule for
 # all 60 G-E items), so those batteries would have scored the answer to nothing. This is machine-checked here
 # because the defect was invisible to inspection: it lived in the real prompt path, not in the stubs.
+# Round 54: the scoring dispatch is keyed on measurement family; when the fresh instruments were added their
+# names matched no branch and each produced {"n": N} with no error at all. This check stub-runs every battery
+# and asserts the family's fields are present - it would have caught that before C24.
+SC=$(mktemp)
+if python3 v2/run_battery.py --check-scoring >"$SC" 2>&1; then
+  ok "every registered battery produces its family's score fields (14 checked)"
+else
+  bad "SCORING CHECK FAILED - batteries would produce empty receipts:"; grep -E 'FAIL|lack' "$SC" | head -8 | sed 's/^/        /'; PRE=$((PRE+1))
+fi
+rm -f "$SC"
 DC=$(mktemp)
 if python3 v2/run_battery.py --check-driver >"$DC" 2>&1; then
   ok "driver sends each probe's own frozen item text ($(grep -c 'distinct driver texts' "$DC") batteries checked)"
