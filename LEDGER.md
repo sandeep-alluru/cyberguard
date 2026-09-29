@@ -3258,3 +3258,27 @@ their writes. Those are precisely the two names stage 1 pulls (`evals/$RUN.json`
 `evals/merge-equiv-$RUN.json` from `$host:~/cyberguard/`), and the inputs they read —
 `models/Qwen3-4B-Instruct-2507`, `data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl`, `v2/holdout500.jsonl` — were
 confirmed present under `$CYBERGUARD_ROOT` on both hosts, with the adapters in place for both arms.
+
+## 2026-09-29 — the host-side script inventory, each read end to end, and the safety of my own edit
+
+After finding the working-directory defect by *reading* a script rather than by testing its contract, the rest of the
+host-side surface was finished the same way. Each script the contract runs on a host has now been read end to end at
+least once:
+
+* `run-eval-chain.sh` — read in full; the defect above was in it; fixed, synced, verified.
+* `quarantine_host_evals.sh` — read in full (24 lines): archives rather than deletes, `cd "$HOME/cyberguard" || exit 1`,
+  fails closed on anything left outside the archive.
+* `check_eval_surface.sh` — read and **run on both hosts**; it is the compile gate and the prerequisite check.
+* `verify_resume_learning.py` — read, and **run on both hosts** earlier today, where it correctly refused the
+  pre-continuation candidate ("was last written 10.04 h ago, before the window under test … A stale checkpoint cannot
+  prove anything about this run"); its relative `--parent`/`--candidate` arguments resolve because stage 0d invokes it
+  from `~/cyberguard`, and `--out /tmp/…` is absolute by construction.
+* `run_battery.py` — read at its input and output boundaries; `--check-driver` and `--check-scoring` pass on both hosts.
+* `merge_equiv.py` / `eval_cyberguard.py` — read at their boundaries; inputs, outputs and consumer contracts verified.
+
+**And the one change of mine that will run there.** `eval_cyberguard.py` gained `wall_seconds` this window, which
+means an edit of mine reaches a host at stage 0b and executes in stage 1 — so the safety of my own edit was checked
+rather than assumed: `_T0 = time.time()` (line 230) and `report["wall_seconds"]` (line 438) are both directly inside
+`main` (defined at 217), no `return`/`raise`/`sys.exit` intervenes between them at that depth, and the field is set
+immediately before the same `json.dump` that writes the receipt. It cannot raise a `NameError`, and the whole
+repository compiles under `compile()` — which, unlike `ast.parse`, is the check that catches that class.
