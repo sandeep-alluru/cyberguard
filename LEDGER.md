@@ -2800,3 +2800,21 @@ Also re-swept the class that has already bitten this project once: **unmarked tr
 deliverable-producing code. The remaining `[:N]` slices across the four deliverable scripts are comments describing
 the historical defect, hash prefixes (`vsha[:16]`, a report id) and a revision prefix — no prose is cut without its
 marker, and the marked-truncation helper is still in use at seven call sites.
+
+## 2026-09-29 — the completion instrument tested in the direction that matters at the end
+
+`verify_objective.py` decides my own completion claim, and it had only been tested against trees where something is
+missing or wrong — which proves it can fail, not that it can **pass**. A checker that refuses a complete tree would
+be discovered at the worst possible moment, with the verdict delivered and the claim unmade. So a full post-contract
+tree was assembled in isolation and the verifier run against it: every artifact an element names, present and
+consistent (audit PASS, the unified leak scan, D2 declared NOT MET, both clearance lines with their revisions, the
+FACTS authorization accounting, both trainer receipts, a clean C24 eviction record, a gate report with both
+pre-registered claims and a decided row, `VERDICT-v2.md`, a manifest containing the verdict **and both adapters**,
+and a terminal brief).
+
+Result: **ALL FIVE ELEMENTS PASS**, exit **0** — the first time the positive path has been exercised. It also
+exercised the two element-3 clauses added earlier: the serving eviction read from the live checkpoint record
+("in force") and the owner's supersession of the restore clause read from the ledger. Together with the four
+negative cases already run (one claim instead of two; a manifest missing an adapter; rejection wording in a
+clearance; a breached eviction record), the instrument is now tested in both directions, which is the only state in
+which it can be trusted to make a claim rather than merely to withhold one.
