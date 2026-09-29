@@ -2071,3 +2071,21 @@ name the verdict), and when it does run it captures and reports the exit status 
 cases that matter: manifest present **and** naming the verdict → SKIP (with the file count); no manifest (the
 contract failed before stage 7) → RUN; manifest present but **without** the verdict → RUN, because a post-contract
 manifest that does not include the verdict is not a completed harvest.
+
+## 2026-09-29 — stage 6 verified that the verdict was non-empty, not that it was complete
+
+The terminal deliverable was checked only with `[ -s docs/VERDICT-v2.md ]`: **any** non-empty file passed. The
+reviews made specific sections mandatory — the measured exposure (review #14), the scoped merge claim with its
+conceded limits (#18/#19/#20/#21), and the serving-posture deviation (A2) — and the rehearsal asserted them
+*before* the run, but nothing asserted them **at the moment the document is written**. A composer change that
+silently dropped a mandatory section would have shipped an overclaiming verdict with a green stage.
+
+Stage 6 now asserts all **nine** mandatory sections by name, failing with exit 9 and naming each one that is
+missing. Verified against a **real composed verdict** (the rehearsal's, 16,404 bytes): all nine present; and
+against a copy with the serving-posture section removed, which fails reporting `serving-posture deviation`.
+
+Along the way I checked a suspicion and it was **not** a defect: the rehearsal's assertion list appeared to be
+missing a comma between two entries, which would have merged two assertions into a call and silently skipped one.
+Parsing the file's AST showed **nine well-formed two-element tuples** — the apparent missing comma was an artefact
+of how a two-line tuple renders in `grep` output. Recorded because a "found something" that dissolves on
+inspection is as much a result as one that does not, and the alternative — reporting it — would have been wrong.

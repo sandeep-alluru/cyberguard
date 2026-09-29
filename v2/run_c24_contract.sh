@@ -751,6 +751,32 @@ echo "  python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals e
     || { bad "the verdict document was not written (see logs/verdict-doc.log)"; exit 9; }
   [ -s docs/VERDICT-v2.md ] && ok "VERDICT-v2.md written ($(wc -c < docs/VERDICT-v2.md) bytes)" \
     || { bad "VERDICT-v2.md missing or empty"; exit 9; }
+  # A NON-EMPTY verdict is not a complete one. The reviews made specific sections MANDATORY - the measured
+  # exposure (review #14), the scoped merge claim with its conceded limits (#18/#19/#20/#21) and the
+  # serving-posture deviation (A2) - and the rehearsal asserts them BEFORE the run, but nothing asserted them at
+  # the moment the document is written. The same list, checked where the artifact is produced: a composer change
+  # that silently dropped a mandatory section would otherwise ship an overclaiming verdict.
+  VERDICT_PATH="${VERDICT_PATH:-docs/VERDICT-v2.md}" python3 - <<'PY' || { bad "the composed verdict is missing a mandatory section"; exit 9; }
+import os, sys
+t = open(os.environ.get("VERDICT_PATH", "docs/VERDICT-v2.md"), encoding="utf-8").read()
+need = {
+    "Training trajectory and measured exposure (review #14)": "the measured-exposure section (review #14)",
+    "measured updates": "the measured-exposure table",
+    "one completed pass over the mixture followed by a": "review #14's required trajectory description",
+    "one continuous schedule": "the explicit statement that this is not one continuous schedule",
+    "What is NOT established": "the merge check's conceded limits",
+    "approximate agreement on the measured surface": "the scoped merge-equivalence claim",
+    "reported and never gated": "the statement that the generation statistics are not gated",
+    "Serving posture (amendment A2": "the serving-posture deviation (amendment A2)",
+    "## Every gate": "the gate table",
+}
+missing = [why for needle, why in need.items() if needle not in t]
+for m in missing:
+    print(f"  MISSING from the verdict: {m}")
+if missing:
+    sys.exit(1)
+print(f"  verdict content: all {len(need)} mandatory sections present ({len(t)} bytes)")
+PY
 }
 
 # ---------------------------------------------------------------- stage 7: harvest
