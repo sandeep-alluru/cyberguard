@@ -2333,3 +2333,26 @@ script), so nothing is pulling an adapter from the wrong directory.
 
 Re-verified after the edit: harvest syntax; both required receipt names present as manifest substrings via the local
 glob; the local rehearsal still passes (12 decided, 6 unmeasured, exit 0).
+
+## 2026-09-29 — an allow-list that could not allow anything, and a pre-flight for the last gate on the critical path
+
+Two items from pre-verifying the host-side prerequisites the contract needs at 12:10 rather than at 12:10.
+
+**`ALLOW_GPU_PIDS` was dead code that lied.** In `check_eval_surface.sh`, the GPU check called `bad` (recording a
+failure) and *then* looped over the allow-list printing `ok "pid N explicitly allowed"` — so a pid on the list was
+announced as allowed while the failure stood and the script still exited 1. Nothing sets that variable today, which
+is why it survived; an operator who set it to keep a known-good process resident would have found the check failing
+anyway under a log line saying the pid was allowed. The list is now applied **before** the decision, with the
+strict default unchanged (no allow-list ⇒ any holder fails). Verified with a stubbed `nvidia-smi` on a synthetic
+HOME: strict default names the holder and fails; the holder's own pid on the list passes; a different pid on the
+list still fails.
+
+**Every other host prerequisite is now confirmed present, ahead of the window.** Ran the real check on both hosts
+(the script is explicit that it is read-only and safe while training continues). All of the following pass on
+`spark-40ee` **and** `spark-8cf2`: `CYBERGUARD_ROOT`, the interpreter, the torch/transformers/peft/datasets imports,
+the base model, the corpus, the synced eval files, disk (3,269 GB / 2,630 GB free), bf16 on the GB10, no port-8093
+listener, serving units evicted, the scoring authority present **and matching its declared receipt sha256
+`dc1639caa5501d72`** (valid=697 deprecated=161), the scorer self-test, and `run_battery --check-driver` /
+`--check-scoring`. The single failure is the GPU item, and it fails for the right reason: it names the live trainer
+pid on each host. Stage 00 of the contract waits for both trainers to exit, so by stage 0b that item clears on its
+own. The verified copy of the script was synced to both hosts, so stage 0b re-syncs the same file it was tested as.

@@ -89,13 +89,22 @@ gpu_pids=$(nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null
 if [ -z "$gpu_pids" ]; then
   chk yes "no process holds the GPU (it is free for the evaluation)"
 else
-  bad "GPU is NOT free — ${ALLOW_GPU_PIDS:+allowed }process(es) holding it:"
+  # The ALLOW_GPU_PIDS escape hatch used to be applied AFTER the failure had been recorded: it printed
+  # "pid N explicitly allowed" as an OK line while FAILS was already incremented, so the check still failed and
+  # the allow-list did nothing. Nothing sets that variable today, which is why it went unnoticed - but an
+  # operator who set it to let a known-good process stay resident would have found the check failing anyway,
+  # under a log line saying the pid was allowed. The list is now applied BEFORE the decision, and the default
+  # stays strict: with no allow-list, any process holding the GPU fails this check.
+  unallowed=""
   for pp in $gpu_pids; do
-    echo "         pid $pp: $(tr '\0' ' ' < /proc/$pp/cmdline 2>/dev/null | cut -c1-90)"
+    case " ${ALLOW_GPU_PIDS:-} " in *" $pp "*) ;; *) unallowed="$unallowed $pp" ;; esac
   done
-  if [ -n "${ALLOW_GPU_PIDS:-}" ]; then
-    for pp in $gpu_pids; do
-      case " $ALLOW_GPU_PIDS " in *" $pp "*) ok "pid $pp explicitly allowed by ALLOW_GPU_PIDS";; esac
+  if [ -z "$unallowed" ]; then
+    ok "GPU is held only by explicitly allowed pid(s):${ALLOW_GPU_PIDS}"
+  else
+    bad "GPU is NOT free — process(es) holding it that are not allowed:"
+    for pp in $unallowed; do
+      echo "         pid $pp: $(tr '\0' ' ' < /proc/$pp/cmdline 2>/dev/null | cut -c1-90)"
     done
   fi
 fi
