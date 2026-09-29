@@ -338,6 +338,40 @@ registers, and the verdict must state them).**
   therefore assessed **per task** (1,200 / 40) rather than one number for every task — applying 1,200 to IFEval
   would have called its own registered size a shortfall.
 
+**Third re-registration (2026-09-28 22:02 CDT, owner-approved): generalisation instruments vs retention
+instruments.** Independent review (Muse) withheld clearance because the frozen batteries turned out to be
+**training rows**, verified here by measurement against both arms:
+
+| registered set | probes | training rows in arm A | in arm B |
+|---|---|---|---|
+| G-A | 1,100 | **1,099** | 399 |
+| G-B | 300 | 300 | 300 |
+| G-E | 60 | 60 | 60 |
+| G-F (unanswerable half) | 20 of 60 | 20 | 20 |
+| G-J | 100 | 99 | 99 |
+| G-A2, G-C, G-G | — | 0 | 0 (unchanged) |
+
+The cause is structural, not a slip: the probe sets were sampled from the same pools the training mixture
+consumed, and no held-out inventory was reserved first. Those pools are now exhausted (format-compliance
+1300/1300 used, refusal-retention 1198/1200, ultrachat-pairs 594/600), so the affected sets **cannot** be made
+disjoint for this window, and the training data cannot be changed. The owner therefore decided:
+
+1. **Training stays on schedule.** C24 proceeds; the checkpoint is a verdict, not a training control.
+2. The affected sets are **repurposed as RETENTION/recall checks.** Failure on a trained row remains a red flag
+   (it is the guard against catastrophic forgetting), but the number is **recall on memorised items and must
+   never be reported as generalisation**.
+3. **Fresh, training-disjoint probes carry the generalisation verdict** for those five gates
+   (the five sets `v2/data/probe-set-fresh-gA.jsonl`, `v2/data/probe-set-fresh-gB.jsonl`, `v2/data/probe-set-fresh-gE.jsonl`, `v2/data/probe-set-fresh-gF.jsonl` and `v2/data/probe-set-fresh-gJ.jsonl` — 1,580 prompts composed from new vocabularies, built before
+   any checkpoint output was seen, with **0 overlap against both training arms** and 0 exact overlap against the
+   superseded sets). The two confirmatory claims are now measured on the fresh G-A instrument — same n (1,100)
+   and the same 700-offensive/400-abstention composition — so their support and their power argument carry over.
+4. **G-A2, G-C and G-G are unchanged**, because they were already disjoint.
+
+Every report must show both sets, each labelled for what it is: `v2/gates_v2.py` attaches a
+`retention_recall` block (with an explicit *never generalisation* note) beside the generalisation result, and
+`v2/battery_contamination_check.py` is a gate: it fails unless every **generalisation** instrument is
+prompt-disjoint, and it prints the retention instruments' recall coverage separately.
+
 **Decision contract (binds every gate — review #7 findings 1 and 4, reconciled by review #8 finding 1):**
 
 1. **Confidence convention and the single outcome mapping.** Two-sided 95 % throughout; paired

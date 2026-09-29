@@ -566,6 +566,15 @@ entries for G-H and the Sigma detection/utility halves.
 
 | 2026-09-28 | **owner decisions D10/D11 GIVEN**: G-A re-registered as non-compliance retention (700 offensive + 400 abstention, n=1,100); G-G registered at the reachable floor (GSM8K 1,200 + IFEval 40, MMLU declared UNMEASURED, per-task n). SPEC §7 updated, hash now `8a5220dc…`. Same day: Qwen3.8-Flash-Next serving stack evicted from both Spark hosts on owner instruction (see HANDOVER) |
 
+| 2026-09-28 | **Muse review WITHHELD clearance on the frozen arms** (independently verified): the frozen
+ batteries are training rows — G-A 1,099/1,100, G-B 300/300, G-E 60/60, G-J 99/100, G-F-unanswerable 20/20 —
+ while G-A2/G-C/G-G are disjoint. Cause: probe sets sampled from the pools the mixture consumed, with no
+ held-out split reserved; pools now exhausted, so unrepairable in this window. **Owner decision D12**:
+ training on schedule; affected sets repurposed as **retention/recall** (never generalisation);
+ **fresh training-disjoint instruments** (probe-set-fresh-gA/gB/gE/gF/gJ, 1,580 composed prompts, 0 overlap
+ with either arm, 0 overlap with the superseded sets) carry the generalisation verdict for those gates;
+ every report shows both sets with labels. Recorded in SPEC §7 |
+
 Full text: `LEDGER.md` (≈950 lines). Project memory and the vault carry the durable summaries.
 
 ### Review-round scope note (2026-09-28, round 43)
