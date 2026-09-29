@@ -2465,3 +2465,30 @@ box stop skips, stage 0a would have failed with `exit 2` after training finished
 evaluation. Also confirmed no stale receipt is sitting on either host for stage 2 to mistake for this run's
 (`receipts/cyberguard-lora-v2-arm*.json` does not exist yet on either machine), so the WARN-if-absent path is not
 hiding a stale file behind a successful pull.
+
+## 2026-09-29 — stage 3's input and output contracts, checked against the real files and the real producer
+
+Stage 3 is the most expensive stage (~8 h, 42 battery runs) and it is where a mismatch is least affordable, so both
+ends of it were checked against the live system rather than against the rehearsal.
+
+**Inputs.** All 14 probe-set files were counted against the `n` declared in `run_battery.py`'s battery table:
+`gA` 1,100 · `gC` 300 · `gF` 60 · `gG-gsm8k` 1,200 · `gG-ifeval` 40 · `gJ` 100 · `gB` 300 · `gE` 60 · `gA2` 60 ·
+`fresh-gA` 1,100 · `fresh-gB` 300 · `fresh-gE` 60 · `fresh-gF` 60 · `fresh-gJ` 100 — **14/14 exact, 4,840 probes per
+side**, matching the row-count the registered rules require. The same 14 files exist on **both** hosts with the same
+total, and `run_battery.py` + `gate_scorers_v2.py` are present on both. A short probe set would have made a gate
+compute on a different `n` than the registration fixes, and a missing one would have failed stage 3 with `exit 5`
+after training — both are now excluded before the contract starts.
+
+**Outputs.** The rehearsal builds its battery receipts **by hand** (`json.dump({"battery": …, "arm": …,
+"probe_ids": …, "scores": …})`), so it cannot catch a producer/consumer schema drift on its own. Comparing the real
+producer against the real consumer instead: every battery-record key `assemble_gate_inputs.py` reads — `battery`,
+`arm`, `scores`, `probe_ids`, `probe_set_sha256`, `provenance`, `stub` — is written by `run_battery.py`, and the
+identity-binding key the assembler uses to refuse an unbound arm (`provenance.adapter_sha256`) is produced at
+`run_battery.py:420` and read at `assemble_gate_inputs.py:552`. **No key the consumer requires is absent from the
+producer.**
+
+One process note worth keeping, because it is the exact failure this project has already been bitten by: my first
+comparison reported `probe_set_sha256` as *missing from the producer*. It was not — my extraction pattern was
+`"([a-z_]+)"`, which cannot match a key containing digits, so the checker silently omitted the one key it then
+declared absent. The finding was in the instrument, not the artifact (the same shape as the `grep -q "*foo[.]py"`
+lesson). Re-run with `"([a-z0-9_]+)"`: nothing missing.
