@@ -326,16 +326,21 @@ def main():
         # refusal-content substitution must not change how much assistant supervision is lost to truncation.
         _e3 = {}
         for _label, _rows in (("armA", A), ("armB", B)):
-            _sample = _rows[: min(len(_rows), 20000)]
+            # Frozen-arms review: this sampled only the PREFIX of each arm and omitted the system prompt, which
+            # the trainer does sequence. Stride-sample across the whole file and include the system field, so the
+            # truncation figure describes the arm rather than its first rows.
+            _stride = max(1, len(_rows) // 20000)
+            _sample = _rows[::_stride][:20000]
             _trunc = _empty = 0
             for r in _sample:
-                ids = tok(str(r["user"]), add_special_tokens=False)["input_ids"]
+                ids = tok(str(r.get("system") or "") + "\n" + str(r["user"]),
+                          add_special_tokens=False)["input_ids"]
                 sup = tok(str(r["assistant"]), add_special_tokens=False)["input_ids"]
                 if len(ids) + len(sup) + 8 > MAX_SEQ:   # +8 for template/special tokens
                     _trunc += 1
                 if not sup:
                     _empty += 1
-            _e3[_label] = {"sampled": len(_sample),
+            _e3[_label] = {"sampled": len(_sample), "stride": _stride, "includes_system": True,
                            "truncation_rate": round(_trunc / max(1, len(_sample)), 4),
                            "empty_supervision": _empty}
             if _e3[_label]["empty_supervision"]:
