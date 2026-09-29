@@ -20,6 +20,9 @@ set -uo pipefail
 ROOT="$HOME/AgentHub/cyberguard"
 cd "$ROOT"
 LOCK="${TL_LOCK:-v2/.c24-timeline.lock}"
+VERDICT="${GUARD_VERDICT:-docs/VERDICT-v2.md}"
+GATREP="${GUARD_GATEREPORT:-v2/gate-report-v2.json}"
+CTLOCK="${GUARD_CONTRACT_LOCK:-v2/.c24-contract.lock}"
 HOURS="${GUARD_HOURS:-24}"
 INTERVAL="${GUARD_INTERVAL:-300}"
 LOG="${GUARD_LOG:-logs/timeline-guard.log}"
@@ -38,6 +41,15 @@ cycles=0
 say "guard starting: every ${INTERVAL}s for ${HOURS}h, watching $LOCK"
 while [ "$(date +%s)" -lt "$deadline" ]; do
   cycles=$((cycles + 1))
+  # TERMINAL CONDITION. Without this the guard would keep "recovering" a finished job: once the contract has ended,
+  # no timeline is alive, so every cycle would launch one, which would find the verdict and gate report, skip the
+  # contract, skip the harvest, no-op the brief and exit — harmless to the deliverables but an endless relaunch
+  # loop appending to the log. The single case the guard exists for is a death BEFORE the contract produces
+  # anything, so the deliverables existing (with no contract still running) means the guard's purpose is served.
+  if [ -s "$VERDICT" ] && [ -s "$GATREP" ] && [ ! -d "$CTLOCK" ]; then
+    say "cycle $cycles: $VERDICT and $GATREP exist and no contract is running — the window is delivered; guard exiting"
+    exit 0
+  fi
   if holder_alive; then
     # Healthy. A heartbeat every ~30 min, because a guard that is silent when healthy is indistinguishable from a
     # guard that has died — and the whole point of this process is that someone notices when nothing else does.
