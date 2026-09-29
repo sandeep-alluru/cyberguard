@@ -1963,3 +1963,18 @@ stages with no spurious retry.
 
 Budget, re-derived rather than assumed: epoch 1 (11.0296 + 11.0136 h) + the frozen window (3.0088 + 3.0084 h) +
 the capped continuation (2 × 9.5 h) = **47.0604 GPU-h of the 48 authorized** — the figure FACTS carries.
+
+## 2026-09-29 — two inaccuracies in the CEO-facing record, both fixed
+
+**1. The C24 brief said "training complete" six minutes early.** The C24 metrics and brief are written at
+11:55/11:57, while the 570-minute box stops the trainers at **~12:01** and the *evaluated* adapter is the one
+saved after that. The title now reads **"C24: the window closes"** — a label that is true when it is written,
+which the previous one was not.
+
+**2. The brief never reported the eviction**, even though the plan requires the Flash-Next serving stack evicted
+for the whole window and `checkpoint_metrics.sh` now collects it per host. The requirement went unmentioned in
+exactly the document the CEO reads. The "Verified at this checkpoint" section now carries a **serving posture**
+line with three states, all three tested:
+* in force — "no `8093` listener and no active serving unit";
+* **BREACH** — naming the host and its state, and saying plainly that the stack competes for the GPU if it returns;
+* not recorded — for a metrics file predating the check, stated as such rather than left blank.

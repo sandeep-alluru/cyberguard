@@ -31,7 +31,10 @@ import urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CEO = os.path.join(ROOT, "docs/ceo")
 PORTAL = "http://127.0.0.1:3100/ceo/report/"
-TITLES = {"C8": "the C8 look", "C16": "the C16 look", "C24": "C24: training complete",
+# C24 is NOT "training complete": the metrics and brief are written at 11:55/11:57 while the 570-minute box stops
+# the trainers at ~12:01 and the evaluated adapter is the one saved after that. Labelling it "complete" would put
+# a claim in the CEO's record that is false at the moment it is written.
+TITLES = {"C8": "the C8 look", "C16": "the C16 look", "C24": "C24: the window closes",
           "M1": "mid-window look 1", "M2": "mid-window look 2", "M3": "mid-window look 3"}
 IPV4 = re.compile(r"\b\d{1,3}(?:\.\d{1,3}){3}\b")
 
@@ -59,6 +62,20 @@ def compose(label: str, notes: str | None = None) -> tuple[str, str]:
         raise SystemExit(f"FATAL: {mp} does not exist - run v2/checkpoint_metrics.sh {label} first")
     m = json.load(open(mp))
     facts = m.get("facts", {})
+    # The plan requires the Flash-Next serving stack evicted for the whole window, and checkpoint_metrics.sh now
+    # collects it per host. It was never surfaced in the brief, so the requirement went unmentioned in the record
+    # the CEO reads - reported here, with a breach stated plainly rather than buried.
+    _ev = m.get("eviction") or {}
+    _breach = [h for h, v in _ev.items() if isinstance(v, dict) and (v.get("port_8093") or v.get("active_units"))]
+    if not _ev:
+        ev_line = ("**not recorded for this checkpoint** (this metrics file predates the eviction check; the "
+                   "contract preflight verifies it again before the evaluation)")
+    elif _breach:
+        ev_line = ("**BREACH** — " + "; ".join(f"`{h}` {_ev[h]}" for h in _breach) +
+                   ". The serving stack must stay evicted for the window and competes for the GPU if it returns.")
+    else:
+        ev_line = ("in force on both hosts — no `8093` listener and no active serving unit "
+                   "(`eviction` block of the metrics file)")
     arms, exp = m.get("arms", {}), m.get("exposure", {})
     files = sorted(f for f in os.listdir(CEO) if f.endswith(".md") and "checkpoint" in f)
     n = next_number(files)
@@ -117,6 +134,7 @@ Projection to 24 h from the same file: **{exp.get('A', {}).get('projected_24h_ep
 * Live trainer state and the numbers above come from `checkpoint_metrics.sh {label}` at the scheduled moment.
 * Watchdog, last cycle: `{wd[:150]}`
 * Repository revision: `{head[:150]}`
+* **Serving posture (plan requirement):** {ev_line}
 {notes or ''}
 ## What is open
 
