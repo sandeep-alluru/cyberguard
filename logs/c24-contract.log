@@ -1,0 +1,113 @@
+
+=== stage 00: wait for both trainers to exit (deadline 45 min) ===
+  t+0s  armA@40ee=GONE  armB@8cf2=GONE
+  [32mOK[0m   both trainers have exited
+  [32mOK[0m   receipt v2/data/mixture/trainer-exit.receipt.json (adapter hashes as of exit)
+
+=== stage 0pre: quarantine pre-existing evals/ inputs (the verdict must consume only this window's measurements) ===
+  [32mOK[0m   archived 4 pre-existing eval json(s) into evals/.pre-c24-archive (kept, not deleted)
+  ssh clawerdigi2@spark-40ee: bash v2/quarantine_host_evals.sh
+  archived 3 pre-existing eval json(s); evals/ now holds only this window's outputs
+  ssh clawerdigi1@spark-8cf2: bash v2/quarantine_host_evals.sh
+  archived 3 pre-existing eval json(s); evals/ now holds only this window's outputs
+
+=== stage 0d: learning proof (deliberately BEFORE the pull, so a stale adapter is caught without a 264 MB transfer) ===
+  window start 1790667173 (2026-09-29 02:32:53 CDT)
+  ssh clawerdigi2@spark-40ee: verify_resume_learning.py --parent armA.epoch1-final-bak --candidate armA
+  candidate adapters/cyberguard-lora-v2-armA/adapter_model.safetensors sha b056fe93c1c8a6ee
+  tensors   504/504 changed | delta L2 26.2781 vs parent L2 68.8946 (38.14% relative)
+    base_model.model.model.layers.31.mlp.down_proj.lora_A.weight           2.00669
+    base_model.model.model.layers.32.mlp.down_proj.lora_A.weight           2.00027
+    base_model.model.model.layers.33.mlp.down_proj.lora_A.weight           1.9614
+    base_model.model.model.layers.30.mlp.down_proj.lora_A.weight           1.95722
+    base_model.model.model.layers.6.mlp.down_proj.lora_A.weight            1.92729
+  PASS — weights moved; an optimizer update was applied
+  [32mOK[0m   armA: weights moved — receipt v2/data/mixture/resume-learning-armA.receipt.json
+  ssh clawerdigi1@spark-8cf2: verify_resume_learning.py --parent armB.epoch1-final-bak --candidate armB
+  candidate adapters/cyberguard-lora-v2-armB/adapter_model.safetensors sha bc6ead3dfda0d3bb
+  tensors   504/504 changed | delta L2 26.1864 vs parent L2 68.9193 (38% relative)
+    base_model.model.model.layers.31.mlp.down_proj.lora_A.weight           2.00527
+    base_model.model.model.layers.32.mlp.down_proj.lora_A.weight           2.00114
+    base_model.model.model.layers.33.mlp.down_proj.lora_A.weight           1.96069
+    base_model.model.model.layers.30.mlp.down_proj.lora_A.weight           1.95571
+    base_model.model.model.layers.6.mlp.down_proj.lora_A.weight            1.93314
+  PASS — weights moved; an optimizer update was applied
+  [32mOK[0m   armB: weights moved — receipt v2/data/mixture/resume-learning-armB.receipt.json
+
+=== stage 0a: pull the trained adapters from the hosts (the benchmark stages run locally) ===
+  rsync -a --copy-links --exclude 'checkpoint-*' clawerdigi2@spark-40ee:~/cyberguard/adapters/cyberguard-lora-v2-armA/ adapters/cyberguard-lora-v2-armA/
+  [32mOK[0m   armA adapter pulled — adapter_model.safetensors sha256 b056fe93c1c8a6ee…
+  rsync -a --copy-links --exclude 'checkpoint-*' clawerdigi1@spark-8cf2:~/cyberguard/adapters/cyberguard-lora-v2-armB/ adapters/cyberguard-lora-v2-armB/
+  [32mOK[0m   armB adapter pulled — adapter_model.safetensors sha256 bc6ead3dfda0d3bb…
+
+=== stage 0c: live loss-mask proof on both hosts (needs the GPU, so it runs after training stops) ===
+  bash v2/verify_training_mask.sh   (MASK_PROOF=1; exits before any optimizer step)
+  [32mOK[0m   MASK PROOF: PASS on both hosts (receipt v2/data/mixture/mask-proof.receipt.json)
+
+=== stage 0: preflight ===
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armA
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=92.2 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-8cf2
+
+=== stage 1: merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU) ===
+  ssh clawerdigi2@spark-40ee: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armA bash run-eval-chain.sh
+  ssh clawerdigi1@spark-8cf2: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armB bash run-eval-chain.sh
+  [32mOK[0m   benchmark + merge-equivalence present for both arms
+
+=== stage 2: verify the pulled artefacts are measurements, not stubs ===
+  [32mOK[0m   trainer receipt pulled for armA (91069 bytes)
+  [32mOK[0m   trainer receipt pulled for armB (88962 bytes)
+    weight-level: max 0.5000 of a bf16 ULP over 3633315840 elements, 0 non-finite (controls: 10%-scale 4.82e+36 ULP, dropped 4.82e+37 ULP)
+FATAL: armA merged-vs-unmerged disagree at the FIRST supervised position on 2 row(s) - a wrong merge changes the first decision

@@ -71,3 +71,1005 @@ LAUNCHED
 [2026-09-29 07:43:29 CDT]   overwrite its metrics snapshot or duplicate its brief
 LAUNCHED
 LAUNCHED
+[2026-09-29 08:50:00 CDT] checkpoint M3 metrics
+  M3: A 2784 steps @ 8.08s/it alive=1 gpu=95% | B 2695 steps @ 7.62s/it alive=1 gpu=94%
+  eviction in force: both hosts report no 8093 listener and no active serving unit
+    arm A: 44544 samples = 0.549 epoch | 5265 refusal presentations | 24 h projection 2.11 epochs, 20224 refusal presentations
+    arm B: 43120 samples = 0.532 epoch | 5097 refusal presentations | 24 h projection 2.24 epochs, 21445 refusal presentations
+    (declared FACTS basis: 0.968288 s/sample -> epoch 21.8 h)
+[2026-09-29 08:50:04 CDT] checkpoint M3 review (Astra)
+prompt written: research-tmp/reviews/checkpoint-M3-review-prompt.md
+review dispatched for checkpoint M3 -> research-tmp/reviews/checkpoint-M3-review.md
+[2026-09-29 08:50:08 CDT] checkpoint M3 brief
+  wrote docs/ceo/2026-09-29_085000CDT-cyberguard-checkpoint18-m3-look.md (3443 bytes)
+  portal verification: PASS — HTTP 200 (17511 bytes), content hits=3, raw IPv4=0 -> http://127.0.0.1:3100/ceo/report/096993c0da39c840d246
+[2026-09-29 11:55:00 CDT] C24 metrics
+  both trainers have exited (both hosts reported 0) — this C24 snapshot IS the end of the window
+  C24: A 4255 steps @ 8.03s/it alive=0 gpu=0% | B 4158 steps @ 8.22s/it alive=0 gpu=0%
+  eviction in force: both hosts report no 8093 listener and no active serving unit
+    arm A: 68080 samples = 0.840 epoch | 8047 refusal presentations | 24 h projection 2.12 epochs, 20350 refusal presentations
+    arm B: 66528 samples = 0.821 epoch | 7864 refusal presentations | 24 h projection 2.07 epochs, 19880 refusal presentations
+    (declared FACTS basis: 0.968288 s/sample -> epoch 21.8 h)
+[2026-09-29 12:02:44 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 12:10:00 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 12:10:00 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 12:15:21 CDT] contract exit=2 (full log logs/c24-contract.log)
+[2026-09-29 12:15:21 CDT] contract FAILED (exit 2) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 12:21:17 CDT] contract second attempt exit=2 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 12:21:17 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (27 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 12:23:28 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 12:23:28 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 12:23:28 CDT] objective verification (five elements, read from artifacts)
+objective verification (cyberguard)
+
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [ NOT-YET] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 0/2 (stage 2 pulls these; absent means the contract has not finished)
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 3 element(s) awaiting artifacts: 3. 24h x 2 training within the recorded authorization; 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 12:23:28 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 12:23:28 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 12:25:28 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 12:25:28 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 12:25:28 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 12:25:28 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 12:25:28 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 12:25:28 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 12:25:28 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 12:25:28 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 12:25:28 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 12:30:28 CDT] contract exit=2 (full log logs/c24-contract.log)
+[2026-09-29 12:30:28 CDT] contract FAILED (exit 2) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 12:36:32 CDT] contract second attempt exit=2 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 12:36:32 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (27 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 12:38:09 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 12:38:09 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 12:38:09 CDT] objective verification (five elements, read from artifacts)
+objective verification (cyberguard)
+
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [ NOT-YET] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 0/2 (stage 2 pulls these; absent means the contract has not finished)
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 3 element(s) awaiting artifacts: 3. 24h x 2 training within the recorded authorization; 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 12:38:09 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 12:38:09 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 12:40:34 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 12:40:34 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 12:40:34 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 12:40:34 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 12:40:34 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 12:40:34 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 12:40:34 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 12:40:34 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 12:40:34 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 12:45:20 CDT] contract exit=2 (full log logs/c24-contract.log)
+[2026-09-29 12:45:20 CDT] contract FAILED (exit 2) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 12:51:13 CDT] contract second attempt exit=2 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 12:51:13 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (27 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 12:53:12 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 12:53:12 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 12:53:12 CDT] objective verification (five elements, read from artifacts)
+objective verification (cyberguard)
+
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [ NOT-YET] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 0/2 (stage 2 pulls these; absent means the contract has not finished)
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 3 element(s) awaiting artifacts: 3. 24h x 2 training within the recorded authorization; 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 12:53:13 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 12:53:13 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 12:55:40 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 12:55:40 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 12:55:40 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 12:55:40 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 12:55:40 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 12:55:40 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 12:55:40 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 12:55:40 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 12:55:40 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 13:00:26 CDT] contract exit=2 (full log logs/c24-contract.log)
+[2026-09-29 13:00:26 CDT] contract FAILED (exit 2) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+  [32mOK[0m   adapter present: adapters/cyberguard-lora-v2-armB
+  [32mOK[0m   probe set present: v2/data/probe-set-gA.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gC.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gF.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gG-gsm8k.jsonl
+  [32mOK[0m   probe set present: v2/data/probe-set-gJ.jsonl
+  [32mOK[0m   FACTS present (every number is cited from it)
+  [32mOK[0m   REGISTRATION-RULES: PASS — 12 gate rules and 2 claim rules match the registration frozen at spec 75a909355bb9dc91
+  [32mOK[0m   ULP spacing is exact (10 lines of evidence)
+  [32mOK[0m   every registered battery produces its family's score fields (14 checked)
+  [32mOK[0m   driver sends each probe's own frozen item text (14 batteries checked)
+  [32mOK[0m   local verdict chain rehearsed: it decides, binds identity, and rests no decision on unusable input
+  [32mOK[0m   batteries are prompt-disjoint from both training arms
+  arms the trainers loaded (must match FACTS):
+    clawerdigi2@spark-40ee: [02:31:17] ARM MODE: /home/clawerdigi2/cyberguard/v2/data/mixture/armA.jsonl rows=81074 sha256=bc785b430551d83
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=67.6 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1048162: /home/clawerdigi2/llama.cpp/build/bin/llama-server -m /home/clawerdigi2/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-40ee — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi2@spark-40ee — stage 1/3 would fail after the window is spent
+[2026-09-29 13:06:21 CDT] contract second attempt exit=2 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 13:06:21 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (27 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 13:07:51 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 13:07:51 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 13:07:51 CDT] objective verification (five elements, read from artifacts)
+objective verification (cyberguard)
+
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [ NOT-YET] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 0/2 (stage 2 pulls these; absent means the contract has not finished)
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 3 element(s) awaiting artifacts: 3. 24h x 2 training within the recorded authorization; 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 13:07:51 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 13:07:51 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 13:10:46 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 13:10:46 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 13:10:46 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 13:10:46 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 13:10:46 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 13:10:46 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 13:10:46 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 13:10:46 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 13:10:46 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=85.0 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1413472: /home/clawerdigi1/llama.cpp/build/bin/llama-server -m /home/clawerdigi1/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-8cf2 — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi1@spark-8cf2 — stage 1/3 would fail after the window is spent
+[2026-09-29 13:15:45 CDT] contract exit=2 (full log logs/c24-contract.log)
+[2026-09-29 13:15:45 CDT] contract FAILED (exit 2) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=85.1 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1413472: /home/clawerdigi1/llama.cpp/build/bin/llama-server -m /home/clawerdigi1/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-8cf2 — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi1@spark-8cf2 — stage 1/3 would fail after the window is spent
+[2026-09-29 13:21:52 CDT] contract second attempt exit=2 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 13:21:52 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (27 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 13:23:14 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 13:23:14 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 13:23:14 CDT] objective verification (five elements, read from artifacts)
+objective verification (cyberguard)
+
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [ NOT-YET] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 0/2 (stage 2 pulls these; absent means the contract has not finished)
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 3 element(s) awaiting artifacts: 3. 24h x 2 training within the recorded authorization; 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 13:23:14 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 13:23:14 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 13:25:52 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 13:25:52 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 13:25:52 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 13:25:52 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 13:25:52 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 13:25:52 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 13:25:52 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 13:25:52 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 13:25:52 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=85.1 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1413472: /home/clawerdigi1/llama.cpp/build/bin/llama-server -m /home/clawerdigi1/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-8cf2 — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi1@spark-8cf2 — stage 1/3 would fail after the window is spent
+[2026-09-29 13:31:04 CDT] contract exit=2 (full log logs/c24-contract.log)
+[2026-09-29 13:31:04 CDT] contract FAILED (exit 2) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+    clawerdigi1@spark-8cf2: [02:31:23] ARM MODE: /home/clawerdigi1/cyberguard/v2/data/mixture/armB.jsonl rows=81074 sha256=61c94262e3c4832
+  [32mOK[0m   preflight passed
+
+=== stage 0b: sync the evaluation surface to the hosts ===
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi2@spark-40ee:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi2@spark-40ee (incl. every v2/*.py module and the ATT&CK authority)
+  rsync -aR cyberguard_data.py cyberguard_contract.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh v2/data/mixture/scorer-authority.receipt.json v2/holdout500.jsonl clawerdigi1@spark-8cf2:~/cyberguard/
+  [32mOK[0m   eval surface synced to clawerdigi1@spark-8cf2 (incl. every v2/*.py module and the ATT&CK authority)
+  [32mOK[0m   corpus already present on clawerdigi1@spark-8cf2
+  ssh clawerdigi2@spark-40ee: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=85.1 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [31mFAIL[0m GPU is NOT free — process(es) holding it that are not allowed:
+         pid 1413472: /home/clawerdigi1/llama.cpp/build/bin/llama-server -m /home/clawerdigi1/ornith-eval/gguf/B
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: FAIL on spark-8cf2 — 1 problem(s) above
+  [31mFAIL[0m eval surface incomplete on clawerdigi1@spark-8cf2 — stage 1/3 would fail after the window is spent
+[2026-09-29 13:37:08 CDT] contract second attempt exit=2 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 13:37:08 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (27 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 13:38:30 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 13:38:30 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 13:38:31 CDT] objective verification (five elements, read from artifacts)
+objective verification (cyberguard)
+
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [ NOT-YET] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 0/2 (stage 2 pulls these; absent means the contract has not finished)
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 3 element(s) awaiting artifacts: 3. 24h x 2 training within the recorded authorization; 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 13:38:31 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 13:38:31 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 13:40:58 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 13:40:58 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 13:40:58 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 13:40:58 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 13:40:58 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 13:40:58 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 13:40:58 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 13:40:58 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 13:40:58 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.2 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=91.8 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-8cf2
+
+=== stage 1: merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU) ===
+  ssh clawerdigi2@spark-40ee: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armA bash run-eval-chain.sh
+  ssh clawerdigi1@spark-8cf2: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armB bash run-eval-chain.sh
+  [32mOK[0m   benchmark + merge-equivalence present for both arms
+
+=== stage 2: verify the pulled artefacts are measurements, not stubs ===
+  [32mOK[0m   trainer receipt pulled for armA (91069 bytes)
+  [32mOK[0m   trainer receipt pulled for armB (88962 bytes)
+    weight-level: max 0.5000 of a bf16 ULP over 3633315840 elements, 0 non-finite (controls: 10%-scale 4.82e+36 ULP, dropped 4.82e+37 ULP)
+FATAL: armA merged-vs-unmerged disagree at the FIRST supervised position on 2 row(s) - a wrong merge changes the first decision
+[2026-09-29 15:17:01 CDT] contract exit=4 (full log logs/c24-contract.log)
+[2026-09-29 15:17:01 CDT] contract FAILED (exit 4) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=92.0 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-8cf2
+
+=== stage 1: merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU) ===
+  ssh clawerdigi2@spark-40ee: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armA bash run-eval-chain.sh
+  ssh clawerdigi1@spark-8cf2: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armB bash run-eval-chain.sh
+  [32mOK[0m   benchmark + merge-equivalence present for both arms
+
+=== stage 2: verify the pulled artefacts are measurements, not stubs ===
+  [32mOK[0m   trainer receipt pulled for armA (91069 bytes)
+  [32mOK[0m   trainer receipt pulled for armB (88962 bytes)
+    weight-level: max 0.5000 of a bf16 ULP over 3633315840 elements, 0 non-finite (controls: 10%-scale 4.82e+36 ULP, dropped 4.82e+37 ULP)
+FATAL: armA merged-vs-unmerged disagree at the FIRST supervised position on 2 row(s) - a wrong merge changes the first decision
+[2026-09-29 16:54:03 CDT] contract second attempt exit=4 (full log logs/c24-contract-attempt2.log)
+[2026-09-29 16:54:03 CDT] harvest (the contract produced no manifest, so this is the only pass)
+  OK   evals/trainer-exit.receipt.json (local; deposited copy re-hashed and equal to the source)
+  OK   evals/training-provenance.receipt.json (local; deposited copy re-hashed and equal to the source)
+  MISS docs/VERDICT-v2.md (local)
+HARVEST-INCOMPLETE — the manifest lacks: gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-inputs-base.json VERDICT-v2.md evals/battery-gA-armA.json evals/battery-gA-armB.json evals/battery-gA-base.json evals/battery-gA2-armA.json evals/battery-gA2-armB.json evals/battery-gA2-base.json evals/battery-gB-armA.json evals/battery-gB-armB.json evals/battery-gB-base.json evals/battery-gC-armA.json evals/battery-gC-armB.json evals/battery-gC-base.json evals/battery-gE-armA.json evals/battery-gE-armB.json evals/battery-gE-base.json evals/battery-gF-armA.json evals/battery-gF-armB.json evals/battery-gF-base.json evals/battery-gG-gsm8k-armA.json evals/battery-gG-gsm8k-armB.json evals/battery-gG-gsm8k-base.json evals/battery-gG-ifeval-armA.json evals/battery-gG-ifeval-armB.json evals/battery-gG-ifeval-base.json evals/battery-gJ-armA.json evals/battery-gJ-armB.json evals/battery-gJ-base.json evals/battery-fresh-gA-armA.json evals/battery-fresh-gA-armB.json evals/battery-fresh-gA-base.json evals/battery-fresh-gB-armA.json evals/battery-fresh-gB-armB.json evals/battery-fresh-gB-base.json evals/battery-fresh-gE-armA.json evals/battery-fresh-gE-armB.json evals/battery-fresh-gE-base.json evals/battery-fresh-gF-armA.json evals/battery-fresh-gF-armB.json evals/battery-fresh-gF-base.json evals/battery-fresh-gJ-armA.json evals/battery-fresh-gJ-armB.json evals/battery-fresh-gJ-base.json
+  (32 files verified; the missing ones mean the contract did not finish)
+[2026-09-29 16:55:29 CDT] harvest exit=1 (no manifest in the contract means a failure here leaves the deliverable missing, not partial)
+[2026-09-29 16:55:29 CDT] verdict brief (the terminal checkpoint)
+VERDICT-BRIEF: REFUSED — v2/gate-report-v2.json is missing or has no gate rows — there is no verdict to brief
+[2026-09-29 16:55:29 CDT] objective verification (five elements, read from artifacts)
+  [    PASS] 1. D1-D4 closed (or declared)
+             audit receipt: PASS (v2/data/mixture/audit.receipt.json)
+             D1 unified leak scan: present (3129463 bytes of findings)
+             D2 diversity: declared NOT MET (carried as an intrinsic asymmetry)
+
+  [    PASS] 2. Astra + Muse clearance on the frozen arms
+             review-log clearance [checkpoint-M2-review.log]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c. Nine versions, seven rejections
+             review-log clearance [checkpoint-M2-review.log]: CHAIN CLEARED a91da33296ab on the registration amendment; Muse FROZEN ARM
+             review-log clearance [codex-evalchain-review10.log]: CHAIN CLEARED — no training-validity objection to running the C24 evaluat
+             review-log clearance [codex-evalchain-review11.log]: FROZEN ARMS CLEARED — no training-validity objection to evaluating these two ar
+             review-log clearance [codex-review-15.log]: CHAIN CLEARED ad5d2c44e53c`
+             review-log clearance [codex-review-16.log]: EQUIVALENCE BASIS SOUND for revision ad5d2c44e53c`
+             Codex-Astra (review #25) [equivalence-clearance.receipt.json]: EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c — revision 44c7cbb3a52c
+             Muse (family-diverse independent reviewer) [muse-clearance.receipt.json]: FROZEN ARMS CLEARED 35e9166fa0d4 — revision 35e9166fa0d4
+
+  [    PASS] 3. 24h x 2 training within the recorded authorization
+             FACTS gpu_hours: spent_before=28.0604, worst_case=47.0604 of 48.0 authorized, within=True
+             trainer receipts pulled locally: 2/2
+               cyberguard-lora-v2-armA.json: steps=None wall_seconds=34265.5
+               cyberguard-lora-v2-armB.json: steps=None wall_seconds=34255.3
+             serving evicted (live record in C24-metrics.json): {"spark-40ee": {"active_units": "", "port_8093": 0}, "spark-8cf2": {"active_units": "", "port_8093": 0}} -> in force
+             restore clause: SUPERSEDED by the owner — the stack stays evicted (recorded in LEDGER.md)
+
+  [ NOT-YET] 4. C24 evaluation contract (2 claims + gates)
+             no v2/gate-report-v2.json yet — the C24 contract has not written it
+
+  [ NOT-YET] 5. VERDICT-v2 + checksum-verified harvest + briefs
+             docs/VERDICT-v2.md is absent or empty
+
+NOT YET COMPLETE — 2 element(s) awaiting artifacts: 4. C24 evaluation contract (2 claims + gates); 5. VERDICT-v2 + checksum-verified harvest + briefs
+[2026-09-29 16:55:29 CDT] verify_objective exit=2 (0 = all five elements pass | 2 = awaiting artifacts | 1 = an element FAILED)
+[2026-09-29 16:55:29 CDT] timeline complete: VERDICT-v2 exists=NO
+[2026-09-29 16:56:04 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 16:56:04 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 16:56:04 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 16:56:04 CDT] checkpoint M3 (today 08:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 16:56:04 CDT]   overwrite its metrics snapshot or duplicate its brief
+[2026-09-29 16:56:04 CDT] C24 metrics (today 11:55) already passed — skipping (see the GRACE_MIN note above)
+[2026-09-29 16:56:04 CDT] C24 brief (today 11:57) already passed — skipping (and its review, for the same reason)
+[2026-09-29 16:56:04 CDT] C24 CONTRACT starting unconditionally (stage 00 waits for both trainers to exit)
+[2026-09-29 16:56:04 CDT] no review clearance marker — proceeding anyway per owner instruction; the verdict records this
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 3264 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=74.4 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-40ee
+  ssh clawerdigi1@spark-8cf2: bash v2/check_eval_surface.sh
+  [32mOK[0m   every host-side script present and compiling (benchmark, merge, contract module, data, chain, battery, scorers)
+  [32mOK[0m   disk free 2625 GB (>= 60 GB)
+  [32mOK[0m   GPU NVIDIA GB10: bf16=True, free=92.2 GB
+  [32mOK[0m   port 8093 has no listener (serving evicted)
+  [32mOK[0m   serving units inactive (eviction in force)
+  [32mOK[0m   no process holds the GPU (it is free for the evaluation)
+  [32mOK[0m   scoring authority present (v2/candidates/attack-stix.json)
+  [32mOK[0m   authority file matches the declared receipt (sha256 dc1639caa5501d72)
+  [32mOK[0m   scoring authority loaded (valid=697 deprecated=161)
+  [32mOK[0m   scorer selftest on this host:  SELF-TEST: PASS
+  [32mOK[0m   run_battery --check-driver on this host
+  [32mOK[0m   run_battery --check-scoring on this host
+
+EVAL SURFACE: PASS on spark-8cf2
+
+=== stage 1: merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU) ===
+  ssh clawerdigi2@spark-40ee: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armA bash run-eval-chain.sh
+  ssh clawerdigi1@spark-8cf2: cd ~/cyberguard && N_GEN=500 RUN_NAME=cyberguard-lora-v2-armB bash run-eval-chain.sh
+  [32mOK[0m   benchmark + merge-equivalence present for both arms
+
+=== stage 2: verify the pulled artefacts are measurements, not stubs ===
+  [32mOK[0m   trainer receipt pulled for armA (91069 bytes)
+  [32mOK[0m   trainer receipt pulled for armB (88962 bytes)
+    weight-level: max 0.5000 of a bf16 ULP over 3633315840 elements, 0 non-finite (controls: 10%-scale 4.82e+36 ULP, dropped 4.82e+37 ULP)
+FATAL: armA merged-vs-unmerged disagree at the FIRST supervised position on 2 row(s) - a wrong merge changes the first decision
+[2026-09-29 18:32:25 CDT] contract exit=4 (full log logs/c24-contract.log)
+[2026-09-29 18:32:25 CDT] contract FAILED (exit 4) — re-running once in 60 s; stage 0pre quarantines the failed attempt's outputs
