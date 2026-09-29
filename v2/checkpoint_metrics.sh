@@ -32,10 +32,29 @@ collect() {   # host, arm
 }
 
 A=$(collect "$S4" A); B=$(collect "$S8" B)
-python3 - "$LABEL" "$OUT" "$A" "$B" "$ROWS_PER_EPOCH" "$BASIS" "$REFUSAL_SLOTS" "$UNIQUE" <<'PY'
+
+# The plan requires the Flash-Next serving stack EVICTED for the whole window (it is Restart=always and enabled,
+# so a plain stop once brought it back mid-window holding ~50 GB per host). Nothing verified that between
+# checkpoints: the eviction was confirmed by hand at C16. Since the checkpoints are exactly the 3-hourly cadence,
+# the check belongs here — a resurrected serving stack is then caught within hours rather than at the contract,
+# when it would compete for the GPU with the evaluation.
+evict() {   # host -> {"port_8093":N,"active_units":"..."}
+  timeout 120 ssh -o BatchMode=yes "$1" '
+    l=$(ss -ltn 2>/dev/null | grep -c ":8093")
+    act=""
+    for u in spark-flash-next.service qwen-flash-guard.timer spark-rpc.service spark-rpc-guard.timer; do
+      st=$(systemctl show -p ActiveState "$u" 2>/dev/null | head -1)
+      case "$st" in *ActiveState=active*|*ActiveState=activating*) act="$act $u";; esac
+    done
+    echo "{\"port_8093\":${l:-0},\"active_units\":\"$act\"}"
+  ' 2>/dev/null | tail -1
+}
+E4=$(evict "$S4"); E8=$(evict "$S8")
+python3 - "$LABEL" "$OUT" "$A" "$B" "$ROWS_PER_EPOCH" "$BASIS" "$REFUSAL_SLOTS" "$UNIQUE" "$E4" "$E8" <<'PY'
 import json, sys, datetime
 label, out, a, b = sys.argv[1:5]
 rows, basis, slots, uniq = int(sys.argv[5]), float(sys.argv[6]), int(sys.argv[7]), int(sys.argv[8])
+EV = {"spark-40ee": sys.argv[9] or "{}", "spark-8cf2": sys.argv[10] or "{}"}
 A, B = json.loads(a), json.loads(b)
 epoch_h = rows * float(basis) / 3600
 def exposure(arm, measured_epoch_h):
@@ -62,9 +81,24 @@ rep = {
     "arms": {"A": A, "B": B},
     "exposure": {"A": exposure(A, epoch_h), "B": exposure(B, epoch_h)},
 }
+# record the eviction state and SHOUT if the serving stack has come back
+rep["eviction"] = {}
+for _h, _raw in EV.items():
+    try:
+        rep["eviction"][_h] = json.loads(_raw)
+    except Exception:                                              # noqa: BLE001
+        rep["eviction"][_h] = {"error": "unreachable or malformed"}
+_breach = [h for h, v in rep["eviction"].items()
+           if isinstance(v, dict) and (v.get("port_8093") or v.get("active_units"))]
 json.dump(rep, open(f"{out}/{label}-metrics.json", "w"), indent=2)
 print(f"  {label}: A {A['steps']} steps @ {A['sec_per_step']}s/it alive={A['trainer_alive']} gpu={A['gpu_util']}% | "
       f"B {B['steps']} steps @ {B['sec_per_step']}s/it alive={B['trainer_alive']} gpu={B['gpu_util']}%")
+if _breach:
+    print(f"  !! EVICTION BREACH at {label}: " +
+          "; ".join(f"{h} {rep['eviction'][h]}" for h in _breach) +
+          " — the serving stack must stay evicted for the window and will compete for the GPU")
+else:
+    print(f"  eviction in force: both hosts report no 8093 listener and no active serving unit")
 for k in ("A", "B"):
     e = rep["exposure"][k]
     if e:

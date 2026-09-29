@@ -1695,3 +1695,36 @@ Also fixed: #22's second finding, that the verdict still said the check "establi
 on the adapted matrices". It now says the check **bounds the deviation to the stated tolerance** on those
 matrices and says nothing about the rest of the model. (Rehearsal PASS; the stage-2 gate re-verified against the
 new control magnitudes.)
+
+## 2026-09-29 — the 3-hourly checkpoints now verify the eviction the plan requires
+
+The plan requires the Flash-Next serving stack **evicted for the whole window** (it is `Restart=always` and
+enabled, and a plain `stop` once brought it back mid-window holding ~50 GB per host). The eviction had been
+confirmed **by hand at C16** and nowhere else: nothing verified it between checkpoints, and the failure mode is
+silent — the stack returns, takes half the GPU memory, and the evaluation later competes with it.
+
+`checkpoint_metrics.sh` now collects, per host, whether port **8093** has a listener and whether any of
+`spark-flash-next.service`, `qwen-flash-guard.timer`, `spark-rpc.service`, `spark-rpc-guard.timer` is active or
+activating; records it in the checkpoint JSON under `eviction`; and prints either
+
+    eviction in force: both hosts report no 8093 listener and no active serving unit
+
+or a loud `!! EVICTION BREACH at <label>` naming the host and the state. The checkpoints are the 3-hourly cadence,
+so a breach is now caught within hours rather than at the contract. Verified live (both hosts clean, block
+recorded in the JSON).
+
+## Robustness for the ~11-hour unattended contract
+
+* **Stage 3 retries each battery once.** 42 sequential battery runs sit on the critical path; a single transient
+  failure — an ssh blip, a momentary GPU error, a lost CUDA context — would otherwise exit 5 and cost the entire
+  verdict after the whole window. Verified both directions: a permanent failure makes exactly 2 attempts and then
+  fails; a transient one recovers on attempt 2. Receipts are written atomically, so a retry cannot corrupt a
+  partial result.
+* **The timeline re-runs the contract once on a non-zero exit**, which covers transient failures anywhere
+  including stages 1–2 (where a single long step has no per-item retry). Stage 0pre quarantines the failed
+  attempt's outputs locally *and on the hosts*, so the re-run starts from a clean `evals/`. Verified that a
+  **successful** first attempt does **not** trigger a wasteful second one.
+
+Also verified end to end this round: the **battery filename contract** (producer `battery-{battery}-{arm}.json`
+→ stage-3 pull glob `battery-*-$ARM.json` → assembler glob `battery-*.json` → harvest's explicit 42 names) agrees
+at every hop.
