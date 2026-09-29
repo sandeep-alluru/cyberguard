@@ -222,6 +222,12 @@ def main() -> int:
         tok.pad_token = tok.eos_token
     tok.padding_side = "left"   # decoder-only batched generation requires left padding
 
+    # Wall clock for the evaluation itself. Added 2026-09-29: the owner's spend authorization is 48 GPU-hours for
+    # training, and the evaluation runs on the same GPUs afterwards - but no evaluation receipt recorded its own
+    # duration, so the verdict could report "within authorization" for training while the evaluation's own spend
+    # went unstated. Battery runs and merge passes already receipt `wall_seconds`; this makes the benchmark
+    # receivable on the same basis so the total is measured rather than narrated.
+    _T0 = time.time()
     report: dict = {"run": ADAPTER.name, "held_out_rows": len(rows),
                     "n_generated": N_GEN, "started_utc": time.strftime("%FT%TZ", time.gmtime())}
 
@@ -429,6 +435,7 @@ def main() -> int:
         final, ship = "SHIP", "yes"
     report["final_verdict"] = final
     report["ship"] = ship
+    report["wall_seconds"] = round(time.time() - _T0, 1)
     log(f"  VERDICT: {final}")
     # rewrite the receipt so the final verdict band is inside the artifact, not only the log
     with open(OUT, "w") as f:

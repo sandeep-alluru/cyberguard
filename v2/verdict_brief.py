@@ -155,6 +155,29 @@ def main() -> int:
 
     facts = load("v2/data/mixture/FACTS.json") or {}
     gh = ((facts.get("training_window") or {}).get("gpu_hours") or {})
+    # The evaluation runs on the same GPUs AFTER the training window, and this brief used to describe its cost in
+    # words ("the plan of record's separately budgeted cost") with no number. The figure is now MEASURED from the
+    # evaluation's own receipts. Guarded: this is one line of context, and it must not be able to cost the terminal
+    # brief itself, which is a deliverable.
+    try:
+        sys.path.insert(0, os.path.join(ROOT, "v2"))
+        from write_verdict_v2 import measured_eval_gpu as _meg          # noqa: PLC0415
+        _eh, _per = _meg(os.path.join(ROOT, "evals"))
+        _eh_txt = (f"The **evaluation** is a separate, plan-approved workstream and its measured cost is "
+                   f"**{_eh:.2f} GPU-hours** (from the evaluation's own receipts), so combined GPU spend for the "
+                   f"window is **{float(gh.get('worst_case_total_gpu_h', 0) or 0) + _eh:.2f} h** — above the "
+                   f"24 h × 2 training authorization, which governs training only."
+                   if _eh > 0 else
+                   "The **evaluation** is a separate, plan-approved workstream whose GPU cost is **UNMEASURED "
+                   "here**: no evaluation receipt carried a `wall_seconds` field.")
+    except Exception as _e:                                             # noqa: BLE001
+        # Name the reason. A guard that swallows the reason is how the ordering bug above went unnoticed for a
+        # moment: the block referenced `gh` before it existed, the except caught the NameError, and the brief
+        # said only that the number "could not be read".
+        print(f"WARNING: evaluation cost unavailable for this brief: {type(_e).__name__}: {_e}", file=sys.stderr)
+        _eh_txt = ("The **evaluation** is a separate, plan-approved workstream; its measured cost could not be "
+                   "read from the receipts for this brief.")
+    eval_cost = _eh_txt
     clear = load("v2/data/mixture/equivalence-clearance.receipt.json") or {}
     muse = load("v2/data/mixture/muse-clearance.receipt.json") or {}
 
@@ -203,8 +226,9 @@ Muse on the frozen arms — {muse.get('clearance_line', '(see research-tmp/revie
 
 Training against the owner's authorization: **{gh.get('spent_before_relaunch_gpu_h', '?')} GPU-hours spent,
 worst case {gh.get('worst_case_total_gpu_h', '?')} of {gh.get('authorization_gpu_h', '?')} authorized**
-(24 h × 2). The evaluation is the plan of record's separately budgeted cost. All figures cited from
-`v2/data/mixture/FACTS.json`.
+(24 h × 2). Training figures cited from `v2/data/mixture/FACTS.json`.
+
+{eval_cost}
 
 ## What is open, stated rather than omitted
 

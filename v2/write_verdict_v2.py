@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import glob
 import json
 import os
 import subprocess
@@ -198,7 +199,38 @@ def _merge_receipt(arm: str):
     return None, None
 
 
-def training_trajectory() -> str:
+def measured_eval_gpu(evals_dir: str = "evals") -> tuple[float, dict]:
+    """Return (GPU-hours, per-source breakdown) for the EVALUATION, summed from the receipts that record wall time.
+
+    Each entry names what was measured and what was not: a receipt without `wall_seconds` is counted as
+    "not receipted" rather than being silently treated as zero, so a missing number cannot masquerade as a small
+    one. The paired benchmark's receipts gained the field on 2026-09-29 (`eval_cyberguard.py`); battery and
+    merge-equivalence receipts already carried it.
+    """
+    total = 0.0
+    per: dict[str, tuple[float, int, int]] = {}
+    for label, pattern in (("batteries", os.path.join(evals_dir, "battery-*.json")),
+                           ("merge-equivalence", os.path.join(evals_dir, "merge-equiv-*.json")),
+                           ("paired benchmark", os.path.join(evals_dir, "cyberguard-lora-v2-arm*.json"))):
+        secs, seen, no_field = 0.0, 0, 0
+        for path in sorted(glob.glob(pattern)):
+            try:
+                d = json.load(open(path))
+            except Exception:                                          # noqa: BLE001
+                no_field += 1
+                continue
+            w = d.get("wall_seconds") if isinstance(d, dict) else None
+            if isinstance(w, (int, float)) and not isinstance(w, bool):
+                secs += float(w)
+                seen += 1
+            else:
+                no_field += 1
+        per[label] = (secs, seen, no_field)
+        total += secs
+    return total / 3600.0, per
+
+
+def training_trajectory(evals_dir: str = "evals") -> str:
     """Measured exposure per saved artefact — required by Codex review #14 (2026-09-29).
 
     #14 accepted the repaired resume as *trainable* but ruled that the reset "changes the optimization
@@ -266,6 +298,40 @@ def training_trajectory() -> str:
                 f"spent before the repair **{gh.get('spent_before_relaunch_gpu_h', '?')}** GPU-hours; the 570-minute",
                 f"continuation box bounds the total at **{gh.get('worst_case_total_gpu_h', '?')}** GPU-hours;",
                 f"within authorization: **{gh.get('within_authorization', '?')}**."]
+    # THE EVALUATION'S OWN SPEND. The block above is TRAINING cost against the owner's 48 GPU-hour authorization.
+    # The evaluation then runs on the same GPUs, and nothing in this verdict said so: read alone,
+    # "within authorization: True" invites the conclusion that all GPU spend is accounted for. Each battery run and
+    # each merge pass holds exactly one GPU for the `wall_seconds` it receipts, and although the two hosts run
+    # concurrently, the runs within a host are sequential - so the sum over receipts IS GPU-hours. Measured, never
+    # estimated: what is not receipted is named, not guessed.
+    _eh, _per = measured_eval_gpu(evals_dir)
+    # ALWAYS rendered, measured or not: if every receipt lacked `wall_seconds` the verdict must SAY the evaluation's
+    # cost is unmeasured. Omitting the block on zero would reintroduce exactly the silence it exists to remove -
+    # a reader would see "within authorization: True" and no mention that the evaluation also spent GPU time.
+    _tot_r = sum(n for _s, n, _m in _per.values())
+    _miss_r = sum(m for _s, _n, m in _per.values())
+    _parts = []
+    if _tot_r == 0:
+        out += ["",
+                "**Evaluation cost: UNMEASURED in this document.** The evaluation runs on the same GPUs after",
+                "the training window and is a separate, plan-approved workstream, but no evaluation receipt",
+                f"carried a `wall_seconds` field ({_miss_r} receipt(s) inspected under `{evals_dir}/`). The",
+                "training figures above therefore describe training only, and this verdict makes no claim about",
+                "the evaluation's own GPU cost."]
+        return "\n".join(out)
+    for _label, (_sec, _n, _miss) in _per.items():
+        if _n:
+            _parts.append(f"{_label} **{_sec / 3600.0:.2f} h** over {_n} receipt(s)")
+        if _miss:
+            _parts.append(f"{_label}: {_miss} receipt(s) carried no `wall_seconds`")
+    if not _parts:
+        _parts.append("no receipt carried a `wall_seconds` field")
+    out += ["",
+            f"**Evaluation cost: {_eh:.2f} GPU-hours**, measured from the evaluation's own receipts and OUTSIDE",
+            "the 48 GPU-hour training authorization above (it is a separate, plan-approved workstream, not part",
+            "of the 24 h x 2 arms): " + "; ".join(_parts) + ".",
+            f"Combined GPU spend for the window: **{float(gh.get('worst_case_total_gpu_h', 0) or 0) + _eh:.2f} h**"
+            " (training + evaluation)."]
     return "\n".join(out)
 
 
@@ -394,7 +460,7 @@ stating it.
 
 ## Training trajectory and measured exposure (review #14)
 
-{training_trajectory()}
+{training_trajectory(a.evals)}
 
 ## Every gate
 
