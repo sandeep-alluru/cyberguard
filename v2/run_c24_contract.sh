@@ -76,6 +76,15 @@ else
   bad "local verdict-chain rehearsal FAILED:"; sed 's/^/        /' "$RS"; PRE=$((PRE+1))
 fi
 rm -f "$RS"
+# Muse's objection (verified independently): the frozen batteries must be disjoint from the training data, or a
+# gate measures memorisation. This is the check whose absence let 1,099/1,100 G-A probes be training rows.
+CC=$(mktemp)
+if python3 v2/battery_contamination_check.py >"$CC" 2>&1; then
+  ok "batteries are prompt-disjoint from both training arms"
+else
+  bad "BATTERY CONTAMINATION — affected gates cannot be reported as capability:"; grep -E 'CONTAMINATED|RESULT|g[A-Z]' "$CC" | head -12 | sed 's/^/        /'; PRE=$((PRE+1))
+fi
+rm -f "$CC"
 echo "  arms the trainers loaded (must match FACTS):"
 for spec in "$S4 A" "$S8 B"; do set -- $spec
   L=$(timeout 60 ssh -o BatchMode=yes "$1" "grep -m1 'ARM MODE' ~/cyberguard/logs/train-cyberguard-lora-v2-arm$2.log" 2>/dev/null)
