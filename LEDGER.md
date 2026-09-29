@@ -2627,3 +2627,32 @@ assumed: `run_battery.load_probes` hard-stops on a missing receipt, a receipt wi
 (the F17 fix), and all **14 probe sets match their receipts locally and on both hosts**.
 
 The endgame therefore has exactly two automated actors: the locked timeline, and a watchdog that only watches.
+
+## 2026-09-29 — the two transfer mechanisms, measured; and a third instrument fault of my own
+
+**The largest movement in the pipeline, bounded.** Stage 0a pulls both trained adapters (264,308,896 bytes each) and
+the harvest pulls them again, so a transfer that stalls would fail a stage that has no cheap recovery. Measured with
+the real file over the real link: **10 seconds**, sha256 `e9d2f7b60655465d11f47588` matching the host byte-for-byte,
+complete size — against stage 0a's 1800-second ceiling, i.e. ~180× margin.
+
+The harvest uses a **different mechanism** from the contract's `rsync` — `scp` with a `./cyberguard/$rel` relative
+path — and it had never been exercised here, so it was tested with its own invocation form: both hosts transfer an
+existing file correctly. The first attempt returned non-zero on both hosts and looked like a mechanism failure; it
+was the target file not existing yet (`receipts/cyberguard-lora-v2-armA.json` is written when training ends), i.e. a
+test-input fault again, and re-running against a file that exists cleared it. That distinction matters: a genuine
+`scp` failure would cost the checksum-verified harvest at 12:10, and a false alarm here would have sent me rewriting
+a script that works.
+
+Also checked while there: 40ee's `receipts/` holds only **v1 and smoke receipts** (`cyberguard-lora-v1.json`,
+`corpus-safety-audit.json`, `smoke-refactor-check.json`) — no stale v2 receipt for stage 2 to pull in place of the
+one written at ~12:03; and `harvest-v2.sh` creates its DEST (`mkdir -p "$DEST"/{receipts,evals,adapters,logs,mixture}`,
+line 8) *before* it truncates the manifest (line 26), so an absent DEST cannot fail the harvest's first write.
+
+**One process note, because it has now happened three times in this window.** My own checks have been the defect, not
+the artifacts: a `[a-z_]+` regex that could not match a key containing digits (reported `probe_set_sha256` missing
+from a producer that writes it); an existence assertion applied to a plan row that says "pending" (reported the plan
+table wrong); and here `ls -ld … | sed` whose exit status is **sed's**, so an absent directory printed nothing
+instead of "ABSENT", and a `scp` non-zero that was "file not found" rather than a broken mechanism. Each was caught
+by asking what the evidence actually said rather than accepting the first answer — but the pattern is now explicit:
+in this environment, **a pipeline reports the last element's status, a regex reports only what its pattern can
+match, and a failing transfer reports only that it failed.** Checks are written to name their reason.
