@@ -4,7 +4,16 @@
 # then runs the merge-equivalence check and the hardened evaluator. Durable logs, real exit codes.
 set -uo pipefail
 source ~/.cyberguard-env
-cd "$HOME"
+# RUN FROM THE PROJECT ROOT, not $HOME. This said `cd "$HOME"`, and the two Python steps below are invoked by
+# RELATIVE name (`"$PY" merge_equiv.py`), so they resolved against the wrong directory. Found 2026-09-29, hours before
+# the C24 contract would have used it: on spark-8cf2 there is no `$HOME/merge_equiv.py` at all, so the chain would
+# have failed with "can't open file" and produced no evals - stage 1 fails, and with it the whole verdict; and on
+# spark-40ee `$HOME/` holds STALE copies from 2026-09-27 (merge_equiv.py sha 907d9985…, eval_cyberguard.py
+# sha 0a7c2811…), so it would silently have run the WRONG evaluator - older than the ones stage 0b syncs. The v1
+# deployment had these files in $HOME and the script was written against that layout; the v2 layout puts them in
+# $CYBERGUARD_ROOT, and the `cd` was never updated. The scripts themselves read CYBERGUARD_ROOT for their data, so
+# only their own location depended on the cwd.
+cd "$CYBERGUARD_ROOT"
 RUN_NAME="${RUN_NAME:-cyberguard-lora-v1}"
 PY="$CYBERGUARD_VENV/bin/python"
 LOGDIR="$CYBERGUARD_ROOT/logs"

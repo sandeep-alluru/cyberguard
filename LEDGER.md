@@ -3203,3 +3203,41 @@ checkpoint review the cadence describes, in the same way a reviewed artifact tha
 been reviewed. The gap is in this record, in each of those briefs' own review-status lines, and in the M1 brief's
 retrospective note. M2 has an output and M3's is dispatched by the timeline at 08:50; the cadence is complete from M2
 onward, and its earlier incompleteness is dated rather than implied away.
+
+## 2026-09-29 — the wrong working directory would have cost the entire evaluation
+
+Found by reading the least-read script on the critical path end to end, after every field contract, probe set and
+transfer mechanism had already checked out. `run-eval-chain.sh` is what stage 1 executes on each host. Its line 7
+said `cd "$HOME"`, and lines 33/37 invoke the two Python steps **by relative name**:
+
+```
+RUN_NAME="$RUN_NAME" "$PY" merge_equiv.py       # resolved against the cwd
+RUN_NAME="$RUN_NAME" "$PY" eval_cyberguard.py
+```
+
+The v1 deployment kept those files in `$HOME` and the script was written against that layout. The v2 layout puts them
+in `$CYBERGUARD_ROOT`, stage 0b syncs them *there*, and the `cd` was never updated. So on **spark-8cf2** — where
+`$HOME/merge_equiv.py` and `$HOME/eval_cyberguard.py` do not exist at all — the chain would have died with
+`can't open file`, produced no `evals/` receipts, failed stage 1, and with it the whole verdict. And on
+**spark-40ee** it would have been quieter and worse: `$HOME/` holds **stale copies from 2026-09-27**
+(`merge_equiv.py` sha `907d9985…`, `eval_cyberguard.py` sha `0a7c2811…`), so the chain would have run an *older
+evaluator* than the one the contract syncs, and produced a plausible-looking benchmark from code the reviews had
+since replaced.
+
+Why nothing else caught it: the chain's own log shows a **successful** v1 run on 2026-09-27 (`eval exit=0`) — because
+at that time `$HOME` *was* the right directory — and the v2 path had never been exercised. The rehearsal cannot catch
+it either: it exercises the local verdict chain, not the host-side shell. Field contracts and probe-set hashes, the
+two things this window has leaned on, are blind to a wrong working directory.
+
+**Fixed and verified.** The `cd` now goes to `$CYBERGUARD_ROOT` (which the scripts already use for their data; only
+their own location depended on the cwd), and the fixed file is on both hosts — line 16, sha256
+`21e256394ec3055d`, matching local — rather than left for stage 0b to deliver. Both hosts were confirmed to resolve
+all four steps (`merge_equiv.py`, `eval_cyberguard.py`, `cyberguard_contract.py`, `cyberguard_data.py`) under
+`$CYBERGUARD_ROOT`, and the same `cd "$HOME"` pattern does not occur anywhere else in the repo. One degraded case was
+checked rather than assumed: if `CYBERGUARD_ROOT` were unset, `cd ""` fails and leaves the cwd unchanged — and the
+contract invokes the chain from `~/cyberguard` — so the relative names still resolve.
+
+The stale `$HOME/*.py` copies on 40ee are now unreachable from the chain and were left in place rather than deleted:
+they are inert for this pipeline, and removing files from a production host is a larger act than the problem
+requires. They are recorded here as what they are — the previous deployment's files — in case anything else on that
+host still refers to them.
