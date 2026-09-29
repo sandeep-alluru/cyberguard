@@ -19,6 +19,8 @@ import os
 import re
 import sys
 
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 SHORT_TOKENS = 13          # below this, n-gram matching is unreliable -> exact match governs
 
 
@@ -147,6 +149,33 @@ def collect_probe_strings():
     return out
 
 
+def collect_battery_strings():
+    """The frozen C24 battery prompts — the reference set whose ABSENCE left the leak scan unable to see that
+    1,099/1,100 G-A probes were training rows (independent review, Muse, 2026-09-28; the scan reported CLEAN
+    against a universe of holdout500 + 225 `cap_probes` strings only).
+
+    Both the registered sets and the fresh generalisation instruments are included: a probe set is a reference
+    the training data must not contain, whichever role it plays.
+    """
+    import glob
+    out = []
+    for path in sorted(glob.glob(os.path.join(ROOT, "v2/data/probe-set-*.jsonl"))):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                for line in fh:
+                    if not line.strip():
+                        continue
+                    row = json.loads(line)
+                    for key in ("prompt", "question", "user"):
+                        v = row.get(key)
+                        if isinstance(v, str) and len(v.strip()) >= 20:
+                            out.append(v)
+                            break
+        except Exception:                                      # noqa: BLE001
+            continue
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", default="v2/data/mixture")
@@ -158,7 +187,8 @@ def main():
     ap.add_argument("--no-write", action="store_true")
     args = ap.parse_args()
 
-    refs = {"holdout": load_refs(args.holdout, "prompt"), "probes": collect_probe_strings()}
+    refs = {"holdout": load_refs(args.holdout, "prompt"), "probes": collect_probe_strings(),
+            "c24_batteries": collect_battery_strings()}
     probe_sets = {}
     try:
         sys.path.insert(0, ".")
@@ -198,7 +228,12 @@ def main():
                             findings.append({"arm": arm, "line": i, "field": field,
                                              "reference_set": setname, "match": why,
                                              "excerpt": str(text)[:160]})
+    _by_set = {}
+    for f in findings:
+        _by_set[f["reference_set"]] = _by_set.get(f["reference_set"], 0) + 1
     rcpt = {"checked_rows": checked, "references": {k: len(v) for k, v in refs.items()},
+            "findings_by_reference_set": _by_set,
+            "verdict_by_reference_set": {k: ("CLEAN" if _by_set.get(k, 0) == 0 else "LEAK") for k in refs},
             "ngram": args.ngram, "jaccard_min": args.jaccard, "containment_min": args.containment,
             "findings": findings, "verdict": "CLEAN" if not findings else "LEAK",
             "arm_sha256": {a: hashlib.sha256(open(os.path.join(args.dir, a), "rb").read()).hexdigest()
