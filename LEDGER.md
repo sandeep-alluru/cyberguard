@@ -1149,3 +1149,41 @@ closing them.
   and per the owner's instruction Astra carries the review requirement. Two attempts produced no output
   for the same reason; recorded rather than retried blindly.
 - **Astra data re-review #2 is running** (471 KB of transcript and growing) against the D1–D4 claims.
+
+## 2026-09-29 — the host-side scoring authority was EMPTY (found by pre-flighting, not by a gate)
+
+While pre-flighting the 12:10 contract I ran the scorer's own selftest **on the hosts** instead of only
+locally — it had never been run there. It **FAILED on both hosts** while passing locally, with the files
+byte-identical (`gate_scorers_v2.py` sha256 `968f91bd…` on all three machines), which meant the difference
+was data, not code.
+
+Cause: `v2/candidates/attack-stix.json` (MITRE's 53.8 MB STIX export) and `v2/build_mixture.py` were **absent
+on both hosts**. `gate_scorers_v2.authority()` therefore returned empty sets, and `run_battery.py` calls it
+**on the host** (line 261) before scoring every emitted identifier. With an empty authority every legitimate
+ATT&CK citation — `T1071.001`, `T1071.004`, `T1558.001` — would have been counted as a **hallucination**.
+
+Impact had it reached 12:10: G-C (id factuality) and the gate rows that consume it would have reported
+invalid ids that do not exist. That is a failure in the *strict* direction — the module's own comment names it
+"the direction that manufactures failures" — so the verdict would have carried a **false safety finding**,
+quite possibly driving a rebuild decision on evidence that was an artefact of a missing file.
+
+Why no gate caught it: the contract's preflight ran `--check-driver` and `--check-scoring` **locally**, while
+the scoring that produces the verdict runs **on the hosts**. Nothing compared the two environments.
+
+Fixed, and made unrepeatable:
+
+| change | what it prevents |
+|---|---|
+| contract stage 0b now syncs **every `v2/*.py` module** and the STIX export | a missing module or authority on a host |
+| `v2/check_eval_surface.sh` asserts the authority is present, **matches a receipted sha256 and counts**, and that the scorer selftest **PASSES on that host** | a silently stale or absent authority |
+| new receipt `v2/data/mixture/scorer-authority.receipt.json` (sha256 `dc1639ca…`, valid 697, deprecated 161) | an undeclared authority change |
+| the check now `cd`s into the project root | ssh lands in `$HOME`, so relative paths silently resolved wrongly (caught by the positive control) |
+
+Verified: `valid=697 deprecated=161`, `stix_sha=dc1639caa5501d72` **identical on local, spark-40ee and
+spark-8cf2**; `T1071.001`/`T1071.004` known and `T9999.999` unknown on all three; positive control PASSES with
+exit 0, tampered-expectation control FAILS with exit 1, and restoration re-PASSES.
+
+Also settled this round: **`MASK PROOF: PASS` on both hosts** (273/598 tokens supervised = 45.7 %, decoded span
+is a real assistant answer, identical geometry on both arms). That is the check whose absence an independent
+review objected to — it had never been run for this window. It ran concurrently with training without
+disturbing it, and it confirms the run's objective was correct from the start.

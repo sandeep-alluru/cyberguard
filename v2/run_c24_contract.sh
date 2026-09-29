@@ -223,13 +223,25 @@ fi
 # the bfloat16 both scripts request. So stages 1-2 run on the hosts. Verified absent there: the four scripts,
 # and on spark-8cf2 the corpus as well (the corpus, 187 MB, exists only on spark-40ee).
 step 0b "sync the evaluation surface to the hosts"
-EVAL_FILES=(cyberguard_data.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh)
+# verify_resume_learning.py is here because stage 0d calls it ON the hosts and runs before stage 3 syncs
+# anything: without it a fresh host aborts the contract at the learning proof with a missing file.
+# v2/*.py is every host-side scoring/authority module (run_battery, gate_scorers_v2, cap_scorers,
+# build_mixture, build_refusal_set, cyberguard_contract, ...). attack-stix.json is the ATT&CK authority: without
+# it the host's authority() is EMPTY and every legitimate technique citation scores as a hallucination. Both
+# were missing on both hosts until 2026-09-29, when a host-side scorer selftest exposed it.
+# scorer-authority.receipt.json is the DECLARED authority the host check compares against; without it the
+# host cannot verify that its id-factuality table is the one the verdict assumes.
+EVAL_FILES=(cyberguard_data.py eval_cyberguard.py merge_equiv.py run-eval-chain.sh
+            v2/data/mixture/scorer-authority.receipt.json)
+EVAL_MODULES=(v2/*.py)
+EVAL_AUTHORITY=(v2/candidates/attack-stix.json)
 for spec in "$S4" "$S8"; do
   echo "  rsync -aR ${EVAL_FILES[*]} v2/holdout500.jsonl $spec:~/cyberguard/"
   [ "$DRY" = 1 ] && continue
-  timeout 600 rsync -aR -e "ssh -o BatchMode=yes" "${EVAL_FILES[@]}" v2/holdout500.jsonl "$spec:~/cyberguard/" \
+  timeout 600 rsync -aR -e "ssh -o BatchMode=yes" "${EVAL_FILES[@]}" "${EVAL_MODULES[@]}" \
+    "${EVAL_AUTHORITY[@]}" v2/holdout500.jsonl "$spec:~/cyberguard/" \
     || { bad "sync to $spec failed"; exit 2; }
-  ok "eval surface synced to $spec"
+  ok "eval surface synced to $spec (incl. every v2/*.py module and the ATT&CK authority)"
 done
 [ "$DRY" = 1 ] || if ! timeout 60 ssh -o BatchMode=yes "$S8" \
      '[ -f ~/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl ]'; then
@@ -241,6 +253,23 @@ done
 else
   ok "corpus already present on $S8"
 fi
+
+# Host prerequisites the expensive stages ASSUME. Added 2026-09-29 while pre-flighting the surface: nothing
+# checked these in advance, so an unset CYBERGUARD_ROOT, an absent base model, a missing corpus, an
+# unsupported bf16 or a full disk would only surface when stage 1 or 3 failed — after the training window had
+# already been spent. Read-only, and safe to run while training continues.
+for spec in "$S4" "$S8"; do
+  echo "  ssh $spec: bash v2/check_eval_surface.sh"
+  [ "$DRY" = 1 ] && continue
+  # Capture the REMOTE status, not a downstream pipe's (testing `ssh | tail` tests tail).
+  es_out=$(timeout 900 ssh -o BatchMode=yes -o ConnectTimeout=10 "$spec" \
+           "bash ~/cyberguard/v2/check_eval_surface.sh" 2>&1); es_rc=$?
+  printf '%s\n' "$es_out" | tail -14
+  if [ "$es_rc" != 0 ]; then
+    bad "eval surface incomplete on $spec — stage 1/3 would fail after the window is spent"
+    exit 2
+  fi
+done
 
 # ---------------------------------------------------------------- stage 1: merge equivalence + benchmark
 step 1 "merge equivalence + paired benchmark, executed ON THE HOSTS (they own CYBERGUARD_ROOT, the model, the GPU)"
