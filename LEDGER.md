@@ -1817,3 +1817,31 @@ fields, and a reference universe that now **includes the frozen C24 batteries** 
 holdout, probes`) — which closes the exact gap Muse raised in its first pass, when the universe was only
 `holdout500` plus 225 legacy probe strings. Per-set verdicts: `holdout` CLEAN, `probes` CLEAN, `c24_batteries`
 **LEAK** (14,162 findings), declared rather than hidden.
+
+## 2026-09-29 — REVIEW #25: **EQUIVALENCE BASIS SOUND** (nine rounds, seven rejections, four apparatus defects)
+
+> `EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c`
+
+And its reasoning validates the final fix mathematically:
+
+> "Sensitivity is sound as separation from the tolerance: **identical sets and spacing give the reverse-triangle
+> bound intrinsic control separation >= 100-2 = 98 ULP**. Residuals can tip the threshold, but cannot manufacture
+> separation from an otherwise undetectable perturbation."
+
+That is exactly what removing the asymmetric mask bought: the statistic and both controls now cover identical
+elements with identical spacing, so the control separation is **intrinsically bounded below by the tolerance**
+rather than able to be manufactured by a tolerated residual.
+
+The two remaining findings are both classified **LIMITATION**, not DEFECT:
+* global maxima do not establish sensitivity *separately for every module* — a stated boundary, not a hole;
+* the weight claim is a tolerance scoped to adapted matrices, with behavioural equivalence explicitly disclaimed,
+  and "those boundaries remain necessary".
+
+Receipt: `v2/data/mixture/equivalence-clearance.receipt.json`. Recorded **with the revision it names**; the commit
+after it (Amendment A2) changed the SPEC, the PLAN-SEQUENCE pointer, the verdict's serving-posture text and the
+rehearsal — **not** `merge_equiv.py` and not stage 2's merge gates, which remain exactly as cleared.
+
+`docs/CHAIN-CLEARED` is **deliberately not written**: the gate writes it only when a clearance line names the
+**checked-out** revision, and none does (registration `a91da33296ab`, equivalence `44c7cbb3a52c`, HEAD moved on).
+The contract is not gated on the marker (owner instruction of 2026-09-29), and the verdict records both
+clearances with the revisions they name rather than a marker implying more than was given.
