@@ -3112,3 +3112,22 @@ them, and the two live children were confirmed intact afterwards with the timeli
 because "there are stray sleeps in the repo" invites exactly the tidy-up that would trigger it, and because the
 implementation only reaps its sleeper on a trapped signal — a `SIGKILL` would leave one behind even if the trap were
 extended to clean up.
+
+## 2026-09-29 — the GPU will still be free at 12:03, and nothing on the hosts can take it back
+
+Element 3 requires the Flash-Next serving stack evicted "for the window", and stage 1 needs that GPU free the moment
+training stops. The eviction is only worth what its durability is, so both halves were checked on the machines that
+matter rather than on this one.
+
+**Nothing can relaunch training.** On `spark-40ee` and `spark-8cf2`: no cron entry mentioning
+train/cyberguard/sglang, no user timers, no system timers, and no unit whose name mentions any of them. So when the
+TimeBox stops the run at ~12:03 there is no mechanism that restarts it in the seconds before the contract's stage 00
+probes the GPU.
+
+**And the serving stack cannot come back on its own.** This was the original failure mode — the units were
+`Restart=always` *and enabled*, so a plain `stop` brought the stack back mid-window holding tens of GB — and the state
+now is: on 40ee `spark-rpc.service`, `spark-rpc-guard.timer` and `spark-rpc-worker.service` are all
+**inactive *and* disabled**; on 8cf2 `spark-flash-next.service`, `qwen-flash-guard.timer` and `qwen-flash-next.service`
+likewise; and `ss -ltn` reports **0** listeners on port 8093 on both. Disabled means the stack will not return on a
+boot or as a dependency, so the eviction does not depend on anyone remembering to keep it stopped — which is what the
+checkpoint snapshots verify every three hours in any case.
