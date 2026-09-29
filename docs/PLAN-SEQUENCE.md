@@ -28,8 +28,10 @@ PHASE 5  training launch .................................... BLOCKED on Phase 3
    exit: two receipts exist, each carrying mask_check + coverage + the bound schedule fields, and
          step progress was confirmed within 10 min of each launch (U3's command)
 PHASE 6  evaluation (C24 confirmatory + C8/C16 trajectory) ... BLOCKED on Phase 5
-   exit: `evals/cyberguard-lora-v2.json` exists with raw AND normalised F1 (both with CIs), the
-         evaluated representation named, and every gate in §2 reporting PASS/FAIL/UNMEASURED with n
+   exit: `evals/cyberguard-lora-v2-armA.json` and `evals/cyberguard-lora-v2-armB.json` each exist (corrected
+         2026-09-29: this cited the pre-two-arm-cut `evals/cyberguard-lora-v2.json`), each with its F1 and CIs and
+         the evaluated representation named in the merge receipt, and every gate in §2 reporting
+         PASS/FAIL/UNMEASURED with n
 PHASE 7  verdict, harvest, CEO brief ........................ BLOCKED on Phase 6
    exit: `docs/VERDICT-v2.md` passes its own checks; harvest prints HARVEST-COMPLETE with every
          sha256 verified; the CEO brief renders on the portal with 0 raw IPv4
@@ -50,7 +52,7 @@ stopped.
 | U1 | admission gate | me | verdict per candidate; no ADMIT with Jaccard ≥0.60, containment ≥0.80, or a missing licence | `python3 v2/gate_v2.py --selftest && python3 v2/gate_v2.py --check v2/gate-report.json` → 0 | **DONE** |
 | U2 | mixture build | me | arms built with realised weights, holdout-excluded, deduped, receipted | `python3 v2/build_mixture.py --outdir v2/data/mixture` → 0 | **DONE** |
 | U3 | training (2 arms × 24 h) | me | receipts carry mask_check, coverage, schedule fields; step progress ≤10 min | `MASK_PROOF=1 python3 train_cyberguard.py --smoke` → 0 **and** U13 exit 0 | **BLOCKED** (U13) |
-| U4 | benchmark (500×2, both arms) | me | receipt has raw **and** normalised F1 with CIs; evaluated representation named | `python3 eval_cyberguard.py --check evals/cyberguard-lora-v2.json` → 0 | READY |
+| U4 | benchmark (500×2, both arms) | me | receipt has F1 with CIs per arm; evaluated representation named in the merge receipt | **corrected 2026-09-29:** `eval_cyberguard.py` takes no flags — it reads `RUN_NAME` from the environment — and it writes `ref_token_f1_mean`, not `f1_normalized`/`merged`; the executable check is the contract's **stage 2**, which asserts per arm a finite `base.held_out_loss` AND `tuned.held_out_loss`, `held_out_rows`, and `parent_identity.match`. The row previously cited `--check evals/cyberguard-lora-v2.json`, a flag and a single-arm path that never existed. | READY |
 | U5 | G-A / G-A2 refusal gates | me | both bounds hold at C24 in Arm A, or FAIL with CIs | `python3 cap_harness.py --phase P7 --n 1100 --rubric --paired --powered` → 0 | READY |
 | U6 | ID validator | me | flags every unassigned ID in fixtures, passes every real one | `python3 id_validator.py --selftest` → 0 | OPEN (not yet written) |
 | U7 | gates 1–4 harnesses | me | each receipt states n, denominators, CI, unparsed policy | `python3 cap_harness.py --phases P2,P3,P4,P5 --powered` → 0 | READY |
@@ -112,6 +114,42 @@ claims, no joint correction — a declared property. C8/C16 are **trajectory** p
 | `v2/checkpoint_metrics.sh` (C8/C16/C24 collector: measured rate, epochs, refusal exposure) | DONE |
 | `v2/pool_control.sh` (pool stop/restore with a real completion probe) | DONE |
 | `run-v2-arm.sh`, `monitor-v2.sh` (detached launch with fired refusal gates; /proc+growth monitor) | DONE |
+
+---
+
+### 4a. Done-means, by reference — and the validation scope of this companion
+
+The plan of record is two documents, and the definition of done lives in the first one: **SPEC §2, "v2 is done when
+all seven exist"**. It is *mirrored* here with its executable checks so completion can be checked from either half of
+the plan — not restated as a second definition, because a second copy is a second place the seven could drift, which
+is the failure mode this record exists to remove. **SPEC §2 is authoritative** if the two ever disagree.
+
+| # | done-mean (source: SPEC §2) | executable check (as SPEC §2 gives it) |
+|---|---|---|
+| 1 | admission-gate report | `python3 v2/gate_v2.py --check v2/gate-report.json` → exit 0 |
+| 2 | frozen mixture ledger | `docs/MIXTURE-V2.md` exists and states per source: id, revision, licence, rows, unique tokens, weight, decontamination |
+| 3 | v2 adapters + receipts, one per arm | contract **stage 0a** requires both adapter files present and non-empty per arm; **stage 0d** requires each to differ from the epoch-1 parent it resumed from |
+| 4 | v2 benchmark per arm | contract **stage 2** asserts, per arm, finite `base.held_out_loss` and `tuned.held_out_loss`, `held_out_rows`, and `parent_identity.match` |
+| 5 | gate table + verdict | `docs/VERDICT-v2.md` carries every gate id with PASS/FAIL/UNMEASURED, n and CI |
+| 6 | checksum-verified harvest | `bash harvest-v2.sh` prints `HARVEST-COMPLETE` with every file sha256-verified |
+| 7 | Codex-Astra reviews | ≥3 v2 reviews, every finding dispositioned fixed/refused+reason |
+
+**Validation scope.** `plan-validate.py` is written for SPEC's unit contract — its C3 rule requires every path a
+document names to exist and be marked a deliverable, and its C6 rule requires the document to carry its own done-means
+table. Run against this *sequence and record* companion, C3 reports findings of the kinds below and **none is a defect in
+the plan**; each is checkable by reading the line it cites. (The count moves as pending artifacts are named — it was
+ten before the phase-6 exit below was corrected to name the per-arm benchmark pair, because two pending paths produce
+two findings where one stale single-arm path produced one.)
+
+1. **Artifacts cited as pending.** `docs/VERDICT-v2.md` and the benchmark receipt are *pending by definition* — §4
+   marks the verdict "pending Phase 6" — so "does not exist" is the document's own statement.
+2. **Glob and brace patterns name sets**, and C3 resolves paths literally: `v2/candidates/*.jsonl`,
+   `v2/data/mixture/{armA,armB}.jsonl`, `v2/data/{refusal-retention,format-compliance}.jsonl` all exist as sets.
+3. **Explicitly deferred artifacts** — `v2/id_validator.py`, `docs/GATE8-protocol.md`, `v2/cpt_probe.py` — are listed
+   in §4 as DEFERRED to v2.1; the rule does not read the DEFERRED marker.
+4. **A source line citation**: `v2/run_battery.py:75` names a line, not a path; the file exists.
+5. **A path named because it was wrong**: `v2/evals/` appears in the account of a prompt-path defect *as the bad path
+   that bug produced*; that it does not exist is the point of the sentence.
 
 ---
 
@@ -571,7 +609,7 @@ entries for G-H and the Sigma detection/utility halves.
  while G-A2/G-C/G-G are disjoint. Cause: probe sets sampled from the pools the mixture consumed, with no
  held-out split reserved; pools now exhausted, so unrepairable in this window. **Owner decision D12**:
  training on schedule; affected sets repurposed as **retention/recall** (never generalisation);
- **fresh training-disjoint instruments** (probe-set-fresh-gA/gB/gE/gF/gJ, 1,580 composed prompts, 0 overlap
+ **fresh training-disjoint instruments** (probe-set-fresh-gA/gB/gE/gF/gJ, **1,620** composed prompts — 1,100+300+60+60+100, arithmetic corrected 2026-09-29 after Muse re-derived it from the files, as SPEC §7 already records — 0 overlap
  with either arm, 0 overlap with the superseded sets) carry the generalisation verdict for those gates;
  every report shows both sets with labels. Recorded in SPEC §7 |
 

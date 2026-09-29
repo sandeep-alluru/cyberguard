@@ -137,7 +137,8 @@ REQUIRED="gate-report-v2.json gate-inputs-armA.json gate-inputs-armB.json gate-i
           receipts/cyberguard-lora-v2-armA.json receipts/cyberguard-lora-v2-armB.json \
           evals/merge-equiv-cyberguard-lora-v2-armA.json evals/merge-equiv-cyberguard-lora-v2-armB.json \
           FACTS.json d2-diversity.receipt.json mask-proof.receipt.json \
-          equivalence-clearance.receipt.json muse-clearance.receipt.json"
+          equivalence-clearance.receipt.json muse-clearance.receipt.json \
+          evals/resume-learning-armA.receipt.json evals/resume-learning-armB.receipt.json"
 MISSING=""
 for pat in $REQUIRED; do
   grep -qF -- "$pat" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $pat"
