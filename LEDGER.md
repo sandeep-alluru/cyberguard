@@ -2521,3 +2521,44 @@ requires only the scripts the contract actually runs on the host (the assembler 
 the trainer is finished by stage 0b, so their absence must not abort stage 0b's `exit 2`), reports absence
 explicitly, and passes on both hosts — the only remaining preflight failure being the expected one, that the live
 trainer still holds the GPU.
+
+## 2026-09-29 — completion as a check instead of a claim, and a learning proof proven not to be vacuous
+
+**The learning proof refuses the input it exists to refuse.** Stage 0d runs before the 264 MB adapter pull precisely
+so that a stale checkpoint is caught without a transfer. Running its exact command on both hosts today — while the
+candidate path still holds the **pre-continuation** adapter, because the current run only saves at the end — it
+refused, naming the reason: *"adapter_model.safetensors was last written 10.04 h ago, before the window under test
+(2026-09-29 02:32:53). A stale checkpoint cannot prove anything about this run."* exit 1. That is the negative test
+passing: a "learning proof" that could pass on an unchanged file would prove nothing, and this one cannot. The same
+run shows what stage 0d will see at 12:10 — the trainer's final `save_model` rewrites that file at ~12:03, inside the
+tested window, so the check passes on real evidence rather than on the earlier receipt of it.
+
+My test harness was wrong twice before the result meant anything: I built the parent path as
+`cyberguard-lora-v2-$arm` with `arm=A`, when the stage uses `armA` (the directory is `…-v2-armA.epoch1-final-bak`),
+and I piped through `tail`, so `$?` was tail's status and the first run reported `EXIT=0` on a FAIL. The stage itself
+was right both times; only my instrument was wrong — the same pattern as the `[a-z_]+` regex two rounds ago.
+
+**`v2/verify_objective.py` — the five elements decided from artifacts.** The endgame currently rests on a document
+that describes itself, and this effort has repeatedly shipped a summary that outran its evidence (a harvest
+requirement that could never be satisfied; a brief asserting a snapshot it never checked; a sentence about the
+harvest that was true only when written). The verifier checks the evidence for each element and prints the path each
+answer came from: (1) the audit PASS, the D1 unified leak scan, and D2 declared NOT MET; (2) Astra's and Muse's
+clearance lines **with the revision each names**; (3) the FACTS authorization accounting plus both trainer receipts;
+(4) the gate report's decided rows and both pre-registered claims; (5) `VERDICT-v2.md`, a manifest that actually
+contains it and both adapters, and the terminal brief. Exit 0 = all five pass, **2 = awaiting artifacts**, **1 = an
+element FAILED** — the distinction matters, because "not yet" and "broken" are different facts. It is read-only and
+offline so an independent reviewer can run it.
+
+It caught a defect in itself on first run: it asserted the word "clear" inside a clearance line, and Astra's line is
+*"EQUIVALENCE BASIS SOUND for revision 44c7cbb3a52c"* — a clearance whose wording I had not anticipated, marked FAIL.
+A checker that decides a reviewer's verdict by matching my guess at their phrasing is the wrong instrument, so it now
+scans the receipts for any clearance record, prints each statement verbatim, and fails only on words that are
+unambiguously a rejection (`BLOCKED`, `not cleared`, …). Four negative cases were then run in an isolated tree — one
+claim instead of two, a manifest missing an adapter, a clearance carrying rejection wording — each failing the
+correct element with the correct reason, while the all-present case exits 0. The real tree was verified untouched
+afterwards (no `gate-report-v2.json`, no `VERDICT-v2.md`).
+
+The verifier is now the timeline's last act, so the unattended log ends with a per-element answer rather than the old
+question of whether one file exists. The timeline was re-armed on that code: the incumbent stopped in **0 s** on
+SIGTERM and released its lock, the new instance (pid 439499) holds `v2/.c24-timeline.lock`, grace-skipped M2, and a
+deliberate second start was refused with exit 75.
