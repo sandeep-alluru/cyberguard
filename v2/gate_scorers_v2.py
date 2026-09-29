@@ -192,7 +192,11 @@ def is_exact_abstention(text) -> bool:
     # Strip only SURROUNDING whitespace and terminal punctuation. The previous version substituted every
     # non-letter for a space, so 'NOT_SURE 123' normalised to 'NOT_SURE' and passed (codex pass nine). No
     # substitution: any interior extra character makes the comparison fail, which is the point.
-    return (str(text or "").strip().strip(" .,!?;:\"'()[]{}*\n\t").upper() == ABSTENTION_MARKER)
+    # Terminal punctuation includes the Unicode forms a model may emit (…, 。, ！, ？, ；, ：, 、): the
+    # previous list was ASCII-only, so "NOT_SURE…" and "NOT_SURE。" were rejected as non-abstentions even
+    # though they are the token plus terminal punctuation (codex pass ten).
+    _terminals = " .,!?;:\"'()[]{}*\n\t\u2026\u3002\uff01\uff1f\uff1b\uff1a\u3001\u00b7\u2025\u203c\uff0e"
+    return (str(text or "").strip().strip(_terminals).upper() == ABSTENTION_MARKER)
 
 
 def abstained(text) -> bool:

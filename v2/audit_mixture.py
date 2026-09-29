@@ -214,7 +214,16 @@ def main():
     for _label, _rows in (("armA", A), ("armB", B)):
         _sigma = [r for r in _rows if r["user"].startswith(SIGMA_PREFIX)]
         _json = [r for r in _rows if "Return JSON" in r["user"]]
-        _tri = [r for r in _rows if "one word" in r["user"].lower() or "single word" in r["user"].lower()]
+        # a triage prompt is one that offers BOTH verdicts; the old "one word"/"single word" selector missed
+        # the 220-per-arm "One-word verdict required (_malicious_ or _benign_)." form (codex frozen-arms review)
+        # a triage prompt offers BOTH verdicts AND asks for one word; the one-word requirement is what
+        # excludes rows that merely mention both terms (e.g. an ML-features question). The five authored forms
+        # are "one word", "one-word" and "single word", giving 1,200 per arm (codex frozen-arms review).
+        def _is_triage(u):
+            u = u.lower()
+            return ("malicious" in u and "benign" in u
+                    and ("one word" in u or "one-word" in u or "single word" in u))
+        _tri = [r for r in _rows if _is_triage(r["user"])]
         _ok = _jok = _one = _mis = 0
         try:
             import yaml as _y
@@ -329,6 +338,9 @@ def main():
             _e3[_label] = {"sampled": len(_sample),
                            "truncation_rate": round(_trunc / max(1, len(_sample)), 4),
                            "empty_supervision": _empty}
+            if _e3[_label]["empty_supervision"]:
+                fail("E3-empty", f"{_label}: {_e3[_label]['empty_supervision']} sampled rows have EMPTY "
+                                 f"assistant supervision - the model would be trained on nothing")
             if _e3[_label]["truncation_rate"] > 0.02:
                 warn("E3-tokenizer", f"{_label}: {_e3[_label]['truncation_rate']:.2%} of sampled rows exceed "
                                      f"{MAX_SEQ} real tokens and would lose assistant supervision")
@@ -448,6 +460,9 @@ def main():
             hp_checked += _c
             hp_ok += _o
         rep["sigma_handprint_agreement_by_arm"] = _hp_by_arm
+        if hp_checked == 0:
+            fail("J3-vacuous", "the handprint-agreement test had ZERO applicable rows - a vacuous pass is not "
+                               "a check, and it would silently bless any future set that names no handprint")
         for r in []:
             goal = None
             if goal is None:
@@ -470,22 +485,52 @@ def main():
             fail("J3-handprint", f"{hp_checked - hp_ok}/{hp_checked} Sigma rules disagree with the handprint "
                                  f"their prompt names")
 
-        det_checked = det_bad = 0
+        def _expected_label(line: str):
+            """Mirror of every shape in v2/build_format_set.py:gen_log_line (ten branches, one per event kind).
+
+            The first version of this test only parsed net_conn rows, so it checked 112 of 1,200 triage
+            presentations per arm and the independent frozen-arms review called that incompleteness out. Each
+            branch's label is a constant, except net_conn where it is a function of port and bytes.
+            """
+            if "EventID=4624" in line and "result=Success" in line:      return "benign"
+            if "parent=winword.exe" in line and "-enc" in line:          return "malicious"
+            if "cmd=certutil -urlcache" in line:                         return "malicious"
+            if "file_event path=/tmp/.x" in line and "mode=0755" in line: return "malicious"
+            if "backup_agent transferred" in line:                       return "benign"
+            if "registry_set HKCU Software Microsoft Windows CurrentVersion Run" in line:
+                return "malicious"
+            if "av signature update completed" in line:                  return "benign"
+            if "dns_query name=" in line and "duckdns.org" in line:      return "malicious"
+            if "ssh login key=authorized" in line:                       return "benign"
+            mp = re.search(r"dst=\S+:(\d+)", line)
+            mb = re.search(r"bytes=(\d+)", line)
+            if mp and mb:
+                port, byt = int(mp.group(1)), int(mb.group(1))
+                return "malicious" if (port in (4444, 5985) or byt > 5_000_000) else "benign"
+            return None
+
+        det_checked = det_bad = det_unparsed = 0
         pairs = {}
         _all_triage = [r for _ls in _LISTS.values() for r in _ls["triage"]]
         for r in _all_triage:
-            mp = re.search(r"dst=\S+:(\d+)", r["user"])
-            mb = re.search(r"bytes=(\d+)", r["user"])
-            if not (mp and mb):
+            want = _expected_label(r["user"])
+            if want is None:
+                det_unparsed += 1
                 continue
             det_checked += 1
-            port, byt = int(mp.group(1)), int(mb.group(1))
-            want = "malicious" if (port in (4444, 5985) or byt > 5_000_000) else "benign"   # mirrors gen_log_line
             got = r["assistant"].strip().lower()
             if got != want:
                 det_bad += 1
-            pairs.setdefault((port, byt), set()).add(got)
+            mp = re.search(r"dst=\S+:(\d+)", r["user"])
+            mb = re.search(r"bytes=(\d+)", r["user"])
+            if mp and mb:
+                pairs.setdefault((mp.group(1), mb.group(1)), set()).add(got)
         conflicting = sum(1 for v in pairs.values() if len(v) > 1)
+        if det_checked == 0:
+            fail("J3-vacuous", "the label-determinism test had ZERO parseable triage rows - vacuous pass")
+        if det_unparsed:
+            fail("J3-labels", f"{det_unparsed} triage rows match no known event shape; the determinism rule "
+                              f"cannot be applied to them, so their labels are unverified")
         rep["triage_label_determinism"] = {"checked": det_checked, "disagreeing": det_bad,
                                           "same_telemetry_two_labels": conflicting}
         if det_bad:
