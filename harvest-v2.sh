@@ -5,7 +5,7 @@
 set -euo pipefail
 DEST="${1:-research-tmp/harvest-v2}"
 H1=clawerdigi2@spark-40ee; H2=clawerdigi1@spark-8cf2
-mkdir -p "$DEST"/{receipts,evals,adapters,logs}
+mkdir -p "$DEST"/{receipts,evals,adapters,logs,mixture}
 pull() { # host remote_local_pair
   local host="$1" rel="$2" sub="$3"
   if scp -q -o ConnectTimeout=10 "$host:./cyberguard/$rel" "$DEST/$sub/" 2>/dev/null; then
@@ -29,7 +29,14 @@ for pair in "$H1 armA" "$H2 armB"; do
   set -- $pair; host=$1; arm=$2
   pull "$host" "receipts/cyberguard-lora-v2-$arm.json" receipts || true
   pull "$host" "evals/cyberguard-lora-v2-$arm.json" evals || true
-  pull "$host" "v2/data/mixture/$arm.jsonl" adapters || true
+  # THE TRAINED ADAPTER — the artifact the whole window exists to produce. It was ABSENT from this harvest,
+  # whose own description says "every v2 artifact": 264,308,896 bytes per arm, and a verifier reading the
+  # manifest would not have found the model itself. One subdir per arm because both files share a basename.
+  mkdir -p "$DEST/adapters/$arm"
+  pull "$host" "adapters/cyberguard-lora-v2-$arm/adapter_model.safetensors" "adapters/$arm" || true
+  pull "$host" "adapters/cyberguard-lora-v2-$arm/adapter_config.json" "adapters/$arm" || true
+  # the MIXTURE is not an adapter: filing it under adapters/ made `adapters/armA.jsonl` look like one.
+  pull "$host" "v2/data/mixture/$arm.jsonl" mixture || true
 done
 pull "$H1" "v2/data/mixture/audit.receipt.json" receipts || true
 pull "$H1" "v2/data/mixture/leak-scan.receipt.json" receipts || true
@@ -89,14 +96,14 @@ fi
 # The evidence for the objective's own claims is REQUIRED, not optional: the re-audit PASS (step 2) and the
 # unified leakage instrument (D1). A harvest that prints HARVEST-COMPLETE without them would certify a verdict
 # whose supporting evidence it had not collected - which is what rehearsing against the live hosts exposed.
-REQUIRED="v2/gate-report-v2.json evals/gate-inputs-armA.json docs/VERDICT-v2.md \
-          v2/data/mixture/audit.receipt.json v2/data/mixture/leak-scan-c24.receipt.json"
+# Manifest SUBSTRINGS, not basenames: the two arms' adapter files share a basename, so a basename grep would be
+# satisfied by one arm alone. The trained adapters are required because they are the deliverable's subject.
+REQUIRED="gate-report-v2.json gate-inputs-armA.json VERDICT-v2.md audit.receipt.json \
+          leak-scan-c24.receipt.json adapters/armA/adapter_model.safetensors \
+          adapters/armB/adapter_model.safetensors"
 MISSING=""
-for rel in $REQUIRED; do
-  base=$(basename "$rel")
-  # Match the BASENAME anywhere in the manifest, fixed-string: the old form searched for "  evals/<base>",
-  # which could never match a file harvested at the DEST root (and would also be fooled by a dotted basename).
-  grep -qF -- "$base" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $rel"
+for pat in $REQUIRED; do
+  grep -qF -- "$pat" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING $pat"
 done
 for b in fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
   grep -q "battery-$b-armA.json" "$DEST/MANIFEST.sha256" 2>/dev/null || MISSING="$MISSING evals/battery-$b-armA.json"

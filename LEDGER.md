@@ -2089,3 +2089,29 @@ missing a comma between two entries, which would have merged two assertions into
 Parsing the file's AST showed **nine well-formed two-element tuples** — the apparent missing comma was an artefact
 of how a two-line tuple renders in `grep` output. Recorded because a "found something" that dissolves on
 inspection is as much a result as one that does not, and the alternative — reporting it — would have been wrong.
+
+## 2026-09-29 — the harvest omitted the artifact the window exists to produce
+
+`harvest-v2.sh` describes itself as a "checksummed pull of **every v2 artifact** from both training hosts". It
+never pulled the **trained adapters** — 264,308,896 bytes each, the deliverable's subject — so the
+checksum-verified harvest, one of the objective's five named deliverables, would have contained the receipts, the
+benchmarks, the batteries and the mixtures, but **not the model**. A verifier reading the manifest would not have
+found it.
+
+Worse in the same table: the directory the harvest called `adapters/` received the **training mixtures**
+(`v2/data/mixture/$arm.jsonl`), so its manifest carried `adapters/armA.jsonl` — a line that looks like an adapter
+and is not one.
+
+Fixed:
+* both arms' `adapter_model.safetensors` **and** `adapter_config.json` are now pulled, into one subdirectory per
+  arm because the two files share a basename (a basename-keyed manifest would have collided);
+* the mixtures are filed under `mixture/`, so the manifest says what the file is;
+* `REQUIRED` now holds **manifest substrings** rather than basenames — necessary because `adapter_model.safetensors`
+  is the same basename for both arms, so a basename grep would have been satisfied by one arm alone. The trained
+  adapters are **required** for `HARVEST-COMPLETE`, so the harvest cannot certify a result whose model it did not
+  collect.
+
+Rehearsed against the live hosts: **505 MB in 91 s**, all four adapter files verified with matching sha256, the
+manifest grown from 18 to 22 lines, and the fail-closed list correctly omitting them while still naming the
+verdict and the five fresh instruments. Unit-tested the arms separately: removing armB's adapter line fails the
+required check even though armA's remains — which a basename check would have passed.
