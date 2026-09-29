@@ -1900,3 +1900,35 @@ original code ever could.
 The episode is worth keeping for the same reason the pipeline bug keeps recurring: **`||` after a pipe is
 genuinely treacherous**, so the right response is to test the claim, not to trust the reading — and then to record
 what the test showed, including when it contradicts me.
+
+## 2026-09-29 — a timeline restart re-ran a past checkpoint; fixed, and the duplicate recorded
+
+Re-arming the timeline (which I have done three times while the CLI, the trainer patch and the checkpoints
+changed) treated a **time already in the past as "fire now"**. Restarting at 06:14 therefore **re-ran the 05:50
+M2 checkpoint**: it overwrote `research-tmp/checkpoints/M2-metrics.json` with 06:14 numbers (arm A 1409 → 1596),
+wrote a **duplicate brief** (`checkpoint16-m2-look`, portal-verified, and accurate for 06:14), and re-dispatched
+the M2 review.
+
+Two honest notes rather than a quiet tidy-up:
+* the **05:50 numbers are not lost** — checkpoint 14's own table carries them (arm A 1409 / 0.2781 epoch, arm B
+  1339 / 0.2643) — but its citation of `M2-metrics.json` as the source now resolves to the *later* file. The
+  metrics file was overwritten, so that citation is stale, and the duplicate brief is a real record rather than
+  something to delete;
+* the duplicate existed only because of the restart.
+
+Root cause fixed: `wait_until` now **skips** any event more than `GRACE_MIN` (5) minutes in the past and the
+caller logs the skip, for the mid-checkpoints **and** the C24 metrics/brief. Verified: 24 minutes past → SKIPPED;
+4 minutes past → FIRES (within grace); future → waits. The restarted timeline skipped M2 and is waiting for M3.
+
+Also added: the contract step is now **guarded against repeating ~11 hours** — if `docs/VERDICT-v2.md` and the
+gate report already exist, a restart logs "NOT re-running the contract" instead of redoing the work. A deliberate
+re-run remains possible by removing the verdict, which is a visible act rather than an accident.
+
+And the gap this round set out to find: **no brief was written for the verdict itself.** The cadence requires "a
+dated CEO-desk brief per checkpoint", and the terminal checkpoint — the deliverable the whole window exists to
+produce — had none: the timeline's last act was to log whether `VERDICT-v2.md` exists. Added
+`v2/verdict_brief.py`, which composes the brief **from artifacts only** (the gate report's every row, the
+verdict's sha256 and size, the harvest manifest's checksum-verified count, the budget from FACTS) and **refuses**
+to write a brief that would announce a verdict which is not there. Verified: all three refusal paths exit 1 with
+their reason, and the composition path writes a well-formed brief (tested into a temp out-dir, so nothing fake
+reached `docs/ceo`). It now runs after the harvest in the timeline.

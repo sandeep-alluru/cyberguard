@@ -26,3 +26,19 @@ review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review
 [2026-09-29 05:50:05 CDT] checkpoint M2 review (Astra)
 prompt written: research-tmp/reviews/checkpoint-M2-review-prompt.md
 review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review.md
+[2026-09-29 06:14:21 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 06:14:21 CDT] checkpoint M2 metrics
+  M2: A 1596 steps @ 7.98s/it alive=1 gpu=93% | B 1513 steps @ 7.57s/it alive=1 gpu=95%
+  eviction in force: both hosts report no 8093 listener and no active serving unit
+    arm A: 25536 samples = 0.315 epoch | 3018 refusal presentations | 24 h projection 2.14 epochs, 20478 refusal presentations
+    arm B: 24208 samples = 0.299 epoch | 2861 refusal presentations | 24 h projection 2.25 epochs, 21587 refusal presentations
+    (declared FACTS basis: 0.968288 s/sample -> epoch 21.8 h)
+[2026-09-29 06:14:25 CDT] checkpoint M2 brief
+  wrote docs/ceo/2026-09-29_061400CDT-cyberguard-checkpoint16-m2-look.md (2779 bytes)
+  portal verification: PASS — HTTP 200 (16758 bytes), content hits=3, raw IPv4=0 -> http://127.0.0.1:3100/ceo/report/d728d6dbbf7a77366cbc
+[2026-09-29 06:14:26 CDT] checkpoint M2 review (Astra)
+prompt written: research-tmp/reviews/checkpoint-M2-review-prompt.md
+review dispatched for checkpoint M2 -> research-tmp/reviews/checkpoint-M2-review.md
+[2026-09-29 06:16:00 CDT] timeline re-armed: C24 today 11:55 | brief today 11:57 | contract today 12:10  (post no-op-resume fix)
+[2026-09-29 06:16:00 CDT] checkpoint M2 (today 05:50) already passed by more than 5 min — SKIPPING, so a restart cannot
+[2026-09-29 06:16:00 CDT]   overwrite its metrics snapshot or duplicate its brief
