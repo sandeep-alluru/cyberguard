@@ -1276,3 +1276,52 @@ receipt. `plan-validate.py` PASSES on the amended spec (sha256 now `2d2872dd…`
 A delta confirmation pass (#17) is requested against the amended revision. The contract remains ungated on the
 clearance marker per the owner's 2026-09-29 instruction, and the verdict records the clearance state that
 actually obtained.
+
+## 2026-09-29 — review #16: NOT SOUND (my replacement gate was too weak), and the learning proof PASSES
+
+### #16 rejected the second equivalence basis, correctly
+After the exact-token gate proved unachievable (see the entry above), the replacement gated on first-position
+top-1 agreement plus aggregate loss. #16:
+
+> "NOT SOUND: First-position agreement plus aggregate loss permits unrestricted continuation changes, so the
+> proposed criterion does not establish merged/unmerged behavioral equivalence."
+
+That is right and it is the stronger criticism of the two: agreeing on the first token constrains nothing
+later, and a compensating error can vanish in aggregate loss. #16 also caught that the prompt it was given
+named a **stale revision** ("Revision identification differs from the proposal") — my error, and now fixed in
+process (below).
+
+### The basis is now teacher-forced, over the scored surface, with a measured negative control
+`merge_equiv.py` compares the two paths **position by position over the assistant span** — the exact surface
+`eval_cyberguard.held_out_loss` scores, with the same template, truncation and prompt boundary. The token
+sequence is fixed, so this is **not** subject to decoding chaos, and it is sensitive to a change anywhere in the
+continuation.
+
+Measured on the real adapter (spark-40ee, armA), and the reason the threshold is defensible rather than fitted:
+
+| comparison | teacher-forced top-1 agreement | positions |
+|---|---|---|
+| merged vs unmerged (same model, different arithmetic) | **0.9882** | 3,389 |
+| merged vs **base** (adapter disabled — what a dropped merge, wrong scale or wrong target modules looks like) | **0.5996** | 3,389 |
+
+**Separation 0.389.** Stage 2 now gates on `tf_top1_agreement_rate >= 0.95` over `tf_positions >= 20,000` AND
+on the separation `>= 0.20`, with `tf_first_position_disagreements == 0`, and keeps `loss_delta <= 0.02`.
+Free-running generation statistics (exact mismatches, F1) are **reported, never gated** — they measure
+amplification, not equivalence. Verified in five directions; a clause that could never fire was found and
+proven live (case E: tf 0.96 with a 0.06 separation FAILS on the separation clause, not on the floor).
+
+### Process fix for the stale-revision failure
+`v2/dispatch_review.sh` now substitutes `{{REV}}` and `{{SPEC_SHA}}`, **asserts** they are present and free of
+placeholders, and refuses to dispatch otherwise. Its own test proves the earlier #17 failure cannot recur:
+`$(echo INJECTED)` and backticks survive literally in the written prompt.
+
+### Review #14's evidence gap: CLOSED
+`v2/early_learning_check.sh` waited for the first fresh checkpoint and settled it on both arms at step 500:
+
+| arm | checkpoint | sha256 | tensor L2 movement | distinct grad_norm values |
+|---|---|---|---|---|
+| armA | `checkpoint-500` @ 03:48:57 | `d5bd72ace5400757…` | ~1.0 (top tensors) | **48** |
+| armB | `checkpoint-500` @ 03:43:30 | `498c6f21eef6f75e…` | ~1.0 (top tensors) | **48** |
+
+Against the frozen run's `trainable params: 0`, `grad_norm 0` and **zero** distinct grad_norm values. Receipt:
+`v2/data/mixture/learning-proof-early.receipt.json`. Stage 0d re-proves it on the final artefact at 12:10.

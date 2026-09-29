@@ -364,17 +364,35 @@ for arm in ("armA", "armB"):
     # differed at 256. Requiring zero mismatches would therefore abort this contract after the window had been
     # spent, on evidence that is an artefact of precision rather than of the merge. The gate is now the
     # measurement that IS sensitive to a wrong merge: does merging change the model's FIRST decision?
-    if "top1_agreement_rate" not in e or e["top1_agreement_rate"] is None:
-        sys.exit(f"FATAL: {eq} records no top1_agreement_rate - merge equivalence is unmeasured from it")
-    t1 = float(e["top1_agreement_rate"])
-    if not math.isfinite(t1):
-        sys.exit(f"FATAL: {arm} top1_agreement_rate is not finite ({e['top1_agreement_rate']})")
-    if t1 < 1.0:
-        sys.exit(f"FATAL: {arm} merged-vs-unmerged disagree on the FIRST generated token for "
-                 f"{(1.0 - t1):.3%} of prompts - a genuine merge defect, not decoding amplification")
-    if int(e.get("top1_agreement_n") or 0) < 100:
-        sys.exit(f"FATAL: {arm} top-1 agreement rests on only {e.get('top1_agreement_n')} prompts; >=100 is "
-                 f"required so that agreement is evidence rather than an anecdote")
+    # (b) review #16 rejected first-position agreement as TOO WEAK ("permits unrestricted continuation
+    # changes"), correctly. The basis is now TEACHER-FORCED per-position agreement over the assistant span -
+    # the surface held_out_loss scores. The token sequence is fixed, so it is not subject to decoding chaos,
+    # and it is sensitive to a change anywhere in the continuation.
+    for k in ("tf_top1_agreement_rate", "tf_positions", "tf_negative_control_agreement_rate"):
+        if k not in e or e[k] is None:
+            sys.exit(f"FATAL: {eq} records no {k} - merge equivalence is not established by this artefact")
+    tf = float(e["tf_top1_agreement_rate"])
+    nc = float(e["tf_negative_control_agreement_rate"])
+    pos = int(e["tf_positions"])
+    if not (math.isfinite(tf) and math.isfinite(nc)):
+        sys.exit(f"FATAL: {arm} teacher-forced agreement is not finite ({tf}, {nc})")
+    if pos < 20000:
+        sys.exit(f"FATAL: {arm} teacher-forced agreement rests on only {pos} positions; >=20000 required")
+    # The threshold is GROUNDED, not fitted. Measured on the real adapter: merged-vs-unmerged 0.9882 over 3,389
+    # positions, and the NEGATIVE CONTROL (merged vs the base model with the adapter disabled - what a dropped
+    # merge, a wrong scale or wrong target modules would look like) 0.5996. 0.95 sits far below the equivalent
+    # case and far above the non-equivalent one, and the separation itself is gated so a degenerate control
+    # cannot make the floor meaningless.
+    if tf < 0.95:
+        sys.exit(f"FATAL: {arm} teacher-forced top-1 agreement {tf:.4f} < 0.95 over {pos} positions - that is "
+                 f"a genuine merge defect, not arithmetic precision")
+    if (tf - nc) < 0.20:
+        sys.exit(f"FATAL: {arm} the merge is not clearly closer to the adapter path ({tf:.4f}) than to the base "
+                 f"({nc:.4f}); separation {tf - nc:.4f} < 0.20 - the equivalence claim is not grounded")
+    if int(e.get("tf_first_position_disagreements") or 0) != 0:
+        sys.exit(f"FATAL: {arm} merged-vs-unmerged disagree at the FIRST supervised position on "
+                 f"{e.get('tf_first_position_disagreements')} row(s) - a wrong merge changes the first decision")
+    t1 = tf
     # Reported, never gated: how far bf16 rounding is amplified by the decoder over a full-length decode.
     # Recorded so the verdict states it instead of hiding it behind an equivalence claim.
     print(f"    reported, not gated: exact_mismatches={e['gen_exact_mismatches']}/{e.get('prompts_gen')} "
@@ -386,7 +404,8 @@ for arm in ("armA", "armB"):
     if int(e.get("rows_loss") or 0) < 100:
         sys.exit(f"FATAL: {arm} loss equivalence rests on only {e.get('rows_loss')} rows; >=100 required")
     print(f"  {arm}: held_out_rows={rows}  merge-equiv ACCEPTED (loss_delta={e['loss_delta']}, "
-          f"top1_agreement={t1:.1%} on {e.get('top1_agreement_n')} prompts)")
+          f"teacher-forced top-1 agreement={t1:.4f} over {pos} positions, "
+          f"negative control (base) {nc:.4f}, separation {t1 - nc:.4f})")
 PY
 
 # ---------------------------------------------------------------- stage 3: batteries, split across machines
