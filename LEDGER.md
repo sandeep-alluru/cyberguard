@@ -3818,3 +3818,23 @@ the two verifiers and what their exit codes mean, where every deliverable lands,
 including the three declared deviations that must not be "fixed", the two figures that are estimates rather than
 measurements, and the one defect this window found that would have cost the entire evaluation — with the fix and the
 hash that is now on both hosts.
+
+## 2026-09-29 08:38 — the state the unattended endgame inherits, checked for cleanliness
+
+Whatever exists now is what the contract and the guard will run against, so the environment was checked rather than
+assumed:
+
+```
+timeline (bash v2/arm_c24_timeline.sh)      1 process, holding its lock
+guard    (bash v2/timeline_guard.sh)        1 process, defaults, watching the two deliverable paths
+watchdog (python3 v2/watchdog.py)           1 process, observational
+live wait children in the repo              2 — the timeline's wait for 08:50:00 and the guard's poll interval
+debris                                      none: no test fixtures, no stale lock, evals/ empty, harvest DEST absent
+/tmp dirs containing my fixtures             0 (every test tree was removed after use; the others belong to other sessions)
+git                                          302 commits, tree clean
+```
+
+The one thing the check corrected was my own impression: `/tmp` holds 169 `tmp.*` directories, which looked like my
+debris until I looked for my *fixtures* rather than for the directory name — none of them is mine, and none is inside
+the repo. Eleventh instance of the same lesson, and the reason the check was written to look for a signature rather
+than a naming pattern.
