@@ -2864,3 +2864,32 @@ The other M2 rows were already satisfied by design and were checked rather than 
 counters "do not establish saved-artifact exposure, terminal LR or weight change" is exactly what review #14's rule
 addresses (measured per-artefact exposure from each run's own receipt), and the Conditional is the budget arithmetic
 — 28.0604 + 2 × 570/60 = 47.0604, leaving 0.9396 within 48 — which `verify_objective.py` now also reads from FACTS.
+
+## 2026-09-29 — D1 verified from its own receipt, and a number in the checkpoint brief traced to source
+
+D1's exit is *"one instrument: exact + n-gram + containment, short prompts handled, both arms, all fields; re-run
+gate + audit"*, and the audit's `leak_reference` looked at first like it contradicted the leak scan: the audit
+reports `probes: 225` with `probe_text_found_in_training: 0`, while the checkpoint brief quotes **14,162** findings
+against the battery reference set. Both are true, and the receipts say why:
+
+* `leak_scan.py` is the unified instrument and implements D1's fix in the open: `SHORT_TOKENS = 13`, with the comment
+  *"below this, n-gram matching is unreliable -> exact match governs"*, a collector returning "a **short set handled by
+  exact match only**", and a leak test that tries **exact match, contiguous short-reference copy, then n-gram
+  overlap**. Short prompts are not skipped; they are routed to the mode that can answer for them.
+* The receipt records it per reference set, which is what makes the numbers readable:
+  `references = {holdout: 500, probes: 225, c24_batteries: 4840}` and
+  `verdict_by_reference_set = {holdout: CLEAN, probes: CLEAN, c24_batteries: LEAK}` with
+  `findings_by_reference_set = {c24_batteries: 14162}` over **162,148 checked rows = 2 × 81,074**, i.e. both arms.
+* So the batteries are a LEAK by design — they are training rows, which is the whole reason D12 labels them **recall**
+  and not generalisation — while the held-out set and the capability probes are **CLEAN**. An overall verdict of
+  `LEAK` with per-set detail is the honest shape: a reader cannot mistake the expected battery overlap for a
+  held-out breach.
+
+The audit's own `probes: 225` check is a *separate, legacy* spot-check against the capability-probe collector, still
+filtered to references of **≥13 tokens** — narrower than the unified instrument. It is not cited by the verdict, the
+CEO brief or the gate layer (checked), so its narrower scope cannot propagate as a blanket "no probe text in
+training" claim; the artefact that speaks to probe leakage is the one that scans the registered 4,840.
+
+And the brief's own number was traced rather than trusted: **14,162** appears in
+`v2/data/mixture/leak-scan-c24.receipt.json` as `findings_by_reference_set.c24_batteries`, against a reference set of
+**4,840** — the same 14 probe sets, at the exact counts, that the batteries will run against at 12:10.
