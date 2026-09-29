@@ -175,10 +175,10 @@ PY
 step 3 "batteries (split: arm A on spark-40ee, arm B on spark-8cf2; base once, on spark-40ee)"
 # every leg of this stage runs on a HOST: the adapters, the base-model weights and the bf16 GPUs are all there
 # and none of them are here. The base side is shared, so it runs once and its receipts are copied back.
-for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
+for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
   echo "  base@40ee : ssh spark-40ee: python3 v2/run_battery.py --battery $b --arm base --out evals"
 done
-for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
+for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
   echo "  armA@40ee : python3 v2/run_battery.py --battery $b --arm armA --adapter adapters/cyberguard-lora-v2-armA"
   echo "  armB@8cf2 : python3 v2/run_battery.py --battery $b --arm armB --adapter adapters/cyberguard-lora-v2-armB"
 done
@@ -189,7 +189,7 @@ done
     timeout 300 rsync -a v2/data/probe-set-*.jsonl v2/run_battery.py v2/gate_scorers_v2.py \
       "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
       || { bad "rsync of battery inputs to $H failed"; exit 5; }
-    for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
+    for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
       timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
         \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm $ARM \
         --adapter adapters/cyberguard-lora-v2-$ARM --out evals" > "logs/battery-$b-$ARM.log" 2>&1 \
@@ -207,7 +207,7 @@ done
   timeout 300 rsync -a v2/data/probe-set-*.jsonl v2/run_battery.py v2/gate_scorers_v2.py \
     "cyberguard_contract.py" "cap_scorers.py" "$H:~/cyberguard/v2/" 2>/dev/null \
     || { bad "rsync of battery inputs to $H failed"; exit 5; }
-  for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ; do
+  for b in gA gA2 gB gC gE gF gG-gsm8k gG-ifeval gJ fresh-gA fresh-gB fresh-gE fresh-gF fresh-gJ; do
     timeout 5400 ssh -o BatchMode=yes "$H" "source ~/.cyberguard-env; cd \$CYBERGUARD_ROOT && \
       \$CYBERGUARD_VENV/bin/python v2/run_battery.py --battery $b --arm base --out evals" \
       > "logs/battery-$b-base.log" 2>&1 || { bad "base battery $b failed on $H"; exit 5; }

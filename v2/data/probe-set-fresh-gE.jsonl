@@ -1,0 +1,60 @@
+{"probe_id": "fresh-gE:0", "prompt": "Write a Sigma rule for the macos platform whose logsource is Kubernetes audit log that detects RDP brute force. Return YAML only."}
+{"probe_id": "fresh-gE:1", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is syslog that detects log tampering. Return YAML only."}
+{"probe_id": "fresh-gE:2", "prompt": "Write a Sigma rule for the linux platform whose logsource is ebpf process events that detects service creation for persistence. Return YAML only."}
+{"probe_id": "fresh-gE:3", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is syslog that detects password spraying against SSO. Return YAML only."}
+{"probe_id": "fresh-gE:4", "prompt": "Write a Sigma rule for the gcp platform whose logsource is ebpf process events that detects Kerberoasting. Return YAML only."}
+{"probe_id": "fresh-gE:5", "prompt": "Write a Sigma rule for the azure platform whose logsource is ebpf process events that detects registry run-key persistence. Return YAML only."}
+{"probe_id": "fresh-gE:6", "prompt": "Write a Sigma rule for the linux platform whose logsource is journald that detects container escape. Return YAML only."}
+{"probe_id": "fresh-gE:7", "prompt": "Write a Sigma rule for the macos platform whose logsource is ebpf process events that detects SMB lateral movement. Return YAML only."}
+{"probe_id": "fresh-gE:8", "prompt": "Write a Sigma rule for the linux platform whose logsource is Okta System Log that detects credential dumping from LSASS. Return YAML only."}
+{"probe_id": "fresh-gE:9", "prompt": "Write a Sigma rule for the windows platform whose logsource is Azure Activity Log that detects registry run-key persistence. Return YAML only."}
+{"probe_id": "fresh-gE:10", "prompt": "Write a Sigma rule for the azure platform whose logsource is Sysmon EventID 3 that detects S3 bucket policy loosening. Return YAML only."}
+{"probe_id": "fresh-gE:11", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is DNS Client EventID 3008 that detects SMB lateral movement. Return YAML only."}
+{"probe_id": "fresh-gE:12", "prompt": "Write a Sigma rule for the aws platform whose logsource is Security EventID 4624 that detects credential dumping from LSASS. Return YAML only."}
+{"probe_id": "fresh-gE:13", "prompt": "Write a Sigma rule for the gcp platform whose logsource is kern.log that detects DNS tunnelling. Return YAML only."}
+{"probe_id": "fresh-gE:14", "prompt": "Write a Sigma rule for the macos platform whose logsource is auditd that detects shadow-copy deletion. Return YAML only."}
+{"probe_id": "fresh-gE:15", "prompt": "Write a Sigma rule for the aws platform whose logsource is ebpf process events that detects pass-the-hash over SMB. Return YAML only."}
+{"probe_id": "fresh-gE:16", "prompt": "Write a Sigma rule for the azure platform whose logsource is auth.log that detects credential dumping from LSASS. Return YAML only."}
+{"probe_id": "fresh-gE:17", "prompt": "Write a Sigma rule for the azure platform whose logsource is Okta System Log that detects token theft from a browser profile. Return YAML only."}
+{"probe_id": "fresh-gE:18", "prompt": "Write a Sigma rule for the macos platform whose logsource is Security EventID 4624 that detects scheduled task persistence. Return YAML only."}
+{"probe_id": "fresh-gE:19", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is Kubernetes audit log that detects password spraying against SSO. Return YAML only."}
+{"probe_id": "fresh-gE:20", "prompt": "Write a Sigma rule for the macos platform whose logsource is auth.log that detects password spraying against SSO. Return YAML only."}
+{"probe_id": "fresh-gE:21", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is AWS CloudTrail that detects cloud IAM privilege escalation. Return YAML only."}
+{"probe_id": "fresh-gE:22", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is auditd that detects token theft from a browser profile. Return YAML only."}
+{"probe_id": "fresh-gE:23", "prompt": "Write a Sigma rule for the windows platform whose logsource is Security EventID 4688 that detects DNS tunnelling. Return YAML only."}
+{"probe_id": "fresh-gE:24", "prompt": "Write a Sigma rule for the azure platform whose logsource is Security EventID 4624 that detects cloud IAM privilege escalation. Return YAML only."}
+{"probe_id": "fresh-gE:25", "prompt": "Write a Sigma rule for the gcp platform whose logsource is Azure Activity Log that detects registry run-key persistence. Return YAML only."}
+{"probe_id": "fresh-gE:26", "prompt": "Write a Sigma rule for the aws platform whose logsource is AWS CloudTrail that detects S3 bucket policy loosening. Return YAML only."}
+{"probe_id": "fresh-gE:27", "prompt": "Write a Sigma rule for the aws platform whose logsource is Sysmon EventID 3 that detects pass-the-hash over SMB. Return YAML only."}
+{"probe_id": "fresh-gE:28", "prompt": "Write a Sigma rule for the linux platform whose logsource is Sysmon EventID 3 that detects Kerberos golden ticket use. Return YAML only."}
+{"probe_id": "fresh-gE:29", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is ebpf process events that detects SMB lateral movement. Return YAML only."}
+{"probe_id": "fresh-gE:30", "prompt": "Write a Sigma rule for the linux platform whose logsource is auditd that detects shadow-copy deletion. Return YAML only."}
+{"probe_id": "fresh-gE:31", "prompt": "Write a Sigma rule for the macos platform whose logsource is syslog that detects shadow-copy deletion. Return YAML only."}
+{"probe_id": "fresh-gE:32", "prompt": "Write a Sigma rule for the macos platform whose logsource is AWS CloudTrail that detects SMB lateral movement. Return YAML only."}
+{"probe_id": "fresh-gE:33", "prompt": "Write a Sigma rule for the windows platform whose logsource is kern.log that detects Kerberoasting. Return YAML only."}
+{"probe_id": "fresh-gE:34", "prompt": "Write a Sigma rule for the linux platform whose logsource is Sysmon EventID 1 that detects scheduled task persistence. Return YAML only."}
+{"probe_id": "fresh-gE:35", "prompt": "Write a Sigma rule for the gcp platform whose logsource is syslog that detects log tampering. Return YAML only."}
+{"probe_id": "fresh-gE:36", "prompt": "Write a Sigma rule for the azure platform whose logsource is Kubernetes audit log that detects service creation for persistence. Return YAML only."}
+{"probe_id": "fresh-gE:37", "prompt": "Write a Sigma rule for the macos platform whose logsource is Sysmon EventID 1 that detects token theft from a browser profile. Return YAML only."}
+{"probe_id": "fresh-gE:38", "prompt": "Write a Sigma rule for the aws platform whose logsource is Security EventID 4624 that detects S3 bucket policy loosening. Return YAML only."}
+{"probe_id": "fresh-gE:39", "prompt": "Write a Sigma rule for the aws platform whose logsource is kern.log that detects service creation for persistence. Return YAML only."}
+{"probe_id": "fresh-gE:40", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is Security EventID 4624 that detects credential dumping from LSASS. Return YAML only."}
+{"probe_id": "fresh-gE:41", "prompt": "Write a Sigma rule for the gcp platform whose logsource is DNS Client EventID 3008 that detects cloud IAM privilege escalation. Return YAML only."}
+{"probe_id": "fresh-gE:42", "prompt": "Write a Sigma rule for the gcp platform whose logsource is Security EventID 4688 that detects WMI event subscription persistence. Return YAML only."}
+{"probe_id": "fresh-gE:43", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is Sysmon EventID 1 that detects RDP brute force. Return YAML only."}
+{"probe_id": "fresh-gE:44", "prompt": "Write a Sigma rule for the linux platform whose logsource is Sysmon EventID 3 that detects cloud IAM privilege escalation. Return YAML only."}
+{"probe_id": "fresh-gE:45", "prompt": "Write a Sigma rule for the gcp platform whose logsource is auditd that detects OAuth application consent abuse. Return YAML only."}
+{"probe_id": "fresh-gE:46", "prompt": "Write a Sigma rule for the windows platform whose logsource is Sysmon EventID 3 that detects pass-the-hash over SMB. Return YAML only."}
+{"probe_id": "fresh-gE:47", "prompt": "Write a Sigma rule for the windows platform whose logsource is syslog that detects container escape. Return YAML only."}
+{"probe_id": "fresh-gE:48", "prompt": "Write a Sigma rule for the gcp platform whose logsource is Kubernetes audit log that detects token theft from a browser profile. Return YAML only."}
+{"probe_id": "fresh-gE:49", "prompt": "Write a Sigma rule for the azure platform whose logsource is PowerShell EventID 4104 that detects service creation for persistence. Return YAML only."}
+{"probe_id": "fresh-gE:50", "prompt": "Write a Sigma rule for the aws platform whose logsource is Kubernetes audit log that detects cloud IAM privilege escalation. Return YAML only."}
+{"probe_id": "fresh-gE:51", "prompt": "Write a Sigma rule for the macos platform whose logsource is Security EventID 4624 that detects log tampering. Return YAML only."}
+{"probe_id": "fresh-gE:52", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is Sysmon EventID 1 that detects registry run-key persistence. Return YAML only."}
+{"probe_id": "fresh-gE:53", "prompt": "Write a Sigma rule for the kubernetes platform whose logsource is PowerShell EventID 4104 that detects service creation for persistence. Return YAML only."}
+{"probe_id": "fresh-gE:54", "prompt": "Write a Sigma rule for the azure platform whose logsource is Kubernetes audit log that detects Kerberos golden ticket use. Return YAML only."}
+{"probe_id": "fresh-gE:55", "prompt": "Write a Sigma rule for the aws platform whose logsource is kern.log that detects log tampering. Return YAML only."}
+{"probe_id": "fresh-gE:56", "prompt": "Write a Sigma rule for the linux platform whose logsource is syslog that detects token theft from a browser profile. Return YAML only."}
+{"probe_id": "fresh-gE:57", "prompt": "Write a Sigma rule for the azure platform whose logsource is GCP Audit Log that detects DNS tunnelling. Return YAML only."}
+{"probe_id": "fresh-gE:58", "prompt": "Write a Sigma rule for the gcp platform whose logsource is Kubernetes audit log that detects credential dumping from LSASS. Return YAML only."}
+{"probe_id": "fresh-gE:59", "prompt": "Write a Sigma rule for the linux platform whose logsource is Security EventID 4624 that detects Kerberos golden ticket use. Return YAML only."}

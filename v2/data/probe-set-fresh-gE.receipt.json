@@ -1,0 +1,22 @@
+{
+  "set": "fresh-gE",
+  "path": "v2/data/probe-set-fresh-gE.jsonl",
+  "rows": 60,
+  "sha256": "45a833baf5a6e42ecfc82ea6789464b0880b9a612a325d5b4792bf730141c03f",
+  "provenance": {
+    "produced_by": "v2/build_fresh_probes.py",
+    "method": "composed from fresh vocabularies; NOT sampled from the training sources",
+    "sources_excluded": [
+      "v2/data/format-compliance.jsonl",
+      "v2/data/refusal-retention.jsonl",
+      "v2/candidates/ultrachat-pairs.jsonl"
+    ],
+    "blind_to_checkpoint_behaviour": true,
+    "seed": 20260928,
+    "reason": "the registered sets were training rows (Muse objection, verified); owner decision 2026-09-28 22:02 CDT commissions fresh disjoint probes for the generalisation verdict"
+  },
+  "fields": {
+    "probe_id": "fresh-gE:0",
+    "prompt": "Write a Sigma rule for the macos platform whose logsource is Kubernetes audit log that detects RDP brute force. Return YAML only."
+  }
+}

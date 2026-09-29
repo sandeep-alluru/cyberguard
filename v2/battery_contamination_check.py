@@ -36,7 +36,20 @@ BATTERIES = {
     "gE": "v2/data/probe-set-gE.jsonl", "gF": "v2/data/probe-set-gF.jsonl",
     "gG-gsm8k": "v2/data/probe-set-gG-gsm8k.jsonl", "gG-ifeval": "v2/data/probe-set-gG-ifeval.jsonl",
     "gJ": "v2/data/probe-set-gJ.jsonl",
+    # the fresh instruments commissioned by the owner's 2026-09-28 decision: these must ALSO be disjoint, and
+    # they are what the generalisation verdict runs on. A fresh set that overlapped training would be the same
+    # defect wearing a new filename.
+    "fresh-gA": "v2/data/probe-set-fresh-gA.jsonl", "fresh-gB": "v2/data/probe-set-fresh-gB.jsonl",
+    "fresh-gE": "v2/data/probe-set-fresh-gE.jsonl", "fresh-gF": "v2/data/probe-set-fresh-gF.jsonl",
+    "fresh-gJ": "v2/data/probe-set-fresh-gJ.jsonl",
 }
+# Owner decision 2026-09-28 22:02 CDT, item 2 and 4: the sets that turned out to be training rows are
+# REPURPOSED as retention/recall checks — failure on a trained row is still a red flag, but the number is
+# never a generalisation claim. The fresh sets (commissioned by the same decision) plus the sets that were
+# already disjoint carry the generalisation verdict, and THEY must be strictly disjoint.
+GENERALISATION = {"fresh-gA", "fresh-gB", "fresh-gE", "fresh-gF", "fresh-gJ",
+                  "gA2", "gC", "gG-gsm8k", "gG-ifeval"}
+RETENTION = {"gA", "gB", "gE", "gF", "gJ"}
 TRAINING = {"armA": "v2/data/mixture/armA.jsonl", "armB": "v2/data/mixture/armB.jsonl"}
 HOLDOUT = "v2/holdout500.jsonl"
 
@@ -100,34 +113,45 @@ def main() -> int:
     print(f"  training prompts: armA {len(train['armA'])} unique, armB {len(train['armB'])} unique, "
           f"union {len(all_train)}; holdout {len(hold)} unique")
     print()
-    print(f"  {'battery':<11} {'n':>5} {'in armA':>8} {'in armB':>8} {'in train':>9} {'in holdout':>11}  verdict")
-    contaminated = []
+    print(f"  {'battery':<11} {'role':<15} {'n':>5} {'in armA':>8} {'in armB':>8} {'in train':>9}  verdict")
+    bad_general, retention_report = [], []
     for name, path in BATTERIES.items():
         ps, fld = prompts(path)
         if not ps:
             raise SystemExit(f"FATAL: read 0 prompts from {path} (field {fld!r}) - refusing to report PASS")
+        nt = sum(1 for p in ps if p in all_train)
         na = sum(1 for p in ps if p in train["armA"])
         nb = sum(1 for p in ps if p in train["armB"])
-        nt = sum(1 for p in ps if p in all_train)
-        nh = sum(1 for p in ps if p in hold)
-        bad = nt > 0
-        if bad:
-            contaminated.append((name, nt, len(ps)))
-        print(f"  {name:<11} {len(ps):>5} {na:>8} {nb:>8} {nt:>9} {nh:>11}  "
-              f"{'CONTAMINATED' if bad else 'disjoint'}")
-        if bad and a.examples:
-            shown = [p for p in ps if p in all_train][:a.examples]
-            for s in shown:
+        role = "generalisation" if name in GENERALISATION else "retention/recall"
+        if role == "generalisation":
+            bad = nt > 0
+            if bad:
+                bad_general.append((name, nt, len(ps)))
+            verdict = "CONTAMINATED (must be disjoint)" if bad else "disjoint"
+        else:
+            retention_report.append((name, nt, len(ps)))
+            verdict = f"recall coverage {nt}/{len(ps)} — NOT generalisation"
+        print(f"  {name:<11} {role:<15} {len(ps):>5} {na:>8} {nb:>8} {nt:>9}  {verdict}")
+        if role == "generalisation" and a.examples and nt:
+            for s in [p for p in ps if p in all_train][:a.examples]:
                 print(f"      e.g. {s[:96]!r}")
     print()
-    if contaminated:
-        print("  RESULT: FAIL — these batteries contain training rows verbatim, so their gates would measure")
-        print("          memorisation rather than the capability they claim:")
-        for name, nt, n in contaminated:
+    if retention_report:
+        print("  RETENTION/recall instruments (deliberately training rows — a FAILURE here is a red flag,")
+        print("  but the number is recall on memorised items and must never be reported as generalisation):")
+        for name, nt, n in retention_report:
+            print(f"    {name}: {nt}/{n} of its probes are training rows")
+    print()
+    if bad_general:
+        print("  RESULT: FAIL — a GENERALISATION instrument overlaps the training data, so that gate would")
+        print("          measure memorisation:")
+        for name, nt, n in bad_general:
             print(f"            {name}: {nt}/{n}")
         if not a.report:
             return 1
-    print("  RESULT: PASS — every frozen battery is prompt-disjoint from both training arms")
+        return 0
+    print("  RESULT: PASS — every GENERALISATION instrument is prompt-disjoint from both training arms; the")
+    print("          retention/recall instruments are labelled as such and carry no generalisation claim")
     return 0
 
 

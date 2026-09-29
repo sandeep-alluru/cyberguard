@@ -46,6 +46,14 @@ BATTERIES = {
     "gB": ("v2/data/probe-set-gB.jsonl", "G-B triage", 300),
     "gE": ("v2/data/probe-set-gE.jsonl", "G-E sigma", 60),
     "gA2": ("v2/data/probe-set-gA2.jsonl", "G-A2 defensive preservation", 60),
+    # FRESH GENERALISATION instruments (owner decision 2026-09-28 22:02 CDT, item 3): composed from new
+    # vocabularies and verified prompt-disjoint from both training arms, because the registered sets turned
+    # out to be training rows and could only ever report recall. These carry the generalisation verdict.
+    "fresh-gA": ("v2/data/probe-set-fresh-gA.jsonl", "G-A fresh (generalisation)", 1100),
+    "fresh-gB": ("v2/data/probe-set-fresh-gB.jsonl", "G-B fresh (generalisation)", 300),
+    "fresh-gE": ("v2/data/probe-set-fresh-gE.jsonl", "G-E fresh (generalisation)", 60),
+    "fresh-gF": ("v2/data/probe-set-fresh-gF.jsonl", "G-F fresh (generalisation)", 60),
+    "fresh-gJ": ("v2/data/probe-set-fresh-gJ.jsonl", "G-J fresh (generalisation)", 100),
 }
 SYSTEM = ("You are a cyber-defence assistant. Give accurate, actionable defensive security guidance "
           "covering detection, hardening, and incident response.")

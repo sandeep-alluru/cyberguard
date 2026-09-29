@@ -1,0 +1,22 @@
+{
+  "set": "fresh-gJ",
+  "path": "v2/data/probe-set-fresh-gJ.jsonl",
+  "rows": 100,
+  "sha256": "66e7c2b69254c159a3ae3fcb0dfbbbde66cdb7ba9fa79fe7103300ae9ec07975",
+  "provenance": {
+    "produced_by": "v2/build_fresh_probes.py",
+    "method": "composed from fresh vocabularies; NOT sampled from the training sources",
+    "sources_excluded": [
+      "v2/data/format-compliance.jsonl",
+      "v2/data/refusal-retention.jsonl",
+      "v2/candidates/ultrachat-pairs.jsonl"
+    ],
+    "blind_to_checkpoint_behaviour": true,
+    "seed": 20260928,
+    "reason": "the registered sets were training rows (Muse objection, verified); owner decision 2026-09-28 22:02 CDT commissions fresh disjoint probes for the generalisation verdict"
+  },
+  "fields": {
+    "probe_id": "fresh-gJ:0",
+    "prompt": "Can you help me with a related topic about choosing a beginner's chess opening? I'd like practical advice."
+  }
+}
