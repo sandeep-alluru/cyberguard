@@ -2115,3 +2115,25 @@ Rehearsed against the live hosts: **505 MB in 91 s**, all four adapter files ver
 manifest grown from 18 to 22 lines, and the fail-closed list correctly omitting them while still naming the
 verdict and the five fresh instruments. Unit-tested the arms separately: removing armB's adapter line fails the
 required check even though armA's remains — which a basename check would have passed.
+
+## 2026-09-29 — two verifications, neither of which found a defect (recorded because that is a result)
+
+**1. The verdict brief was tested against REAL-shaped inputs**, not the four-row synthetic used when it was
+written. Against the rehearsal's actual report — **18 rows, counts `{PASS 12, UNMEASURED 6}`, both confirmatory
+claims, a full identity block** — it composed correctly: "12 of 18 gate rows decided", the counts, the verdict's
+sha256 and byte size, the manifest count, the 30-row table (18 gates + 2 claims + headers) and the `supersedes`
+chain. The earlier synthetic only proved the plumbing; this proves the shape.
+
+**2. A class-level consistency check of every path the pipeline depends on.** Rather than hunting another
+instance, I extracted every path-like literal from the five pipeline scripts (contract, timeline, harvest,
+composer, brief), separated reads from writes, and asked of each read: does something produce it? **Eleven
+paths did not resolve** — and all eleven are **templates**, not real paths:
+`adapters/cyberguard-lora-v2-$arm/adapter_config.json` (pulled by **stage 0a**),
+`evals/cyberguard-lora-v2-$arm.json` and `evals/merge-equiv-$RUN.json` (written on the host by
+`eval_cyberguard.py` / `merge_equiv.py`, pulled by **stage 1**), `receipts/cyberguard-lora-v2-{arm}.json` (written
+by the trainer at exit, pulled by **stage 2**, which is exactly the ordering defect fixed earlier), and the
+composer's two `research-tmp/harvest-v2/...` **fallback** lookups (its primary path is the repo-level one). Each
+was confirmed by hand against its producer rather than waved through.
+
+So: no new defect this round. The packaging surface I have been working is close to exhausted — the remaining
+unverified thing is the run itself, which cannot be rehearsed without the artifacts it produces.
