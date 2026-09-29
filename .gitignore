@@ -10,3 +10,9 @@ v2/.selftest/
 *.gguf
 v2/data/mixture/
 v2/data/corpus/
+
+# review-round scratch: the rebuilt mixtures and change dumps each round produced. They are ~200 MB apiece and were
+# being committed on every `git add -A`, which is why .git reached 726 MB. The EVIDENCE for those rounds (their
+# receipts, logs and diffs) stays tracked; the regenerable bulk does not, matching the convention stated above.
+research-tmp/reviews/*_rebuild/
+research-tmp/reviews/*_changes.json
