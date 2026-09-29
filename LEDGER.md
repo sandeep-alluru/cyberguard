@@ -3306,3 +3306,27 @@ stale lock, skips anything more than five minutes past, and leaves future target
 is `exec`'d, so the running process holds its own file. Note also that the cheap-looking alternative — adding a
 comment to document the rule *in the running script* — would itself rewrite the file under the live process, which is
 the very hazard being documented. The rule lives here instead.
+
+## 2026-09-29 — self-review of my own additions in their final form
+
+Every change of mine that runs unattended has now been read in its shipped form, because several of them cannot be
+exercised end to end before the moment they matter (stage 8 needs a verdict; the timeline's contract step needs
+12:10).
+
+**Stage 8, the terminal brief** (`run_c24_contract.sh`): the redirection target `logs/` exists (20 files); `brc=$?` is
+captured on the line immediately after the call rather than after `tail`; the failure path uses `bad` without an
+`exit`, and that was checked rather than assumed — the contract has **no `FAILS` counter at all** (`bad` is purely a
+printer, and the exit code comes from explicit `exit N` calls in the stages), so a failed brief is informational and
+the contract still reports COMPLETE. The consequence is coherent rather than hidden: the timeline's harvest fallback
+skips (a manifest exists), the timeline composes the brief again and logs its refusal, and `verify_objective.py`'s
+element 5 fails on the missing brief — so the packaging failure surfaces in the verification even though it does not
+abort the measurement.
+
+**The timeline's contract step**: the two nested `if`s close with two `fi`s; `wait_until`'s return is deliberately
+ignored so the contract is unconditional; `_attempt_t0` is set only on the path that uses it; `rc=75` exits *before*
+the retry logic; and the packaging-only branch re-checks that the verdict and gate report are **newer than this
+attempt's start** before skipping the re-run, so a leftover from an earlier run cannot be packaged with this one's
+receipts.
+
+Nothing was edited while doing this: `arm_c24_timeline.sh` is running, and editing a running script in place is the
+hazard recorded in the previous entry.
