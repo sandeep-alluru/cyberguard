@@ -733,7 +733,19 @@ echo "  python3 v2/write_verdict_v2.py --report v2/gate-report-v2.json --evals e
 # ---------------------------------------------------------------- stage 7: harvest
 step 7 "harvest with per-file sha256"
 echo "  bash harvest-v2.sh   (prints HARVEST-COMPLETE only when every file is checksum-verified)"
-[ "$DRY" = 1 ] || { bash harvest-v2.sh | tail -3 || { bad "harvest failed"; exit 8; }; }
+# The harvest's own exit status is captured explicitly. The previous form was
+#     bash harvest-v2.sh | tail -3 || { bad "harvest failed"; exit 8; }
+# and I first read it as a masked failure - `||` binding to TAIL rather than to the harvest - which WOULD have
+# printed "C24 CONTRACT COMPLETE" over a missing deliverable. Tested before changing it: the script sets
+# `set -uo pipefail`, so the pipeline already propagated the harvest's status and the original was CORRECT. This
+# form is kept for two honest reasons only - the intent is explicit rather than dependent on a shell option three
+# lines up, and the full harvest output is retained in logs/harvest.log for diagnosis.
+if [ "$DRY" != 1 ]; then
+  bash harvest-v2.sh > logs/harvest.log 2>&1
+  hrc=$?
+  tail -3 logs/harvest.log
+  [ "$hrc" = 0 ] || { bad "harvest FAILED (exit $hrc) - the checksum-verified harvest is a deliverable (see logs/harvest.log)"; exit 8; }
+fi
 
 
 echo

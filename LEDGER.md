@@ -1880,3 +1880,23 @@ Removed rather than implemented: the stage labels are **not ordinal** (the 0x st
 paths do exist (the timeline's automatic single re-run; `--dry-run` for a preview). Verified: `--dry-run` prints
 all 14 stages and exits 0; `--stage 3`, `3` and `--bogus` each exit 64; both timeline invocations pass no
 arguments and are unaffected.
+
+## 2026-09-29 — a finding I retracted after testing it: the harvest was NOT masked
+
+Reading stage 7 I judged `bash harvest-v2.sh | tail -3 || { bad "harvest failed"; exit 8; }` to be a bug: `||`
+binds to `tail`, so a `HARVEST-INCOMPLETE` would be masked and the contract would print "C24 CONTRACT COMPLETE"
+over a missing deliverable — one of the five artifacts the objective names.
+
+**I tested it before recording it, and I was wrong.** The contract sets `set -uo pipefail` (line 15), so the
+pipeline's status is the last non-zero status and the harvest's failure already propagated correctly. Running the
+old form against a failing harvest exits 8, exactly as intended.
+
+The code was therefore left functionally equivalent, with two honest justifications rather than a claimed fix:
+the intent is now explicit instead of dependent on a shell option set three lines up, and the full harvest output
+is retained in `logs/harvest.log` for diagnosis. The comment in the script says this, including that I first read
+it wrongly — a false "we fixed a masked failure" note in the source would mislead the next reader more than the
+original code ever could.
+
+The episode is worth keeping for the same reason the pipeline bug keeps recurring: **`||` after a pipe is
+genuinely treacherous**, so the right response is to test the claim, not to trust the reading — and then to record
+what the test showed, including when it contradicts me.
