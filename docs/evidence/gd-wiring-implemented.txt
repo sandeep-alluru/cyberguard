@@ -1,0 +1,51 @@
+# G-D's gate input is now produced (rev 11, round 28)
+
+## THE GAP
+
+Round 17 built the offset/typed span scorer (`tools/gd_span_scorer_v3.py`), but **nothing fed it into the
+gate**, and the gate's required input was never produced by anything:
+
+* `v2/gates_v2.py` needs `extraction` = **≥100 per-document span-F1 values** plus `fabricated_ioc` =
+  `{rate, n}`;
+* the assembler emitted only `extraction_mean` — a v1 aggregate the gate explicitly REFUSES ("only a v1
+  mean is available; G-D needs >=100 per-document span-F1 values ... so a stale mean must not stand in
+  for it").
+
+So even WITH the human labels, G-D could not have been measured. The scorer existed and was called by
+nothing — the same shape of gap as the §8.1 classifier before D7.
+
+## IMPLEMENTED (reusing the verified scorer, no new tool)
+
+1. `tools/gd_span_scorer_v3.py` now returns `per_doc_f1` and, with `--out-gate-input PATH`, writes exactly
+   the shape the gate consumes:
+       {"extraction": [per-doc span-F1 ...], "fabricated_ioc": {"rate": ..., "n": ...}, ...}
+2. `v2/assemble_gate_inputs.py` reads that receipt (`CYBERGUARD_GD_RECEIPT`, then
+   `<extra-evals>/gd-receipt.json`, then `v3/evals/gd/gd-receipt.json`) and emits `extraction` +
+   `fabricated_ioc`, recording the source in `_provenance["G-D receipt"]`.
+3. **Fail-closed**: fewer than 100 documents, or a missing `extraction` list, means the fields are NOT
+   emitted and `_provenance["G-D receipt rejected"]` says why. The v1 mean is never accepted in place.
+
+## VERIFIED END TO END
+
+Synthetic case designed to exercise the bar that was previously unreachable — perfect extraction but a
+fabrication rate above the limit:
+
+    100 documents, exact typed spans, every 5th document inventing an IOC (rate = 0.20)
+
+    scorer   -> wrote gate input (100 docs); extraction length 100; fabricated_ioc {n:100, rate:0.2}
+    assembler-> extraction length 100; fabricated_ioc {n:100, rate:0.2}; provenance records the receipt
+    gate     -> G-D extraction: **FAIL**
+                {"mean_span_f1": 1.0, "bootstrap_ci95": [1.0,1.0], "lower_95": 1.0,
+                 "fabricated_ioc_rate": 0.2}
+
+That is exactly the hole review F05 identified: "a perfect span-F1 with every document inventing an
+indicator would have passed." It no longer passes.
+
+`gates_v2.py --selftest`: PASS. Both files staged to spark-40ee and hash-verified.
+
+## WHAT REMAINS FOR G-D
+
+DATA, not code — and specifically the HUMAN half: the 100 pinned documents still carry empty `labels`
+(500 rows, 500 empty). With labels present, the remaining path is: run the model over the 100 documents,
+score with `gd_span_scorer_v3.py --out-gate-input`, assemble, gate. Owner decision D4 (fund the
+annotation, or retire the gate) is unchanged.

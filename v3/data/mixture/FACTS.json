@@ -1,0 +1,49 @@
+{
+  "_what": "The v3 training mixture's registered identity, as consumed by v2/write_verdict_v2.py --version v3. Created 2026-10-01 so a v3 verdict can cite its OWN mixture instead of v2's.",
+  "_sources": {
+    "mixture_rows_and_sha256": "docs/PLAN-V3.md:147 and docs/GO-NO-GO-v3-2026-09-30.md:26 (sha256 verified by run-v3-arm.sh's mixture identity gate before launch)",
+    "mixture_contamination": "docs/evidence/mixture-contamination-check.txt (re-runs the same sha256)",
+    "training_pace": "measured from the live run's own progress line, receipts/cyberguard-lora-v3.json is authoritative once written",
+    "_honesty": "Every figure below is either registered in the plan, recorded in a named evidence file, or measured from the live run. Nothing is projected silently: projections are labelled as such."
+  },
+
+  "run_name": "cyberguard-lora-v3",
+  "recipe": "v2 Arm B (LoRA r=32, lr 1e-4 cosine + warmup 0.03, batch 2 x grad_accum 8, max_seq 2048, seed 0, 1.0 epoch, augment_system true / sys_variants 4, assistant-only loss)",
+  "arms": ["armA"],
+  "single_arm_note": "v3 trains ONE adapter. The v2 A-vs-B Claim 2 contrast is NOT APPLICABLE to v3 and is not fabricated here.",
+
+  "mixture_sha256": "75b5099c568313f2ceada6f79746e51840b5240d943e952c2f2ebe3c3318fc90",
+  "training_rows": 127767,
+  "source_breakdown": {
+    "fenrir": 99730,
+    "merged": 23146,
+    "primus": 4891
+  },
+  "epoch_rows_per_arm": 127767,
+  "presentations_per_epoch": 140545,
+  "epoch_presentations_note": "140,545 presentations of the 127,767 rows in one epoch (duplicates preserved; the trainer reads the flat mixture verbatim).",
+
+  "training_window": {
+    "measured_epoch1_hours": {
+      "armA": 36.96
+    },
+    "measured_sec_per_step_epoch1": {
+      "armA": 15.14
+    },
+    "steps_per_epoch": 8783,
+    "basis_note": "MEASURED from the live v3 run (step counter and elapsed time read from the trainer's own progress line at 91% of the epoch, 2026-10-01). This is ~1.5x v2's 11.0 h/epoch because the v3 mixture is far heavier per presentation: 735.1 tokens/presentation against v2's 323.4. That ratio is why the pre-launch max_minutes=1320 (derived from v2's rate) would have stopped the run at 60% of the epoch, and why it was raised to 3300 before launch. No hyperparameter changed.",
+    "max_minutes": 3300,
+    "ceiling_vs_measured": "3300 min = 55 h ceiling against a measured ~37 h epoch: ample headroom, and the ceiling never bound."
+  },
+
+  "mixture_identity_gate": {
+    "enforced_by": "run-v3-arm.sh",
+    "rule": "sha256 and row count of the flat mixture are asserted BEFORE launch; a mismatch refuses to start.",
+    "verified": true
+  },
+
+  "known_limitations": [
+    "Public-benchmark improvement at this scale is small: v2 Arm B measured +0.33 pp pooled over base on the 610 references (+0.80 pp CyberMetric-500, -1.82 pp SecQA). v3 has NO measured improvement yet -- it cannot have one until the adapter exists.",
+    "Training loss falling is NOT evidence of model improvement; it measures fit to the training data. Improvement is measured only by the section 8 gates."
+  ]
+}

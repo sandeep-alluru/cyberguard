@@ -1,0 +1,1451 @@
+{
+ "built": "2026-09-30T09:23:54",
+ "coverage": 1.0,
+ "cves": {
+  "CVE-1999-0171": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0181": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0212": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0278": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0431": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0437": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0668": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0782": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0786": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0803": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0852": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0878": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-0890": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1032": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1034": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1105": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1160": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1227": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1305": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1362": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-1999-1537": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0009": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0091": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0145": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0162": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0246": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0311": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0447": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0455": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0461": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0462": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0513": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0552": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0594": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0637": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0676": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0706": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0781": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0854": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0862": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0886": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0906": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0913": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0948": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0974": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-0994": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-1015": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-1219": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2000-1232": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0078": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0134": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0221": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0227": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0240": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0517": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0522": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0559": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0565": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0607": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0714": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0750": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0760": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0764": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0795": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0871": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0874": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-0877": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1035": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1067": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1068": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1082": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1177": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1210": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1252": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1324": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1329": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1459": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1508": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2001-1525": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0072": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0214": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0272": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0300": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0324": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0420": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0568": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0580": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0587": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0669": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0683": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0725": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0727": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0738": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0894": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0914": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0944": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0954": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0990": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-0995": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1042": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1061": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1089": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1123": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1362": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1442": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1482": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1510": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1519": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1557": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1584": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1722": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1744": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1758": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1788": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1803": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1840": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1879": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1884": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-1991": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-2022": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-2086": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2002-2257": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0007": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0067": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0126": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0129": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0268": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0430": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0446": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0450": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0579": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0656": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0659": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0805": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-0879": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1074": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1118": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1182": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1237": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1259": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1315": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1343": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1348": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1451": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1500": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2003-1520": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0036": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0167": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0216": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0236": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0298": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0300": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0330": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0518": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0606": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0617": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0628": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0672": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0704": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0809": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0927": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0937": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-0997": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1049": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1074": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1075": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1101": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1218": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1287": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1307": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1317": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1350": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1359": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1398": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1406": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1452": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1466": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1480": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1502": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1554": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1565": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1640": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1644": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1652": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1812": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1834": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-1947": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2004": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2059": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2093": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2112": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2154": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2160": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2233": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2244": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2252": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2285": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2311": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2342": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2380": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2406": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2410": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2423": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2637": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2639": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2678": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2709": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2710": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2004-2718": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0013": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0050": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0090": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0288": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0296": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0340": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0353": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0565": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0592": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0598": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0671": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0733": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-0774": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1124": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1185": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1312": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1415": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1421": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1436": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1443": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1483": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1502": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1563": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1707": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1717": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1816": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-1933": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2054": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2075": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2084": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2124": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2127": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2169": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2207": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2285": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2289": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2407": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2434": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2543": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2545": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2596": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2597": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2615": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2656": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2660": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2688": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2697": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2715": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2783": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2937": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2945": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-2981": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3016": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3050": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3060": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3068": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3094": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3191": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3195": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3323": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3411": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3429": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3434": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3468": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3502": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3516": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3544": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3560": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3771": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3919": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-3988": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4061": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4079": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4228": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4242": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4259": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4359": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4364": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  },
+  "CVE-2005-4415": {
+   "checked": true,
+   "exists": true,
+   "total": 1
+  }
+ },
+ "n_checked": 288,
+ "n_exists": 288,
+ "n_probe_cves": 288,
+ "probe_set": "v2/data/probe-set-gC.jsonl",
+ "source": "nvd-cve-2.0-api"
+}

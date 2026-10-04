@@ -1,0 +1,32 @@
+# Mixture contamination check vs the ACTUAL eval set (CyberGuard v3, 2026-09-30)
+
+Why: PLAN-V3 §3 claims the cleaned sources are contamination-free vs CyberMetric-500 + SecQA, but
+that was measured on the **sources** during prep. This measures the **built training artifact**
+against the same held-out set, at the strict near-duplicate threshold — the same three tests v2's
+builder uses (normalized exact match, 0.80 Jaccard, 0.80 containment on 5-gram shingles).
+
+**Held-out set: CyberMetric-500 (500 Q) + SecQA test (110 Q) = 610 items** — this is the set
+PLAN-V3 §8.6 scores the held-out quality gate on. It is **not** v2's `holdout500.jsonl`, which v3
+does not use; that distinction is why the relevant check is against the benchmarks.
+
+File: `data/v3/mixture/mixture-v3-no-trail.jsonl`
+sha256: 75b5099c568313f2ceada6f79746e51840b5240d943e952c2f2ebe3c3318fc90
+
+## Result
+
+| test | hits |
+|---|---|
+| mixture rows scanned | 140,545 |
+| exact matches | **0** |
+| near-duplicate (0.80 Jaccard) | **0** |
+| containment (0.80) | **0** |
+| **verdict** | **CONTAMINATION-FREE** |
+
+## Interpretation
+
+This also validates the stage-policy decision **not** to re-apply v2's `near_holdout()` removal. That
+stage filtered against v2's own holdout split; v3 evaluates on the public benchmarks, and the built
+mixture is clean against them at the same strict threshold, so skipping the stage introduced **no
+leakage**. Counts are therefore preserved exactly (140,545) without compromising the §8.6 gate — the
+decision is now evidence-backed in both directions: it protects 64.8 % of `merged` from a spurious
+collapse, and it does not leak.

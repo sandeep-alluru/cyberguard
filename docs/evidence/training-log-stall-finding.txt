@@ -1,0 +1,47 @@
+# CORRECTION: the stdout loss log stalled at step ~1440 (found rev 11, round 39)
+
+## THE FINDING
+
+The trainer's stdout loss logging has not advanced since roughly **step 1440 (epoch 0.164)**, while the
+run itself continues normally.
+
+Evidence:
+* the log contains **144** physical lines with a loss dict, and the newest parses to `epoch 0.164`
+  (`loss 0.8419, num_tokens 1.306e+07`);
+* the newest loss dict is followed, **on the same physical line** (tqdm separates updates with `\r`, not
+  `\n`), by progress bars running all the way to `1895/8783`;
+* so no new loss dict has been written for roughly **455 steps (~110 minutes)**;
+* the file is NOT rotated: it is the only training log, its mtime is current, and pid 1189450 holds BOTH
+  fd1 and fd2 open on it — so the writes that ARE arriving are tqdm's stderr progress updates;
+* `logging_steps=10` and `report_to=[]`, so the Trainer should be emitting a loss line every 10 steps.
+
+Cause not definitively established (stdout block-buffering is the most likely mechanism, but the ~110-minute
+gap is longer than a simple buffer-fill would explain). Recorded as observed behaviour rather than
+explained away.
+
+## WHY IT MATTERS HERE — A CORRECTION TO MY OWN REPORTING
+
+My periodic "training healthy / verified learning" checks have been parsing THIS stdout log and comparing
+its first and last quartiles. Those checks therefore describe data only up to **epoch 0.164**, not the
+current state. I reported "verified learning, loss 1.2283 -> 0.8873" in rounds 9, 38 and 39 using a log
+that had already stalled — the numbers were real but **stale**, and I presented them as current. That is
+exactly the class of mistake this session has been hunting elsewhere: plausible, unchallenged, and wrong
+about recency.
+
+What remains valid from those checks: the process is alive (pid 1189450), the step counter advances
+(1895/8783), and the GPU is at 95 %, all read from the progress bar and nvidia-smi rather than the loss log.
+
+## WHAT IS NOT AFFECTED
+
+The training RECEIPT is written from `trainer.state.log_history` — an in-memory list — not from stdout:
+
+    train_cyberguard.py:326   "log_history": [ ... for entry in trainer.state.log_history ]
+
+So the delivered receipt's loss curve is unaffected by a stalled stdout stream. The authoritative
+learning check therefore happens **post-training, from the receipt**, not from the live log.
+
+## ACTION
+
+Add to the runbook's Step 0: after the run finishes, verify the receipt's `log_history` covers the whole
+epoch (it should have ~878 entries at `logging_steps=10`, i.e. one per 10 steps) and that `epoch` reaches
+1.0. A short or truncated `log_history` would indicate a real logging failure; a quiet stdout log does not.

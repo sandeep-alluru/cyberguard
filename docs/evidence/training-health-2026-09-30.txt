@@ -1,0 +1,20 @@
+# Training health check — v3 run, 2026-09-30 (rev 11)
+
+Purpose: 'supervise' must mean verifying the run is LEARNING, not merely that a process is alive.
+A diverging or NaN-producing run would waste ~30 GPU-hours and yield an unusable adapter.
+
+Parsed 144 structured loss entries from the trainer log (epoch 0.0011 -> 0.1640):
+  NaN / Inf entries        : 0
+  loss, first quartile     : 1.2283
+  loss, last quartile      : 0.8873      -> DECREASING (learning)
+  loss min / max           : 0.7927 / 2.1950
+  mean_token_accuracy      : 0.6753 -> 0.7482   -> IMPROVING
+  grad_norm min/max/mean   : 0.385 / 2.940 / 0.540 -> STABLE (no spikes)
+
+v2 Arm B receipt for comparison (the recipe this run reuses):
+  train_loss 0.778863 | mean_token_accuracy 0.784839 | epoch 0.820584
+v3 at epoch 0.164 sits at loss 0.887 / token-acc 0.748, on a downward, stable trajectory that is
+consistent with reaching the v2 range by the end of the epoch. No intervention indicated.
+
+Interpretation limit: loss and token accuracy are TRAINING signals. They say the optimiser is
+working, not that the model is safe or capable - that is what the section 8 gates are for.

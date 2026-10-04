@@ -1,0 +1,52 @@
+# §5 hyperparameter / stop-rule citation verification — CyberGuard v3 (2026-09-30)
+
+Why: §5 is the "measured, not tuned" baseline, so every value it cites must exist in the receipt it
+names — and §5.2's stop rule is defined on a logged loss series that must actually be present. Both
+were checked against `receipts/cyberguard-lora-v2-armB.json`.
+
+## Config citations — all verified
+
+| plan value | receipt (`config`) | verdict |
+|---|---|---|
+| max_seq 2048 | 2048 | OK |
+| epochs 1.0 | 1.0 | OK |
+| lr 1e-4 | 0.0001 | OK |
+| batch / grad_accum 2 / 8 | 2 / 8 | OK |
+| lora_r 32 | 32 | OK |
+| seed 0 | 0 | OK |
+| max_steps -1 | -1 | OK |
+| augment_system true, sys_variants 4 | true, 4 | OK |
+
+## Metric citations — all verified
+
+| plan value | receipt (`train_metrics` / top level) | verdict |
+|---|---|---|
+| train_loss 0.7789 | **0.778863** | OK |
+| mean_token_accuracy 0.7848 | **0.784839** | OK |
+| epoch 0.820584 (used in the 1.942 derivation) | **0.820584** | OK |
+| wall 34,255.3 s | **34255.3** | OK |
+| rows 81,074 | `rows_total` = 81,074, `rows_train` = 81,074, `rows_eval` = 0 | OK |
+| logged losses 0.707653–0.888986 | min **0.707653**, max **0.888986** | OK |
+
+## §5.2 stop rule is defined on a series that exists
+
+The rule is "median of the first 30 logged observations after warmup; halt if the median of the
+trailing 30 exceeds 2× baseline for 6 consecutive observations". The receipt's `log_history` contains
+**416 entries, 415 with a loss**, and the **step delta is exactly 10** throughout (10, 20, 30, …,
+4158) — so "every 10 optimizer steps" is real, and 415 observations comfortably support a 30-observation
+baseline plus a 6-consecutive halt condition. `grad_norm` is logged on all 415. The rule is
+reproducible from the receipt, which is what review pass-1 finding 9 demanded.
+
+## One contradiction found and fixed
+
+The §5 table's `max_minutes` row said the prior value was **1080**, while §12's own pass-1 disposition
+says **570→1320**, and the receipt records **570.0**. The table cell was wrong and has been corrected
+to cite 570.0 (receipt-verified). This is the class of stale cross-reference that review pass-5
+Minor 1 was about, so it is recorded rather than silently edited.
+
+## Independent integrity cross-check
+
+The receipt pins `arms_sha256 = 61c94262e3c483215fc17a1c7bbb0c4d347969806ffcc8fd955d9af28078091c`.
+The on-disk `v2/data/mixture/armB.jsonl` hashes to exactly that value, and the staging manifest in
+`docs/evidence/sft-staging-manifest.txt` recorded it independently. So the mixture artifact the v2
+receipt attests to is the artifact present on disk — the reuse chain is intact end to end.

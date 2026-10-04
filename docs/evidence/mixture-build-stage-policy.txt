@@ -1,0 +1,33 @@
+# Mixture-build stage policy — evidence (CyberGuard v3, 2026-09-30)
+
+Question: which of v2's mixture-build stages may be re-applied to the v3 corpus?
+Method: import v2/build_mixture.py and call its dedupe() on the real v3 inputs.
+
+## Result
+
+| pool | rows in | after v2 dedupe() | removed | mechanism |
+|---|---|---|---|---|
+| v2/data/refusal-retention.jsonl | 1,200 | **1,198** | 2 | 0 exact, 2 near-dup |
+| v2/data/format-compliance.jsonl | 1,300 | **1,300** | 0 | 0 exact, 0 near |
+| v2/candidates/ultrachat-pairs.jsonl | 600 | 600 | 0 | 0 exact, 0 near |
+| data/v3/sft/merged.jsonl | 23,146 | **8,157** | **14,989 (64.8%)** | 2,324 exact, 12,665 near |
+
+## Reading
+
+- The refusal result (1,200 -> 1,198) **exactly reproduces** v2's pinned FACTS.json
+  (`refusal_unique_rows = 1198`, 700 offensive-refusal + 498 unknown-answer), so the v2 mechanism IS
+  applied to the authored sets and the plan's 9,584 slots / 140,545 total are reproducible.
+- The merged result is the reason the corpora must NOT be re-deduped. v2's dedupe collapses on the
+  PROMPT, and merged's prompts share a CVE-analysis template while the CVEs underneath differ
+  (PREP_SUMMARY.md records the same for primus). Collapsing them would delete two-thirds of a source
+  and move the epoch by ~15,000 presentations — a silent change to the training mixture.
+
+## Policy adopted (written into PLAN-V3 §2 pre-flight)
+
+- Three public corpora: enter the mixture **exactly as prepped** — no near-dup collapse, no
+  near-holdout removal, no boundary/defect dropping, no answer clipping; role-mapping only
+  (`messages` -> flat `{system?,user,assistant}`). Counts are the SFT_MANIFEST.md counts.
+- Authored sets: through the v2 mechanism (refusal -> 1,198, format -> 1,300). Replay capped at 594.
+- Answer clipping is not applied at build time (it changes content without changing counts); §5.3
+  measures real truncation at max_seq 2048.
+- Any deviation is a build failure, and the receipt reports realised per-source counts.

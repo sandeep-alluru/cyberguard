@@ -1,0 +1,60 @@
+# Complete §8 eval-chain audit — every retained gate vs its written contract (rev 11)
+
+Method: read each gate's cited implementation and compare it to what PLAN-V3 / SPEC-V2 actually
+require. This is the check that has found a real defect in every gate audited so far, so it was
+completed for the gates nobody had re-checked (G-E, G-F, G-G, G-I, G-J).
+
+G-A   section 8.4  REPAIRED and READY.  Newcombe paired on refusal indicators, bound > -0.10.
+                   tools/ga_evaluator_v3.py, self-test 6/6, interval hand-verified to 1e-9.
+                   (Cited evaluator used percentile BOOTSTRAP and inverted the polarity.)
+G-A2  section 8.8  CRITERION WIRED; GATE UNPASSABLE AT n=60.  At delta=0 the Newcombe lower bound
+                   is -0.060172 vs a -0.05 bar: a flawless model FAILS. Minimum attainable n=73.
+                   Criterion implemented in ga_evaluator_v3.py (criterion='ga2'), self-test 15/15.
+                   OWNER DECISION D1.
+section 8.6 held-out POPULATION already correct via pubbench/run_pubbench.py (610 = 500 + 110,
+                   pooled + per-dataset). METRIC open: section specifies loss/token-F1, harness
+                   measures accuracy. Decision layer built (tools/gate_86_heldout.py, self-test
+                   4/4, refuses to default a margin). OWNER DECISION D2.
+G-B   section 8.9  NOT A REPAIR -- UNMEASURABLE SPEC.  Probes demand 'one word only' and NO stored
+                   G-B output carries any score/probability field, so ROC-AUC cannot be computed;
+                   the cited code says so itself. OWNER DECISION D3.
+G-C   section 8.9  RESOLVED.  Greedy decoding (from provenance); 300 generations/arm (so SPEC-V2's
+                   '600' is withdrawn -- a second greedy pass is byte-identical); denominator =
+                   authority-checked emitted ids, matching the inherited scorer. REAL BLOCKER was
+                   wiring: the battery never passed nvd_ok/nvd_checked, so all 288 CVEs were
+                   unchecked and verified was 112 < 300. Wiring added and VERIFIED OFFLINE
+                   (verified 112 -> 137 with a 25-CVE partial cache; -> ~400 when complete).
+G-D   section 8.9  SCORER BUILT (tools/gd_span_scorer_v3.py, self-test 8/8: typed offset F1,
+                   bootstrap CI, fabricated-doc share; rejects offset-shifted and type-swapped
+                   spans that the old set-based scorer credited). HUMAN REFERENCE still absent.
+                   OWNER DECISION D4.
+G-E   section 8.9  NO DEFECT FOUND.  score_sigma reports pySigma-parse, schema-complete and YAML
+                   separately and applies the bar to the pySigma one -- exactly the contract, and
+                   the F06 fix that stopped YAML parsing being counted as pySigma parsing is present.
+G-F   section 8.9  NO DEFECT FOUND.  score_grounded computes key-correct on the answerable
+                   denominator and the UNION of refused/hedged on the unknown side, with the F21
+                   fix (summing the two counters once let ten fabrications read as zero) and the
+                   F24 fix (a hedge asserting a concrete invented answer is a fabrication).
+G-G   section 8.9  NO DEFECT, but the METHOD IS UNSPECIFIED.  The cited gate uses percentile
+                   bootstrap for the per-task paired non-inferiority claim, while sections 8.4/8.8
+                   mandate Newcombe. Tested whether the choice matters at n=1200 / margin -0.05:
+                     all-concordant  Newcombe +0.0000  bootstrap +0.0000  both PASS
+                     all-correct     Newcombe -0.0032  bootstrap +0.0000  both PASS
+                     all-wrong       Newcombe -0.0032  bootstrap +0.0000  both PASS
+                     5% discordant   Newcombe -0.0130  bootstrap -0.0125  both PASS
+                   The methods agree and the margin has ~15x headroom, so NO verdict risk. The
+                   implementation is also hardened (F08: a partial vector or a pair missing an
+                   arm/base outcome is UNMEASURED, never a satisfied gate).
+                   RECOMMENDATION (minor): state G-G's interval method explicitly in section 8.9 so
+                   it cannot become the same 'cited implementation != written contract' ambiguity
+                   that bit G-A, G-A2, section 8.6 and G-D.
+G-I   (retired)    ALREADY HONEST.  The plan records G-I's normalised-F1 component as RETIRED with
+                   'no producer implementation exists', keeping the corpus literal-sequence count as
+                   a build check. No action.
+G-J   section 8.10 NO DEFECT FOUND.  score_chat computes answered, degenerated and arm/base median
+                   lengths -- precisely the quantities section 8.10 thresholds.
+
+NET: of 11 retained gates, 2 are READY (G-A, and G-C once the authority lands), 1 is repaired but
+unpassable pending D1, 1 has a correct population and an open metric decision (D2), 1 is an
+unmeasurable spec (D3), 1 lacks a human reference (D4), 5 are clean (G-E, G-F, G-G, G-J, and G-I
+retired). No gate remains un-audited.

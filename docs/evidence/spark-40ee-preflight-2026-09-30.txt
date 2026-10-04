@@ -1,0 +1,42 @@
+# spark-40ee pre-flight evidence — CyberGuard v3
+# captured 2026-09-30 01:01:43 CDT by supervisor (read-only ssh; no writes to the host)
+# note: the reviewer's sandbox could not resolve the host (tailnet-only name); this is the
+#       timestamped transcript the plan's §2 pre-flight cites.
+
+--- host ---
+spark-40ee
+clawerdigi2
+ 01:01:44 up 6 days,  8:33,  1 user,  load average: 0.18, 0.09, 0.01
+--- gpu ---
+NVIDIA GB10, 0 %, [N/A]
+--- disk ---
+/dev/nvme0n1p2  3.7T  302G  3.2T   9% /
+--- base model ---
+config.json
+generation_config.json
+LICENSE
+merges.txt
+model-00001-of-00003.safetensors
+model-00002-of-00003.safetensors
+model-00003-of-00003.safetensors
+model.safetensors.index.json
+README.md
+tokenizer_config.json
+tokenizer.json
+vocab.json
+--- env file ---
+export CYBERGUARD_ROOT=/home/clawerdigi2/cyberguard
+export HF_HOME=/home/clawerdigi2/cyberguard/hf
+export HF_HUB_CACHE=/home/clawerdigi2/cyberguard/hf/hub
+export CYBERGUARD_VENV=/home/clawerdigi2/venvs/sglang
+export CYBERGUARD_GPU=0
+--- interpreter ---
+torch 2.13.0+cu130 cuda True
+transformers 5.12.1 peft 0.21.0
+--- trainer present ---
+/home/clawerdigi2/cyberguard/run-v2-arm.sh
+/home/clawerdigi2/cyberguard/train_cyberguard.py
+--- sft corpus staged? ---
+NOT STAGED (pre-flight gap)
+--- trainer running? ---
+1181889 bash -c  echo "--- host ---"; hostname; whoami; uptime echo "--- gpu ---"; nvidia-smi --query-gpu=name,utilization.gpu,memory.total --format=csv,noheader 2>/dev/null || echo "n/a" echo "--- disk ---"; df -h ~ | tail -1 echo "--- base model ---"; ls ~/cyberguard/models/Qwen3-4B-Instruct-2507 echo "--- env file ---"; cat ~/.cyberguard-env echo "--- interpreter ---"; ( . ~/.cyberguard-env; "$CYBERGUARD_VENV/bin/python" -c "import torch,transformers,peft;print(\"torch\",torch.__version__,\"cuda\",torch.cuda.is_available());print(\"transformers\",transformers.__version__,\"peft\",peft.__version__)" ) echo "--- trainer present ---"; ls ~/cyberguard/train_cyberguard.py ~/cyberguard/run-v2-arm.sh 2>/dev/null echo "--- sft corpus staged? ---"; ls ~/cyberguard/data/v3/sft 2>/dev/null || echo "NOT STAGED (pre-flight gap)" echo "--- trainer running? ---"; pgrep -af train_cyberguard.py || echo "none" 

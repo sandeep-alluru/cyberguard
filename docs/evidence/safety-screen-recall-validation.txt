@@ -1,0 +1,21 @@
+# Safety-screen recall validation — CyberGuard v3 (2026-09-30)
+
+Purpose: before proposing an exclusion screen for the A7 unsafe finding, measure whether it
+actually catches the known-bad rows. Test set = the 11 hand-verified unsafe rows from the A7
+audit plus 9 specificity controls (answers carrying refusal language, expected unsafe=false).
+Screen under test: tools/safety_screen_model.py's narrow question (answers only, blinded, no prompt).
+
+Result:
+  positives (hand-verified unsafe, n=11): 9 flagged  -> recall 0.82
+  controls  (refusal answers, n=9)      : 0 flagged  -> false-positive rate 0.00
+  missed positive ids: k3044, k6969
+
+Comparison (same test, measured earlier):
+  cyberguard_contract.teaches_attack_production (deterministic): 0/11 recalled -> unusable
+
+Interpretation: the model-based screen is usable but not complete. At the measured 5.5% base
+rate an 82%-recall screen implies ~1.0% residual unsafe content, which would sit inside the
+A7 2% bound -- but this must be confirmed by re-auditing the filtered block, and the recall
+estimate rests on only 11 positives (wide CI), so the screen cannot be assumed sufficient.
+
+Raw model output: /tmp/screen-recall-out.txt (session-local)

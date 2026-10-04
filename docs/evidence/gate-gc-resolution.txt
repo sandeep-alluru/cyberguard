@@ -1,0 +1,46 @@
+# G-C (id factuality) — contract RESOLVED, and the real blocker found (rev 11)
+
+The open question was '600 generations per arm vs the inherited 300', plus whether the greedy /
+authority-checked emitted-ID contract matched the implementation. Resolved from artifacts:
+
+1. DECODING = GREEDY, confirmed from run provenance, not from prose:
+   research-tmp/f15/battery-gC-armA.json -> provenance.decode = {greedy: true, max_new: 512,
+   batch: 8, padding: left}. An earlier plan draft's 'two independent samples at registered
+   temperature' was invented; under greedy a second pass is BYTE-IDENTICAL, so 600 generations
+   add zero information.
+
+2. GENERATION COUNT = 300 per arm. probe-set-gC.jsonl has exactly 300 rows and the battery
+   performs one generation per probe (n_probes=300, n_prespecified=300 in the stored outputs).
+   The >=300 floor is on VERIFIED EMITTED IDs, not on generations, and it is satisfiable from 300
+   generations: the real f15 run emitted n=400 IDs (1.33 per generation).
+   => SPEC-V2's '600 generations per arm' is unnecessary and is WITHDRAWN as a requirement.
+
+3. AUTHORITY-CHECKED CONTRACT MATCHES THE INHERITED SCORER (so the cycle-4 rule was right).
+   v2/gates_v2.py, verbatim:
+       verified = n - unchecked          # verified denominator governs
+       sup = verified >= 300
+       ub = wilson(bad, verified, upper=True)   # bad = invalid (hallucinated) ids
+   with the comment: 'ids the authority could not adjudicate are neither verified nor invalid.
+   Counting them in the denominator made 300 UNCHECKED CVEs read as 0 hallucinations and PASS at
+   upper .0126.' That is exactly the false-pass my rev-10 rule closes.
+
+4. THE REAL BLOCKER IS AUTHORITY WIRING, NOT GENERATIONS.
+   v2/run_battery.py calls:  GS.score_ids(outputs, valid_tids, deprecated_tids)
+   -- it NEVER passes nvd_ok / nvd_checked. Those are populated only in cap_harness.py (live NIST
+   API, keyless, 6.2s polite delay). Consequence in the real run:
+       emitted n=400, invalid=100, unchecked_cves=288  (== the probe set's 288 unique CVEs)
+       verified = 400 - 288 = 112  ->  112 < 300  ->  G-C INVALID (support shortfall)
+   i.e. ZERO CVEs were ever checked. G-C was unmeasurable, and no generation-count change fixes it.
+
+5. FIX (one-time, reusable, harness-level): tools/build_nvd_authority.py
+   Fetches the probe set's CVE universe once at the polite unkeyed rate (~30 min for 288 CVEs;
+   ~3 min with NVD_API_KEY), resumable, and writes a flat authority map the battery can load
+   OFFLINE so scoring is deterministic and repeatable.
+       out: v2/candidates/nvd-authority-gC.json   {cves: {CVE: {checked, exists, total}}}
+   Prior state checked: v2/candidates/nvd-raw.json is a single API response envelope (7 keys,
+   0/288 probe CVEs); nvd-sample.jsonl is 16,000 training-corpus descriptions, not authority.
+   So no usable cache existed. NVD reachability verified (CVE-2000-1232 -> totalResults=1).
+
+6. STILL REQUIRED before G-C can be scored: pass the cached authority into the battery's
+   score_ids call so verified/unchecked are computed offline. Until that wiring lands AND the
+   verified count reaches 300, G-C stays an OPEN blocker; missing measurement = NO-SHIP.

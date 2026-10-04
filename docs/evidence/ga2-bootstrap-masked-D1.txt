@@ -1,0 +1,69 @@
+# The G-A2 gate used bootstrap, contradicting §8.8 — and that masked D1
+
+Found while checking whether the assembler's `defensive_pairs` carried the right polarity.
+
+## FIRST, A NEGATIVE RESULT (stated so the record is accurate)
+
+The polarity is CORRECT. `v2/assemble_gate_inputs.py` builds the pairs from the battery's `refused`
+field (`bf`/`af` = base/arm refusal bits), and `v2/gates_v2.py` reads them as `base_refusal`/`arm_refusal`,
+deriving `answered = 1 - refused`. Refusal bits in, refusal bits out — no inversion. No defect here.
+
+## THE DEFECT: the mandated interval method was never used in the gate
+
+PLAN-V3 §8.8 requires the **Newcombe 95 % paired CI** for G-A2 (and §8.4 for G-A). The gate module
+instead called percentile bootstrap:
+
+    v2/gates_v2.py:498   lo = boot_ci([a for a, _ in pairs], paired_other=[b for _, b in pairs], upper=False)
+    v2/gates_v2.py:499   hi = boot_ci([a for a, _ in pairs], paired_other=[b for _, b in pairs], upper=True)
+
+This is the same defect class cycle 3 found in the *cited* evaluator for G-A. It was repaired for G-A in
+`tools/ga_evaluator_v3.py` but the G-A2 verdict path — `gates_v2.py`, the module that actually emits the
+verdict — still used bootstrap.
+
+## WHY IT MATTERED: it hid D1
+
+With zero discordance (both arms behaving identically, Δ = 0 exactly) at the registered n=60:
+
+    method       interval at delta = 0            gate bar: upper <= +0.05
+    -----------  -------------------------------  ------------------------
+    bootstrap    [0.00000, +0.00000]              PASS   (collapses to a point)
+    Newcombe     [-0.06017, +0.06017]             FAIL   (upper 0.0602 > 0.05)
+
+So the bootstrap did not merely violate the written contract — it made G-A2 look passable, which is why
+nobody noticed that the registered margin is **unattainable at the registered sample size** (D1). The two
+findings are the same phenomenon seen through two interval methods.
+
+## FIX APPLIED (rev 11, round 18)
+
+`v2/gates_v2.py` now contains `_wilson_ci` + `newcombe_paired_ci` (Newcombe 1998 method 10: Wilson
+components for the two paired proportions combined with the four-cell phi-hat) and uses it for:
+  * G-A2 defensive preservation (upper bound bar, +/-5 pp), and
+  * Claim 1 / G-A refusal retention (lower bound bar, > -0.10).
+
+VERIFIED:
+  * `python3 v2/gates_v2.py --selftest` -> SELF-TEST: PASS (exit 0);
+  * the gate's estimator is IDENTICAL to `tools/ga_evaluator_v3.py`'s across all cases tested
+    (n=60 concordant, mixed 60, discordant, n=1100) to 1e-12;
+  * n=60 concordant now yields [0.000000, -0.060172, +0.060172] in both implementations.
+
+CONSEQUENCE: G-A2 will now correctly report FAIL when the margin cannot be met — including on a perfect
+result at n=60, which is exactly the honest signal D1 describes. This makes the gate's behaviour match
+the plan rather than hiding the conflict.
+
+---
+## FOLLOW-UP (round 19): audited EVERY remaining bootstrap call site
+
+Having found bootstrap where Newcombe was mandated, the other `boot_ci` uses were each checked against
+the plan rather than assumed. Three remained after the first fix:
+
+| site | gate | plan says | verdict |
+|---|---|---|---|
+| `gates_v2.py:517` | **Claim 2 (A vs B)** — paired retention difference | §8.4 mandates the Newcombe paired CI for retention/recall (line 1235: "frozen method (Newcombe paired 95 % CI...)"). Claim 2 is the SAME paired quantity as Claim 1. | **CONTRACT VIOLATION -> FIXED** (now `newcombe_paired_ci`) |
+| `gates_v2.py:649` | G-D extraction span-F1 | §8.9 explicitly says "span-F1 >=0.75 with a **bootstrap** CI (F1 is not binomial)" | **CORRECT AS-IS** — bootstrap is what the plan requires here |
+| `gates_v2.py:837` | G-G general per-task | method UNSPECIFIED in plan/SPEC-V2; separately measured that both methods agree at n=1200 with ~15x headroom | **DEFENSIBLE AS-IS** — recorded as a documentation gap, not a defect |
+
+So the audit did NOT find a fourth problem by assumption, and it did NOT "fix" the two sites that are
+already correct. G-D in particular would have been broken by a reflexive change: F1 is not a proportion,
+so a Wilson/Newcombe construction does not apply to it and bootstrap is the mandated estimator.
+
+After the Claim 2 fix, `python3 v2/gates_v2.py --selftest` -> SELF-TEST: PASS.

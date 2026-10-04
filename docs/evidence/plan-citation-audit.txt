@@ -1,0 +1,44 @@
+# Plan citation audit — CyberGuard v3, PLAN-V3.md (rev 8)
+
+**Generated:** 2026-09-30 01:25 CDT · **Method:** extract every pinned `sha256` and every backticked
+file path from the plan, then verify each against the real file.
+
+## Pinned hashes — ALL VERIFIED
+
+The plan carries 11 sha256 citations covering 9 distinct (path, hash) pairs. Every pair was
+recomputed against the real file:
+
+| path | pinned | result |
+|---|---|---|
+| `v2/data/probe-set-fresh-gA.jsonl` | `5b9ed867c925…` | **match** |
+| `v2/data/probe-set-gA2.jsonl` | `306c3f4ae46e…` | **match** |
+| `v2/candidates/arcspan-train-sample.jsonl` | `36812f5a0897…` | **match** |
+| `v2/data/probe-set-gE.jsonl` | `3de5970cc7ff…` | **match** |
+| `v2/data/probe-set-fresh-gE.jsonl` | `45a833baf5a6…` | **match** |
+| `v2/data/probe-set-gG-gsm8k.jsonl` | `f6c24c83a59b…` | **match** |
+| `v2/data/probe-set-gG-ifeval.jsonl` | `ac07a3a40c50…` | **match** |
+
+**0 mismatches, 0 missing files.** Two apparent mismatches appeared during the audit and were traced
+to the *auditing heuristic*, not the plan: the gE and fresh-gE hashes are each cited more than once,
+and the heuristic re-paired the later citations to a nearer path token (`probe-set-gG-ifeval.jsonl`)
+belonging to a different sentence. Both hashes are correct for their real owners. Recorded because a
+future audit should expect duplicate citations and pair by sentence, not by proximity.
+
+## Cited paths — all resolve to a known home
+
+43 backticked paths are cited. 32 exist verbatim from the repo root. The remainder are not broken
+links; they fall into two benign classes:
+
+- **Artifacts cited relative to `data/v3/` (4)** — `trails-30/VALIDATION-REPORT.md`,
+  `trails-30/CONTENT-QUALITY-AUDIT.md`, `trails-30/SAFETY-SCREEN-RECEIPT.json`,
+  `trails-30/trails_pilot.jsonl`. All four exist under `data/v3/`; the citation is written relative
+  to that directory.
+- **Bare basenames cited in prose (7)** — `SFT_MANIFEST.md` (→ `data/v3/sft/`),
+  `VALIDATION-REPORT.md` (→ `data/v3/trails-30/`), `trails_deepseek_7k.jsonl` and
+  `trails_muse_7k.jsonl` (→ `data/v3/trails-30/`), `config.json` and `generation_config.json`
+  (→ the pinned base model on the training host), and `QUALITY_REPORT.md` (a **retired placeholder**,
+  mentioned only in the historical/disposition text describing what rev 7 replaced — correctly
+  absent).
+
+No unresolvable citations. This audit exists because independent review has twice rejected the plan
+for claims that did not verify against the cited files; the citations themselves are sound.

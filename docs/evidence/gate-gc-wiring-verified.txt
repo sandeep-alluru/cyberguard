@@ -1,0 +1,50 @@
+# G-C — wiring verified end-to-end (rev 11)
+
+Object under test: the authority wiring added to v2/run_battery.py + GS.nvd_authority().
+
+Method: re-score the STORED 300 generations from research-tmp/f15/battery-gC-armA.json offline,
+first with no authority (the historical path) and then with the partial authority cache on disk.
+No model is invoked; this isolates the wiring.
+
+  WITHOUT authority (old)      emitted=400 invalid=100 unchecked=288 VERIFIED=112  support FAIL
+  WITH partial authority(25)   emitted=400 invalid=100 unchecked=263 VERIFIED=137  support FAIL
+  -> each checked CVE converts exactly one unchecked id into a verified id (+25 for 25 CVEs).
+
+Projection when the full 288-CVE authority is present and all exist:
+  unchecked = 288 - 288 = 0  ->  VERIFIED = 400  ->  400 >= 300  ->  support PASS
+So G-C becomes MEASURABLE once the authority build completes; before the fix it could not reach
+the floor at all (112 < 300) no matter how good the model was.
+
+CAVEAT, stated so this is not over-read: f15/battery-gC-armA.json carries "stub": true. Its 300
+generations are synthetic (the battery's stub generator), not model output. This verification
+therefore validates the WIRING and the support arithmetic, NOT the model's factuality. The real
+G-C measurement still requires generations from base and tuned arms.
+
+Also confirmed while checking: the stored artifact DOES retain all 300 raw generations under
+'outputs', so real runs can be re-scored offline without regenerating - relevant because scoring
+must be repeatable and must not depend on the network at scoring time.
+
+---
+## FINAL VERIFICATION (round 20): full authority built and confirmed
+
+The cached NVD authority is COMPLETE:
+    tools/build_nvd_authority.py  ->  288/288 checked, 288 exist, coverage 1.000
+    elapsed 31.3 min at the polite keyless rate (estimate was ~30 min)
+    fetch failures: 0        checked-but-not-found: 0
+    deployed to spark-40ee and hash-verified (3ef2e3c17cba); confirmed loading there.
+
+Re-scoring the stored G-C generations with the COMPLETE authority:
+
+    BEFORE authority (old path)   emitted=400  invalid=100  unchecked=288  VERIFIED=112  support FAIL
+    AFTER full authority          emitted=400  invalid=100  unchecked=0    VERIFIED=400  support PASS
+
+    verified rose 112 -> 400 (+288, i.e. one verified id per checked CVE, exactly as predicted)
+
+The earlier projection ("~400 once the authority lands") is CONFIRMED, not merely asserted. G-C's
+support floor (>=300 verified emitted ids) is therefore reachable, where before this work it could not
+be reached at any model quality -- the gate was unmeasurable for a wiring reason.
+
+CAVEAT, retained: the generations in this check come from a --stub battery (the artifact carries
+"stub": true), so this validates the AUTHORITY, the WIRING and the SUPPORT ARITHMETIC. It is not a
+statement about the model's factuality. A real G-C measurement still requires generations from the base
+and tuned arms.

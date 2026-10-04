@@ -1,0 +1,66 @@
+# G-E: a missing instrument was reading as a MODEL failure (rev 11, round 35)
+
+## HOW IT SURFACED
+
+Running the full deployed chain ON THE HOST gave a different result from the same run locally:
+
+    local  gE armB: {"pysigma_parsed": 0,  "parsed_rate": 0.0}    -> G-E sigma UNMEASURED ("no rule outcomes")
+    host   gE armB: {"pysigma_parsed": 20, "parsed_rate": 0.3333} -> G-E sigma FAIL
+
+Same code (all modules hash-identical — verified across cap_scorers, cyberguard_contract,
+cyberguard_data, cap_probes, gates_v2, run_battery, gate_scorers_v2, assemble_gate_inputs,
+eval_cyberguard), same probe set, same stub replies. Chased it down to an environment difference:
+
+    LOCAL: `from sigma.collection import SigmaCollection` -> ModuleNotFoundError   (pySigma ABSENT)
+    HOST : `from sigma.collection import SigmaCollection` -> PRESENT               (pySigma INSTALLED)
+
+(An earlier check of mine tested `import pysigma`, which is the wrong module name — pySigma installs as
+`sigma`. That mistake briefly hid the cause.)
+
+## THE DEFECT THIS EXPOSED
+
+`cap_scorers.pysigma_compile` already distinguishes the two cases correctly:
+
+    except Exception as e:
+        return False, f"pySigma unavailable: {type(e).__name__}"
+
+but `score_sigma` took only the boolean — `S.pysigma_compile(d)[0]` — and **discarded the reason**. So a
+missing library produced `parsed_rate 0.0`, and the gate reported **FAIL**, i.e. it blamed the MODEL for an
+environment problem.
+
+This is not hypothetical: cap_scorers' own docstring records that precisely this confusion already
+occurred once —
+
+    "the function returned False unconditionally, which means G-E's 'pySigma parse 0 %' (recorded for v1
+     and quoted in SPEC §7 as '6.7 % / 0 %') was at least partly an INSTRUMENT FAILURE rather than a model
+     failure"
+
+The API-call half of that was repaired on 2026-09-28. The **silent-failure half never was**.
+
+## FIXED, FAIL-CLOSED
+
+1. `score_sigma` now captures the reason per rule and, when any rule reports the library missing, sets
+   `instrument_error` in its returned dict.
+2. `gates_v2`'s G-E block emits **UNMEASURED** with the reason when `instrument_error` is present, never
+   FAIL.
+
+VERIFIED:
+  * with a VALID Sigma rule and no pySigma installed:
+        parsed_rate 0.0, instrument_error = "pySigma unavailable for 2/2 rules: the pySigma-parse rate
+        would read 0.0 and FAIL, which measures the environment, not the model"
+  * through the real gate, an `instrument_error` sigma input yields **UNMEASURED**, not FAIL
+  * `gates_v2.py --selftest`: PASS
+
+Staged to the host and hash-verified.
+
+## THE BROADER LESSON, AND A LIMIT ON MY EARLIER CLAIMS
+
+Local and host environments differ in optional dependencies, so **a local integration result is not
+evidence about the host**. Concretely: my round-29 local integration run reported "G-E sigma UNMEASURED"
+and I described the suite as 18 UNMEASURED / 0 PASS; on the host the same run gives 17 UNMEASURED / 1 FAIL
+because the host has pySigma and the stub rules genuinely fail to parse. The host figure is the
+representative one. Every other gate was unaffected (none of the evaluator work in this session depends
+on pySigma), but the difference is recorded because it changes what the local run proves.
+
+Note also that the HOST having pySigma is the correct state for the plan — §8.9 requires a pySigma-parse
+rate, so an environment without the library could not measure G-E at all.

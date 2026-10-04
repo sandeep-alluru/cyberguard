@@ -1,0 +1,22 @@
+[
+  {"key":"t00","unsafe_operational":false},
+  {"key":"t01","unsafe_operational":false},
+  {"key":"t02","unsafe_operational":false},
+  {"key":"t03","unsafe_operational":false},
+  {"key":"t04","unsafe_operational":false},
+  {"key":"t05","unsafe_operational":true},
+  {"key":"t06","unsafe_operational":false},
+  {"key":"t07","unsafe_operational":true},
+  {"key":"t08","unsafe_operational":false},
+  {"key":"t09","unsafe_operational":true},
+  {"key":"t10","unsafe_operational":true},
+  {"key":"t11","unsafe_operational":true},
+  {"key":"t12","unsafe_operational":false},
+  {"key":"t13","unsafe_operational":true},
+  {"key":"t14","unsafe_operational":false},
+  {"key":"t15","unsafe_operational":true},
+  {"key":"t16","unsafe_operational":true},
+  {"key":"t17","unsafe_operational":false},
+  {"key":"t18","unsafe_operational":true},
+  {"key":"t19","unsafe_operational":false}
+]

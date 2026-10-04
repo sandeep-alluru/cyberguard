@@ -1,0 +1,87 @@
+# The assembler silently substitutes STALE v1 measurements (found rev 11, round 12)
+
+## THE FINDING
+
+`v2/assemble_gate_inputs.py` carries hardcoded fallback sources for each gate's aggregate form
+(lines ~48-54):
+
+```
+"cap-1-factuality": ["cap/receipts/cap-1-factuality.json", "research-tmp/harvest-cap-v1/receipts/cap-1-factuality.json"]
+"cap-2-triage":     ["cap/receipts/cap-2-triage.json",     "research-tmp/harvest-cap-v1/receipts/cap-2-triage.json"]
+"cap-3-extraction": ...   "cap-4-sigma": ...   "cap-5-grounded": ...   "cap-6-general": ...   "cap-7-paired": ...
+```
+
+Those are **v1 artifacts dated 2026-09-27**, produced by a different model in the previous window. When
+a gate's per-probe v3 battery data is absent, the assembler does not leave the gate UNMEASURED — it
+fills the aggregate from these receipts.
+
+## DEMONSTRATED, NOT INFERRED
+
+Ran the full chain in stub mode (all 14 batteries x base/armB, plus gA/fresh-gA armA), assembled, and
+read back what the G-B and G-C gates would consume for armA — for which **no gB/gC battery had run**:
+
+```
+assembled "triage" (feeds G-B)  = {tp: 24, fp: 43, tn: 17, fn: 36}
+v1 research-tmp/harvest-cap-v1/receipts/cap-2-triage.json = {tp: 24, fp: 43, tn: 17, fn: 36, n: 120}   IDENTICAL
+
+assembled "ids" (feeds G-C)     = {n: 28, invalid: 6}
+v1 .../cap-1-factuality.json    = {tid_mentions_total: 28, tid_hallucinated: 6, ...}                  IDENTICAL
+```
+
+So the values the v3 gate layer would read for those two gates are **v1's numbers**, with no v3
+measurement behind them at all.
+
+## WHY IT MATTERS
+
+This is a false-verdict pathway: a v3 verdict could report G-B/G-C/G-D/G-E/G-F figures that come from a
+**different model measured by a different battery in a previous window**, attributed to this run. The
+mitigations are real but insufficient on their own:
+  - the assembler PREFERS per-probe battery data when it exists ("v2 batteries take precedence over the
+    v1 aggregates"), so this fires only for gates lacking v3 data;
+  - `_provenance` records the source path for each field, so the origin IS traceable.
+But the plan's rule is unambiguous: "a missing measurement is a NO-SHIP, never an assumed pass". A gate
+that has no v3 data must be **UNMEASURED**, and substituting a stale number violates exactly that. A
+reader who does not open `_provenance` would read v1 results as v3 results.
+
+## REMEDY (owner decision D8)
+
+**Recommended: run the v3 assembly in STRICT MODE** — disable the `harvest-cap-v1` / `cap/receipts`
+fallbacks, so any gate without v3 battery data is reported UNMEASURED with a reason. This is a small,
+targeted change and it makes the fail-closed contract true rather than aspirational. Optionally, if v3
+cap receipts are produced, point the first fallback path at them (never the v1 directory).
+
+Recorded as D8. Note the interaction with D7: an UNMEASURED G-A2/G-J would then be *honest* — which is
+the whole point.
+
+---
+## RESOLVED IN REV 11 (round 14): strict mode implemented and verified
+
+PLAN-V3 states plainly that "a missing measurement is a NO-SHIP, never an assumed pass". Substituting a
+stale v1 number for a missing v3 measurement violates that rule, so this was treated as a REPAIR against
+the written contract rather than an open design question.
+
+CHANGE (v2/assemble_gate_inputs.py):
+  * STALE_V1_MARKER = "harvest-cap-v1"; ALLOW_STALE_V1 = False by default;
+  * load() SKIPS any candidate path containing the marker unless the flag is set, so a gate with no v3
+    data now genuinely has no source and must be reported UNMEASURED;
+  * new CLI flag --allow-stale-v1 reproduces a historical v1 assembly for comparison only;
+  * the mode is printed on every run: "cap-receipt mode: STRICT (...)" so the log itself records it.
+
+VERIFIED (same eval directory that previously produced v1 numbers):
+  STRICT (default)      triage = None                     ids = None
+                        provenance cites harvest-cap-v1?  False
+  PERMISSIVE (--allow)  triage = {tp:24,fp:43,tn:17,fn:36}   <- exactly v1 cap-2-triage
+                        ids    = {n:28,invalid:6}            <- exactly v1 cap-1-factuality
+
+And the gates now fail honestly rather than reporting substituted values:
+  G-B triage          UNMEASURED  no triage confusion matrix
+  G-C id factuality   UNMEASURED  no emitted-id list
+  G-D extraction      UNMEASURED  no per-document span-F1
+  G-E sigma           UNMEASURED  no rule outcomes
+  G-F grounded qa     UNMEASURED  no grounded items
+
+DEPLOYED: v2/assemble_gate_inputs.py staged to spark-40ee and hash-verified (f8a91b6026e4); confirmed on
+the host that ALLOW_STALE_V1 defaults to False and the marker is recognised.
+
+This closes the false-verdict pathway. It also makes the fail-closed contract TRUE rather than
+aspirational: a gate without v3 data can no longer borrow a previous window's number.

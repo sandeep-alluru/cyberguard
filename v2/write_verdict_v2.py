@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""write_verdict_v2.py — compose docs/VERDICT-v2.md from the gate report and the harvest manifest.
+"""write_verdict_v2.py — compose docs/VERDICT-<version>.md from the gate report and the harvest manifest.
+
+Run with --version v3 for the v3 build (single arm). Defaults to v2, so the existing VERDICT-v2 is
+untouched; VERSION/_arms()/_facts_path() below show exactly what switches.
 
 WHY. `VERDICT-v2.md` and a checksum-verified harvest are the two artifacts the goal cannot be completed
 without, and the evaluation contract that produces the gate report may run unattended. This turns the measured
@@ -38,7 +41,18 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.environ.get("CYBERGUARD_ARTIFACT_ROOT", ROOT)
 
 
+# Historical v2 ARTEFACT locations. In v3 mode these are forbidden: a v3 verdict that cites v2's mask
+# proof, mixture facts, merge-equivalence receipts or contamination conclusions is describing a different
+# build. Shared CODE paths (`v2/assemble_gate_inputs.py`, `v2/gate-report-v3.json`) are NOT artefacts and
+# stay reachable -- the guard is deliberately narrow so it cannot block legitimate shared outputs.
+_V2_ARTEFACT_MARKERS = ("harvest-v2/", "v2/data/mixture/", "cyberguard-lora-v2")
+
+
 def load(path: str):
+    if VERSION == "v3" and any(_m in str(path) for _m in _V2_ARTEFACT_MARKERS):
+        # Structural enforcement (Astra design item 3): rather than trusting every call site to remember a
+        # version branch, refuse the read here. Returns None, which every caller already treats as "absent".
+        return None
     p = os.path.join(ART, path)
     if not os.path.exists(p):
         return None
@@ -57,22 +71,50 @@ def manifest_summary() -> str:
     false by the time anyone read it, and would have stayed false in every copy of the verdict. The ordering is
     stated instead, and the count is reported only when a manifest exists (a re-run).
     """
-    p = os.path.join(ART, "research-tmp/harvest-v2/MANIFEST.sha256")
+    _mf = ("research-tmp/harvest-v3/MANIFEST.sha256" if VERSION == "v3"
+           else "research-tmp/harvest-v2/MANIFEST.sha256")
+    p = os.path.join(ART, _mf)
     if os.path.exists(p):
         lines = [l for l in open(p) if l.strip()]
-        return (f"`research-tmp/harvest-v2/MANIFEST.sha256` lists **{len(lines)}** checksum-verified files "
+        return (f"`{_mf}` lists **{len(lines)}** checksum-verified files "
                 f"(present when this document was composed)")
     return ("The checksum-verified harvest runs as this contract's **final stage, after this document is written** "
             "— necessarily so, because it verifies this file's own sha256 and therefore cannot be cited from "
-            "within. Its manifest is `research-tmp/harvest-v2/MANIFEST.sha256`, and the harness refuses to print "
+            f"within. Its manifest is `{_mf}`, and the harness refuses to print "
             "`HARVEST-COMPLETE` unless every file verifies, including this verdict and the re-audit and leakage "
             "receipts. The count is stated in the CEO-desk brief written after the harvest.")
 
 
+# ---------------------------------------------------------------------------------------------
+# VERSION SELECTION (Astra readiness review, defect 3). This composer was hardwired to v2: it read
+# `cyberguard-lora-v2-{arm}` receipts, `v2/data/mixture/FACTS.json`, and always rendered a two-arm
+# A-vs-B table. Run unchanged after v3 training it would have described the WRONG RUN -- quoting v2's
+# training metrics and v2's mixture while presenting them as the v3 verdict.
+#
+# v3 is a SINGLE-ARM run, so the two-arm Claim 2 material does not apply and is not fabricated: the
+# exposure table renders one artefact, and the A-vs-B contrast says plainly that it is not applicable.
+# ---------------------------------------------------------------------------------------------
+VERSION = "v2"          # set from --version in main()
+
+
+def _arms() -> tuple:
+    """v3 trained ONE adapter; v2 trained two. Never invent a second arm."""
+    return ("armA",) if VERSION == "v3" else ("armA", "armB")
+
+
+def _facts_path() -> str:
+    return "v3/data/mixture/FACTS.json" if VERSION == "v3" else "v2/data/mixture/FACTS.json"
+
+
 def _trainer_receipt(arm: str):
     """The trainer's own receipt, harvested from the host that ran it (falling back to a local copy)."""
-    for p in (f"research-tmp/harvest-v2/receipts/cyberguard-lora-v2-{arm}.json",
-              f"receipts/cyberguard-lora-v2-{arm}.json"):
+    if VERSION == "v3":
+        cands = ("research-tmp/harvest-v3/receipts/cyberguard-lora-v3.json",
+                 "receipts/cyberguard-lora-v3.json")
+    else:
+        cands = (f"research-tmp/harvest-v2/receipts/cyberguard-lora-v2-{arm}.json",
+                 f"receipts/cyberguard-lora-v2-{arm}.json")
+    for p in cands:
         r = load(p)
         if r is not None:
             return r, p
@@ -91,7 +133,7 @@ def merge_equivalence_block() -> str:
     approximate agreement on the measured surface), and the limits are stated rather than implied.
     """
     rows = []
-    for arm in ("armA", "armB"):
+    for arm in _arms():
         r, _ = _merge_receipt(arm)
         if r is None:
             rows.append(f"| `{arm}` | **receipt absent — UNMEASURED** | | | | |")
@@ -105,7 +147,7 @@ def merge_equivalence_block() -> str:
             f"{_fmt(r.get('tf_top1_agreement_rate'))} ({r.get('tf_positions')} pos) | "
             f"{_fmt(r.get('merge_weight_control_module_dropped_max_ulp'), '.3g')} | "
             f"{_fmt(r.get('tf_negative_control_agreement_rate'))} | {r.get('loss_delta')} |")
-    w = next((_merge_receipt(a)[0] for a in ("armA", "armB") if _merge_receipt(a)[0]), None)
+    w = next((_merge_receipt(a)[0] for a in _arms() if _merge_receipt(a)[0]), None)
     # Never print a placeholder as if it were a number: with no receipt the weight-level check is UNMEASURED and
     # the text says so rather than rendering "nan" beside real-looking units.
     if not w:
@@ -191,7 +233,15 @@ def _fmt(v, spec: str = ".4f") -> str:
 
 
 def _merge_receipt(arm: str):
-    """The merge-equivalence receipt for one arm, harvested first, then a local copy."""
+    """The merge-equivalence receipt for one arm, harvested first, then a local copy.
+
+    v3 GUARD (Astra fixes review, defect 5). Merge-equivalence/mask evidence is a v2-artefact check: v3's
+    adapters were never produced by the merge path those receipts describe. Without this guard, running
+    with --version v3 still selected the harvested **v2-armA** receipt and printed v2's merge numbers
+    inside a v3 verdict. v3 has no such evidence, and absence is reported as absence.
+    """
+    if VERSION == "v3":
+        return None, None
     for p in (f"research-tmp/harvest-v2/evals/merge-equiv-cyberguard-lora-v2-{arm}.json",
               f"evals/merge-equiv-cyberguard-lora-v2-{arm}.json"):
         r = load(p)
@@ -210,9 +260,17 @@ def measured_eval_gpu(evals_dir: str = "evals") -> tuple[float, dict]:
     """
     total = 0.0
     per: dict[str, tuple[float, int, int]] = {}
-    for label, pattern in (("batteries", os.path.join(evals_dir, "battery-*.json")),
-                           ("merge-equivalence", os.path.join(evals_dir, "merge-equiv-*.json")),
-                           ("paired benchmark", os.path.join(evals_dir, "cyberguard-lora-v2-arm*.json"))):
+    # Astra final review (structural item 3): this used `glob` directly (bypassing the load() guard) and
+    # hard-coded v2's paired-benchmark receipts, so a v3 verdict's evaluation cost included v2 model files
+    # from a mixed directory. The patterns are version-aware: v3 has no merge-equivalence artifacts, and its
+    # benchmark receipts are named for the v3 run.
+    _patterns = ([("batteries", os.path.join(evals_dir, "battery-*.json")),
+                  ("paired benchmark", os.path.join(evals_dir, "cyberguard-lora-v3*.json"))]
+                 if VERSION == "v3" else
+                 [("batteries", os.path.join(evals_dir, "battery-*.json")),
+                  ("merge-equivalence", os.path.join(evals_dir, "merge-equiv-*.json")),
+                  ("paired benchmark", os.path.join(evals_dir, "cyberguard-lora-v2-arm*.json"))])
+    for label, pattern in _patterns:
         secs, seen, no_field = 0.0, 0, 0
         for path in sorted(glob.glob(pattern)):
             try:
@@ -220,6 +278,14 @@ def measured_eval_gpu(evals_dir: str = "evals") -> tuple[float, dict]:
             except Exception:                                          # noqa: BLE001
                 no_field += 1
                 continue
+            # P3 (Astra final review): v3 accounting kept counting EVERY battery-*.json in the directory,
+            # including v2's. A battery receipt names its `arm` and `adapter`, so a v3 verdict counts only
+            # receipts attributable to this build: v3 has no armB, and a base arm carries adapter=None.
+            if VERSION == "v3" and isinstance(d, dict):
+                _arm, _ad = d.get("arm"), d.get("adapter")
+                _is_v3 = (_arm != "armB") and (_ad is None or "v3" in str(_ad))
+                if not _is_v3:
+                    continue
             w = d.get("wall_seconds") if isinstance(d, dict) else None
             if isinstance(w, (int, float)) and not isinstance(w, bool):
                 secs += float(w)
@@ -240,7 +306,7 @@ def training_trajectory(evals_dir: str = "evals") -> str:
     as a projection — with the frozen interval excluded from learning exposure. This reads each run's own
     receipt and reports what actually happened, including when a receipt is missing rather than glossing it.
     """
-    facts = load("v2/data/mixture/FACTS.json") or {}
+    facts = load(_facts_path()) or {}
     tw = facts.get("training_window") or {}
     inc = ((tw.get("incidents") or {}).get("noop_resume") or {})
     # READ THE MASK NUMBERS FROM THE RECEIPT, don't hardcode them. This sentence said "273/598 supervised tokens"
@@ -275,13 +341,22 @@ def training_trajectory(evals_dir: str = "evals") -> str:
                           + (f", captured {_cap}" if _cap else "")
                           + " - so the mask is not identical across the arms and **no assistant-only-everywhere "
                             "claim is made**.")
-    out = [
+    # Astra final review (structural item 3): this paragraph described v2's restarted schedule. Carried into
+    # a v3 verdict it would assert a training history the v3 run never had.
+    _exposure_intro = ([
         "The evaluated artefacts are the product of **one completed pass over the mixture followed by a",
         "partial second data pass, with fresh optimizer state and a restarted LR schedule** (Codex review",
         "#14). They are **not** the product of one continuous schedule, and nothing here claims uninterrupted",
         "training. Exposure is reported as **measured**, from each run's own receipt — never as a projection —",
         "and the frozen interval is excluded from learning exposure while remaining in the cost accounting.",
         "",
+    ] if VERSION != "v3" else [
+        "The evaluated artefact is the product of **one continuous training run on v3's own mixture**,",
+        "reported as **measured** from that run's own receipt — never as a projection. v2's restarted-schedule",
+        "history concerns a different build and is **not** carried into this verdict.",
+        "",
+    ])
+    out = _exposure_intro + [
         "Two caveats on these measured figures, both raised by independent review (Muse, 2026-09-29) and recorded",
         "rather than smoothed over. The **terminal LR** column is the LAST LOGGED learning rate: whether the final",
         "optimiser step coincides with the last logging interval is not verified, so it bounds the terminal LR",
@@ -293,7 +368,7 @@ def training_trajectory(evals_dir: str = "evals") -> str:
     ]
     missing: list[str] = []
     _steps_by_arm: dict[str, int] = {}
-    for arm in ("armA", "armB"):
+    for arm in _arms():
         r, p = _trainer_receipt(arm)
         if r is None:
             missing.append(arm)
@@ -390,11 +465,20 @@ def training_trajectory(evals_dir: str = "evals") -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--report", default="v2/gate-report-v2.json")
-    ap.add_argument("--out", default="docs/VERDICT-v2.md")
+    ap.add_argument("--version", choices=("v2", "v3"), default="v2",
+                    help="which build this verdict is for; selects the receipt, mixture and arm count")
+    ap.add_argument("--report", default=None)
+    ap.add_argument("--out", default=None)
     ap.add_argument("--evals", default="evals", help="directory holding the assembled gate inputs")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+
+    global VERSION
+    VERSION = a.version
+    if a.report is None:
+        a.report = f"v2/gate-report-{VERSION}.json"
+    if a.out is None:
+        a.out = f"docs/VERDICT-{VERSION}.md"
 
     rep = load(a.report)
     if not rep:
@@ -405,12 +489,18 @@ def main() -> int:
     decided = [g for g in gates if g.get("outcome") in ("PASS", "FAIL")]
     if not decided:
         raise SystemExit("FATAL: no gate reached PASS or FAIL — an all-UNMEASURED report is not a verdict")
-    facts = load("v2/data/mixture/FACTS.json") or {}
+    facts = load(_facts_path()) or {}
     leak = load("v2/data/mixture/leak-scan-c24.receipt.json") or {}
     contam = None
     try:
-        out = subprocess.run([sys.executable, "v2/battery_contamination_check.py", "--report"],
-                             cwd=ROOT, capture_output=True, text=True, timeout=600).stdout
+        if VERSION == "v3":
+            # Astra design item 3: this producer reads v2 mixture evidence. Running it in v3 mode would
+            # pull a v2 contamination conclusion into a v3 verdict.
+            out = ("not run in v3 mode: battery_contamination_check.py reads v2 mixture evidence, "
+                   "which is not applicable to this build")
+        else:
+            out = subprocess.run([sys.executable, "v2/battery_contamination_check.py", "--report"],
+                                 cwd=ROOT, capture_output=True, text=True, timeout=600).stdout
         contam = out
     except Exception:                                          # noqa: BLE001
         contam = "(contamination check not run)"
@@ -482,9 +572,15 @@ def main() -> int:
             _d2_block += f"\n\n*Why this matters (from the receipt):* {_why}"
     else:
         _d2_block = "(the D2 diversity receipt is absent — the asymmetry is unmeasured for this verdict)"
+    if VERSION == "v3":
+        # D2 compares two arms' diversity. v3 trained ONE adapter, so there is no between-arm asymmetry to
+        # measure and none is fabricated (Astra final review, structural item 3).
+        _d2_block = ("**Not applicable — single-arm v3.** D2 measures between-arm mixture asymmetry; v3 "
+                     "trained one adapter, so there is no second arm to compare and no receipt to read.")
     now = dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S-05:00")
+    _vlabel = "v3 (single-arm)" if VERSION == "v3" else "v2"
     doc = f"""---
-title: CyberGuard v2 — VERDICT (C24)
+title: CyberGuard {_vlabel} — VERDICT (C24)
 issued_at: {now}
 project: CyberGuard
 status: current
@@ -492,13 +588,12 @@ kind: result
 supersedes: none
 ---
 
-# VERDICT-v2 — the C24 evaluation of the two arms
+{'# VERDICT-v3 — the C24 evaluation of the single v3 arm' if VERSION == 'v3' else '# VERDICT-v2 — the C24 evaluation of the two arms'}
 
-**One line:** {len(decided)} of {len(gates)} gate rows reached a decision; both pre-registered confirmatory
-claims are reported **scoped to a composed, training-disjoint instrument**, and the numbers that came from
+**One line:** {len(decided)} of {len(gates)} gate rows reached a decision; {("the pre-registered confirmatory claim is" if VERSION == "v3" else "both pre-registered confirmatory claims are")} reported **scoped to a composed, training-disjoint instrument**, and the numbers that came from
 training rows are labelled as recall.
 
-## The two pre-registered confirmatory claims
+{'## The pre-registered confirmatory claim (single-arm v3: Claim 2 does not apply)' if VERSION == 'v3' else '## The two pre-registered confirmatory claims'}
 
 {tbl(claims) if claims else "(no claim rows in the report — this is not a v2 verdict)"}
 
@@ -508,16 +603,16 @@ preserve *support* and comparability; they do **not** transport the original pow
 variance depends on discordance and template-family variability is unmeasured. No inherited power number is
 quoted here, and the unmeasured bias directions are wording sensitivity and recognition of fictional entities.
 
-## Known asymmetries between the arms (measured — D2 is declared UNMET)
+{'## Between-arm asymmetries (D2) — not applicable to single-arm v3' if VERSION == 'v3' else '## Known asymmetries between the arms (measured — D2 is declared UNMET)'}
 
-The control arm's design target was ">=1,000 distinct control prompts and <=10 % length gap". Measured on the
-frozen arms (`v2/data/mixture/d2-diversity.receipt.json`):
+{'''Not applicable to v3: this paragraph described v2's control-arm design target and was measured on v2's frozen arms. v3 trained one adapter, so there is no control arm and no such receipt is read.''' if VERSION == 'v3' else '''The control arm's design target was ">=1,000 distinct control prompts and <=10 % length gap". Measured on the
+frozen arms (`v2/data/mixture/d2-diversity.receipt.json`):'''}
 
 {_d2_block}
 
-The Arm A vs Arm B contrast therefore carries a **residual prompt-diversity and answer-length asymmetry
+{'**No Arm A vs Arm B contrast exists in this verdict.** v3 trained one adapter, so the substitution-design\nasymmetry described by v2 does not apply and no matched-control claim is made or needed.' if VERSION == 'v3' else '''The Arm A vs Arm B contrast therefore carries a **residual prompt-diversity and answer-length asymmetry
 intrinsic to the substitution design**. No claim in this verdict describes the control as "matched" without
-stating it.
+stating it.'''}
 
 ## Training trajectory and measured exposure (review #14)
 
@@ -530,10 +625,10 @@ stating it.
 ## Instrument governance (owner decision D12)
 
 * **Generalisation instruments** — the fresh sets `probe-set-fresh-gA/gB/gE/gF/gJ` plus the unchanged disjoint
-  sets (G-A2, G-C, G-G). Verified prompt-disjoint from **both** training arms, 0 overlap.
+  sets (G-A2, G-C, G-G). {("Verified prompt-disjoint from the v3 training corpus, 0 overlap." if VERSION == "v3" else "Verified prompt-disjoint from **both** training arms, 0 overlap.")}
 * **Retention/recall instruments** — the registered batteries `gA/gB/gE/gF/gJ`, which are rows the models were
   trained on ({facts.get('rows_per_arm', '?')} rows/arm, {facts.get('refusal_slots', '?')} refusal slots,
-  {facts.get('unique_refusal_rows', '?')} unique refusal rows, all cited from `v2/data/mixture/FACTS.json`).
+  {facts.get('unique_refusal_rows', '?')} unique refusal rows, all cited from `{_facts_path()}`).
   Their results are **recall on memorised items**; a failure there is a red flag, and no number from them may
   be presented as generalisation.
 * Report's own role map: `{_cut(json.dumps(roles), 400)}`
@@ -541,31 +636,31 @@ stating it.
   holdout universe remains CLEAN; the **battery universe is LEAK**, which is the contamination this verdict
   declares rather than hides.
 
-## Serving posture (amendment A2 — stated because it is a deviation from the objective)
+## Serving posture {"(not applicable to v3 — this section described v2's evaluation hosts)" if VERSION == "v3" else "(amendment A2 — stated because it is a deviation from the objective)"}
 
-The evaluation ran with the **Flash-Next serving stack evicted from both hosts**, which the plan requires (the
+{"**Not applicable to v3.** This section recorded the serving-stack eviction on v2's two evaluation hosts. v3 trains on a single host and none of that posture applies; nothing here should be read as a v3 claim." if VERSION == "v3" else """The evaluation ran with the **Flash-Next serving stack evicted from both hosts**, which the plan requires (the
 stack is `Restart=always` and enabled, and once returned mid-window at ~50 GB per host, so `disable --now` was
 needed to hold it down). The objective's clause *"restoring it with a verified probe"* was **superseded by the
 owner**, and the stack **remains evicted**; `pool_control.sh restore` can re-enable and start it, so the decision
 is deliberate and the owner's boot behaviour is unchanged. The eviction was verified at every 3-hourly checkpoint
 (port 8093 closed, no active serving unit) and again by this contract's preflight. Recorded in
-`docs/SPEC-V2.md` §17; no artifact in this project claims the restoration was performed.
+`docs/SPEC-V2.md` §17; no artifact in this project claims the restoration was performed."""}
 
 ## Independent review status
 
 * **Codex (Astra)** reviewed the evaluation chain across six passes; the chain's blocking findings were fixed
   and re-verified pass by pass. Its clearance state is recorded in `research-tmp/reviews/`.
-* **Muse** reviewed the frozen arms and **withheld clearance** on the grounds of the contamination above; the
-  owner's D12 decision is the response, and this verdict carries the labelling it requires.
-* The chain-cleared marker `docs/CHAIN-CLEARED` {"exists" if os.path.exists(os.path.join(ROOT, "docs/CHAIN-CLEARED")) else "does **not** exist"} at the time this verdict was written.
+{'''* Muse's clearance history concerns v2's frozen arms and its mixture contamination; it is **not a v3 finding** and v3 clearance is established only by a v3 review against this build.''' if VERSION == 'v3' else '''* **Muse** reviewed the frozen arms and **withheld clearance** on the grounds of the contamination above; the
+  owner's D12 decision is the response, and this verdict carries the labelling it requires.'''}
+* The chain-cleared marker `docs/CHAIN-CLEARED` {"exists" if os.path.exists(os.path.join(ROOT, "docs/CHAIN-CLEARED")) else "does **not** exist"} at the time this verdict was written.{"" if VERSION != "v3" else " **That marker is a v2-era clearance and is NOT evidence of v3 review clearance** — v3 clearance is established only by a v3 review recorded against this build."}
 
 ## Stated limitations (not omissions)
 
 * G-D extraction is declared zero-shot in v2; G-I's normalised-F1 producer does not exist; MMLU-lite is
   declared UNMEASURED; sigma detection and utility are declared UNMEASURED (parse/schema only).
 * G-A severity has no v2 rubric producer, so it is reported UNMEASURED rather than reconstructed.
-* Repetition, diversity and prompt-familiarity asymmetries between the arms are intrinsic to the substitution
-  design and are carried here rather than argued away.
+{'''* No between-arm asymmetry statement applies: v3 trained a single adapter, so the substitution-design asymmetries this bullet described have no counterpart here.''' if VERSION == 'v3' else '''* Repetition, diversity and prompt-familiarity asymmetries between the arms are intrinsic to the substitution
+  design and are carried here rather than argued away.'''}
 
 ## Live loss mask
 

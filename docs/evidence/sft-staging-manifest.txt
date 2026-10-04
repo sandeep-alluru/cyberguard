@@ -1,0 +1,16 @@
+# SFT staging manifest — CyberGuard v3 (generated 2026-09-30 01:22:01 CDT)
+# Purpose: the §2 pre-flight requires the v3 corpus staged on spark-40ee with row counts equal
+# to SFT_MANIFEST.md. This pins exactly what 'staged' means so the transfer is verifiable.
+# Host is READ-ONLY until Sandeep approves training; nothing here writes to it.
+
+## Required on spark-40ee at data/v3/sft/
+fenrir.jsonl                       rows=99730   bytes=435924422  sha256=bd4375e3bfef13c5ac5357ca93954987f6eaf05cd437fd50806dc516048a7d7e
+merged.jsonl                       rows=23146   bytes=93666093   sha256=ca4333002ffc7f7655966ba6bc18862faaba7c827321cdbd9e901cb48015b557
+primus.jsonl                       rows=4891    bytes=20626170   sha256=d176575d87a39b2b6116b40be807e51ec96128737dfd651846c34686122ec352
+
+## Mixture inputs (reused in place from v2 — not staged)
+v2/data/mixture/armB.jsonl         bytes=202396764  sha256=61c94262e3c483215fc17a1c7bbb0c4d347969806ffcc8fd955d9af28078091c
+v2/data/mixture/FACTS.json         bytes=4883       sha256=d919a80462563e294f7eda190a6bf40be0455bc29be5d8c63e96b5285776f477
+
+## Total payload
+525M	total

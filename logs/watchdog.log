@@ -552,3 +552,10 @@
 [2026-09-29 18:35:28] cycle 274 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
 [2026-09-29 18:40:29] cycle 275 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
 [2026-09-29 18:45:30] cycle 276 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+[2026-09-29 18:50:31] cycle 277 | hashes: MATCH | leak_scan: LEAK (full) | audit: PASS (full)
+    ALERT LEAK: unified leak scan found a hit
+[2026-09-29 19:03:04] cycle 278 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+    RESOLVED LEAK (condition no longer holds)
+[2026-09-29 19:08:05] cycle 279 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+[2026-09-29 19:13:06] cycle 280 | hashes: MATCH | scans: skipped (hashes unchanged since the last full pass)
+[2026-09-29 19:18:07] watchdog exit after 280 cycles

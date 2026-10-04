@@ -1,0 +1,28 @@
+# Mixture artifact verification — CyberGuard v3 no-trail build (2026-09-30)
+
+Purpose: verify the ACTUAL training artifact (not just its inputs) — row counts, that the
+intentional x8/x2 duplication is exactly intended (no unintended duplicates or content loss),
+that no row has empty fields, and that no value-bearing credential survives into the corpus
+that will train.
+
+File: data/v3/mixture/mixture-v3-no-trail.jsonl
+sha256: 75b5099c568313f2ceada6f79746e51840b5240d943e952c2f2ebe3c3318fc90
+
+| src | rows | unique (user,assistant) | expected unique | verdict |
+|---|---|---|---|---|
+| fenrir | 99730 | 99730 | 99730 | OK |
+| merged | 23146 | 23146 | 23146 | OK |
+| primus | 4891 | 4891 | 4891 | OK |
+| refusal | 9584 | 1198 | 1198 | OK |
+| format | 2600 | 1300 | 1300 | OK |
+| replay | 594 | 594 | 594 | OK |
+| **total** | **140545** | | | **OK** |
+
+empty fields: none
+value-bearing credential hits: NONE
+
+Reading: unique-content counts equal the declared unique counts for every source, so the
+x8 (refusal) and x2 (format) weighting is exactly the intended repetition — there are no
+accidental duplicates and no content was silently dropped. Credential hits are zero, which
+confirms the earlier redaction holds through the build (the mixture is built from the redacted
+SFT files). This is the artifact that would be trained on.

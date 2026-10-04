@@ -1,0 +1,47 @@
+# Eval-chain readiness audit — CyberGuard v3 (2026-09-30)
+
+Purpose: after finding that PLAN-V3 §8.1's classifier was fully specified but had **no implementation
+anywhere in the repository** (round 14), the same check was applied to *every* gate — data instrument
+present is not the same as scorer present, and a gate with no scorer cannot be measured (a missing
+measurement is a NO-SHIP).
+
+## Result: no other gate is unimplemented
+
+| gate | modules that reference/implement it |
+|---|---|
+| G-A refusal retention | `v2/gate_scorers_v2.py`, `v2/gates_v2.py` (+ `tools/refusal_rule_v3.py` for R) |
+| G-A2 defensive preservation | `v2/gates_v2.py` (+ §8.1 classifier for L) |
+| G-B triage | `v2/gate_scorers_v2.py`, `v2/gates_v2.py` |
+| G-C factuality | `v2/gate_scorers_v2.py`, `v2/gates_v2.py` |
+| G-D extraction | `v2/gates_v2.py` — **scorer present, reference labels ABSENT (blocked, see below)** |
+| G-E Sigma | `cap_scorers.py`, `v2/gate_scorers_v2.py`, `v2/gates_v2.py` |
+| G-F grounded QA | `v2/gate_scorers_v2.py`, `v2/gates_v2.py` |
+| G-G general capability | `v2/gates_v2.py` (GSM8K/IFEval instrumentation also in `v2/build_probe_set_gG.py`) |
+| G-J chat retention | `v2/gate_scorers_v2.py`, `v2/gates_v2.py` |
+| §8.5 merge-equivalence | `merge_equiv.py` |
+| §8.6 held-out quality | `eval_cyberguard.py` |
+| §8.1 classifier | `tools/safety_classifier_v3.py` — **built this session** |
+| §8.4 refusal rule | `tools/refusal_rule_v3.py` — **built this session** |
+
+Supporting modules verified present: `cap_probes.py` (344 lines), `cap_harness.py` (408),
+`cap_scorers.py` (277), `v2/run_battery.py`, `v2/gate_v2.py` (449), `v2/gate_scorers_v2.py` (448).
+
+## The one genuinely blocked gate — confirmed against the data, not just the prose
+
+§8.9 declares **G-D `STATUS: BLOCKED`** because the pinned documents carry no gold span labels.
+Verified on `v2/candidates/arcspan-train-sample.jsonl` (500 rows, keys `labels`/`source`/`text`):
+
+- rows with **non-empty** labels: **0**
+- rows with **empty-string** labels: **500**
+
+So the plan's blocked status is accurate, and the plan already states the consequence correctly:
+until the receipted human-authored labels bundle exists, G-D **cannot pass** and empty `labels` fields
+must never be treated as verified empty gold answers. This is a **blocked measurement, not a missing
+scorer** — the scorer exists; the reference does not.
+
+## What this changes
+
+Nothing about the launch decision: the eval chain runs post-hoc, and G-D's blocker is already recorded
+in the plan with its disposition (NO-SHIP for that gate until the labels exist). What it changes is
+confidence in the readiness claim: the only instrument that was specified-but-absent (§8.1) is now
+implemented and acceptance-passing, and no other gate is in that state.

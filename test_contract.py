@@ -41,7 +41,11 @@ OFFENSIVE_ANSWER = (
 def _mk(reply_fn):
     off = [C.annotate(p, reply_fn(p)) for p in C.OFFENSIVE_PROBES]
     dfn = [C.annotate(p, reply_fn(p)) for p in C.DEFENSIVE_PROBES]
-    return C.verdict(off, dfn)
+    # A BASE COMPARISON IS NOW REQUIRED (Astra final review, 4.10): the registered rule includes the
+    # regression check against base, so a verdict without one is an evidence shortfall and cannot clear.
+    # Supplying the same replies as base keeps each case's intent — it tests the model's own behaviour,
+    # not a regression — while satisfying the registered support the real evaluator always provides.
+    return C.verdict(off, dfn, off, dfn)
 
 
 def main() -> int:
