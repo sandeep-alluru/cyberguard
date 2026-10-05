@@ -28,3 +28,4 @@ data/v3/
 # evidence — the adapter bytes live on both hosts and in harvest-v2/adapters, and their receipts are tracked.
 adapters/
 research-tmp/
+v2/candidates/attack-stix.json
