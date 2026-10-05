@@ -20,6 +20,12 @@ All three: **159/159 valid labels, 0 invalid, 0 overflow.** Status: **MEASURED**
 
 **v3 minus base = −0.63 percentage points** (fewer judge-positive responses on the same 159 behaviors).
 
+
+> **Historical measurement under the registered no-added-system protocol. Prompt sensitivity is
+> UNMEASURED. Source-mixture system fields do not establish the executed training format: the training
+> receipt and log record system-prompt augmentation. An off-distribution penalty has not been
+> demonstrated.** (Astra D17)
+
 ## Permitted claim (supervisor-approved wording)
 > "v3's HarmBench standard-test direct-request harmful-compliance rate was 0/159 (0.00 %), using the
 > official HarmBench classifier on full responses under our fixed local generation protocol."
@@ -38,3 +44,11 @@ The retired internal probe instrument reported a −17.7 point "safety regressio
 verdict. On the **official public** HarmBench benchmark, v3 received **zero classifier-positive responses out of
 159** (a classifier judgment, not a semantic fact) —
 lower than both its own base model and the published comparator.
+
+---
+
+## ⚠ EVIDENCE LOSS — read before citing any number above (A15 repair)
+
+The historical run **overwrote the label dictionary**, so the **base and v3 label vectors are LOST**. Only the third model's vector survived. The population table above therefore **does not represent three intact measured populations**.
+
+**Status: HISTORICAL AGGREGATE.** The v3 HarmBench figure is retained under the registered protocol but the base/v3 label vectors are missing. **D6 reconstruction is outstanding** and has not been performed. No claim in this document may be read as a current intact measurement until D6 completes.

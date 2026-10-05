@@ -27,6 +27,12 @@ Paired counts (base refusal, v3 refusal): **00 = 493 · 01 = 225 · 10 = 27 · 1
   useful answer was supplied.
 - 10 = 27: base refused, v3 answered
 
+
+> **Historical measurement under the registered no-added-system protocol. Prompt sensitivity is
+> UNMEASURED. Source-mixture system fields do not establish the executed training format: the training
+> receipt and log record system-prompt augmentation. An off-distribution penalty has not been
+> demonstrated.** (Astra D17)
+
 ## Permitted claim (supervisor wording)
 > "Under our fixed local generation protocol, v3 had an upstream-heuristic refusal rate of 230/750
 > (30.67 %; 95 % Wilson interval [27.47 %, 34.06 %]) on the pinned English CyberSecEval MITRE-FRR
@@ -46,3 +52,11 @@ Paired counts (base refusal, v3 refusal): **00 = 493 · 01 = 225 · 10 = 27 · 1
 |---|---:|---:|---:|---|
 | HarmBench harmful compliance (lower better) | 0.63 % | **0.00 %** | 1.89 % | v3 |
 | MITRE-FRR benign refusal (lower better) | 4.27 % | **30.67 %** | **1.07 %** | CyberSecQwen |
+
+---
+
+## Qualification (A16 repair)
+
+**"base refused, v3 answered" describes a HEURISTIC LABEL TRANSITION, not semantic behaviour.** An upstream heuristic non-refusal label does not prove the model answered usefully, and a heuristic refusal label does not prove it refused. Semantic refusal/usefulness remains **UNMEASURED** pending D7/D11 human judgment.
+
+**Inherited limitation:** this document's side-by-side safety table shares the damaged HarmBench evidence. The base/v3 HarmBench label vectors are **LOST** and **D6 reconstruction is outstanding**.

@@ -1,0 +1,202 @@
+[
+ {
+  "id": "A01",
+  "test": "OWNER-DECISION: withdrawn design superseded, not appended",
+  "fail_before": "passed pre-fix; failability shown by CONTROL",
+  "prefix_evidence": "withdrawal=True superseded_opening_still_operative=False",
+  "control": "re-insert the withdrawn design as the operative opening proposal",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "withdrawal=True superseded_opening_still_operative=False"
+ },
+ {
+  "id": "A02",
+  "test": "OWNER-DECISION: separate-identity mentor ruling incorporated",
+  "fail_before": "FAIL",
+  "prefix_evidence": "separate_identity_ruling_present=False",
+  "control": "remove the separate-identity ruling",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "separate_identity_ruling_present=True"
+ },
+ {
+  "id": "A03",
+  "test": "ARCHITECTURE: stale 'not persisted' claim removed",
+  "fail_before": "FAIL",
+  "prefix_evidence": "stale_not_persisted_claim=False",
+  "control": "re-insert the stale not-persisted claim",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "stale_not_persisted_claim=False"
+ },
+ {
+  "id": "A04",
+  "test": "ACTIVE-PLAN: absent pipeline exits marked planned",
+  "fail_before": "passed pre-fix; failability shown by CONTROL",
+  "prefix_evidence": "planned-deliverable qualification present",
+  "control": "remove the planned-deliverable qualification entirely",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "planned-deliverable qualification present"
+ },
+ {
+  "id": "A05",
+  "test": "ACTIVE-PLAN: strict validation passes",
+  "fail_before": "FAIL",
+  "prefix_evidence": "plan-validate exit=2",
+  "control": "re-insert a blank required cell and an undeclared absent path",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "plan-validate exit=0 on cyberguard"
+ },
+ {
+  "id": "A06",
+  "test": "PLAN-OF-RECORD: stale session status removed",
+  "fail_before": "passed pre-fix; failability shown by CONTROL",
+  "prefix_evidence": "stale_session_status_present=False",
+  "control": "re-insert the stale session-status line",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "stale_session_status_present=False"
+ },
+ {
+  "id": "A07",
+  "test": "PLAN-OF-RECORD: D13 restoration reflected",
+  "fail_before": "FAIL",
+  "prefix_evidence": "d13_restoration_reference=False",
+  "control": "remove the D13 restoration reference",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "d13_restoration_reference=True"
+ },
+ {
+  "id": "A08",
+  "test": "gate: refuse wrong/altered/D9-as-permission, dispatch exact",
+  "fail_before": "FAIL",
+  "prefix_evidence": "{\"wrong_action_refused\": true, \"exact_authorized_dispatched\": false, \"altered_args_refused\": true, \"d9_as_permission_refused\": true}",
+  "control": "weaken the gate to allow any D19 row (disable the allowlist)",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "{\"wrong_action_refused\": true, \"exact_authorized_dispatched\": true, \"altered_args_refused\": true, \"d9_as_permission_refused\": true}"
+ },
+ {
+  "id": "A09",
+  "test": "review_packet: no enforcement overclaim",
+  "fail_before": "FAIL",
+  "prefix_evidence": "claims_actual_serialized=True uses_char_estimate=True claims_cumulative_enforcement=False",
+  "control": "inject a positive serialized-request enforcement claim and remove the estimate disclosure",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "claims_actual_serialized=False uses_char_estimate=True discloses_estimate=True claims_cumulative_enforcement=False"
+ },
+ {
+  "id": "A10",
+  "test": "wrapper: returns failure on launch failure",
+  "fail_before": "FAIL",
+  "prefix_evidence": "suppresses_failure=True fails_on_bad_input=True",
+  "control": "re-insert the failure suppression",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "suppresses_failure=False fails_on_bad_input=True"
+ },
+ {
+  "id": "A11",
+  "test": "launchers: no direct codex invocation",
+  "fail_before": "FAIL",
+  "prefix_evidence": "tools/review_cycle.sh:direct,v2/dispatch_review.sh:direct,v2/checkpoint_review.sh:direct",
+  "control": "re-insert a direct codex invocation into a launcher",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "clean"
+ },
+ {
+  "id": "A12",
+  "test": "audit_reviews: real request matching + nonzero exit",
+  "fail_before": "FAIL",
+  "prefix_evidence": "reads_request_ids=True compares_session_identity=False warns_but_passes=True",
+  "control": "restore the lenient warn-and-pass behaviour (no identity match, exit 0)",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "reads_request_ids=True compares_session_identity=True warns_but_passes=False"
+ },
+ {
+  "id": "A13",
+  "test": "accounting: no zero placeholders",
+  "fail_before": "FAIL",
+  "prefix_evidence": "zero_placeholder_rows=2",
+  "control": "re-insert a zero placeholder row",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "zero_placeholder_rows=0"
+ },
+ {
+  "id": "A14",
+  "test": "FAILURE-REGISTER: CLOSED means verified",
+  "fail_before": "FAIL",
+  "prefix_evidence": "closed_by_plan_present=True",
+  "control": "re-insert CLOSED by plan",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "closed_by_plan_present=False"
+ },
+ {
+  "id": "A15",
+  "test": "HARMBENCH: lost vectors disclosed",
+  "fail_before": "FAIL",
+  "prefix_evidence": "loss_disclosed=False",
+  "control": "remove the lost-vector disclosure",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "loss_disclosed=True"
+ },
+ {
+  "id": "A16",
+  "test": "FRR: heuristic transition qualified",
+  "fail_before": "FAIL",
+  "prefix_evidence": "has_refusal_phrase=True heuristic_qualified=True carries_harmbench_limit=False",
+  "control": "remove every HarmBench limitation marker from the FRR side-by-side",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "has_refusal_phrase=True heuristic_qualified=True carries_harmbench_limit=True"
+ },
+ {
+  "id": "A17",
+  "test": "ROLE-PROTOCOL: instrument list not exhaustive",
+  "fail_before": "FAIL",
+  "prefix_evidence": "stale_exhaustive_wording=True scoped_against_plan=False",
+  "control": "re-insert unscoped exhaustive wording and remove the plan-of-record scoping",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "stale_exhaustive_wording=False scoped_against_plan=True"
+ },
+ {
+  "id": "A18",
+  "test": "acceptance dir populated",
+  "fail_before": "FAIL",
+  "prefix_evidence": "dir absent",
+  "control": "empty the acceptance directory",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "acceptance_files=57"
+ },
+ {
+  "id": "A19",
+  "test": "scanner exists and detects planted entry point",
+  "fail_before": "FAIL",
+  "prefix_evidence": "scanner absent",
+  "control": "remove the planted-entry detection",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "planted_detected=True clean_passes=True"
+ },
+ {
+  "id": "C01",
+  "test": "manifest round-trips byte-identical + home patch holds",
+  "fail_before": "FAIL",
+  "prefix_evidence": "preserve manifest absent",
+  "control": "corrupt one preserved copy so round-trip fails",
+  "control_disabled_test_fails": true,
+  "pass_after": "PASS",
+  "live_evidence": "coverage=17 entries missing=0 roundtrip=True home_patch_ok=True"
+ }
+]

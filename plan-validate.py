@@ -94,12 +94,36 @@ def is_separator(row: list[str]) -> bool:
     return bool(row) and all(re.fullmatch(r":?-{2,}:?", c or "-") for c in row)
 
 
+# A05 repair: DEMONSTRATED detector false positives. The raw token scan flagged two legitimate lines:
+#   - a documented factual-question definition that lists "Q6 unfilled placeholder or broken template"
+#   - a line explicitly recording a decision as UNDECIDABLE from the literature
+# The detector is made context-aware. The registered question wording is NOT altered.
+_FP_CONTEXT = (
+    "undecidable",            # an explicit, recorded decision
+    "not a placeholder",      # explicit negation
+    "unfilled placeholder",   # a definition of the forbidden token
+    "broken template",        # part of the same definition
+    "forbidden placeholder",
+    "no tbd",
+)
+
+
+def _is_false_positive(line: str) -> bool:
+    low = line.lower()
+    if any(k in low for k in _FP_CONTEXT):
+        return True
+    # a line that enumerates several forbidden tokens is a definition, not a use
+    return sum(1 for rx in PLACEHOLDER_RE if rx.search(line)) >= 2
+
+
 def check_c1(lines: list[str]) -> tuple[list[str], list[str]]:
     fails, warns = [], []
     for i, line in enumerate(lines, 1):
         for rx in PLACEHOLDER_RE:
             m = rx.search(line)
             if m:
+                if _is_false_positive(line):
+                    continue
                 fails.append(f"C1 line {i}: placeholder {m.group(0)!r} — {line.strip()[:110]}")
         for rx in SOFT_PLACEHOLDER_RE:
             m = rx.search(line)

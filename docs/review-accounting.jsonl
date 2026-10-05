@@ -1,0 +1,1 @@
+{"note": "A13 repair: zero placeholder token fields removed. Missing usage is represented as null + UNMEASURED, never as numeric zero. Prior rows carried input_tokens:0 with telemetry:UNMEASURED.", "input_tokens": null, "output_tokens": null, "cached_input_tokens": null, "telemetry": "UNMEASURED"}

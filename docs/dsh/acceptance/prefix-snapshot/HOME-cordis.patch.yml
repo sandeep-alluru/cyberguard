@@ -1,0 +1,54 @@
+# Home-level patch layer ($DSH_HOME/cordis.patch.yml).
+#
+# Applied after every bundle layer AND after the per-profile patch, so it
+# outranks both. The compaction policy lives here because it must hold for
+# every profile -- a session that overflows is broken regardless of surface.
+#
+# NOTE: only these keys exist in the INSTALLED dsh-compaction-basic:
+#   thresholdRatio, retainRatio, retainTokens, summarizationProvider,
+#   summarizationModel, maxTokens, compactionRetries, maxOverflowRetries,
+#   modelPolicies, auto
+# `headroomTokens` is NOT one of them -- that key belongs to a newer source tree,
+# and passing it fails the whole plugin tree with
+#   BasicCompactionConfig: unknown key "headroomTokens"
+# which took the headless profile down. Do not reintroduce it here.
+
+# Compaction fires at 80% of the route's context window.
+#
+# The installed trigger is exactly:  floor(contextWindow * thresholdRatio)
+# (no headroom subtraction -- a session compacts once measured tokens reach
+# that fraction of the model's declared window). 0.8 is also the shipped
+# default, but it is stated explicitly so the intent survives an upgrade that
+# changes the default.
+- id: compaction-basic
+  config:
+    thresholdRatio: 0.8
+    auto: true
+
+    # --- The part that makes the hard 400 structurally unreachable ----------
+    #
+    # Compaction is ITSELF a model call. When the summariser runs on the same
+    # route as the conversation, a session that has grown past that route's
+    # window cannot be summarised either -- the summary request fails exactly
+    # the way the turn did, compaction never completes, and the session wedges
+    # with no way forward. That is what produced
+    #   400 exceed_context_size_error n_prompt_tokens 131084 / n_ctx 131072
+    #
+    # Pinning the summariser to the HOSTED route breaks the deadlock: it has a
+    # 1,000,000-token window, so the summary call fits no matter how large the
+    # local conversation became. Compaction then always succeeds, and the
+    # conversation is reduced below the local window instead of dying at it.
+    summarizationProvider: deepseek-official
+    summarizationModel: deepseek-flash
+
+    # Summary output cap. The installed default is 8192, and that is the value
+    # that was silently breaking every compaction here: the summariser hit the
+    # cap mid-summary and the result was rejected as an
+    #   "summarization truncated at the token cap (incomplete checkpoint)"
+    # so compaction never committed and the session looped and died.
+    # 32768 leaves room for a complete checkpoint over a long transcript. The
+    # summariser is the hosted 1M-window route, whose own output limit is far
+    # above this, so the cap is the only ceiling in play.
+    maxTokens: 32768
+    compactionRetries: 3
+    maxOverflowRetries: 2

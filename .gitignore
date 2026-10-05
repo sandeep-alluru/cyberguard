@@ -27,3 +27,4 @@ data/v3/
 # tokenizer.json files (22 MB) as the only addable part. They are regenerable copies of the base tokenizer, not
 # evidence — the adapter bytes live on both hosts and in harvest-v2/adapters, and their receipts are tracked.
 adapters/
+research-tmp/

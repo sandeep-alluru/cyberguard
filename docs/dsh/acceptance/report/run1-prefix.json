@@ -1,0 +1,125 @@
+{
+ "state": "prefix",
+ "rows": [
+  {
+   "id": "A01",
+   "desc": "OWNER-DECISION: withdrawn design superseded, not appended",
+   "ok": true,
+   "evidence": "withdrawal=True superseded_opening_still_operative=False"
+  },
+  {
+   "id": "A02",
+   "desc": "OWNER-DECISION: separate-identity mentor ruling incorporated",
+   "ok": false,
+   "evidence": "separate_identity_ruling_present=False"
+  },
+  {
+   "id": "A03",
+   "desc": "ARCHITECTURE: stale 'not persisted' claim removed",
+   "ok": false,
+   "evidence": "stale_not_persisted_claim=False"
+  },
+  {
+   "id": "A04",
+   "desc": "ACTIVE-PLAN: absent pipeline exits marked planned",
+   "ok": true,
+   "evidence": "planned-deliverable qualification present"
+  },
+  {
+   "id": "A05",
+   "desc": "ACTIVE-PLAN: strict validation passes",
+   "ok": false,
+   "evidence": "plan-validate exit=2"
+  },
+  {
+   "id": "A06",
+   "desc": "PLAN-OF-RECORD: stale session status removed",
+   "ok": true,
+   "evidence": "stale_session_status_present=False"
+  },
+  {
+   "id": "A07",
+   "desc": "PLAN-OF-RECORD: D13 restoration reflected",
+   "ok": false,
+   "evidence": "d13_restoration_reference=False"
+  },
+  {
+   "id": "A08",
+   "desc": "gate: refuse wrong/altered/D9-as-permission, dispatch exact",
+   "ok": false,
+   "evidence": "{\"wrong_action_refused\": true, \"exact_authorized_dispatched\": false, \"altered_args_refused\": true, \"d9_as_permission_refused\": true}"
+  },
+  {
+   "id": "A09",
+   "desc": "review_packet: no enforcement overclaim",
+   "ok": false,
+   "evidence": "claims_actual_serialized=True uses_char_estimate=True claims_cumulative_enforcement=False"
+  },
+  {
+   "id": "A10",
+   "desc": "wrapper: returns failure on launch failure",
+   "ok": false,
+   "evidence": "suppresses_failure=True fails_on_bad_input=True"
+  },
+  {
+   "id": "A11",
+   "desc": "launchers: no direct codex invocation",
+   "ok": false,
+   "evidence": "tools/review_cycle.sh:direct,v2/dispatch_review.sh:direct,v2/checkpoint_review.sh:direct"
+  },
+  {
+   "id": "A12",
+   "desc": "audit_reviews: real request matching + nonzero exit",
+   "ok": false,
+   "evidence": "reads_request_ids=True compares_session_identity=False warns_but_passes=True"
+  },
+  {
+   "id": "A13",
+   "desc": "accounting: no zero placeholders",
+   "ok": false,
+   "evidence": "zero_placeholder_rows=2"
+  },
+  {
+   "id": "A14",
+   "desc": "FAILURE-REGISTER: CLOSED means verified",
+   "ok": false,
+   "evidence": "closed_by_plan_present=True"
+  },
+  {
+   "id": "A15",
+   "desc": "HARMBENCH: lost vectors disclosed",
+   "ok": false,
+   "evidence": "loss_disclosed=False"
+  },
+  {
+   "id": "A16",
+   "desc": "FRR: heuristic transition qualified",
+   "ok": false,
+   "evidence": "has_refusal_phrase=True heuristic_qualified=True carries_harmbench_limit=False"
+  },
+  {
+   "id": "A17",
+   "desc": "ROLE-PROTOCOL: instrument list not exhaustive",
+   "ok": false,
+   "evidence": "stale_exhaustive_wording=True scoped_against_plan=False"
+  },
+  {
+   "id": "A18",
+   "desc": "acceptance dir populated",
+   "ok": false,
+   "evidence": "dir absent"
+  },
+  {
+   "id": "A19",
+   "desc": "scanner exists and detects planted entry point",
+   "ok": false,
+   "evidence": "scanner absent"
+  },
+  {
+   "id": "C01",
+   "desc": "manifest round-trips byte-identical + home patch holds",
+   "ok": false,
+   "evidence": "preserve manifest absent"
+  }
+ ]
+}

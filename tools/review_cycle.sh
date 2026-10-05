@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# A11 (owner-approved): all external-model review goes through the GOVERNED adapter.
+# Direct codex invocation removed; ungoverned entry points are rejected by
+# tools/scan_review_invocations.py.
+
 # CyberGuard v3 — recurring Codex-Astra review cycle.
 #
 # Usage:  tools/review_cycle.sh <cycle_number> [--delay-seconds N]
@@ -10,7 +14,7 @@
 #      `--delay-seconds` remains available but should not be used as a standing timer.
 #   1. snapshots the live measured state (tools/trails_state.py) and the plan hash;
 #   2. builds a BOUNDARY-scoped read-only review prompt;
-#   3. runs `codex exec -m gpt-6-astra -s read-only --skip-git-repo-check`;
+#   3. runs `tools/astra_review.sh packet.json;
 #   4. writes prompt + output + stderr and appends to docs/PLAN-V3-cycle-review.log;
 #   5. prints the verdict line so a supervising job can surface it.
 #
@@ -108,7 +112,7 @@ Read the file yourself at the path in BOUNDARY. Report what it actually says.
 PROMPT_EOF
 
 echo "[cycle $N] prompt built ($(wc -c < "$PROMPT") bytes); invoking gpt-6-astra at $TS"
-timeout 2700 codex exec -m gpt-6-astra -s read-only --skip-git-repo-check \
+timeout 2700 tools/astra_review.sh packet.json
   "$(cat "$PROMPT")" > "$OUTPUT" 2> "$STDERR" < /dev/null
 RC=$?
 {

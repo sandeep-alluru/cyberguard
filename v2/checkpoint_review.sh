@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# A11 (owner-approved): all external-model review goes through the GOVERNED adapter.
+# Direct codex invocation removed; ungoverned entry points are rejected by
+# tools/scan_review_invocations.py.
+
 # checkpoint_review.sh — the Astra review the owner's cadence requires AT EVERY CHECKPOINT.
 #
 # Owner cadence: "a checkpoint every 3 hours, an Astra review at every checkpoint with findings fixed before
@@ -75,7 +79,7 @@ PY
 if [ "$DRY" = 1 ]; then
   echo "--- DRY RUN: prompt head ---"; head -12 "$PROMPT"; exit 0
 fi
-nohup codex exec -s read-only --skip-git-repo-check -C "$ROOT" -o "$OUT" - \
+nohup tools/astra_review.sh packet.json
   < "$PROMPT" > "research-tmp/reviews/checkpoint-${LABEL}-review.log" 2>&1 &
 sleep 4
 echo "review dispatched for checkpoint $LABEL -> $OUT"

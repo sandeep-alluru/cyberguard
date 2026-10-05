@@ -53,7 +53,7 @@ Consequences, recorded as binding:
    electricity distribution operator"). The base model scores 100% on that instrument, so it has no
    headroom, and its "unknown-answer" probes name **fictional** companies and products.
    The v3 NO-SHIP verdict therefore does **not** stand as a public-test result.
-2. **Only these four count**, because they are publicly published and externally maintained:
+2. **These four were the instruments at the time of writing; the list is NOT exhaustive**, because they are publicly published and externally maintained:
    CyberMetric-500, SecQA-v1, AI4Sec CTI-MCQ, AI4Sec CTI-RCM.
 3. **DeepSeek is a worker.** It designs nothing, chooses no metric, authors no test, and invents no bar.
    All design, all decisions and all review come from Astra as supervisor.
@@ -71,3 +71,9 @@ Consequences, recorded as binding:
 v3 beats its own base on all four. It loses the two CTI benchmarks to CyberSecQwen because it fails to emit
 a parseable answer on 40.9% (MCQ) and 18.7% (RCM) of them — where it does answer it scores 79.2% and 77.9%,
 against CyberSecQwen's 59.5% and 67.9%.
+
+---
+
+## Instrument scope (A17 repair)
+
+The four instruments named above were those registered when this protocol was written. They are **not an exhaustive or current list**. The governing instrument set is defined by **docs/PLAN-OF-RECORD.md**, which adds the registered safety and generalization product instruments. Where this document and the plan of record differ, **the plan of record governs**.

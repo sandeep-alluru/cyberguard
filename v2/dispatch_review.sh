@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# A11 (owner-approved): all external-model review goes through the GOVERNED adapter.
+# Direct codex invocation removed; ungoverned entry points are rejected by
+# tools/scan_review_invocations.py.
+
 # dispatch_review.sh — dispatch a Codex-Astra review with the revision and spec hash SUBSTITUTED AND VERIFIED.
 #
 # Two failures this exists to prevent, each of which produced a review of the wrong thing:
@@ -36,7 +40,7 @@ if [ "$MODE" = "--no-dispatch" ]; then
   echo "  --no-dispatch: prompt verified, nothing launched"
   exit 0
 fi
-nohup codex exec -s read-only --skip-git-repo-check -C "$ROOT" -o "$OUT" - \
+nohup tools/astra_review.sh packet.json
   < "$PROMPT" > "research-tmp/reviews/codex-review-${N}.log" 2>&1 &
 sleep 4
 echo "  review #$N dispatched -> $OUT (rev $REV, spec $SPEC_SHA)"
