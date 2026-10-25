@@ -21,7 +21,7 @@
 | **Visibility** | **private** (verified with `gh` after the push) |
 | **Action taken** | **updated in place**, not duplicated — the name was already taken by the owner's own v3-era workspace repository, so the brief's "update it, never duplicate" branch applied |
 | **Default branch** | `master` |
-| **Contents now** | 130 files: methodology and governance, public-benchmark results with their receipts, corpus-qualification and gate discipline, the eval tooling, the boundary charter, the inventory, and this packet |
+| **Contents now** | 132 files: methodology and governance, public-benchmark results with their receipts, corpus-qualification and gate discipline, the eval tooling, the boundary charter, the inventory, and this packet |
 | **Before** | 430 files: the v3-era build workspace, including training candidates, the held-out set, the internal probe sets, session archives and host-specific scripts |
 
 The previous contents remain in the git history. The replacement is deliberate, and the reasons are
@@ -151,12 +151,36 @@ None of these is a technical question, and none of them was taken here.
 
 | asset | file | duration | coverage |
 |---|---|---|---|
-| **Demo video** | `cyberguard-evaluation-demo.mp4` (in the launch workdir — **not** in the repository) | *see the table in the delivery notes* | the evaluation story end to end: what VulnTriage is; the pre-registered bars and the release table; how a result is read; v3's NO-SHIP with the two regressions; v3's public-benchmark numbers; the corpus gate and the F-8 leak; why the next arm trains from base and the measured pilot; the seven-step path to a shippable model repository; and the boundary enforced mechanically |
+| **Demo video** | `cyberguard-evaluation-demo.mp4` (in the launch workdir — **not** in the repository) | **16 min 13 s** (973 s), 1920×1080, 25 fps, H.264 + AAC, 27.5 MB | the evaluation story end to end, in the order below |
+
+**What it covers**, and where:
+
+| # | segment | what is on screen |
+|---|---|---|
+| 1 | what VulnTriage is, and what this repository holds | title card; the four contents and the four exclusions |
+| 2 | the shape of the repository | live terminal: the tree, the file counts, the commit log |
+| 3 | the rule everything follows | card: *public third-party benchmarks only* |
+| 4 | the pre-registered bars | live terminal: `docs/BAR-SHEET.md` §2, all eight bars with their n, their bar and their status |
+| 5 | the release table | live terminal: which arms are carried forward, and why |
+| 6 | v3's verdict | live terminal: the gate table — 4 PASS, 6 FAIL, and the row that carries the weight |
+| 7 | v3's public-benchmark numbers | live terminal: B4 HarmBench per arm, B1 CTI-RCM per arm, B5 CTI-MCQ per arm, B3 false-refusal per arm, B3b refusal integrity per arm |
+| 8 | the corpus gate | card, then live terminal: the Data Gate receipt, verdict and all three registered limits |
+| 9 | the held-out leak | live terminal: the F-8 trace, stage by stage — 604 rows, 499 of 500 |
+| 10 | why the next arm trains from base | card, then live terminal: the pilot receipt — 2.506 samples/s, epoch 0.024 |
+| 11 | the seven steps to a shippable model repository | card, building one step at a time |
+| 12 | the boundary, enforced | live terminal: `verify_repo.py` running to PASS |
+| 13 | what was deliberately left out | live terminal: `INVENTORY.md` §2 |
+| 14 | where to read it, and the whole story | card |
 
 The video was produced from the same scrubbed repository copies that are published here, by screen
 capture of the tooling and the records, plus title and structure cards. **Nothing on screen is a
-model weight or adapter, training or held-out data, a credential, or an internal hostname or path.**
-It has **not** been uploaded anywhere; publication is the owner's to do.
+model weight or adapter, training or held-out data, a credential, or an internal hostname or
+path** — the on-screen commands are all relative-path reads of this repository's own published
+files. It has **not** been uploaded anywhere; publication is the owner's to do.
+
+The build is reproducible from the launch workdir: `demo_content.py` holds the narration and the
+on-screen material, `make_demo.py` renders the cards, drives the screen capture through tmux and
+assembles the file, and `make_demo.py --reuse-audio` re-uses the existing narration clips.
 
 ---
 
@@ -173,6 +197,7 @@ It has **not** been uploaded anywhere; publication is the owner's to do.
 | the held-out leak | `docs/ESCALATION-F8-HELDOUT-CONTAMINATION.md` |
 | the release shape and the six artefacts | `docs/RELEASE-SHAPE.md` |
 | the current rulings | `docs/ASTRA-DECISIONS.jsonl`, `docs/OWNER-DECISIONS.md`, `docs/V3-OWNER-DECISIONS.md` |
+| the demo video's content and length | `ffprobe -show_entries format=duration cyberguard-evaluation-demo.mp4` |
 
 ---
 
