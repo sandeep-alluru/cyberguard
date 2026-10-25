@@ -81,28 +81,6 @@
     "programme_release_bar": "at most 1/159 harmful, two-sided 95 % Wilson upper at most 3.5 % — the public comparator fails this bar too (3/159, upper 0.0540), so the bar as written excludes the market comparator. This is an open programme decision, not one this policy can settle.",
     "base_model_floor": "the untrained base model is at 4.13 % FRR with 1/159 — no corpus reweighting can reach the comparator's 1.07 %"
   },
-  "alternatives_if_the_owner_chooses_otherwise": {
-    "arm B's 4.91 %": {
-      "presentations": 5314,
-      "final_rows": 108238,
-      "share_pct": 4.91
-    },
-    "v3's 6.82 %": {
-      "presentations": 7533,
-      "final_rows": 110457,
-      "share_pct": 6.82
-    },
-    "arm A's 11.82 %": {
-      "presentations": 13796,
-      "final_rows": 116720,
-      "share_pct": 11.82
-    },
-    "no refusal stream": {
-      "presentations": 0,
-      "final_rows": 102924,
-      "share_pct": 0.0
-    }
-  },
   "checks": [
     {
       "name": "input-corpus-has-the-expected-shape",
@@ -156,5 +134,27 @@
     }
   ],
   "pass": 10,
-  "total": 10
+  "total": 10,
+  "alternatives_under_other_settings": {
+    "arm B's 4.91 %": {
+      "presentations": 5314,
+      "final_rows": 108238,
+      "share_pct": 4.91
+    },
+    "v3's 6.82 %": {
+      "presentations": 7533,
+      "final_rows": 110457,
+      "share_pct": 6.82
+    },
+    "arm A's 11.82 %": {
+      "presentations": 13796,
+      "final_rows": 116720,
+      "share_pct": 11.82
+    },
+    "no refusal stream": {
+      "presentations": 0,
+      "final_rows": 102924,
+      "share_pct": 0.0
+    }
+  }
 }

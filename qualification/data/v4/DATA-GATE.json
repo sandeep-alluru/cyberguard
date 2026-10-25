@@ -5,8 +5,8 @@
   "authority": {
     "protocol": "docs/P2-CALIBRATION-PROTOCOL.md",
     "protocol_status": "APPROVED 2026-10-23 (ledger D-1)",
-    "owner_go": "2026-10-24 (phase 2; no training in this phase)",
-    "note": "protocol §9.3: approval authorises no draw, no labels, no removals, no source edits and no Data Gate pass."
+    "note": "protocol §9.3: approval authorises no draw, no labels, no removals, no source edits and no Data Gate pass.",
+    "programme_go": "2026-10-24 (phase 2; no training in this phase)"
   },
   "candidate": {
     "path": "<programme-tree>/data/v4/corpus-final.jsonl",

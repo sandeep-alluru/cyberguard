@@ -13,7 +13,8 @@ Two banned vocabularies
 What it scans
   - every Markdown file          the prose a reader reads
   - every Python file            docstrings, comments, human-readable strings
-  - every JSON receipt           the metadata around a measurement
+  - every JSON receipt           the metadata around a measurement, keys included
+  - every CSV table              the published benchmark files
 
 What it does not scan
   Measured content: the evaluated models' own answers, and the published
@@ -104,7 +105,12 @@ def scan_text(path: Path, text: str) -> list[tuple[int, str]]:
 
 
 def scan_json(path: Path) -> tuple[list[tuple[int, str]], int]:
-    """Return (prose hits, measured-content hit count)."""
+    """Return (prose hits, measured-content hit count).
+
+    Keys are checked as well as values. A key is metadata - a field name a
+    reader sees - so a banned word in one is a hit, exactly as a banned word in
+    a value would be. Keys inside a measured subtree stay counted as measured.
+    """
     try:
         blob = json.loads(path.read_text(encoding="utf-8", errors="replace"))
     except Exception:
@@ -117,6 +123,11 @@ def scan_json(path: Path) -> tuple[list[tuple[int, str]], int]:
         nonlocal measured
         if isinstance(node, dict):
             for k, v in node.items():
+                if PATTERN.search(k):
+                    if measured_parent:
+                        measured += 1
+                    else:
+                        prose.append((0, f"[key] {k}"))
                 walk(v, measured_parent or k.lower() in MEASURED_KEYS)
         elif isinstance(node, list):
             for v in node:
@@ -134,25 +145,42 @@ def scan_json(path: Path) -> tuple[list[tuple[int, str]], int]:
     return prose, measured
 
 
+def scan_csv(path: Path, text: str) -> tuple[list[tuple[int, str]], int]:
+    """Return (prose hits, measured-content hit count) for a benchmark table.
+
+    Every CSV in this repository is a published benchmark file: its rows are
+    the benchmark's own prompts and identifiers. Those are the evidence and
+    they are never edited, so their hits are counted and reported rather than
+    treated as findings.
+    """
+    hits = PATTERN.findall(text)
+    return [], len(hits)
+
+
 def main() -> int:
     files = sorted(
         p for p in ROOT.rglob("*")
         if p.is_file()
         and not any(part in SKIP_DIRS for part in p.parts)
-        and p.suffix.lower() in {".md", ".py", ".json", ".jsonl", ".txt"}
+        and p.suffix.lower() in {".md", ".py", ".json", ".jsonl", ".txt", ".csv"}
     )
 
     measured_total = 0
+    measured_files: list[tuple[str, int]] = []
     findings: list[tuple[str, str]] = []
 
     for p in files:
         rel = p.relative_to(ROOT)
         if p.suffix.lower() == ".json":
             hits, measured = scan_json(p)
+        elif p.suffix.lower() == ".csv":
+            hits, measured = scan_csv(p, p.read_text(encoding="utf-8", errors="replace"))
         else:
             hits = scan_text(p, p.read_text(encoding="utf-8", errors="replace"))
             measured = 0
         measured_total += measured
+        if measured:
+            measured_files.append((str(rel), measured))
         for n, line in hits:
             where = f"{rel}:{n}" if n else str(rel)
             findings.append((where, line))
@@ -169,6 +197,10 @@ def main() -> int:
 
     print(f"measured content excluded from the scan: {measured_total} occurrences "
           f"(the evaluated models' own answers and the published benchmark prompts)")
+    if measured_files:
+        print(f"in {len(measured_files)} file(s):")
+        for rel, n in measured_files:
+            print(f"  {n:>6}  {rel}")
     print("\nPASS - no banned vocabulary in the public files.")
     return 0
 
