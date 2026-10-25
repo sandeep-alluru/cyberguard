@@ -1,8 +1,10 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="CyberGuard VulnTriage" height="76">
+  <img src="assets/logo.svg" alt="CyberGuard" height="76">
 </p>
 
-<p align="center"><strong>CVE or advisory in — CWE, CVSS v3.1 vector and score, plain-English impact, and a prioritisation call out.</strong></p>
+<h1 align="center">CyberGuard VulnTriage</h1>
+
+<p align="center"><strong>Hand it any security vulnerability — it tells you how dangerous it is, what an attacker can actually do with it, and what to fix first.</strong></p>
 
 <p align="center">An open evaluation programme for a 4B vulnerability-triage scorer, measured on public third-party benchmarks.</p>
 
@@ -152,7 +154,7 @@ The comparator's published hash was verified against the bytes measured here: th
 
 | asset | what it is |
 |---|---|
-| `assets/logo.svg`, `assets/logo.png` | the wordmark |
+| `assets/logo.svg`, `assets/logo.png` | the Rottweiler mark and the wordmark |
 | `assets/social-preview.png` | the link preview |
 | `assets/hero-poster.png` | the hero poster |
 | `assets/chart-cti-rcm.png`, `assets/chart-frr.png` | the comparison charts, with the threshold marked |
