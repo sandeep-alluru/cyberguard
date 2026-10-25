@@ -1,4 +1,4 @@
-# NEXT-STEPS — CyberGuard VulnTriage
+# NEXT-STEPS — CyberGuard
 
 **Prepared** 2026-10-23 · **Status** approved direction · this document is the roadmap
 **Scope of this document** inventory and roadmap only. **No new downloads were performed. No training was performed. No corpus file, adapter or model artifact was modified.**
@@ -37,13 +37,13 @@
 
 ## 0. What this document is, and what it is bound by
 
-The **CyberGuard VulnTriage** direction in `PRODUCT-DEFINITION.md` is approved, and the roadmap from the §7 build path is set out here, in order, with particular detail on data.
+The **CyberGuard** direction in `PRODUCT-DEFINITION.md` is approved, and the roadmap from the §7 build path is set out here, in order, with particular detail on data.
 
 Three things it contains, in this order:
 
 1. **§1 — The ordered next steps.** The §7 path, each step with **what it produces** and **what it unblocks**, plus the dependencies that the data work in §2 and §3 turned up.
 2. **§2 — DATA FIXING.** For every existing corpus and stream: **fixable in place** or **must be rebuilt**, with the **measured defect** behind each call.
-3. **§3 — DATA INVENTORY BEFORE ANY NEW COLLECTION.** Everything already on this machine, and everything the project record shows was downloaded, with name, location, size, row count, licence status, and whether it serves the VulnTriage corpus. **Only after that inventory** does §4 list what is genuinely missing.
+3. **§3 — DATA INVENTORY BEFORE ANY NEW COLLECTION.** Everything already on this machine, and everything the project record shows was downloaded, with name, location, size, row count, licence status, and whether it serves the CyberGuard corpus. **Only after that inventory** does §4 list what is genuinely missing.
 
 ### 0.1 The evidence rules this document obeys
 
@@ -78,13 +78,13 @@ Each row names the artefact it produces and the work it unblocks. "Authority" is
 |---:|---|---|---|---|---|
 | **0** | **Freeze the data record** — re-issue the v2 mixture ledger against `FACTS.json`, record the licence receipts in one table, write the row-level provenance map (already built) into the corpus directory | a single authoritative `docs/DATA-LEDGER.md` **+ `data/v3/provenance-map.jsonl`** *(both to be written)* | step 6, step 7, and any future rebuild template | **none** — operator-side, no GPU, no network | **new in this document.** Two defects found (§2.4); next is the ledger re-issue — a few hours |
 | **1** | **Finish the running public re-measurement** — FRR for all six arms, the HarmBench re-judgement, the 610-item knowledge sweep for the older arms, and the CTI free-form sweep for v1 / v2 arm A / v2 arm B | the release table | step 2's bars; every "good enough" judgement | the benchmark-run authorisation (released) | **MEASURED in full** — the CTI sweep finished on both GPUs (v1 and v2 arm A on GPU1, v2 arm B on GPU0), all three arms are merged into `results-merged-2026-10-23.json` (24 comparison rows), §5.3 is regenerated from the merged artefact, and the release table is regenerated from `release-candidates.json` |
-| **2** | **Fix the bar sheet (§5 of `PRODUCT-DEFINITION.md`) and sign it** | a signed bar sheet: B1–B8 with their baselines | every public claim, including the VulnTriage headline | **a recorded decision** | next: sign the bar sheet once the 4 questions from the measurements (Q11–Q14) are answered |
+| **2** | **Fix the bar sheet (§5 of `PRODUCT-DEFINITION.md`) and sign it** | a signed bar sheet: B1–B8 with their baselines | every public claim, including the CyberGuard headline | **a recorded decision** | next: sign the bar sheet once the 4 questions from the measurements (Q11–Q14) are answered |
 | **3** | **Write the product contract** — user, job, operational meaning of "defensive", what the model must refuse, **and the triage output schema** (CWE, CVSS vector, severity, priority, rationale, abstain) | `docs/PRODUCT-CONTRACT.md` *(to be written)* | step 2's refusal bar; step 8b's output contract; the schema every dataset in §7 must target | a recorded decision | next: write the contract |
 | **4** | **Commission the blinded human adjudication** — 750 FRR responses per model, 2 human assessors + adjudicator | a human-semantic judgment per response | B3's semantic meaning; the "was a refusal warranted?" half of CG-09 | **humans** | next: the human panel adjudicates — inputs are ready for all six arms, and this step is not a mechanical one |
 | **5** | **Build the refusal-integrity check** — CG-09's prevention check: sampled refusals audited for post-refusal leakage | `eval-2026-10-23/refusal-integrity-audit.json` refreshed on the frozen surface | B3b | it can be built mechanically; **a human must sign it off** | next: re-run against the released surface — the tool exists |
 | **6** | **Qualify the corpus** — approve the P2 calibration protocol, execute the held removal sets, freeze the corpus, issue the Data Gate | a frozen, qualified corpus + Data Gate | any future training | operator-side; the protocol is a **DRAFT** and must be approved first | next: approve the protocol, then execute the removal sets, freeze the corpus and issue the Data Gate |
 | **6b** | **Execute the corpus exclusion, already decided** — drop Primus and the merged reasoning corpus (**28,037 rows, 19.95 % of the v3 mixture, 20.69 % of the v4 working corpus**) and add a stock-preamble gate (leading token = 0, preamble-opening targets = 0) | a written removal set, executed, with the resulting corpus hashed | step 7 | **nothing outstanding — this is the one removal with no missing authority** | **next: write the removal set, then execute it — the resulting corpus is hashed** |
-| **7** | **Rebuild the vuln-analysis corpus from public structured sources** (NVD + MITRE CWE + CVSS), licence-clean, qualifying it from scratch rather than repairing the contaminated streams | the VulnTriage corpus | the retrain | data collection + the step-6 calibration gate | **§2 and §3 below are this step's specification** |
+| **7** | **Rebuild the vuln-analysis corpus from public structured sources** (NVD + MITRE CWE + CVSS), licence-clean, qualifying it from scratch rather than repairing the contaminated streams | the CyberGuard corpus | the retrain | data collection + the step-6 calibration gate | **§2 and §3 below are this step's specification** |
 | **8** | **Add the missing instruments** — CTI-VSP and CTI-ATE to the harness | two public instruments, parsers, scorers | B2 (the CVSS-prediction bar) | a download; no gate issue (public benchmarks) | **next: download both, then write the parser and the scorer** |
 | **8b** | **Ship an output contract and measure it** — a constrained last-line instruction and/or a parse-and-retry wrapper, evaluated on the frozen surface | `docs/OUTPUT-CONTRACT.md` *(to be written)* + a measured delta on the frozen surface | B1, B5, and the product's headline claim | **no training, no new data** — a serving-template change and a measurement | **next: write the shipped contract** — the measurement already exists (`output-contract-recovery-ceiling*.json`) |
 | **9** | **THE TRAINING STEP — after 3–8b** | a trained adapter | the release | **a recorded decision**; the benchmark run's freeze state; a written hypothesis | **next: on a recorded decision and a written hypothesis** |
@@ -95,11 +95,11 @@ Each row names the artefact it produces and the work it unblocks. "Authority" is
 
 **Step 0 is new and it is first.** It was not in `PRODUCT-DEFINITION.md` §7 because the data record looked settled. It is not: `docs/MIXTURE-V2.md` — the ledger that calls itself the "frozen v2 mixture ledger" — **does not satisfy its own definition of done**, and it is the template any rebuild would naturally copy. §2.4 gives the numbers. This is days of operator work that has to happen before step 6, because the corpus gate in step 6 is written against a ledger that currently mis-states the composition of the artefact it governs.
 
-**Step 6b and step 7 are now in tension, and the tension is sharp for VulnTriage specifically.** `PRODUCT-DEFINITION.md` §8 question 8 raised this for the general case: excluding the `merged` stream removes the CVE/CWE reasoning that CTI-RCM depends on. The data inventory sharpens it into a specific, decidable fact:
+**Step 6b and step 7 are now in tension, and the tension is sharp for CyberGuard specifically.** `PRODUCT-DEFINITION.md` §8 question 8 raised this for the general case: excluding the `merged` stream removes the CVE/CWE reasoning that CTI-RCM depends on. The data inventory sharpens it into a specific, decidable fact:
 
 > **The corpus's *only* CVE→CWE supervision is the Primus stream — the 4,891 rows the exclusion removes — and the stream it also excludes (`merged`) is not CVE→CWE at all; its schema is `cwe_id`/`cwe_name`/`affected_line`/`partial_code`, i.e. code→CWE.**
 >
-> So for the VulnTriage direction specifically, executing step 6b removes **100 % of the CVE→CWE task from the training corpus** and leaves the code→CWE reasoning. Executing step 6b *without* step 7 leaves the corpus with **no CVE→CWE supervision at all**.
+> So for the CyberGuard direction specifically, executing step 6b removes **100 % of the CVE→CWE task from the training corpus** and leaves the code→CWE reasoning. Executing step 6b *without* step 7 leaves the corpus with **no CVE→CWE supervision at all**.
 
 This is not an argument against the exclusion — it is correct and remains the one removal with no outstanding authority. It is an argument for **ordering**: 6b and 7 are the same project, and 7 is where the CVE→CWE supervision comes back, clean.
 
@@ -123,7 +123,7 @@ For each stream, one of four calls, made on a measured defect:
 |---|---|
 | **FIXABLE IN PLACE** | the defect is confined to a removable subset, or to a field-level edit; the rest of the stream is sound and its licence is compatible with redistribution in the release stack |
 | **MUST BE REBUILT** | the defect is in the stream's *targets* at a rate that makes the stream unusable as supervision, or the stream lacks the field the product needs |
-| **NOT APPLICABLE** | the stream is sound but does not serve the VulnTriage corpus; it is kept, and it is not repaired |
+| **NOT APPLICABLE** | the stream is sound but does not serve the CyberGuard corpus; it is kept, and it is not repaired |
 | **ABSENT** | the record says it exists; it does not exist on disk. Nothing to fix, nothing to use |
 
 **"Fixable in place" is a claim about cost, not about virtue.** A stream that is fixable in place is still worth checking against the licence column in §3.
@@ -144,7 +144,7 @@ For each stream, one of four calls, made on a measured defect:
 | **Trendyol** | 53,201 raw (50,672/50,606 admitted) | **NOT APPLICABLE** | Apache-2.0, sound, general cyber instruction tuning. The v1 core and the source of the 500-row holdout. No triage fields. Kept; not repaired. |
 | **UltraChat** | 400 sampled / 600 pairs admitted | **NOT APPLICABLE** | MIT, sound, and deliberately near-zero weight (the replay slot carries real assistant turns). Not triage. |
 | **arcspan-cyber-ner** | 500 sampled | **REJECTED at the v2 gate (0 admitted)** | Extraction supervision absent — arcspan's labels are not retrievable through the viewer API. Retained as the **G-D evaluation corpus** (making G-D zero-shot). Call: **NOT APPLICABLE** to training; the admission was correct and stands. |
-| **v3 mixture** (`mixture-v3-no-trail.jsonl`) | 140,545 | **MUST BE REBUILT for VulnTriage** | Composition measured: fenrir 99,730 · merged 23,146 · primus 4,891 · refusal 9,584 · format 2,600 · replay 594. It **carries both contaminations at full strength** (the 4,891 thinking-token rows and the 18,074 preamble-opening rows). More importantly for VulnTriage: it contains **no CVSS supervision, no CVE-anchored impact supervision, and no prioritisation supervision of any kind**, because no such data exists on this machine. The corpus exclusion makes it clean; it does not make it a triage corpus. |
+| **v3 mixture** (`mixture-v3-no-trail.jsonl`) | 140,545 | **MUST BE REBUILT for CyberGuard** | Composition measured: fenrir 99,730 · merged 23,146 · primus 4,891 · refusal 9,584 · format 2,600 · replay 594. It **carries both contaminations at full strength** (the 4,891 thinking-token rows and the 18,074 preamble-opening rows). More importantly for CyberGuard: it contains **no CVSS supervision, no CVE-anchored impact supervision, and no prioritisation supervision of any kind**, because no such data exists on this machine. The corpus exclusion makes it clean; it does not make it a triage corpus. |
 | **v4 working corpus** (`corpus-r2.jsonl`) | 135,503 | **SUPERSEDED — do not repair, do not train on** | sha256 `c29907c1…f228`, derived from the v3 mixture (source sha `75b5099c…fc90`, read-only). Its **only** removal pass was **5,042 exact-duplicate rows**; it still carries all 4,891 thinking-control-token rows and all 23,146 `merged` rows byte-for-byte. Its own receipt says *"This working copy is not a training set."* The dedup work, the leakage report and the row-level metadata tagging are all **reusable inputs to step 7** — the corpus file itself is not. |
 | **`trails-30`** | 7,000 traces (1,976 combined; 855 muse) | **FIXABLE IN PLACE — and it is the most useful thing on disk** | Never trained on: the v3 build is `mixture-v3-**no-trail**` and its receipt records *"no trail stream in the no-trail build"*. Measured for this document: **0 thinking-control tokens** and **0 stock preambles** in the 268 Primus-sourced targets, **0** and **7/1,268** in the merged-sourced targets, **0** and **87/5,464** in the Fenrir-sourced targets. These are teacher-generated reasoning traces over the same CVE→CWE prompts. **See §2.3.** |
 | **v1 mixture** | — | **ABSENT — unrecoverable** | `research-tmp/harvest-v1/` contains **only the adapter** (263 MB). v1's training composition is not on this machine and cannot be derived. Recorded as unrecoverable, **not** as data to collect. |
@@ -161,7 +161,7 @@ The measured defect is in Primus's **targets**, and the evidence for that is unu
 
 > *"Analyze the following CVE description and map it to the appropriate CWE. Provide a short justification for your choice. **Ensure the last line of your response contains only the CWE ID.**"*
 
-— and that last-line instruction **is the CTI-RCM output contract**. So the task definition is right, and it is exactly VulnTriage's task.
+— and that last-line instruction **is the CTI-RCM output contract**. So the task definition is right, and it is exactly CyberGuard's task.
 
 What is wrong is the target: the thinking-control token in **100 %** of rows, and nothing else — the project's own preamble detector finds **0 %** in Primus.
 
@@ -196,7 +196,7 @@ Recomputed for this document, the NVD material on disk is:
 | `v2/candidates/nvd-raw.json` | 2,000 (of 398,563) | 1,865/2,000 = `NVD-CWE-Other` | cvssMetricV2 1,966 / v31 36 / v30 1 | no — wrong era, wrong vector version, unlabelled weaknesses |
 | `v2/candidates/nvd-authority-gC.json` | 288 CVEs | — | — | no — an authority-cross-check artefact, not supervision |
 
-**So the machine has 16,000 CVE descriptions with no labels and no scores, plus a 2,000-row slice that is 1999–2006 and mostly `NVD-CWE-Other`.** The VulnTriage corpus needs a modern, labelled fetch. §4 specifies it.
+**So the machine has 16,000 CVE descriptions with no labels and no scores, plus a 2,000-row slice that is 1999–2006 and mostly `NVD-CWE-Other`.** The CyberGuard corpus needs a modern, labelled fetch. §4 specifies it.
 
 ### 2.4 Two defects in the record itself, found while fixing
 
@@ -239,7 +239,7 @@ Mechanical enumeration, extension-filtered, over five roots: `~/cyberguard`, `~/
 
 **Sizes are exact bytes.** Row counts are full parses, not `wc -l` guesses — and this matters in **three** places, not two: `fenrir-v2.1/220426-…_escaped.jsonl` (99,870, not 99,869), `v2/data/corpus/trendyol-escaped.jsonl` (53,201, not 53,200) and **both CTI-Bench TSVs** (`cti-mcq.tsv` **2,500**, `cti-rcm.tsv` **1,000**, not 2,499 and 999) have **no trailing newline**, so `wc -l` under-reports each by exactly 1. The CTI counts here are taken from the **frozen runner's own `csv.DictReader`**, which is the population every published CTI number uses.
 
-### 3.2 The VulnTriage fit test
+### 3.2 The CyberGuard fit test
 
 The product is a **vulnerability triage scorer**: given a vulnerability, produce the CWE, the CVSS vector and severity, the impact, and a prioritisation, in a schema the caller can rely on. The inventory therefore scores every source against **four axes**:
 
@@ -254,7 +254,7 @@ The product is a **vulnerability triage scorer**: given a vulnerability, produce
 
 ### 3.3 Table A — training and supervision streams
 
-| name | location | size | rows | licence | A | B | C | D | VulnTriage |
+| name | location | size | rows | licence | A | B | C | D | CyberGuard |
 |---|---|---|---:|---|:-:|:-:|:-:|:-:|---|
 | **Fenrir v2.1** (raw) | `cyberguard/data/v3/fenrir-v2.1/220426-CyberSec-Dataset_escaped.jsonl` | 431,213,578 B | 99,870 | Apache-2.0 (`LICENSE_RECEIPT.md`) | ✗ | ✗ | ~ | ✗ | general cyber reasoning; no triage fields; **bundles a copy of the Trendyol corpus, and 605 of its rows carry a held-out-500 identity (F-8)** |
 | **Fenrir v2.1** (clean) | `cyberguard/data/v3/fenrir-v2.1/clean/fenrir-v2.1.clean.jsonl` | 431,175,244 B | 99,852 | Apache-2.0 | ✗ | ✗ | ~ | ✗ | as above |
@@ -285,7 +285,7 @@ The product is a **vulnerability triage scorer**: given a vulnerability, produce
 
 The licence ground truth is now **`docs/DATA-LEDGER.md`** (programme item B-2) — one authoritative table covering every source in the corpus, candidate and evaluation trees, with each licence's provenance, its notice obligation and whether it may ship. It is built from `v2/candidates.json` (9 sources, each with id / revision / license / role / rows), `v2/candidates/SAMPLES.json` (2 sources), `docs/MIXTURE-V2.md` (the frozen v2 mixture record — see §2.4 (i)) and the three `data/v3/*/LICENSE_RECEIPT.md` files, and it is checked by `eval-2026-10-23/b2_data_ledger_check.py` (**9 of 9 PASS**). The per-source licence column below is a convenience restatement; **where it and the DATA-LEDGER differ, the DATA-LEDGER is the source of truth.**
 
-| name | location | size | rows | licence | A | B | C | D | VulnTriage |
+| name | location | size | rows | licence | A | B | C | D | CyberGuard |
 |---|---|---|---:|---|:-:|:-:|:-:|:-:|---|
 | **NVD sample** | `cyberguard/v2/candidates/nvd-sample.jsonl` | 4,682,180 B | 16,000 | public domain (17 USC 105); **CVE(R) notice required** | ✗ | ✗ | ~ | ✗ | **0/16,000 carry a CWE id; 0/16,000 carry CVSS; all 1999–2006** |
 | **NVD raw page** | `cyberguard/v2/candidates/nvd-raw.json` | 4,258,928 B | 2,000 of **398,563** | public domain; CVE(R) notice | ~ | ~ | ~ | ✗ | 1,865/2,000 `NVD-CWE-Other`; cvssMetricV2 1,966 / v31 36 |
@@ -299,7 +299,7 @@ The licence ground truth is now **`docs/DATA-LEDGER.md`** (programme item B-2) �
 
 ### 3.5 Table C — mixtures, working corpora and the v4 programme artefacts
 
-| name | location | size | rows | licence | A | B | C | D | VulnTriage |
+| name | location | size | rows | licence | A | B | C | D | CyberGuard |
 |---|---|---|---:|---|:-:|:-:|:-:|:-:|---|
 | **v3 mixture** | `cyberguard/data/v3/mixture/mixture-v3-no-trail.jsonl` | 554,059,776 B | 140,545 | mixed (per stream) | ✓ | ✗ | ~ | ✗ | fenrir 99,730 · merged 23,146 · primus 4,891 · refusal 9,584 · format 2,600 · replay 594 — **carries both contaminations** |
 | **v3 mixture copy** | `cyberguard/research-tmp/harvest-v3/evals/mixture-v3-no-trail.jsonl` | 554,059,776 B | 140,545 | as above | ✓ | ✗ | ~ | ✗ | byte-identical duplicate |
@@ -317,7 +317,7 @@ The licence ground truth is now **`docs/DATA-LEDGER.md`** (programme item B-2) �
 
 ### 3.6 Table D — public benchmark corpora (evaluation only, never trained on)
 
-| name | location | size | rows | licence | A | B | C | D | VulnTriage |
+| name | location | size | rows | licence | A | B | C | D | CyberGuard |
 |---|---|---|---:|---|:-:|:-:|:-:|:-:|---|
 | **CTI-Bench MCQ** | `cyberguard/research-tmp/ctibench/cti-mcq.tsv` | 2,394,094 B | **2,500** | **UNKNOWN — no licence file in the directory** | ✗ | ✗ | ~ | ✗ | B5; the free-form knowledge instrument |
 | **CTI-Bench RCM** | `cyberguard/research-tmp/ctibench/cti-rcm.tsv` | 990,921 B | **1,000** | **UNKNOWN — no licence file** | **✓** | ✗ | ~ | ✗ | **B1 — the CVE→CWE headline benchmark** |
@@ -355,11 +355,11 @@ The licence ground truth is now **`docs/DATA-LEDGER.md`** (programme item B-2) �
 
 ### 3.9 What the inventory says, in one paragraph
 
-The machine holds **7,146 data-extension files, 8.27 GB**, of which **~2.7 GB is training and candidate payload** (2.09 GB in `data/v3`, 0.61 GB in `v2/data`, 0.03 GB in `v2/candidates`; ~2.2 GB of that is unique once the derived SFT copies are excluded). That payload is dominated by two large general-cyber instruction corpora (Fenrir 99,730 rows and Trendyol 50,606 rows) that contain **no CVE, CWE or CVSS field at all**. The entire CVE→CWE axis rests on **4,891 Primus rows whose targets are the corpus's most defective**, plus **268 clean trail targets** that were never trained on and are sitting in `data/v3/trails-30/`. The CVSS axis rests on **36 `cvssMetricV31` records inside a 2,000-row 1999–2006 page** — effectively nothing, and there is **no CVSS feed, no CWE list, no EPSS, no KEV and no CVE→technique mapping** anywhere on the machine. So the record is right that a great deal was downloaded: **Fenrir, Primus, the merged reasoning set, the NVD feed, ATT&CK, NIST, Trendyol, UltraChat, arcspan and every benchmark corpus are all here.** What is *not* here is the part that VulnTriage is made of. **Update, 2026-10-23 (after the Phase F downloads, ledger D-1, D-2, D-4, D-4b, D-5, D-6):** the CWE catalogue, the CVSS v3.1 specification, the ATT&CK master, the ATT&CK v11.0 control and the CTI-VSP/ATE files are **now on disk** — and the gap they were collected to fill is **still open at the mapping**: F-4 measured **0** structured technique↔CVE pairs in the ATT&CK master (the v11.0 control also **0**), and MITRE publishes no CVE-mapping artefact at all. The CWE catalogue and the CVSS specification do fill their own gaps; the ATT&CK master does not.
+The machine holds **7,146 data-extension files, 8.27 GB**, of which **~2.7 GB is training and candidate payload** (2.09 GB in `data/v3`, 0.61 GB in `v2/data`, 0.03 GB in `v2/candidates`; ~2.2 GB of that is unique once the derived SFT copies are excluded). That payload is dominated by two large general-cyber instruction corpora (Fenrir 99,730 rows and Trendyol 50,606 rows) that contain **no CVE, CWE or CVSS field at all**. The entire CVE→CWE axis rests on **4,891 Primus rows whose targets are the corpus's most defective**, plus **268 clean trail targets** that were never trained on and are sitting in `data/v3/trails-30/`. The CVSS axis rests on **36 `cvssMetricV31` records inside a 2,000-row 1999–2006 page** — effectively nothing, and there is **no CVSS feed, no CWE list, no EPSS, no KEV and no CVE→technique mapping** anywhere on the machine. So the record is right that a great deal was downloaded: **Fenrir, Primus, the merged reasoning set, the NVD feed, ATT&CK, NIST, Trendyol, UltraChat, arcspan and every benchmark corpus are all here.** What is *not* here is the part that CyberGuard is made of. **Update, 2026-10-23 (after the Phase F downloads, ledger D-1, D-2, D-4, D-4b, D-5, D-6):** the CWE catalogue, the CVSS v3.1 specification, the ATT&CK master, the ATT&CK v11.0 control and the CTI-VSP/ATE files are **now on disk** — and the gap they were collected to fill is **still open at the mapping**: F-4 measured **0** structured technique↔CVE pairs in the ATT&CK master (the v11.0 control also **0**), and MITRE publishes no CVE-mapping artefact at all. The CWE catalogue and the CVSS specification do fill their own gaps; the ATT&CK master does not.
 
 ---
 
-## 4. What is genuinely missing for the VulnTriage rebuild
+## 4. What is genuinely missing for the CyberGuard rebuild
 
 Only now, after the inventory.
 
@@ -385,7 +385,7 @@ Only now, after the inventory.
 | **C5** | **EPSS / CISA KEV** *(optional)* | daily EPSS scores; the KEV catalogue | axis **D** — prioritisation beyond the raw CVSS score | EPSS: public (CISA); KEV: public domain | the prioritisation claim, and the market's actual pain |
 | **C6** | **CTI-VSP and CTI-ATE** | the two missing public benchmarks | B2 has **no instrument at all** today, and adopting one requires a parser/scorer that does not exist in this project | public, third-party | B2; the "is the CVSS claim measurable" question |
 
-**C1–C3 are the irreducible minimum** to make VulnTriage a triage product. C4 and C5 are what turn it from "CWE + score" into "triage". C6 is what makes the claim falsifiable.
+**C1–C3 are the irreducible minimum** to make CyberGuard a triage product. C4 and C5 are what turn it from "CWE + score" into "triage". C6 is what makes the claim falsifiable.
 
 ### 4.3 What must **not** be collected, and why
 

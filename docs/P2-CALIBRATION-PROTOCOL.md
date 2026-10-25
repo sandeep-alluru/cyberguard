@@ -2,7 +2,7 @@
 
 **Status:** APPROVED 2026-10-23 · **Item:** D-1 · **Registered values:** §9 below
 **Basis:** the protocol's boundary decisions, taken 20261015 and recorded as 20261015-2120 (ada461b).
-**Accepted:** the 2026-10-23 authorisation of the VulnTriage build, which accepts the sample sizes, uncertainty allocation and agreement rules that this protocol had flagged as needing acceptance. The accepted values are listed in §9.
+**Accepted:** the 2026-10-23 authorisation of the CyberGuard build, which accepts the sample sizes, uncertainty allocation and agreement rules that this protocol had flagged as needing acceptance. The accepted values are listed in §9.
 
 **This protocol authorizes no sample draw, no labels, no scorer tuning, no training, no removals, no source edits and no Data Gate pass.** Accepting a measurement design is not executing it. The registered Data Gate limits remain **unsafe <1%, off-topic <2%, shallow <5%**, plus zero known unexplained cross-row leakage and verified metadata/provenance/rights. §9 names the execution dependencies that stand between this protocol and its first draw, so that *approved* is never read as *ready to run*.
 
@@ -129,7 +129,7 @@ The verifier must check: disjoint stratum arithmetic and inclusion probabilities
 
 ### 9.1 The registered values
 
-**Registered:** 2026-10-23, under the 2026-10-23 authorisation of the VulnTriage build
+**Registered:** 2026-10-23, under the 2026-10-23 authorisation of the CyberGuard build
 (item **D-1**).
 
 These are the registered values — the sample sizes, the uncertainty allocation and the agreement

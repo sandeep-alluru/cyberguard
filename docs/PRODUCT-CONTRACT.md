@@ -1,4 +1,4 @@
-# PRODUCT-CONTRACT — CyberGuard VulnTriage
+# PRODUCT-CONTRACT — CyberGuard
 
 **Programme item E-1. Status: WRITTEN and in force.** This document is the authority for the
 triage output schema, the abstain path and the refusal posture. It is grounded in the approved

@@ -17,7 +17,7 @@ Two output contracts exist in this programme, and they are not the same thing.
 
 | contract | what it governs | where it is specified |
 |---|---|---|
-| **the product's** | what CyberGuard VulnTriage emits for a vulnerability: six keys, exactly six, `TRIAGE-1` | `docs/PRODUCT-CONTRACT.md` §4 |
+| **the product's** | what CyberGuard emits for a vulnerability: six keys, exactly six, `TRIAGE-1` | `docs/PRODUCT-CONTRACT.md` §4 |
 | **the evaluation surfaces'** | what the model emits on the four public benchmarks, and how the harness reads it | **this document** |
 
 The product's contract is the one the release is judged on. The evaluation surfaces' contract

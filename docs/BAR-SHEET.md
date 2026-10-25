@@ -1,4 +1,4 @@
-# The bar sheet — CyberGuard VulnTriage
+# The bar sheet — CyberGuard
 
 **Generated.** `eval-2026-10-23/e2_bar_sheet.py` → this file. Every number below is read from a named artefact at generation time; the bars themselves are parsed from `PRODUCT-DEFINITION.md` §5's own table. The acceptance checks re-derive each printed figure from its artefact and fail if one disagrees. **Regenerate, never hand-edit.**
 

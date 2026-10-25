@@ -1,5 +1,5 @@
 {
-  "what_this_is": "F-7's receipt: the rebuilt VulnTriage mixture, every source's realised presentation count, the epoch total, the re-solved refusal share, and the weight rationale.",
+  "what_this_is": "F-7's receipt: the rebuilt CyberGuard mixture, every source's realised presentation count, the epoch total, the re-solved refusal share, and the weight rationale.",
   "status": "PROVISIONAL — a working corpus, on its way to a qualified one. Phase D's removals (D-3, D-4) and D-7's freeze and Data Gate are the next measurements, and each needs a pair of qualified human scorers. This mixture is assembled so that the decontamination and hygiene gates (F-8, F-9) can be measured on it; the Data Gate is what makes a corpus trainable, and it is issued once those measurements complete.",
   "output": {
     "path": "<programme-tree>/data/v4/mixture-v5-f8clean.jsonl",

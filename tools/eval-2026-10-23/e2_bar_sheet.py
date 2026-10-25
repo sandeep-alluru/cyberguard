@@ -369,7 +369,7 @@ def build(D, bars):
     content = D["content"]["per_arm"]
     hyg = D["hyg"]
 
-    A("# The bar sheet — CyberGuard VulnTriage")
+    A("# The bar sheet — CyberGuard")
     A("")
     A("**Generated.** `eval-2026-10-23/e2_bar_sheet.py` → this file. Every number below is read "
       "from a named artefact at generation time; the bars themselves are parsed from "

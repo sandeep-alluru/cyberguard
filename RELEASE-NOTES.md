@@ -2,7 +2,7 @@
 
 ## v0.1.0 — 2026-10-25 · the measurement programme
 
-**What this release is.** The measurement programme for CyberGuard VulnTriage: the product
+**What this release is.** The measurement programme for CyberGuard: the product
 definition, the pre-registered thresholds, the public-benchmark results with their receipts, the
 corpus qualification and gate discipline, and the tooling that produces all of it.
 

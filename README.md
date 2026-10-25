@@ -1,10 +1,13 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="CyberGuard" height="76">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="CyberGuard" height="76">
+  </picture>
 </p>
 
-<h1 align="center">CyberGuard VulnTriage</h1>
+<h1 align="center">CyberGuard</h1>
 
-<p align="center"><strong>Hand it any security vulnerability — it tells you how dangerous it is, what an attacker can actually do with it, and what to fix first.</strong></p>
+<p align="center"><strong>Reads any security vulnerability and tells you how dangerous it is, what an attacker can actually do with it, and what to fix first.</strong></p>
 
 <p align="center">An open evaluation programme for a 4B vulnerability-triage scorer, measured on public third-party benchmarks.</p>
 
@@ -17,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="assets/hero-poster.png"><img src="assets/hero-poster.png" alt="CyberGuard VulnTriage — the benchmark table, the contamination trace, and the boundary check" width="760"></a>
+  <a href="assets/hero-poster.png"><img src="assets/hero-poster.png" alt="CyberGuard — the benchmark table, the contamination trace, and the boundary check" width="760"></a>
   <br><em>19 min 5 s walkthrough — <a href="assets/teaser.mp4">45 s teaser</a> · <a href="#watch">all clips</a></em>
 </p>
 
@@ -33,7 +36,7 @@ Four models on one scoreboard, every figure read from a receipt in this reposito
 | Qwen3-4B-Instruct-2507<br><small>base, untrained</small> | 0.4100 **F** | 0.4444 **F** | 1.32 **F** | 4.13 % **F** | 1/159 **F** | 0.4680 **F** | 0.6818 **F** |
 | **CyberSecQwen-4B**<br><small>the direct twin</small> | 0.6664 **P**<br>0.6780 **F** | 0.5868 **P**<br>0.5764 **F** | 1.223 **F** | 1.07 % **F** | 3/159 **F** | 0.4460 **F** | 0.4727 **F** |
 | **Cisco Foundation-Sec-8B-Instruct**<br><small>the reference specialist</small> | 0.692 **P** | 0.644 **P** | 0.802 **P** ⚠ | not measured | not comparable ⚠ | not measured | not measured |
-| **CyberGuard VulnTriage v3**<br><small>the arm of record</small> | **0.6360 F** | 0.4648 **F** | not measured | **29.07 % F** | **0/159 F** | **0.8000 F** | **0.9364 F** |
+| **CyberGuard v3**<br><small>the arm of record</small> | **0.6360 F** | 0.4648 **F** | not measured | **29.07 % F** | **0/159 F** | **0.8000 F** | **0.9364 F** |
 
 The bar row is the threshold the arm of record is measured against, and it is a number rather than a verdict: CTI-RCM above the comparator's re-measured 0.6780, CVSS error no worse than the comparator's 1.223, false refusals no worse than the untrained base plus 1.0 pp, and no more harmful completions than the base's 1 of 159. The full statements, with each instrument's population and provenance, are in [`docs/BAR-SHEET.md`](docs/BAR-SHEET.md).
 
@@ -55,7 +58,7 @@ Every number above carries its population, its scored fraction and its unparseab
 
 ## What it is
 
-**CyberGuard VulnTriage** is a vulnerability-triage scorer. It takes a CVE or an advisory and returns the **CWE**, a **CVSS v3.1 vector and score**, a **plain-English statement of impact**, and a **prioritisation call**. The release artefact is a LoRA of rank 32 on `Qwen3-4B-Instruct-2507`, and the benchmark family it is judged against is public and third-party: CTI-Bench, HarmBench, CyberMetric-500 and SecQA.
+**CyberGuard** is a vulnerability-triage scorer. It takes a CVE or an advisory and returns the **CWE**, a **CVSS v3.1 vector and score**, a **plain-English statement of impact**, and a **prioritisation call**. The release artefact is a LoRA of rank 32 on `Qwen3-4B-Instruct-2507`, and the benchmark family it is judged against is public and third-party: CTI-Bench, HarmBench, CyberMetric-500 and SecQA.
 
 **The shape of it.** A CVE description goes in; a structured triage answer comes out, in a fixed format the parser can read. Behind that sits a measurement programme: eight instruments with fixed thresholds, a frozen decoding surface, one runner, and a receipt for every published figure. Anyone can re-run the receipts' cross-checks, and anyone can re-run the benchmarks themselves from the published data.
 
@@ -148,13 +151,14 @@ Every frame is a screen capture of the published repository, or a card drawn fro
 | Qwen3-4B-Instruct-2507 | `Qwen/Qwen3-4B-Instruct-2507` | 4B | published on the hub | measured as the untrained baseline for every instrument |
 | CyberSecQwen-4B | `athena129/CyberSecQwen-4B` | 4B | `63881a91…aaa0b92` | re-measured on the equal-terms surface; the CTI-RCM and CVSS thresholds are defined against it |
 | Cisco Foundation-Sec-8B-Instruct | `cisco-open/ai-deep-sast` | 8B | published on the hub | published figures used for the results table |
-| CyberGuard VulnTriage v3 | this project | 4B, LoRA r = 32 | — | trained from the base checkpoint and measured on every instrument |
+| CyberGuard v3 | this project | 4B, LoRA r = 32 | — | trained from the base checkpoint and measured on every instrument |
 
 The comparator's published hash was verified against the bytes measured here: the locally cached revision matches the hash the hub publishes for it, file for file. The weights of the arm of record are the release artefact, and the release pipeline that builds them is described in [`docs/RELEASE-SHAPE.md`](docs/RELEASE-SHAPE.md).
 
 | asset | what it is |
 |---|---|
-| `assets/logo.svg`, `assets/logo.png` | the Rottweiler mark and the wordmark |
+| `assets/logo.svg`, `assets/logo.png` | the Rottweiler mark and the wordmark, for a light page |
+| `assets/logo-dark.svg`, `assets/logo-dark.png` | the same mark and wordmark, for a dark page — the README picks between them by the reader's theme |
 | `assets/social-preview.png` | the link preview |
 | `assets/hero-poster.png` | the hero poster |
 | `assets/chart-cti-rcm.png`, `assets/chart-frr.png` | the comparison charts, with the threshold marked |
@@ -207,7 +211,7 @@ The thresholds, the populations and the baseline figures for the next arm are al
 
 ```bibtex
 @project{cyberguard_vulntriage_eval,
-  title  = {CyberGuard VulnTriage: an open evaluation programme for a 4B vulnerability-triage scorer},
+  title  = {CyberGuard: an open evaluation programme for a 4B vulnerability-triage scorer},
   note   = {v0.1.0. The measurement programme and its published results.},
   year   = {2026},
   url    = {https://github.com/sandeep-alluru/cyberguard}

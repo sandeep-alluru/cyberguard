@@ -10,5 +10,5 @@
   <polygon points="43,47 53,47 54,54 48,56 42,54" fill="#0a0d12"/>
   <ellipse cx="41.7" cy="41.7" rx="2.8" ry="2.8" fill="#0a0d12"/>
   <ellipse cx="54.3" cy="41.7" rx="2.8" ry="2.8" fill="#0a0d12"/>
-  <text x="118" y="63" font-family="DejaVu Sans, Helvetica Neue, Arial, sans-serif" font-size="46" font-weight="700" fill="#e8eef5" textLength="307" lengthAdjust="spacingAndGlyphs">CyberGuard</text>
+  <text x="118" y="63" font-family="DejaVu Sans, Helvetica Neue, Arial, sans-serif" font-size="46" font-weight="700" fill="#0b1220" textLength="307" lengthAdjust="spacingAndGlyphs">CyberGuard</text>
 </svg>

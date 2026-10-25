@@ -54,7 +54,7 @@ This is the same primitive the market's biggest pain is made of — *classify, p
 
 ### 2.1 The product, named plainly
 
-> **CyberGuard VulnTriage** — a locally-run 4B model that turns a CVE or advisory into a **CWE**, a **CVSS v3.1 vector and score**, a **plain-English impact statement**, and a **prioritisation call**, and that **does not refuse legitimate defensive analysis of a vulnerability**.
+> **CyberGuard** — a locally-run 4B model that turns a CVE or advisory into a **CWE**, a **CVSS v3.1 vector and score**, a **plain-English impact statement**, and a **prioritisation call**, and that **does not refuse legitimate defensive analysis of a vulnerability**.
 >
 > **The open release:** `CyberGuard-Vuln-4B` — `Qwen3-4B-Instruct-2507` + a tuned adapter, Apache-2.0, with weights, training recipe, dataset card, a public evaluation harness, and a benchmark table containing its own bad news.
 
