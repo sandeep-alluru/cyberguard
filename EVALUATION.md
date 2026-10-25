@@ -13,12 +13,27 @@ is named rather than smoothed over.
 
 ## 1. The short answer
 
-The repository is the **evaluation programme**: the methodology, the public-benchmark results and
-their receipts, the corpus-qualification and gate discipline, and the eval tooling.
+**The product.** **CyberGuard VulnTriage** — a CVE or advisory in; **CWE + CVSS v3.1 vector and
+score + plain-English impact + a prioritisation call** out; proven only on public benchmarks, with
+ship/no-ship bars fixed in advance.
+
+**The repository.** It is the **evaluation programme**: the methodology, the public-benchmark
+results and their receipts, the corpus-qualification and gate discipline, and the eval tooling.
 
 It is **not** a model repository. There is no shippable model to publish, and the record says so
 in its own words: v3 is a **NO-SHIP**, the corpus **Data Gate is BLOCKED**, and the release path is
 an arm that has not finished training.
+
+**The product identity does not change the boundary — it explains it.** The product is a triage
+*scorer*, and a scorer is judged by a scoreboard that other people can also run. That is why the
+repository holds public third-party benchmarks and their receipts, why the bars are pre-registered,
+and why the contamination check that failed is published alongside the results rather than quietly
+fixed. The repository front page carries the apples-to-apples table of all four arms (base model,
+CyberSecQwen-4B, Cisco Foundation-Sec-8B-Instruct, and v3) with every figure labelled **P**
+(published by that model's own authors) or **F** (first-party, measured here), the failing bars
+shown failing, and the unmeasured cells shown as unmeasured; §6 below is the same path it names.
+The differentiator is named on the front page as a **PROPOSED** method name — *Bar-First
+Evaluation* — and the reasoning behind it is §4 and §5 here.
 
 Three facts drive every decision below. All three are in the record, not inferred:
 
@@ -35,6 +50,11 @@ Three facts drive every decision below. All three are in the record, not inferre
 **CyberGuard VulnTriage** — a vulnerability-triage scorer: CVE → CWE, plus CVSS, impact and
 prioritisation (`docs/OWNER-DECISIONS.md` `OWNER-D1` clause 1). The release artefact is named
 **`CyberGuard-Vuln-4B`** (`docs/PRODUCT-DEFINITION.md` §"The open release").
+
+**In plain language:** a CVE or advisory goes in; a CWE, a CVSS v3.1 vector and score, a
+plain-English statement of impact, and a prioritisation call come out — and the claim that it does
+that well is settled only on public benchmarks, against bars that were written down before the
+training run.
 
 | attribute | value | where |
 |---|---|---|
@@ -213,6 +233,13 @@ and never the adapter.
 ---
 
 ## 6. What a future clean arm needs to become a shippable model repository
+
+**The path, plainly:** **fix the gate measurement → re-run it → certify the corpus → train the new
+arm from base → evaluate it on every bar → rule it → build the six artefacts → name a serving
+party.** The corpus **Data Gate is BLOCKED — NOT PASS**: all three registered limits (unsafe
+< 1 %, off-topic < 2 %, shallow < 5 %) are **NOT MEASURED**, because the §6 confirmation draw has
+not been run, and the non-statistical criterion **cross-row leakage FAILED**. The re-measurement
+is to be preregistered with a named reviewer pair and a decision rule (`ASTRA-D30`).
 
 The path is already written down in the record. This section is the ordering, with the condition
 that gates each step, and it is exactly the sequence that turns *this* repository into a model
