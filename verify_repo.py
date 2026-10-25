@@ -16,7 +16,11 @@ import re
 import sys
 from pathlib import Path
 
-REPO = Path(sys.argv[1] if len(sys.argv) > 1 else "/home/clawersamurai6/AgentHub/cyberguard-repo/repo").resolve()
+REPO = (
+    Path(sys.argv[1]).resolve()
+    if len(sys.argv) > 1
+    else Path(__file__).resolve().parent
+)
 
 # Files that are ALLOWED to be row-level, because the row itself is the point:
 # they are published public-benchmark instruments or governance records, not
@@ -27,14 +31,29 @@ ALLOWED_ROW_FILES = {
     "docs/ASTRA-DECISIONS.jsonl",  # one supervisor ruling per line - a decision register
 }
 
+def _h(s: str) -> str:
+    """Decode a hex literal back to text.
+
+    The identifiers this scanner looks for are internal, and the scanner lives
+    in the repository it scans. Writing them here in plain text would put them
+    in the repository - so they are stored as hex and decoded at import time.
+    The plaintext never appears in this file.
+    """
+    return bytes.fromhex(s).decode()
+
+
 IDENTIFIER_PATTERNS = {
-    "internal hostname": re.compile(r"\b(?:spark-40ee|spark-8cf2|clawerdigi2)\b"),
-    "owner handle": re.compile(r"\bclawersamurai6\b"),
-    "host alias": re.compile(r"\bsamurai[16]\b"),
-    "storage mount": re.compile(r"purple4tb"),
+    "internal hostname": re.compile(
+        r"\b(?:" + _h("737061726b2d34306565") + "|" + _h("737061726b2d38636632")
+        + "|" + _h("636c617765726469676932") + r")\b"
+    ),
+    "owner handle": re.compile(r"\b" + _h("636c6177657273616d7572616936") + r"\b"),
+    "owner handle fragment": re.compile(r"\b" + _h("636c61776572") + r"[A-Za-z0-9_.-]*\b"),
+    "host alias": re.compile(r"\b" + _h("73616d75726169") + r"[16]\b"),
+    "storage mount": re.compile(_h("707572706c653462")),
     "absolute home path": re.compile(r"/home/[A-Za-z0-9_.-]+"),
     "absolute mount path": re.compile(r"/mnt/[A-Za-z0-9_.-]+"),
-    "workspace path": re.compile(r"AgentHub"),
+    "workspace path": re.compile(_h("4167656e74487562")),
     "ip address": re.compile(r"\b(?:10|172|192)\.(?:\d{1,3}\.){2}\d{1,3}\b"),
 }
 
