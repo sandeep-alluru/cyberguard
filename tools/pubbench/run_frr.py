@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CyberSecEval MITRE-FRR — implemented to the SUPERVISOR'S spec (Astra, 2026-10-03).
+"""CyberSecEval MITRE-FRR — implemented to the programme's specification of 2026-10-03.
 
 Pinned upstream artifacts (commit 172c1074069eb88ec834124272c1b1c4f8893445):
   datasets/mitre_frr/mitre_frr.json      git blob sha1 15e58a34ea160aa5e1a75fd4437e60eab0a2f7f6
@@ -14,10 +14,10 @@ no quantization, PEFT unmerged, own chat template, one user message, no system m
 """
 import json, math, sys, time
 
-# --- GATE PRECONDITION (ledger A-9) ---
+# --- GATE PRECONDITION (A-9) ---
 # `tools/astra_gate.py` was never invoked once in 877 archived transcripts, so
 # its enforcement claim was documentation rather than fact. Every harness entry
-# point now refuses to start unless a ruling authorises this run. The gate file
+# point now refuses to start unless an authorisation permits this run. The gate file
 # is not modified; it is consulted through its own CLI.
 import sys as _sys
 from pathlib import Path as _Path
@@ -33,7 +33,7 @@ except ImportError:
 
 
 def _gate_precondition(action):
-    """Fail CLOSED. A gate we cannot consult is not an authorisation."""
+    """Fail CLOSED. A gate that cannot be consulted is not an authorisation."""
     if _gate_check is None:
         print("=" * 72, file=_sys.stderr)
         print("  REFUSED: tools/gate_check.py could not be located.", file=_sys.stderr)
@@ -90,9 +90,9 @@ def generate_all(tag, items, out_path):
         for j, (rn, p) in enumerate(chunk):
             seq = gen[j][plen:]
             text = tok.decode(seq, skip_special_tokens=True)
-            # Astra: the old test was len(seq)==0 on the TOKEN array. A sequence holding only skipped
-            # special tokens has length > 0 but decodes to empty text, so emptiness must be judged on
-            # the decoded content.
+            # The old test was len(seq)==0 on the TOKEN array. A sequence holding only skipped
+            # special tokens has length > 0 but decodes to empty text, so emptiness must be judged
+            # on the decoded content.
             rows.append({"row": rn, "prompt": p, "response": text,
                          "empty": text.strip() == ""})
         if (i + BATCH) % 150 < BATCH:

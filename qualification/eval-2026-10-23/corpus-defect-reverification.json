@@ -1,127 +1,127 @@
 {
- "artifact": "<programme-tree>/data/v3/mixture/mixture-v3-no-trail.jsonl",
- "rows": 140545,
- "counts": {
-  "rows_with_reserved_special_token": 4891,
-  "rows_with_think_or_control_marker": 372,
-  "rows_with_reserved_or_think_marker": 5263,
-  "rows_with_any_angle_bracket_control_token_in_assistant": 2785,
-  "rows_with_reserved_or_angle_bracket_token": 7649,
-  "rows_with_both": 27,
-  "rows_with_broken_template_on_against": 0,
-  "rows_with_ON_AGAINST_as_a_substring": 5728,
-  "rows_with_empty_assistant": 0
- },
- "rates": {
-  "reserved_special_token": 0.0348,
-  "reserved_or_think_marker": 0.037447,
-  "broken_template_on_against": 0.0,
-  "on_against_substring": 0.040756
- },
- "A3_test": {
-  "question": "is the A3 'broken template English' (ON AGAINST) present in the corpora?",
-  "method": "the substring form 'on against' is matched case-insensitively across the whole row (this is what reproduces the register's counts); the standalone form (where 'on' is its own token) is matched separately, because that is what an actually-broken template looks like",
-  "per_corpus": {
-   "v3 mixture": {
-    "rows": 140545,
-    "register_count": 6068,
-    "substring_occurrences_whole_row": 6437,
-    "standalone_occurrences_whole_row": 0
-   },
-   "fenrir": {
-    "rows": 99730,
-    "register_count": 5738,
-    "substring_occurrences_whole_row": 6138,
-    "standalone_occurrences_whole_row": 0
-   },
-   "v2 armA": {
-    "rows": 81074,
-    "register_count": 2905,
-    "substring_occurrences_whole_row": 2965,
-    "standalone_occurrences_whole_row": 0
-   }
+  "artifact": "<programme-tree>/data/v3/mixture/mixture-v3-no-trail.jsonl",
+  "rows": 140545,
+  "counts": {
+    "rows_with_reserved_special_token": 4891,
+    "rows_with_think_or_control_marker": 372,
+    "rows_with_reserved_or_think_marker": 5263,
+    "rows_with_any_angle_bracket_control_token_in_assistant": 2785,
+    "rows_with_reserved_or_angle_bracket_token": 7649,
+    "rows_with_both": 27,
+    "rows_with_broken_template_on_against": 0,
+    "rows_with_ON_AGAINST_as_a_substring": 5728,
+    "rows_with_empty_assistant": 0
   },
-  "conclusion": "The register's counts reproduce EXACTLY as a case-insensitive substring match (the v3 mixture's whole-row substring count is 6,437). The standalone form occurs ZERO times in every corpus. Every matched instance is ordinary English in which 'on' is the tail of a word ending in -tion/-sion/-ion followed by 'against' (validation against, protection against, reduction against). The register's own quoted example ('disables endpoint protection ON AGAINST an electricity distribution operator') occurs in the REVIEW AND PLAN documents (research-tmp/reviews/astra-*.txt) and in no corpus file; the phrase 'electricity distribution operator' occurs zero times in the v3 mixture.",
-  "verdict": "A3 IS NOT REPRODUCIBLE AS A CORPUS DEFECT \u2014 the count is a substring artefact"
- },
- "angle_bracket_token_kinds_top15": [
-  [
-   "<link>",
-   723
-  ],
-  [
-   "<full-commit-SHA>",
-   609
-  ],
-  [
-   "<version>",
-   561
-  ],
-  [
-   "<script>",
-   520
-  ],
-  [
-   "<think>",
-   342
-  ],
-  [
-   "<li>",
-   264
-  ],
-  [
-   "<package>",
-   182
-  ],
-  [
-   "<desired_limit>",
-   180
-  ],
-  [
-   "<value>",
-   163
-  ],
-  [
-   "<full-length-commit-SHA>",
-   153
-  ],
-  [
-   "<reasonable_value>",
-   145
-  ],
-  [
-   "<specific-version>",
-   140
-  ],
-  [
-   "<a>",
-   126
-  ],
-  [
-   "<appropriate_value>",
-   90
-  ],
-  [
-   "<dependency>",
-   90
-  ]
- ],
- "reserved_token_samples": [
-  {
-   "row": 43,
-   "token": "<|reserved_special_token_0|>",
-   "context": "<|reserved_special_token_0|>**Initial CVE Analysis**\nReviewi"
+  "rates": {
+    "reserved_special_token": 0.0348,
+    "reserved_or_think_marker": 0.037447,
+    "broken_template_on_against": 0.0,
+    "on_against_substring": 0.040756
   },
-  {
-   "row": 73,
-   "token": "<|reserved_special_token_0|>",
-   "context": "<|reserved_special_token_0|>**Initial Vulnerability Analysis"
+  "A3_test": {
+    "question": "is the A3 'broken template English' (ON AGAINST) present in the corpora?",
+    "method": "the substring form 'on against' is matched case-insensitively across the whole row (this is what reproduces the register's counts); the standalone form (where 'on' is its own token) is matched separately, because that is what an actually-broken template looks like",
+    "per_corpus": {
+      "v3 mixture": {
+        "rows": 140545,
+        "register_count": 6068,
+        "substring_occurrences_whole_row": 6437,
+        "standalone_occurrences_whole_row": 0
+      },
+      "fenrir": {
+        "rows": 99730,
+        "register_count": 5738,
+        "substring_occurrences_whole_row": 6138,
+        "standalone_occurrences_whole_row": 0
+      },
+      "v2 armA": {
+        "rows": 81074,
+        "register_count": 2905,
+        "substring_occurrences_whole_row": 2965,
+        "standalone_occurrences_whole_row": 0
+      }
+    },
+    "conclusion": "The register's counts reproduce EXACTLY as a case-insensitive substring match (the v3 mixture's whole-row substring count is 6,437). The standalone form occurs ZERO times in every corpus. Every matched instance is ordinary English in which 'on' is the tail of a word ending in -tion/-sion/-ion followed by 'against' (validation against, protection against, reduction against). The register's own quoted example ('disables endpoint protection ON AGAINST an electricity distribution operator') occurs in the programme's own working documents and in no corpus file; the phrase 'electricity distribution operator' occurs zero times in the v3 mixture.",
+    "verdict": "A3 IS NOT REPRODUCIBLE AS A CORPUS DEFECT — the count is a substring artefact"
   },
-  {
-   "row": 147,
-   "token": "<|reserved_special_token_0|>",
-   "context": "<|reserved_special_token_0|>Okay, let's tackle this CVE anal"
-  }
- ],
- "note": "Counts only. The defect MEANING of each class is argued in EVALUATION.md \u00a73.3 and \u00a76.1; this script does not re-litigate it."
+  "angle_bracket_token_kinds_top15": [
+    [
+      "<link>",
+      723
+    ],
+    [
+      "<full-commit-SHA>",
+      609
+    ],
+    [
+      "<version>",
+      561
+    ],
+    [
+      "<script>",
+      520
+    ],
+    [
+      "<think>",
+      342
+    ],
+    [
+      "<li>",
+      264
+    ],
+    [
+      "<package>",
+      182
+    ],
+    [
+      "<desired_limit>",
+      180
+    ],
+    [
+      "<value>",
+      163
+    ],
+    [
+      "<full-length-commit-SHA>",
+      153
+    ],
+    [
+      "<reasonable_value>",
+      145
+    ],
+    [
+      "<specific-version>",
+      140
+    ],
+    [
+      "<a>",
+      126
+    ],
+    [
+      "<appropriate_value>",
+      90
+    ],
+    [
+      "<dependency>",
+      90
+    ]
+  ],
+  "reserved_token_samples": [
+    {
+      "row": 43,
+      "token": "<|reserved_special_token_0|>",
+      "context": "<|reserved_special_token_0|>**Initial CVE Analysis**\nReviewi"
+    },
+    {
+      "row": 73,
+      "token": "<|reserved_special_token_0|>",
+      "context": "<|reserved_special_token_0|>**Initial Vulnerability Analysis"
+    },
+    {
+      "row": 147,
+      "token": "<|reserved_special_token_0|>",
+      "context": "<|reserved_special_token_0|>Okay, let's tackle this CVE anal"
+    }
+  ],
+  "note": "Counts only. The defect MEANING of each class is argued in EVALUATION.md §3.3 and §6.1; this script does not re-litigate it."
 }

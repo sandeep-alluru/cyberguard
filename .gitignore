@@ -1,7 +1,6 @@
 # --- build artefacts -------------------------------------------------------
 __pycache__/
 *.pyc
-.inventory.json.tmp
 
 # --- NEVER commit model weights or checkpoints -----------------------------
 # These are the release artefact, not the evaluation record. If a tool drops one
@@ -19,13 +18,12 @@ models/
 
 # --- NEVER commit row-level data -------------------------------------------
 # Training corpora, held-out sets, mixtures and probe sets are out of bounds.
-# The three exceptions below are published public-benchmark or governance files
-# that are already tracked; the negations keep a fresh clone consistent.
+# The two exceptions below are published public-benchmark files that are
+# already tracked; the negations keep a fresh clone consistent.
 *.jsonl
 *.parquet
 *.arrow
 *.npz
-!docs/ASTRA-DECISIONS.jsonl
 !results/pubbench/harmbench/harmbench_behaviors_text_test.csv
 !results/pubbench/secqa_test.csv
 

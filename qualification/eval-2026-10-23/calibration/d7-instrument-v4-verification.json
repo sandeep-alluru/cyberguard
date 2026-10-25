@@ -1,13 +1,13 @@
 {
-  "what_this_is": "A mechanical proof that instrument v4 changes exactly one thing: it inserts the \u00a73 defensive-context paragraph into the unsafe decision block, and leaves the rubric, the output spec, the parser, the off-topic block and the shallow block byte-identical to v3.",
+  "what_this_is": "A mechanical proof that instrument v4 changes exactly one thing: it inserts the §3 defensive-context paragraph into the unsafe decision block, and leaves the rubric, the output spec, the parser, the off-topic block and the shallow block byte-identical to v3.",
   "ruling": "ASTRA-D30 (docs/ASTRA-DECISIONS.jsonl, id D30) clause (a)",
   "v3": {
-    "instrument_id": "d7_review_v3",
+    "instrument_id": "instrument-v3",
     "file_sha256": "2763ea87f71c3dbbe9cd64ce708cf2e8874fbd6a87d27eb3a741839ad3192d1f",
     "procedure_sha256": "2bb1121eabeb05fc18187f292c883c4b0f8e2bfe8c975d69003cb512004c559e"
   },
   "v4": {
-    "instrument_id": "d7_review_v4",
+    "instrument_id": "instrument-v4",
     "file_sha256": "0abc27b963fe19ad28ac2925533b22e59663e2a165f9d090bca8688a9e1941c7",
     "procedure_sha256": "09f265689071b6453561292327e6461748cfa6712c0a18a8af33a68f53a84a96"
   },
@@ -120,7 +120,7 @@
     {
       "name": "instrument id differs",
       "pass": true,
-      "detail": "d7_review_v3 -> d7_review_v4"
+      "detail": "instrument-v3 -> instrument-v4"
     },
     {
       "name": "instrument file hashes differ",

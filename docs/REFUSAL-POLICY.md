@@ -1,6 +1,6 @@
 # REFUSAL-POLICY — the v4 corpus's refusal-stream weight
 
-**Ledger item C-5. Status: EXECUTED, and the target weight is one parameter away from being changed.**
+**Programme item C-5. Status: EXECUTED, and the target weight is one parameter away from being changed.**
 
 **The target:** the refusal stream's share of the rebuilt corpus is **4.91 %** — **5,314
 presentations** from the **1,198 distinct refusal rows**, in a final corpus of **108,238 rows**
@@ -33,7 +33,7 @@ is **not statistically significant** (p = 0.375).
 > **The limit of that pair, stated.** One swapped stream is not one changed property. Inside the
 > 5,600 substituted rows the content type, the prompt diversity and the answer length all move
 > together, and the programme's own SPEC-V2 D2 gate for a matched control reads **NOT MET**
-> (`EVALUATION.md` §5.3.6/§5.3.9). The pair identifies the refusal **slot's content** as causal;
+> (the evaluation record §5.3.6/§5.3.9). The pair identifies the refusal **slot's content** as causal;
 > it does not separately identify the refusal behaviour inside that slot, and the sign of the
 > diversity/length confound is not determined by these artefacts. That does not weaken the
 > direction of the effect — 17.87 pp at p = 5.1 × 10⁻²² is not a small effect — but it is the
@@ -57,12 +57,12 @@ false-refusal rate any *trained* arm in this family has achieved.
 release bar of "at most 1/159 harmful, Wilson upper at most 3.5 %". The policy states that rather
 than picking a share that would pretend to pass. **The public comparator fails that bar too**
 (3 / 159, Wilson upper 0.0540), so the bar as written excludes the market comparator. That is
-`EVALUATION.md` §8 Q11 and it is an owner decision — this policy cannot settle it, and it does not
-pretend to.
+the evaluation record §8 Q11 and it is an open product decision — this policy cannot settle it, and
+it does not pretend to.
 
 ## 3. The arithmetic that had to be got right
 
-ASTRA-D5's removal shrank the corpus from **140,545** to **112,508** rows while the refusal stream
+The removal of the two contaminated sources shrank the corpus from **140,545** to **112,508** rows while the refusal stream
 stayed at **9,584** presentations. A share is a ratio, so the refusal share **rose from 6.82 % to
 8.52 %** — an *increase* — purely as a side effect of removing two contaminated sources. Left
 alone, the rebuilt corpus would have been *more* refusal-loaded than v3, and the dose-response
@@ -84,7 +84,7 @@ Stated as a **row count**: 5,314 presentations. Weight over the distinct rows: 4
 **Which presentations are kept.** All **1,198 distinct refusal rows survive** — the cut removes
 presentations, never content. The remaining presentations are spread evenly over the distinct rows
 in a deterministic round-robin, so no refusal family is over-represented by the cut. This follows
-the record's own proposal for the v4 working corpus ("the same 1,198 rows, fewer
+the record's own guidance for the v4 working corpus ("the same 1,198 rows, fewer
 presentations").
 
 ## 4. What this policy is accountable to
@@ -120,31 +120,32 @@ established that the arms' doses differ only in the denominator.
 
 The next checkpoint's **measured** false-refusal rate and harmful-compliance count at this share.
 If the measured false-refusal rate lands materially above **17.47 %**, then the share→rate mapping
-has moved with the corpus's other changes (ASTRA-D5's removal, the new triage streams) and the target
+has moved with the corpus's other changes (the removal of the two contaminated sources, the new triage streams) and the target
 must be re-derived from the new measurement rather than carried over from arm B. If the measured
 harmful-compliance count lands materially above **5 / 159**, the controlled pair's "not significant"
 reading does not hold at this share and the trade has to be re-priced.
 
-## 7. Ownership — stated plainly
+## 7. How the target was set — stated plainly
 
-`NEXT-STEPS.md` §2 recorded that *"the refusal stream's weight is already cut from ×8.0 to ×4.08 …
-but the target weight is an owner decision"*, and the open-decision list asked *"what FRR does the
-release target, knowing that every point of it is paid for on the HarmBench side?"* `EVALUATION.md`
-§8 Q12 puts the safety-posture choice with the owner (P2-1, P2-2).
+The next-steps record (§2) noted that *"the refusal stream's weight is already cut from ×8.0 to
+×4.08 …"*, that the target weight is a release decision, and the open-decision list asked *"what
+FRR does the release target, knowing that every point of it is paid for on the HarmBench side?"*
+The safety-posture choice sits with the release decision (the evaluation record §8 Q12; P2-1,
+P2-2).
 
 **A correction to the premise that question rested on, and it changes what the target means.**
-The record asked the owner to choose a **weight**. The measured variable is the **share** — the
-dose-response curve in `EVALUATION.md` §5.3.9b is plotted against the refusal share of the
-training mixture, not the presentation weight, and the two do not move together. Measured: the
-v4 working corpus's weight was indeed halved (×8.0 → ×4.08) while its **share** sat at only
-**3.6066 %** — *below* every point on the curve — and executing ASTRA-D5's removal **raised** the
-share from **6.8192 %** to **8.5185 %**. So a weight-based target would have been chosen against
-the wrong number. **This policy therefore fixes the share** (4.91 %, arm B's measured dose
-point), and the rebuilt corpus measures **4.9092 %**. Evidence:
-`eval-2026-10-23/refusal-weight-audit.json` (**7/7** checks); `EVALUATION.md` §5.3.13.
+That question rested on a **weight**. The measured variable is the **share** — the dose-response
+curve in the evaluation record §5.3.9b is plotted against the refusal share of the training
+mixture, not the presentation weight, and the two do not move together. Measured: the v4 working
+corpus's weight was indeed halved (×8.0 → ×4.08) while its **share** sat at only **3.6066 %** —
+*below* every point on the curve — and executing the removal of the two contaminated sources
+**raised** the share from **6.8192 %** to **8.5185 %**. So a weight-based target would have been
+chosen against the wrong number. **This policy therefore fixes the share** (4.91 %, arm B's
+measured dose point), and the rebuilt corpus measures **4.9092 %**. Evidence:
+`eval-2026-10-23/refusal-weight-audit.json` (**7/7** checks); the evaluation record §5.3.13.
 
-**This policy is therefore executed as a worker decision under the owner's 2026-10-23 approval**
-(`docs/OWNER-DECISIONS.md`, **W-3**), recorded with its reversal path, because the approved plan
-lists C-5 as *"decide and execute"* and the owner's instruction is to keep going without waiting.
-**It is not presented as settled.** The target, the evidence, the two-sided cost and the
-alternatives are all above, and §5 makes changing it one command.
+**This policy is therefore executed under the approved 2026-10-23 direction** (**W-3**), recorded
+with its reversal path, because the approved plan lists C-5 as *"decide and execute"* and the
+standing instruction is to keep going without waiting. **It is not presented as settled.** The
+target, the evidence, the two-sided cost and the alternatives are all above, and §5 makes changing
+it one command.

@@ -1,3 +1,8 @@
+"""CyberMetric spot check — five questions, printed with the gold letter and the parsed output.
+
+Runs the base checkpoint on the first five items of the benchmark file, in the letter-only answer
+format the scorers expect, and prints the gold letter beside the parsed answer.
+"""
 import json, re, torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 BASE="<home>/.cache/huggingface/hub/models--Qwen--Qwen3-4B-Instruct-2507/snapshots/cdbee75f17c01a7cc42f958dc650907174af0554"

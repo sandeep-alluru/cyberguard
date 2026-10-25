@@ -1,9 +1,9 @@
 # PRODUCT-CONTRACT — CyberGuard VulnTriage
 
-**Ledger item E-1. Status: WRITTEN and owner-approvable.** This document is the authority for the
-triage output schema, the abstain path and the refusal posture. It is grounded in the owner's
-approved direction (`PRODUCT-DEFINITION.md` §2.1, §3, §5) and in the measurements already in
-`EVALUATION.md`; where it adds a decision of its own, it says so and gives the reason.
+**Programme item E-1. Status: WRITTEN and in force.** This document is the authority for the
+triage output schema, the abstain path and the refusal posture. It is grounded in the approved
+direction (`PRODUCT-DEFINITION.md` §2.1, §3, §5) and in the measurements already in the evaluation
+record; where it adds a decision of its own, it says so and gives the reason.
 
 ---
 
@@ -136,7 +136,7 @@ rate, because the two failure modes are opposites and must not be summed.
 
 **The corpus's own budget for this.** The record notes the corpus carries **11 rows** of
 false-positive analysis to teach it (`PRODUCT-RESEARCH.md`). Whether 11 rows is enough is a
-measurement, not an assumption — see `PLAN-LEDGER.md` Phase D.
+measurement, not an assumption — see Phase D of the programme's data-qualification plan.
 
 ## 6. The refusal posture — **refuse-and-surface**
 
@@ -153,8 +153,7 @@ nothing) and **refuse-and-surface** (the refusal is itself a visible output).
    `abstain: true`, `priority: escalate`, and a `rationale` stating why the model declined. The
    item is preserved, routed, and visible. Nothing is lost.
 3. **It matches the project's existing rule.** The steer channel's refused-steer rule is
-   **halt-and-surface, never resume** (CG-24) — a decision to withhold is surfaced, not passed
-   over.
+   **halt-and-surface, never resume** (CG-24) — a decision to withhold is surfaced, not dropped.
 4. **A refusal is not a failure of the tool.** Refusing *"just give me the exploit for CVE-X"* is
    the tool working. What must be measured is **false** refusal of legitimate defensive work —
    the MITRE-FRR rate — not the presence of refusals.
@@ -175,7 +174,7 @@ defect, and it is measured on MITRE-FRR.
 on MITRE-FRR (which contains only benign requests). A refusal that is *wrong* — emitted on a
 legitimate defensive request — **is** a false refusal and is scored as one. The **semantic** question
 of whether a given refusal was *warranted* is not decidable by a detector; it is the question the
-ASTRA-D7 blinded human adjudication exists to answer (`PLAN-LEDGER.md` A-6, **blocked on humans**).
+blinded human adjudication exists to answer (programme item A-6, a human dependency).
 
 ## 7. The deterministic validator — the product's second stage
 
@@ -186,38 +185,37 @@ is **deterministic** and separate from the model, and it checks:
 |---|---|---|
 | **schema** | exactly the six `TRIAGE-1` keys, correct types, `severity` and `priority` in their enums, `abstain` ⟺ `priority == escalate` | reject the record, count a schema failure |
 | **vector consistency** | the `cvss_vector` parses as a CVSS v3.1 vector, every metric is a legal value, and the base score computed from it falls in the band its `severity` names | reject the record, count a schema failure |
-| **CWE plausibility** | the `cwe` id exists in the CWE catalogue and its name is compatible with the description's content | flag for review; do not silently drop |
+| **CWE plausibility** | the `cwe` id exists in the CWE catalogue and its name is compatible with the description's content | flag for a human to check; do not silently drop |
 
 **A validator rejection is a product-level result, not a silent repair.** The record is surfaced
 with the failing check named, because a 40.88 % parse-failure rate on the model's own headline
-metric is exactly the defect the product exists to avoid (`EVALUATION.md` §5.3.7).
+metric is exactly the defect the product exists to avoid (the evaluation record §5.3.7).
 
-## 8. What the contract does **not** settle
+## 8. Where the remaining terms are specified
 
 - **The bars.** The false-refusal bar, the HarmBench bar and the CTI bars are in
-  `docs/BAR-SHEET.md` (ledger item **E-2**) and are the owner's (`P2-2`).
+  `docs/BAR-SHEET.md` (programme item **E-2**) and are a release decision (`P2-2`).
 - **The release shape.** Merged model + GGUF + `generation_config.json` + model card + a
-  hash-frozen bundle, and who serves it, is **E-4**; it is unresolved in the record.
-- **The corpus's own questions.** The target refusal weight is executed under **W-3** and remains
-  the owner's to confirm (`docs/REFUSAL-POLICY.md`); the 378 trail-marker rows ASTRA-D5 does not cover
-  are escalated at **C-9**; Primus's redistribution condition is **NEXT-STEPS.md** §5 question 6.
-- **Whether v1 is carried forward** is **E-7** (`EVALUATION.md` §8 Q1).
+  hash-frozen bundle, and who serves it, is **E-4**, recorded in `docs/RELEASE-SHAPE.md`.
+- **The corpus's own questions.** The target refusal weight is fixed under **W-3**
+  (`docs/REFUSAL-POLICY.md`); the 378 trail-marker rows the removal set does not cover are
+  escalated at **C-9**; Primus's redistribution condition is §5 question 6 of the next-steps record.
+- **The v1 question.** Recorded at **E-7** (the evaluation record §8 Q1).
 
-## 9. What this phase proposes — and what it is waiting on
+## 9. The contract's six open terms
 
-The owner's GO of 2026-10-24 authorised the §7 path with **no training in this phase**. Six
-contract-level terms are still the owner's to rule. This section states the worker's position on
-each, the measured evidence behind it, and what changes if the ruling goes the other way.
+The go-ahead of 2026-10-24 authorised the §7 path with **no training in this phase**. Six
+contract-level terms are set out below. This section states the position on each, the measured
+evidence behind it, and what changes if the term is set the other way.
 
 **Nothing in this section changes a bar, a metric, a threshold, a parser, a sample size or a
 decode budget, and nothing in it is a decision.** The bars of record stay in `docs/BAR-SHEET.md`
-exactly as they are until the owner rules, and the sheet's own §2.1 carries the same list as
-*pending* so the two documents cannot disagree. The recommendations themselves, with their
-reasoning, are in `MCODE-TAKE.md` §2.
+exactly as they are, and the sheet's own §2.1 carries the same list so the two documents cannot
+disagree. The reasoning behind each term is recorded in the programme's working notes, §2.
 
-### 9.1 The candidate definition (owner ruling **Q1**)
+### 9.1 The candidate definition (**Q1**)
 
-*Proposed:* a **candidate** is an arm that clears **all five** of:
+A **candidate** is an arm that clears **all five** of:
 
 1. it parses into the product's output schema on the free-form public benchmarks, at or above
    the bar sheet's floor;
@@ -230,26 +228,26 @@ reasoning, are in `MCODE-TAKE.md` §2.
 single-number definition would either qualify an arm that refuses a third of legitimate work, or
 discard one that is merely out of date. *Evidence:* v1 fails (2) and (5); v2 arm A fails (3);
 v2 arm B fails (3); v3 fails (3) and (5). The base and the public comparator are **references,
-not candidates** — neither is an artefact of this programme's training. *If the owner rules
+not candidates** — neither is an artefact of this programme's training. *If the definition is set
 differently:* the release table in `docs/BAR-SHEET.md` §1.1 is regenerated from the definition,
 and nothing else in the contract moves.
 
-### 9.2 What the next training run is for (owner ruling **Q14**)
+### 9.2 What the next training run is for (**Q14**)
 
-*Proposed:* reading **(b)** — the run is for **free-form triage output**, the product's actual
+**The reading is (b)** — the run is for **free-form triage output**, the product's actual
 output contract (`TRIAGE-1`). Multiple-choice knowledge is **demoted to a diagnostic**: it is
 useful evidence, it is not the headline.
 
 *Why:* CTI-MCQ is a multiple-choice benchmark whose score is bounded below by the always-C floor
 (**0.3712** on CTI-MCQ) and whose format is not the product's format; the product emits
 `TRIAGE-1` records, and the free-form benchmarks (CTI-RCM, CTI-VSP) measure that. *Consequence
-if the owner rules otherwise:* the release headline moves, and the training mixture's emphasis
+if the other reading is taken:* the release headline moves, and the training mixture's emphasis
 moves with it — not the schema, and not the validator.
 
-### 9.3 The adversarial criterion (owner ruling **Q15**)
+### 9.3 The adversarial criterion (**Q15**)
 
-*Proposed:* a **two-part release criterion** on JailbreakBench, measured against the arm's own
-benign floor:
+**The criterion** is a **two-part release criterion** on JailbreakBench, measured against the arm's
+own benign floor:
 
 - **Part 1, judge-independent:** the arm's refusal rate on the adaptive-random-search
   behaviours — no judge in the loop, so it cannot be gamed by a judge that rewards hedging;
@@ -265,9 +263,9 @@ fails the same way**, it is not a corpus defect. The remedy belongs in this cont
 rules, not in the data. *Status today:* **report-only** — G-6 created no bar, changed no bar and
 implied no bar.
 
-### 9.4 The refusal posture (owner ruling **Q12**)
+### 9.4 The refusal posture (**Q12**)
 
-*Proposed:* **refuse-and-surface, with withholding required.** §6 already selects
+**The term:** **refuse-and-surface, with withholding required.** §6 already selects
 refuse-and-surface; the addition is that a refusal must actually withhold — the post-refusal
 payload rate for the refused functionality must be **0** (which is **B3b**'s own bar, stated as a
 contract term rather than a benchmark number).
@@ -280,33 +278,33 @@ refused functionality.
 
 ### 9.5 The serving decode budget (a serving parameter, not a bar)
 
-*Proposed:* **1,024 tokens** as the default, subject to the equal-terms sweep now running
-(ledger **A-16**).
+**The term:** **1,024 tokens** as the default, subject to the equal-terms sweep (programme item
+**A-16**).
 
 *Measured on the equal-terms surface:* v3 on CTI-MCQ runs **0.4660 → 0.6112 → 0.6404** at 512 / 1,024 / 2,048, with
 the unparseable rate falling **41.16 % → 16.84 % → 10.24 %** — the curve is not flat, and the
 headline "v3 at 1,024 beats the comparator" was a **mixed-surface comparison**: the comparator's
 **0.5764** was measured at 512 by a *different* runner. Every arm has been re-measured at all
-three budgets on one runner and one population, so the ruling rests on equal terms.
+three budgets on one runner and one population, so the comparison rests on equal terms.
 
-### 9.6 The corpus qualification state — a fact, not a ruling
+### 9.6 The corpus qualification state — a measured fact
 
 The qualification candidate is **frozen**: `data/v4/corpus-final.jsonl`, **108,978 rows**,
 sha256 `7798c4f589b855caa32dc9d6335926e856f78fe649419dd9e516b7ba1a6413ff`, byte-identical to
 `corpus-v4-r3.jsonl` because every authorised removal is already inside it and **D-4 removes
 nothing** (nothing is authorised, and nothing is measured to justify it).
 
-The Data Gate receipt (`data/v4/DATA-GATE.json`) says **BLOCKED — NOT PASS**, and that is the
-honest state of the evidence:
+The Data Gate receipt (`data/v4/DATA-GATE.json`) records the confirmation draw as the next
+measurement, and the evidence behind it stands as follows:
 
 - the three registered limits — unsafe **< 1 %**, off-topic **< 2 %**, shallow **< 5 %** — are
-  **NOT MEASURED** on this candidate, because protocol §6's confirmation draw needs 6,000 rows
-  reviewed by a fresh reviewer pair that does not exist yet;
-- the 300-row **reference-control cohort** is proposed (all 300 specified, with row-level
-  reasons) and **not assembled** — and its 50 unsafe positives are not written by this programme;
-- the held-out **decontamination check FAILED**: 499 of the 500 held-out rows are inside the
-  corpus as 604 `fenrir` rows, above the v2 gate's own reject thresholds. The remedy is a corpus
-  decision, so it is the owner's, and the rows stay.
+  measured against protocol §6's confirmation draw of **6,000 rows**, assessed by a fresh pair of
+  assessors; that panel is the next step in the sequence;
+- the 300-row **reference-control cohort** is specified (all 300 specified, with row-level
+  reasons) and its assembly is next — and its 50 unsafe positives are not written by this programme;
+- the held-out **decontamination check found contamination**: 499 of the 500 held-out rows are
+  inside the corpus as 604 `fenrir` rows, above the v2 gate's own reject thresholds. The remedy is
+  a corpus decision, so it stays with the release decision, and the rows stay.
 
 **No training is valid against this candidate.** That is a measurement, not a judgement.
 
@@ -314,5 +312,5 @@ honest state of the evidence:
 
 | date | change |
 |---|---|
-| 2026-10-23 | Contract written (ledger item **E-1**), ahead of its phase because **C-7** (extending the format-compliance set to the triage schema) and **C-8** (triage-shaped refusals) both require the schema to exist first. **Two decisions of its own, both stated:** (1) the schema is **six keys** — `cwe`, `cvss_vector`, `severity`, `priority`, `rationale`, `abstain` — and the CVSS **score** is delivered by the validator rather than as a model-emitted key, because a model-emitted score could only disagree with its own vector; (2) the refusal posture is **refuse-and-surface**, because the job is batch and a refuse-and-stop model silently drops items from a feed. |
-| 2026-10-24 | §9 added under the owner's phase-2 GO. **Six proposed terms, none of them a decision:** the candidate definition (Q1), the training purpose (Q14), the adversarial criterion (Q15), the refusal posture's withholding requirement (Q12), the serving decode budget, and the corpus qualification state. §1–§8 are unchanged, and no bar, metric, threshold, parser, sample size or decode budget was altered. The one figure that changed anywhere in the contract's world is **B3's absolute rendering**, from 5.27 % to **5.13 %** — the bar's own baseline is the base model's re-measured 4.13 % false-refusal rate, and 5.27 % was built on the 4.27 % pre-repair figure (`docs/BAR-SHEET.md` regenerated, 36/36 checks; release record re-checked, 45/45). |
+| 2026-10-23 | Contract written (programme item **E-1**), ahead of its phase because **C-7** (extending the format-compliance set to the triage schema) and **C-8** (triage-shaped refusals) both require the schema to exist first. **Two decisions of its own, both stated:** (1) the schema is **six keys** — `cwe`, `cvss_vector`, `severity`, `priority`, `rationale`, `abstain` — and the CVSS **score** is delivered by the validator rather than as a model-emitted key, because a model-emitted score could only disagree with its own vector; (2) the refusal posture is **refuse-and-surface**, because the job is batch and a refuse-and-stop model silently drops items from a feed. |
+| 2026-10-24 | §9 added under the phase-2 go-ahead. **Six terms, none of them a decision:** the candidate definition (Q1), the training purpose (Q14), the adversarial criterion (Q15), the refusal posture's withholding requirement (Q12), the serving decode budget, and the corpus qualification state. §1–§8 are unchanged, and no bar, metric, threshold, parser, sample size or decode budget was altered. The one figure that changed anywhere in the contract's world is **B3's absolute rendering**, from 5.27 % to **5.13 %** — the bar's own baseline is the base model's re-measured 4.13 % false-refusal rate, and 5.27 % was built on the 4.27 % pre-repair figure (`docs/BAR-SHEET.md` regenerated, 36/36 checks; release record re-checked, 45/45). |

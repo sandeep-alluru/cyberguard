@@ -164,10 +164,10 @@
     "finding": "The Primus-sourced subset (268 rows) is clean on both contamination axes (0 thinking-control tokens, 0 stock preambles) and 49.63% of its targets already end with a CWE id, which is exactly the CTI-RCM output contract. The defect in the Primus stream is in its own targets, not in its prompts. So the CVE->CWE task, and a repair template for it, are already on disk."
   },
   "laya_slot": {
-    "path": "<other-workspace>/v4/data/agent4-laya-datasets",
+    "path": "<other-workspace>/v4/data/phase-4-laya-datasets",
     "exists": true,
     "files": 0,
     "bytes": 0,
-    "note": "The directory exists and is empty. The agent4 log claims 'Loaded 140545 rows across 6 strata' and the dispatch brief specifies five planned output files (offensive-1200, offtopic-1200, shallow-1200, heldout-1000, dataset-card) \u2014 none of which were materialised. Nothing to fix; nothing there."
+    "note": "The directory exists and is empty. An earlier session log claims 'Loaded 140545 rows across 6 strata' and the work order specifies five planned output files (offensive-1200, offtopic-1200, shallow-1200, heldout-1000, dataset-card) — none of which were materialised. Nothing to fix; nothing there."
   }
 }

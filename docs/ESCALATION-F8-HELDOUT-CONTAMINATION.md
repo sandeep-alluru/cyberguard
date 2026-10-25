@@ -1,11 +1,12 @@
-# Escalation F-8 — the 500-row held-out set is inside the training corpus
+# Contamination report F-8 — the 500-row held-out set is inside the training corpus
 
-**Raised:** 2026-10-23 · **Ledger item:** F-8 (decontamination) · **Status:** OPEN, awaiting a ruling
+**Measured:** 2026-10-23 · **Finding:** F-8 (decontamination) · **Status:** OPEN — no treatment applied
 **Measurement:** `eval-2026-10-23/f8-decontamination-report.json` (**18/20**, exit 1) · `eval-2026-10-23/f8c-holdout-leak-trace.json` (**15/15**, exit 0)
 
-> **This document asks a question and does not answer it.** Removing rows from the training
-> corpus is a corpus decision, and the worker does not make corpus decisions. Everything below is
-> a **count**, an **authority fact**, and **three candidate treatments with their consequences**.
+> **This document states a measurement and the options it leaves open.** Removing rows from the
+> training corpus is a corpus decision, and this report does not make corpus decisions. Everything
+> below is a **count**, an **authority fact**, and **three candidate treatments with their
+> consequences**.
 
 ## 1. The counted class
 
@@ -35,8 +36,8 @@ held-out row's prompt string exactly. The identity key is the project's own —
 says in its own comment that it *"must match gate_v2.prompt_hash_of and the dedupe key"*; the
 trace cross-checks that key against the gate's own `prompt_hash_of` on 100 rows (**100/100 agree**).
 
-**The answers leak too — and this section was WRONG when it was first written, which is why it
-carries its own correction.** The first version of this document said that **25** of the 604 rows
+**The answers leak too — and this figure was WRONG in the first version of this report, which is
+why the corrected figures are given here.** The first version said that **25** of the 604 rows
 carried the held-out answer and **579** carried "the fenrir corpus's own answer in the fenrir
 house style". **That was an artefact of the instrument, not a property of the corpus.** The
 held-out file stores the Trendyol reference with the escaping it came with — which varies in
@@ -51,9 +52,9 @@ corrected figures are:
   differently, 3 are the corpus refusing where the reference answers, 1 the other way round, and
   **98 are neither**).
 
-**So the held-out set's answers leak into the training corpus far more than this document first
-claimed: not a small minority but the large majority.** The correction is in the *conservative*
-direction against the programme's own interest, and it is recorded here rather than quietly
+**So the held-out set's answers leak into the training corpus far more than this report first
+claimed: not a small minority but the large majority.** The correction runs in the *conservative*
+direction, against the programme's own interest, and it is recorded here rather than quietly
 replaced. The instrument that produced the wrong number was
 `eval-2026-10-23/f8c_trace_holdout_leak.py`, and the comparison it now performs is written down
 in the file's own `skeleton()` docstring.
@@ -93,7 +94,7 @@ other things.
 
 **And the check that did run on the built mixture was aimed at the public set.**
 `docs/CHECKPOINT-v3-02-2026-09-30.md` records a *"CONTAMINATION-FREE"* verdict for v3's mixture
-against **CyberMetric-500 + SecQA (610 items)** — v3's §8.6 held-out set, as that document
+against **CyberMetric-500 + SecQA (610 items)** — v3's §8.6 held-out set, as that record
 correctly says, *"is not v2's `holdout500.jsonl`"*. The verdict is sound **for what it tested**.
 The 500-row Trendyol holdout was never checked against the built mixture.
 
@@ -106,8 +107,8 @@ Two things that could be mistaken for damage are not.
   normalised-prompt matches** against CyberMetric-500 (500) and SecQA-v1-test (110) across **all
   six sources**, and **residual overlap 0.0 on every source** for both. Every public-benchmark
   number in EVALUATION.md — CTI-MCQ, CTI-RCM, MITRE-FRR, HarmBench, CyberMetric, SecQA — rests on
-  a population the mixture does not touch. **The contamination is confined to the internal,
-  retired 500-row battery.**
+  a population the mixture does not touch. **The contamination is confined to the retired
+  500-row battery.**
 - **v1 and v2 are not affected.** v1 was trained on the Trendyol corpus (52,284 rows,
   `docs/muse-1.3-cyberguard-v1-training-postmortem-2026-09-27_153135CDT.md:29`) with the same
   500-row split excluded by construction, and v2's corpus is exactly the gated candidate set,
@@ -150,14 +151,14 @@ All are defensible. None is chosen here.
 ### Treatment A — **remove the 604 rows and re-derive**
 
 - *What it does*: drops 604 of 367,198 rows (**0.164 %**), all fenrir, and rebuilds the mixture.
-- *What it costs*: a **corpus change without a ruling**. fenrir is the mixture's largest general
+- *What it costs*: a **corpus change that nothing currently authorises**. fenrir is the mixture's largest general
   stream by characters (**68.0 %**), so a 0.261 % row trim is small by count but the removal's
   effect on coverage is **UNMEASURED**. The mixture must be re-assembled and F-7's weight
   rationale re-checked against the new counts.
 - *What it buys*: the held-out set's exclusion becomes **true by construction** for the rebuilt
   mixture, and F-8's acceptance check would then pass on the mixture it is run against.
 - *What it risks*: **it does not repair the history.** v3's published held-out loss and token-F1
-  stay contaminated, and the two internal instruments stay unusable for v3 unless the arm is
+  stay contaminated, and the two diagnostic instruments stay unusable for v3 unless the arm is
   retrained.
 
 ### Treatment B — **keep the rows, retire the 500-row holdout as an instrument, record the class**
@@ -169,8 +170,8 @@ All are defensible. None is chosen here.
   from fenrir, and the "v3 is the best-fitting arm" reading is withdrawn rather than repaired. The
   finding that v3's failure is one of transfer rather than fit is **no longer available from this
   instrument.**
-- *What it buys*: **no corpus change without a ruling**, and a record that states what the
-  measurement was and was not.
+- *What it buys*: **no corpus change**, and a record that states what the measurement was and was
+  not.
 - *What it risks*: the contamination stays in the training corpus. Any future arm built on the
   mixture inherits it, and the exclusion is only enforced by **the removal or the discipline of
   whoever builds next** — not by the corpus's construction.
@@ -198,7 +199,7 @@ contaminated rows is materially lower, the contamination inflated the number; if
 similar, the number stands and the reading of §5.2a survives. **That needs no trained model and
 no new data** — it is a re-scoring of the existing v3 checkpoint against a split of the existing
 500 rows by contamination status. **It has not been performed here**, because what it decides is
-the ruling's.
+a corpus decision.
 
 ## 6. The question
 
@@ -207,15 +208,15 @@ the ruling's.
 > and the dependent claims withdrawn (Treatment B), or should a clean held-out split be built and
 > the measurement re-run (Treatment C)?**
 
-**The worker does not choose.** Choosing a corpus change is the decision-maker's, and the
-candidate treatments differ in coverage and in measured-ness, not in taste. The ruling should also
+**This report does not choose.** Choosing a corpus change is a programme decision, and the
+candidate treatments differ in coverage and in measured-ness, not in taste. The choice should also
 say whether the 500-row holdout is **retired outright** or kept with a scope note naming the
 arms it is valid for.
 
-**Until the ruling arrives, the rows stay** — in `data/v4/corpus-v4-r3.jsonl` and in
+**Until that choice is made, the rows stay** — in `data/v4/corpus-v4-r3.jsonl` and in
 `data/v4/mixture-v4.jsonl`, unchanged and counted here, so that no later reader mistakes this
 mixture for a decontaminated one. **The mixture is provisional in any case**: Phase D's removals
-(D-3, D-4) and D-7's Data Gate are outstanding and blocked on humans.
+(D-3, D-4) and D-7's Data Gate are the next measurements, and each needs a pair of qualified human scorers.
 
 ## 7. The evidence
 
@@ -231,6 +232,6 @@ mixture for a decontaminated one. **The mixture is provisional in any case**: Ph
 | `v2/holdout500.jsonl` + `v2/holdout500.manifest.json` | the certified 500-row split and its manifest |
 | `data/v3/fenrir-v2.1/CONTAMINATION_REPORT.md` | the v3 report whose zero covers CyberMetric-500 (and SecQA, excluded as a failed download) — **not** this holdout |
 | `docs/CHECKPOINT-v3-02-2026-09-30.md` | the mixture's *"CONTAMINATION-FREE"* verdict against the **public** 610-item set |
-| `docs/ESCALATION-C9-TRAIL-MARKER-RESIDUE.md` | the sibling escalation in the same stream — 378 marker rows, also awaiting a ruling |
+| `docs/ESCALATION-C9-TRAIL-MARKER-RESIDUE.md` | the sibling finding in the same stream — 378 marker rows, also open |
 
 ---

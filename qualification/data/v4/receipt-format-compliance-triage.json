@@ -1,117 +1,117 @@
 {
- "what_this_is": "Receipt for data/v4/format-compliance-triage.jsonl (ledger item C-7): the output-contract supervision extended to the TRIAGE-1 triage schema.",
- "schema": {
-  "source": "docs/PRODUCT-CONTRACT.md \u00a74 (TRIAGE-1) \u2014 parsed by eval-2026-10-23/e1_schema_check.py, not restated here",
-  "keys": [
-   "cwe",
-   "cvss_vector",
-   "severity",
-   "priority",
-   "rationale",
-   "abstain"
+  "what_this_is": "Receipt for data/v4/format-compliance-triage.jsonl (ledger item C-7): the output-contract supervision extended to the TRIAGE-1 triage schema.",
+  "schema": {
+    "source": "docs/PRODUCT-CONTRACT.md §4 (TRIAGE-1) — parsed by eval-2026-10-23/e1_schema_check.py, not restated here",
+    "keys": [
+      "cwe",
+      "cvss_vector",
+      "severity",
+      "priority",
+      "rationale",
+      "abstain"
+    ],
+    "enums": {
+      "severity": [
+        "NONE",
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL",
+        "UNKNOWN"
+      ],
+      "priority": [
+        "patch_now",
+        "schedule",
+        "monitor",
+        "escalate"
+      ]
+    }
+  },
+  "cvss": {
+    "source": "CVSS v3.1 Specification Document, FIRST.Org — https://www.first.org/cvss/v3-1/specification-document, §7.1/§7.4",
+    "implementation": "eval-2026-10-23/cvss_v31.py (15/15 against the specification's own worked examples)",
+    "every_severity_is_computed_from_its_vector": true
+  },
+  "content_provenance": {
+    "descriptions": "SYNTHETIC — written for this item in the shape of a vendor advisory. These rows teach the output contract; they are NOT evidence about any real CVE and are not drawn from any CVE dataset.",
+    "cwe_ids": "real CWE ids from the MITRE CWE catalogue",
+    "vectors": "authored, and consistent by construction (the severity is computed from the vector)",
+    "priority_rule": "CRITICAL/HIGH -> patch_now, MEDIUM -> schedule, LOW/NONE -> monitor, abstention -> escalate",
+    "licence": "ours, from public rule schemas — the parent set's provenance, with the SigmaHQ attribution retained (docs/MIXTURE-V2.md §1; docs/DATA-LEDGER.md §1)"
+  },
+  "output": {
+    "path": "<programme-tree>/data/v4/format-compliance-triage.jsonl",
+    "rows": 352,
+    "scored": 208,
+    "abstained": 144,
+    "severity_counts": {
+      "HIGH": 120,
+      "MEDIUM": 41,
+      "CRITICAL": 38,
+      "NONE": 8,
+      "LOW": 1,
+      "UNKNOWN": 144
+    },
+    "priority_counts": {
+      "patch_now": 158,
+      "schedule": 41,
+      "monitor": 9,
+      "escalate": 144
+    },
+    "sha256": "e754e18e6abf4cec02ccfc2ee21b5e6b1c49882a845faa180794ece2576ed73a"
+  },
+  "checks": [
+    {
+      "name": "every-rows-user-names-all-six-schema-keys",
+      "pass": true,
+      "detail": "352 rows checked for all six key names"
+    },
+    {
+      "name": "every-rows-user-names-only-those-keys",
+      "pass": true,
+      "detail": "no other output key is named in any instruction"
+    },
+    {
+      "name": "a-parser-over-the-authored-targets-recovers-them-100-percent",
+      "pass": true,
+      "detail": "352/352 targets parsed and validated against TRIAGE-1"
+    },
+    {
+      "name": "every-severity-value-appears",
+      "pass": true,
+      "detail": "{'HIGH': 120, 'MEDIUM': 41, 'CRITICAL': 38, 'NONE': 8, 'LOW': 1, 'UNKNOWN': 144}"
+    },
+    {
+      "name": "every-priority-value-appears",
+      "pass": true,
+      "detail": "{'patch_now': 158, 'schedule': 41, 'monitor': 9, 'escalate': 144}"
+    },
+    {
+      "name": "both-abstain-states-appear",
+      "pass": true,
+      "detail": "144 abstained, 208 scored"
+    },
+    {
+      "name": "every-severity-matches-its-vector-computed-score",
+      "pass": true,
+      "detail": "0 mismatches across 352 rows"
+    },
+    {
+      "name": "every-row-is-distinct",
+      "pass": true,
+      "detail": "352 distinct targets of 352"
+    },
+    {
+      "name": "every-instruction-is-distinct",
+      "pass": true,
+      "detail": "352 distinct instructions of 352"
+    },
+    {
+      "name": "parent-set-is-read-and-its-kinds-recorded",
+      "pass": true,
+      "detail": "1300 parent rows, kinds {'structured-json': 300, 'sigma-rule': 400, 'triage-one-word': 600}; this family adds 'triage-json'"
+    }
   ],
-  "enums": {
-   "severity": [
-    "NONE",
-    "LOW",
-    "MEDIUM",
-    "HIGH",
-    "CRITICAL",
-    "UNKNOWN"
-   ],
-   "priority": [
-    "patch_now",
-    "schedule",
-    "monitor",
-    "escalate"
-   ]
-  }
- },
- "cvss": {
-  "source": "CVSS v3.1 Specification Document, FIRST.Org \u2014 https://www.first.org/cvss/v3-1/specification-document, \u00a77.1/\u00a77.4",
-  "implementation": "eval-2026-10-23/cvss_v31.py (15/15 against the specification's own worked examples)",
-  "every_severity_is_computed_from_its_vector": true
- },
- "content_provenance": {
-  "descriptions": "SYNTHETIC \u2014 written for this item in the shape of a vendor advisory. These rows teach the output contract; they are NOT evidence about any real CVE and are not drawn from any CVE dataset.",
-  "cwe_ids": "real CWE ids from the MITRE CWE catalogue",
-  "vectors": "authored, and internally consistent by construction (the severity is computed from the vector)",
-  "priority_rule": "CRITICAL/HIGH -> patch_now, MEDIUM -> schedule, LOW/NONE -> monitor, abstention -> escalate",
-  "licence": "ours, from public rule schemas \u2014 the parent set's provenance, with the SigmaHQ attribution retained (docs/MIXTURE-V2.md \u00a71; docs/DATA-LEDGER.md \u00a71)"
- },
- "output": {
-  "path": "<programme-tree>/data/v4/format-compliance-triage.jsonl",
-  "rows": 352,
-  "scored": 208,
-  "abstained": 144,
-  "severity_counts": {
-   "HIGH": 120,
-   "MEDIUM": 41,
-   "CRITICAL": 38,
-   "NONE": 8,
-   "LOW": 1,
-   "UNKNOWN": 144
-  },
-  "priority_counts": {
-   "patch_now": 158,
-   "schedule": 41,
-   "monitor": 9,
-   "escalate": 144
-  },
-  "sha256": "e754e18e6abf4cec02ccfc2ee21b5e6b1c49882a845faa180794ece2576ed73a"
- },
- "checks": [
-  {
-   "name": "every-rows-user-names-all-six-schema-keys",
-   "pass": true,
-   "detail": "352 rows checked for all six key names"
-  },
-  {
-   "name": "every-rows-user-names-only-those-keys",
-   "pass": true,
-   "detail": "no other output key is named in any instruction"
-  },
-  {
-   "name": "a-parser-over-the-authored-targets-recovers-them-100-percent",
-   "pass": true,
-   "detail": "352/352 targets parsed and validated against TRIAGE-1"
-  },
-  {
-   "name": "every-severity-value-appears",
-   "pass": true,
-   "detail": "{'HIGH': 120, 'MEDIUM': 41, 'CRITICAL': 38, 'NONE': 8, 'LOW': 1, 'UNKNOWN': 144}"
-  },
-  {
-   "name": "every-priority-value-appears",
-   "pass": true,
-   "detail": "{'patch_now': 158, 'schedule': 41, 'monitor': 9, 'escalate': 144}"
-  },
-  {
-   "name": "both-abstain-states-appear",
-   "pass": true,
-   "detail": "144 abstained, 208 scored"
-  },
-  {
-   "name": "every-severity-matches-its-vector-computed-score",
-   "pass": true,
-   "detail": "0 mismatches across 352 rows"
-  },
-  {
-   "name": "every-row-is-distinct",
-   "pass": true,
-   "detail": "352 distinct targets of 352"
-  },
-  {
-   "name": "every-instruction-is-distinct",
-   "pass": true,
-   "detail": "352 distinct instructions of 352"
-  },
-  {
-   "name": "parent-set-is-read-and-its-kinds-recorded",
-   "pass": true,
-   "detail": "1300 parent rows, kinds {'structured-json': 300, 'sigma-rule': 400, 'triage-one-word': 600}; this family adds 'triage-json'"
-  }
- ],
- "pass": 10,
- "total": 10
+  "pass": 10,
+  "total": 10
 }

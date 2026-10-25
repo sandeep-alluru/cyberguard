@@ -1,5 +1,5 @@
 {
-  "what_this_is": "The BLINDED, MIXED-ORDER review views of cohort 4. Each reviewer sees control_id, system, user and assistant only — no dimension, no expected label, no kind, no reason — in its own deterministic order.",
+  "what_this_is": "The BLINDED, MIXED-ORDER scoring views of cohort 4. Each scorer sees control_id, system, user and assistant only — no dimension, no expected label, no kind, no reason — in its own deterministic order.",
   "ruling": "ASTRA-D30 (b); ASTRA-D31; ASTRA-D32",
   "truth_path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4.jsonl",
   "truth_sha256": "1ecdf614a0568882eb5fea62c3ee589f0f0aedc7b142256f860ccec9612a37bf",

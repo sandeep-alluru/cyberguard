@@ -1,7 +1,7 @@
 # Eval tooling — provenance, and how to run it
 
 Every file in this directory was imported from the CyberGuard programme tree and scrubbed of
-internal identifiers. The **logic was not changed**: the checks below assert the same things they
+programme identifiers. The **logic was not changed**: the checks below assert the same things they
 asserted in the tree, against the same documents.
 
 ## What is here
@@ -38,23 +38,26 @@ here. They also assert on the *host state* of the tree: that the adapter directo
 that the merge and serve scripts exist, that the quantiser binary is built, that the GGUF
 directory holds a specific number of files.
 
-That host state is **deliberately not in this repository** — no adapters, no scripts, no GGUF, by
-the boundary in `EVALUATION.md` §4.3. So run these against the programme tree, not against this
-checkout, and read their **receipts** here as the results of those runs.
+That host state is **deliberately not in this repository** — no adapters, no scripts, no GGUF.
+The boundary that keeps it out is enforced mechanically by `verify_repo.py` at the repository
+root: it scans every file for programme identifiers, credentials of any shape, and row-level data
+files that are not on the published-benchmark allow-list, and exits non-zero if it finds one. So
+run these against the programme tree, not against this checkout, and read their **receipts** here
+as the results of those runs.
 
 **The benchmark runners and the corpus instruments need the artefacts they measure**: the model,
 the benchmark data, the corpora. They are the reproducible path, and they are here so that the
 method is checkable — not so that a reader can re-run them without the hardware and the data.
 
 **One tool in this repository runs anywhere, and it is the one that matters most to a reader:
-`verify_repo.py` at the repository root.** It checks this tree against the boundary — internal
+`verify_repo.py` at the repository root.** It checks this tree against the boundary — programme
 identifiers, credentials of any shape, and row-level data files that are not on the
 published-benchmark allow-list — and exits non-zero if it finds one.
 
 ## The scrub, and what it changed in these files
 
-75 of the 125 imported files were modified on import: internal host names, the owner handle,
-absolute internal paths, other programmes' names and other people's names were replaced with
+75 of the 125 imported files were modified on import: programme host names, the account handle,
+absolute programme paths, other programmes' names and other people's names were replaced with
 generic descriptions. In this directory that means:
 
 - `e4_release_shape_check.py` asserts `"<host-a>" in doc` where the tree's original asserted the
@@ -64,5 +67,5 @@ generic descriptions. In this directory that means:
   writes (`host_ssh_returncode`, `host_ssh_output`) were renamed in **both** the generator and the
   receipt, so the pair stays consistent.
 
-`INVENTORY.md` lists every file with its source path and source sha256, and §3 of it records the
-full replacement table.
+Every imported file is listed with its source path and source sha256, and section 3 of that
+listing records the full replacement table.

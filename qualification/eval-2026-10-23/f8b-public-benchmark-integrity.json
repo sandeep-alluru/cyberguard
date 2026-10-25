@@ -1,204 +1,204 @@
 {
- "what_this_is": "F-8b: the PUBLIC benchmarks' integrity on the rebuilt mixture, and the held-out finding F-8 produced, stated in one place.",
- "instrument": {
-  "exact_identity": "sha256 of the whitespace-normalised prompt, against the benchmark's own question text",
-  "residual_overlap": "v2/gate_v2.py::overlap_scan, imported \u2014 13-gram Jaccard plus verbatim-span containment, with the gate's own thresholds",
-  "sample_rows_per_source": 2000
- },
- "public_benchmarks": {
-  "cybermetric-500": {
-   "path": "<programme-tree>/pubbench/cybermetric-500.json",
-   "questions": 500
+  "what_this_is": "F-8b: the PUBLIC benchmarks' integrity on the rebuilt mixture, and the held-out finding F-8 produced, stated in one place.",
+  "instrument": {
+    "exact_identity": "sha256 of the whitespace-normalised prompt, against the benchmark's own question text",
+    "residual_overlap": "v2/gate_v2.py::overlap_scan, imported — 13-gram Jaccard plus verbatim-span containment, with the gate's own thresholds",
+    "sample_rows_per_source": 2000
   },
-  "secqa-v1-test": {
-   "path": "<programme-tree>/pubbench/secqa_test.csv",
-   "questions": 110
-  }
- },
- "held_out_finding": {
-  "what": "499 of the 500 rows of the v1/v2 held-out set (v2/holdout500.jsonl) are inside the training corpus, complete with their reference answers, in the fenrir stream \u2014 604 rows, because some appear two or three times",
-  "why": "the holdout split was applied to the Trendyol copy of CyberSec-Dataset_escaped.jsonl (the v2 gate's admitted candidate) and never to the Fenrir copy (AlicanKiraz0/Cybersecurity-Dataset-Fenrir-v2.1), which was fetched on 2026-09-29 for the v3 build and never passed through the v2 admission gate",
-  "scope": "the held-out set is an INTERNAL battery. It is retired under the owner's evidence rule, and no public number rests on it. The public benchmarks are measured separately in this file",
-  "fenrir_own_report_gap": "data/v3/fenrir-v2.1/CONTAMINATION_REPORT.md reports 'contaminated rows: 0' over 99,870 rows, and also reports that its SecQA fingerprint file was a failed-download placeholder and was excluded \u2014 so the zero covers CyberMetric-500 only, and this file measures the SecQA half properly"
- },
- "per_source": {
-  "fenrir": {
-   "rows": 99730,
-   "sampled_rows": 2000,
-   "cybermetric-500": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "secqa-v1-test": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "exact_matches": {}
+  "public_benchmarks": {
+    "cybermetric-500": {
+      "path": "<programme-tree>/pubbench/cybermetric-500.json",
+      "questions": 500
+    },
+    "secqa-v1-test": {
+      "path": "<programme-tree>/pubbench/secqa_test.csv",
+      "questions": 110
+    }
   },
-  "format": {
-   "rows": 3304,
-   "sampled_rows": 2000,
-   "cybermetric-500": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "secqa-v1-test": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "exact_matches": {}
+  "held_out_finding": {
+    "what": "499 of the 500 rows of the v1/v2 held-out set (v2/holdout500.jsonl) are inside the training corpus, complete with their reference answers, in the fenrir stream — 604 rows, because some appear two or three times",
+    "why": "the holdout split was applied to the Trendyol copy of CyberSec-Dataset_escaped.jsonl (the v2 gate's admitted candidate) and never to the Fenrir copy (AlicanKiraz0/Cybersecurity-Dataset-Fenrir-v2.1), which was fetched on 2026-09-29 for the v3 build and never passed through the v2 admission gate",
+    "scope": "the held-out set is a programme battery rather than a public one. It is retired under the programme's evidence rule, and no public number rests on it. The public benchmarks are measured separately in this file",
+    "fenrir_own_report_gap": "data/v3/fenrir-v2.1/CONTAMINATION_REPORT.md reports 'contaminated rows: 0' over 99,870 rows, and also reports that its SecQA fingerprint file was a failed-download placeholder and was excluded — so the zero covers CyberMetric-500 only, and this file measures the SecQA half properly"
   },
-  "refusal": {
-   "rows": 18029,
-   "sampled_rows": 2000,
-   "cybermetric-500": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "secqa-v1-test": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "exact_matches": {}
+  "per_source": {
+    "fenrir": {
+      "rows": 99730,
+      "sampled_rows": 2000,
+      "cybermetric-500": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "secqa-v1-test": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "exact_matches": {}
+    },
+    "format": {
+      "rows": 3304,
+      "sampled_rows": 2000,
+      "cybermetric-500": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "secqa-v1-test": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "exact_matches": {}
+    },
+    "refusal": {
+      "rows": 18029,
+      "sampled_rows": 2000,
+      "cybermetric-500": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "secqa-v1-test": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "exact_matches": {}
+    },
+    "replay": {
+      "rows": 594,
+      "sampled_rows": 594,
+      "cybermetric-500": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "secqa-v1-test": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "exact_matches": {}
+    },
+    "triage": {
+      "rows": 245273,
+      "sampled_rows": 2000,
+      "cybermetric-500": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "secqa-v1-test": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "exact_matches": {}
+    },
+    "triage_salvage": {
+      "rows": 268,
+      "sampled_rows": 268,
+      "cybermetric-500": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "secqa-v1-test": {
+        "jaccard_max": 0.0,
+        "jaccard_docs_ge": 0,
+        "containment_max": 0.0,
+        "containment_docs_ge": 0
+      },
+      "exact_matches": {}
+    }
   },
-  "replay": {
-   "rows": 594,
-   "sampled_rows": 594,
-   "cybermetric-500": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "secqa-v1-test": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "exact_matches": {}
-  },
-  "triage": {
-   "rows": 245273,
-   "sampled_rows": 2000,
-   "cybermetric-500": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "secqa-v1-test": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "exact_matches": {}
-  },
-  "triage_salvage": {
-   "rows": 268,
-   "sampled_rows": 268,
-   "cybermetric-500": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "secqa-v1-test": {
-    "jaccard_max": 0.0,
-    "jaccard_docs_ge": 0,
-    "containment_max": 0.0,
-    "containment_docs_ge": 0
-   },
-   "exact_matches": {}
-  }
- },
- "total_exact_matches": 0,
- "checks": [
-  {
-   "name": "both public multiple-choice benchmarks are on disk and read",
-   "pass": true,
-   "detail": "CyberMetric-500 500 questions, SecQA-v1-test 110 questions"
-  },
-  {
-   "name": "no row of the rebuilt mixture IS a public benchmark item",
-   "pass": true,
-   "detail": "0 exact normalised-prompt matches across 6 sources; per source: none"
-  },
-  {
-   "name": "fenrir: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "fenrir: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "format: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "format: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "refusal: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "refusal: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "replay: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "replay: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "triage: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "triage: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "triage_salvage: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  },
-  {
-   "name": "triage_salvage: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
-   "pass": true,
-   "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
-  }
- ],
- "pass": 14,
- "total": 14,
- "all_pass": true
+  "total_exact_matches": 0,
+  "checks": [
+    {
+      "name": "both public multiple-choice benchmarks are on disk and read",
+      "pass": true,
+      "detail": "CyberMetric-500 500 questions, SecQA-v1-test 110 questions"
+    },
+    {
+      "name": "no row of the rebuilt mixture IS a public benchmark item",
+      "pass": true,
+      "detail": "0 exact normalised-prompt matches across 6 sources; per source: none"
+    },
+    {
+      "name": "fenrir: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "fenrir: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "format: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "format: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "refusal: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "refusal: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "replay: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "replay: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "triage: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "triage: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "triage_salvage: the residual overlap against CyberMetric-500 is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    },
+    {
+      "name": "triage_salvage: the residual overlap against SecQA-v1-test is under the gate's own reject threshold",
+      "pass": true,
+      "detail": "jaccard_max 0.0 against the gate's reject threshold 0.6"
+    }
+  ],
+  "pass": 14,
+  "total": 14,
+  "all_pass": true
 }

@@ -1,87 +1,87 @@
 {
- "run": "cyberguard-lora-v4-PILOT",
- "started_utc": "2026-10-25T14:50:42Z",
- "finished_utc": "2026-10-25T14:54:22Z",
- "wall_seconds": 219.9,
- "host": "<owner-handle>",
- "gpu": "NVIDIA GeForce RTX 3090",
- "base_model": "<model-cache>/cyberguard-eval/Qwen3-4B-Instruct-2507",
- "dataset": "<programme-tree>/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl",
- "arms": "<programme-tree>/data/v4/mixture-v7-f8clean.jsonl",
- "arms_sha256": "f2485d853400c482d7c15d6fa90d09eafbfda36bec4661f2c3e0a55490af4020",
- "rows_total": 20000,
- "rows_train": 20000,
- "rows_eval": 0,
- "rows_after_prompt_dedupe": 20000,
- "max_rows_cap": 0,
- "config": {
-  "max_seq": 2048,
-  "epochs": 1.0,
-  "lr": 0.0001,
-  "batch": 2,
-  "grad_accum": 8,
-  "lora_r": 32,
-  "seed": 0,
-  "max_steps": 30,
-  "max_minutes": 0.0,
-  "augment_system": true,
-  "sys_variants": 4
- },
- "train_metrics": {
-  "train_runtime": 191.5111,
-  "train_samples_per_second": 2.506,
-  "train_steps_per_second": 0.157,
-  "total_flos": 4984034103595008.0,
-  "train_loss": 1.028872,
-  "epoch": 0.024
- },
- "log_history": [
-  {
-   "loss": 1.392709,
-   "grad_norm": 0.093572,
-   "learning_rate": 8.2e-05,
-   "entropy": 1.144483,
-   "num_tokens": 59803.0,
-   "mean_token_accuracy": 0.734689,
-   "epoch": 0.008,
-   "step": 10
+  "run": "cyberguard-lora-v4-PILOT",
+  "started_utc": "2026-10-25T14:50:42Z",
+  "finished_utc": "2026-10-25T14:54:22Z",
+  "wall_seconds": 219.9,
+  "host": "<account-handle>",
+  "gpu": "NVIDIA GeForce RTX 3090",
+  "base_model": "<model-cache>/cyberguard-eval/Qwen3-4B-Instruct-2507",
+  "dataset": "<programme-tree>/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl",
+  "arms": "<programme-tree>/data/v4/mixture-v7-f8clean.jsonl",
+  "arms_sha256": "f2485d853400c482d7c15d6fa90d09eafbfda36bec4661f2c3e0a55490af4020",
+  "rows_total": 20000,
+  "rows_train": 20000,
+  "rows_eval": 0,
+  "rows_after_prompt_dedupe": 20000,
+  "max_rows_cap": 0,
+  "config": {
+    "max_seq": 2048,
+    "epochs": 1.0,
+    "lr": 0.0001,
+    "batch": 2,
+    "grad_accum": 8,
+    "lora_r": 32,
+    "seed": 0,
+    "max_steps": 30,
+    "max_minutes": 0.0,
+    "augment_system": true,
+    "sys_variants": 4
   },
-  {
-   "loss": 0.905746,
-   "grad_norm": 0.0581,
-   "learning_rate": 3.1e-05,
-   "entropy": 1.39721,
-   "num_tokens": 121076.0,
-   "mean_token_accuracy": 0.805439,
-   "epoch": 0.016,
-   "step": 20
+  "train_metrics": {
+    "train_runtime": 191.5111,
+    "train_samples_per_second": 2.506,
+    "train_steps_per_second": 0.157,
+    "total_flos": 4984034103595008.0,
+    "train_loss": 1.028872,
+    "epoch": 0.024
   },
-  {
-   "loss": 0.788162,
-   "grad_norm": 0.059814,
-   "learning_rate": 0.0,
-   "entropy": 1.252863,
-   "num_tokens": 182596.0,
-   "mean_token_accuracy": 0.83871,
-   "epoch": 0.024,
-   "step": 30
-  },
-  {
-   "train_runtime": 191.5111,
-   "train_samples_per_second": 2.506,
-   "train_steps_per_second": 0.157,
-   "total_flos": 4984034103595008.0,
-   "train_loss": 1.028872,
-   "epoch": 0.024,
-   "step": 30
+  "log_history": [
+    {
+      "loss": 1.392709,
+      "grad_norm": 0.093572,
+      "learning_rate": 8.2e-05,
+      "entropy": 1.144483,
+      "num_tokens": 59803.0,
+      "mean_token_accuracy": 0.734689,
+      "epoch": 0.008,
+      "step": 10
+    },
+    {
+      "loss": 0.905746,
+      "grad_norm": 0.0581,
+      "learning_rate": 3.1e-05,
+      "entropy": 1.39721,
+      "num_tokens": 121076.0,
+      "mean_token_accuracy": 0.805439,
+      "epoch": 0.016,
+      "step": 20
+    },
+    {
+      "loss": 0.788162,
+      "grad_norm": 0.059814,
+      "learning_rate": 0.0,
+      "entropy": 1.252863,
+      "num_tokens": 182596.0,
+      "mean_token_accuracy": 0.83871,
+      "epoch": 0.024,
+      "step": 30
+    },
+    {
+      "train_runtime": 191.5111,
+      "train_samples_per_second": 2.506,
+      "train_steps_per_second": 0.157,
+      "total_flos": 4984034103595008.0,
+      "train_loss": 1.028872,
+      "epoch": 0.024,
+      "step": 30
+    }
+  ],
+  "versions": {
+    "torch": "2.4.0+cu121",
+    "transformers": "5.5.0",
+    "peft": "0.21.0",
+    "trl": "0.24.0",
+    "datasets": "4.3.0",
+    "accelerate": "1.15.0"
   }
- ],
- "versions": {
-  "torch": "2.4.0+cu121",
-  "transformers": "5.5.0",
-  "peft": "0.21.0",
-  "trl": "0.24.0",
-  "datasets": "4.3.0",
-  "accelerate": "1.15.0"
- }
 }

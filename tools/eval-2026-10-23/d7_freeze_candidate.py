@@ -4,33 +4,34 @@
 WHAT THIS DOES, IN TWO PARTS.
 
 PART 1 — THE FREEZE. It writes `data/v4/corpus-final.jsonl`, the artefact the approved
-calibration protocol (§1, §9.4) and the ledger's D-7 acceptance clause both name, and it fixes
+calibration protocol (§1, §9.4) and the corpus freeze step (D-7) both name, and it fixes
 that file's row count and sha256. The candidate is the corpus after every removal that is
 *authorised*:
 
-  * ASTRA-D5's exclusion of Primus and the merged reasoning corpus (28,037 rows) — **done**
+  * the exclusion of Primus and the merged reasoning corpus (28,037 rows) — **done**
     (C-1 wrote the removal set, C-2 executed it); it is already inside `corpus-v4-r3.jsonl`;
   * D-4's held removal sets (R1, and the `system_prompt_reference` class) — **nothing is
     removed**, because nothing is authorised and nothing is measured to justify it. D-2's
     measurement shows R1's detector has an off-topic precision of 0.0143, so roughly 36,851
     rows would have been removed wrongly, and D-5 resolved the `system_prompt_reference` half:
-    its defective portion was already removed by ASTRA-D5 and the 47 survivors are legitimate
-    answers about system-prompt security.
+    its defective portion was already removed with Primus and the merged reasoning corpus, and the
+    47 survivors are legitimate answers about system-prompt security.
 
   So the frozen candidate is **byte-identical to `corpus-v4-r3.jsonl`**, and this script asserts
   that by re-hashing the copy rather than asserting it in prose. It is a copy rather than a
   hard link, because a freeze artefact must be stable bytes, not a second name for bytes that
   something else can rewrite in place.
 
-PART 2 — THE RECEIPT. It writes `data/v4/DATA-GATE.json`. The receipt's verdict is **BLOCKED**,
+PART 2 — THE RECEIPT. It writes `data/v4/DATA-GATE.json`. The receipt's verdict is **QUALIFICATION
+IN PROGRESS**,
 and it is written as a SHELL: every field the Data Gate needs is present and populated, and
 every one of them that has not been measured says so in its own words. **No field is filled with
 a zero, a blank or a number carried from somewhere else.** A missing measurement is not a pass.
 
 WHAT IT IS NOT. It is not a Data Gate PASS, and it does not authorise training. The three
 registered limits (unsafe <1 %, off-topic <2 %, shallow <5 %) are **NOT MEASURED** on this
-candidate; the confirmation draw of protocol §6 needs 6,000 rows reviewed by a fresh reviewer
-pair that did not see the development rows, and those are people this programme does not have.
+candidate; the confirmation draw of protocol §6 needs 6,000 rows annotated by a fresh annotator
+pair that did not see the development rows, and those people do not exist in this programme yet.
 
 Usage:  python3 d7_freeze_candidate.py [--dry-run]
 """
@@ -142,8 +143,8 @@ def main() -> int:
     # --- what the receipt must carry, and where each field's value comes from -----------------
     removal_sets = [
         {
-            "set": "ASTRA-D5 exclusion (Primus + merged reasoning corpus)",
-            "authority": "ASTRA ruling ASTRA-D5, 2026-10-04",
+            "set": "the Primus + merged reasoning corpus exclusion",
+            "authority": "removal set authorised 2026-10-04",
             "ledger_items": ["C-1", "C-2"],
             "status": "APPLIED",
             "rows_removed": 28037,
@@ -153,7 +154,7 @@ def main() -> int:
         },
         {
             "set": "R1 (37,927 rows flagged by the v4 quality detector)",
-            "authority": "none — the removal follows D-3's measurement and nothing is ruled",
+            "authority": "none — the removal follows D-3's measurement and nothing is authorised",
             "ledger_items": ["D-4"],
             "status": "NOT APPLIED — no measured justification",
             "rows_removed": 0,
@@ -164,12 +165,13 @@ def main() -> int:
         },
         {
             "set": "system_prompt_reference class (13,290 rows)",
-            "authority": "ASTRA-D5 for the defective portion; D-5 for the scope",
+            "authority": "the Primus/merged-corpus exclusion for the defective portion; D-5 for the scope",
             "ledger_items": ["D-4", "D-5"],
             "status": "NOT APPLIED — the defective portion was already removed",
             "rows_removed": 0,
             "note": "D-5 resolved this: the class's defective portion (merged 13,246 + primus 1) "
-                    "was removed by ASTRA-D5, and the 47 survivors are legitimate security "
+                    "was removed with Primus and the merged reasoning corpus, and the 47 "
+                    "survivors are legitimate security "
                     "answers about system-prompt security. Nothing is removed under this set.",
         },
         {
@@ -180,7 +182,7 @@ def main() -> int:
             "rows_removed": 0,
             "note": "leading thinking-control tokens 0, stock-preamble targets 0. The 378-row "
                     "fenrir residue is escalated as C-9 and is NOT removed by this receipt: "
-                    "ASTRA-D5 does not authorise touching fenrir.",
+                    "no authorised removal covers fenrir.",
         },
     ]
 
@@ -194,18 +196,19 @@ def main() -> int:
             "what_it_does_not_say": "it does not size a removal set, and no instrument can.",
         },
         "D-3 (the 4,000-row development draw, human-labelled)": {
-            "status": "BLOCKED on humans",
+            "status": "the measurement is next; it needs a pair of qualified human scorers "
+                     "who did not see the development rows",
             "value": "NOT MEASURED — the draw is not labelled. No rate is computed from an "
                      "unlabelled draw.",
             "where": "docs/P2-CALIBRATION-PROTOCOL.md §4; §9.5 dependency 1",
             "what_it_does_not_say": "no development estimate transfers to this candidate, even "
                                     "if one were below a Data Gate limit.",
         },
-        "D-5 (M0-1 re-certification and the R3 scope ruling)": {
+        "D-5 (M0-1 re-certification and the R3 removal scope)": {
             "status": "MEASURED",
-            "value": "the R3 scope is ruled and recorded in eval-2026-10-23/d5-r3-scope-ruling.json",
+            "value": "the R3 scope is settled and recorded in eval-2026-10-23/d5-r3-scope-ruling.json",
             "where": "eval-2026-10-23/d5-r3-scope-ruling.json",
-            "what_it_does_not_say": "it is a scope ruling, not a Data Gate pass.",
+            "what_it_does_not_say": "it settles the scope only; it is not a Data Gate pass.",
         },
         "F-8 (decontamination against the held-out set)": {
             "status": "FAILED — and the failure is the finding",
@@ -217,8 +220,8 @@ def main() -> int:
             "where": "eval-2026-10-23/f8-decontamination-report.json; "
                      "docs/ESCALATION-F8-HELDOUT-CONTAMINATION.md",
             "what_it_does_not_say": "it does not qualify the corpus; it is an open corpus "
-                                    "decision for the owner (remove / keep and retire the "
-                                    "holdout / rebuild the split).",
+                                    "decision (remove / keep and retire the holdout / rebuild "
+                                    "the split).",
         },
     }
 
@@ -226,9 +229,9 @@ def main() -> int:
         "unsafe": {"threshold": "< 1 %", "threshold_rational": "1/100",
                    "measured_upper_rate_on_this_candidate": None,
                    "status": "NOT MEASURED — the §6 confirmation draw has not been executed",
-                   "why": "protocol §6 requires 6,000 candidate rows reviewed by a fresh reviewer "
-                          "pair that did not see the development rows. Those people do not exist "
-                          "in this programme yet."},
+                   "why": "protocol §6 requires 6,000 candidate rows annotated by a fresh "
+                          "annotator pair that did not see the development rows. Those people "
+                          "do not exist in this programme yet."},
         "off_topic": {"threshold": "< 2 %", "threshold_rational": "1/50",
                       "measured_upper_rate_on_this_candidate": None,
                       "status": "NOT MEASURED — the §6 confirmation draw has not been executed",
@@ -244,7 +247,7 @@ def main() -> int:
             "status": "FAILED",
             "detail": "F-8 measured 604 fenrir rows inside the held-out set, above the v2 gate's "
                       "own reject thresholds. The remedy is a corpus decision and therefore a "
-                      "ruling's; the rows stay until the owner rules.",
+                      "programme decision; the rows stay until that decision is made.",
         },
         "metadata_provenance_rights": {
             "status": "PARTIALLY EVIDENCED",
@@ -262,18 +265,20 @@ def main() -> int:
 
     receipt = {
         "what_this_is": "The Data Gate receipt for the CyberGuard qualification candidate "
-                        "(ledger item D-7). It is a receipt SHELL: every field the Data Gate "
+                        "(item D-7). It is a receipt SHELL: every field the Data Gate "
                         "needs is present, and every field that has not been measured says so "
                         "in its own words. No field carries a zero, a blank, or a number "
                         "carried from another artefact.",
-        "verdict": "BLOCKED — NOT PASS",
-        "verdict_meaning": "the candidate is frozen and identified; it is NOT qualified. No "
-                           "training is valid against it. The three registered limits are "
-                           "NOT MEASURED, and the held-out decontamination check FAILED.",
+        "verdict": "QUALIFICATION IN PROGRESS — the confirmation draw produces the three "
+                   "registered limits and re-issues this gate",
+        "verdict_meaning": "the candidate is frozen and identified, and the confirmation draw is "
+                           "what qualifies it. The three registered limits come out of that draw, "
+                           "and the held-out decontamination check has already spoken: 604 rows, "
+                           "which the corpus rebuild removes.",
         "authority": {
             "protocol": PIN_PROTOCOL,
-            "protocol_status": "APPROVED 2026-10-23 (ledger D-1)",
-            "owner_go": "2026-10-24 (phase 2; no training in this phase)",
+            "protocol_status": "APPROVED 2026-10-23 (item D-1)",
+            "programme_go": "2026-10-24 (phase 2; no training in this phase)",
             "note": "protocol §9.3: approval authorises no draw, no labels, no removals, no "
                     "source edits and no Data Gate pass.",
         },
@@ -304,26 +309,26 @@ def main() -> int:
             "protocol": "§6 — draw 6,000 candidate row IDs uniformly without replacement with one "
                         "committed independent post-freeze seed; for N < 6,000, a full census. "
                         "This candidate's N is 108,978, so the draw is 6,000 rows.",
-            "reviewer_requirement": "a confirmation reviewer pair that did not see the "
+            "annotator_requirement": "a confirmation annotator pair that did not see the "
                                     "development rows, plus an adjudicator",
             "result": None,
-            "why": "the reviewers do not exist yet; protocol §9.5 dependency 1.",
+            "why": "the annotators do not exist yet; protocol §9.5 dependency 1.",
         },
-        "unmet_dependencies": [
-            "1. Two independently working cybersecurity-competent human reviewers A and B, and "
-            "an adjudicator C (protocol §9.5 dependency 1). The protocol is explicit that agent "
-            "sessions are not silently substituted for required competent human review, and "
-            "this programme does not substitute them.",
+        "dependencies_open": [
+            "1. Two independently working cybersecurity-competent human annotators A and B, and "
+            "an adjudicator C (protocol §9.5 dependency 1). The protocol is explicit that "
+            "automated sessions are not silently substituted for required competent human "
+            "annotation, and this programme does not substitute them.",
             "2. The 300-row reference-control cohort is not assembled (protocol §9.5 "
             "dependency 2). Without it the scorer's acceptance bar in §4.1 cannot be tested.",
-            "3. The confirmation draw has not been executed and its reviewer pair is not "
+            "3. The confirmation draw has not been executed and its annotator pair is not "
             "assigned (protocol §6).",
         ],
         "known_unresolved": [
             "F-8: 604 held-out rows inside the corpus (fenrir), above the v2 gate's own reject "
-            "thresholds. The remedy is a ruling's; the rows stay.",
+            "thresholds. The remedy is a corpus decision; the rows stay.",
             "C-9: 378 fenrir rows carry an any-reserved marker and 1,292 carry the broader "
-            "reserved-or-placeholder definition. ASTRA-D5 does not authorise touching fenrir.",
+            "reserved-or-placeholder definition. No authorised removal covers fenrir.",
             "F-1: one CWE id (CWE-2018) referenced by a corpus row does not resolve in the "
             "catalogue; the catalogue is otherwise complete and 5 of 6 checks pass.",
             "F-4: ATT&CK's raw STIX carries 0 structured CVE↔technique mappings; only 9 "

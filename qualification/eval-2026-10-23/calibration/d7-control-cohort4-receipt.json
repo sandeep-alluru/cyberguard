@@ -1,12 +1,12 @@
 {
   "what_this_is": "The D-7 FRESH reference-control cohort 4: 300 rows, 100 per dimension, 50 positive and 50 negative each, each with its expected label, its kind and a row-level reason.",
-  "status": "FROZEN — this is the set the panel is QUALIFIED on under instrument v4 (d7_review_v4.py). It is independent of cohorts 1, 2 and 3 and of the D4-50 reference set, and that independence is proved mechanically below.",
+  "status": "FROZEN — this is the set the panel is QUALIFIED on under instrument v4 (instrument v4). It is independent of cohorts 1, 2 and 3 and of the D4-50 reference set, and that independence is proved mechanically below.",
   "ruling": "ASTRA-D30 (b); ASTRA-D31; ASTRA-D32",
   "why_a_fourth_cohort": "cohort 1 was the set instrument v2 was developed against; cohort 2 was consumed by the v2 qualification and read for v3's diagnosis; cohort 3 was read during the v3 qualification and MiniCPM failed §4 bar 1 on it. A qualification set the instrument was read against is not independent of it.",
-  "purpose": "(1) find a SECOND, INDEPENDENT, QUALIFIED reviewer, since instrument v4 makes the defensive-context carve-out operative and the models that failed cohort 3 partly by over-flagging defensive content have a real chance now; (2) requalify adjudicator C, MiniCPM-V-4.7-35B, which failed §4 bar 1 on cohort 3 and whose shallow labels moved 1.6 pp from reviewer A.",
+  "purpose": "(1) find a SECOND, INDEPENDENT, QUALIFIED scorer, since instrument v4 makes the defensive-context carve-out operative and the models that failed cohort 3 partly by over-flagging defensive content have a real chance now; (2) requalify adjudicator C, MiniCPM-V-4.7-35B, which failed §4 bar 1 on cohort 3 and whose shallow labels moved 1.6 pp from scorer A.",
   "authorship": {
     "cohort_4_modules": "Codex (gpt-6.1-sol), a lineage that is NOT a panel candidate, NOT the adjudicator and NOT the comparator.",
-    "d4_50_reference_set": "the working agent's own model (MiniMax M3.1), because Codex refused that specific job; the refusal is recorded in ASTRA-D32 (4).",
+    "d4_50_reference_set": "the working model's own (MiniMax M3.1), because Codex refused that specific job; the refusal is recorded in ASTRA-D32 (4).",
     "different_authors": true,
     "not_silent": "every row here and in the D4-50 set is MODEL-AUTHORED. Nothing in this programme may describe either set as human reference."
   },

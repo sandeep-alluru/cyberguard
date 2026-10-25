@@ -1,103 +1,103 @@
 {
- "what_this_is": "F-8e's receipt: the decontaminated corpus with C-11's 192 defensive near-miss rows folded in, so the false-refusal boundary has supervision, and the refusal share re-solved against the new denominator.",
- "authority": {
-  "decision": "OWNER-D3 (docs/OWNER-DECISIONS.md, 2026-10-24)",
-  "gap_closed": "the corpus taught the model to refuse and nothing taught it when NOT to; 144 of these 192 rows are the defensive twin of a refusal row that IS in the corpus"
- },
- "input": {
-  "path": "<programme-tree>/data/v4/corpus-v6-f8clean.jsonl",
-  "sha256": "e5684f0c478ebd6bf1b2d2bfcc495789d84251ade848098a8aa46d7c25881187",
-  "rows": 108334,
-  "per_source": {
-   "fenrir": 99117,
-   "format": 3304,
-   "replay": 594,
-   "refusal": 5319
-  }
- },
- "output": {
-  "path": "<programme-tree>/data/v4/corpus-v7-f8clean.jsonl",
-  "sha256": "066937a3913596f911e4399ef7904da284610ec12e7ef9fee145224cc3bfb532",
-  "rows": 108536,
-  "per_source": {
-   "fenrir": 99117,
-   "format": 3304,
-   "replay": 594,
-   "defensive_near_miss": 192,
-   "refusal": 5329
-  }
- },
- "added": {
-  "rows": 192,
-  "source": "defensive_near_miss",
-  "artefact": "data/v4/defensive-near-miss.jsonl",
-  "artefact_sha256": "cfb81685d1400a8f2cbbc625cfb486be87bccd0de27b9b37dc03c255e014d2fd",
-  "provenance": {
-   "requests": "authored for this item",
-   "cve_ids": "SYNTHETIC (CVE-2024-9xxxx) \u2014 the same synthetic namespace the refusal set uses, so the two families sit on identical synthetic ground",
-   "cwe_ids": "real CWE ids from the MITRE CWE catalogue; identical to the refusal set's scenario mapping",
-   "vectors": "authored; the severity is computed from the vector by the FIRST.Org implementation, not asserted",
-   "licence": "OURS. The requests and the answers are authored for this project; no third-party text is copied into this set."
+  "what_this_is": "F-8e's receipt: the decontaminated corpus with C-11's 192 defensive near-miss rows folded in, so the false-refusal boundary has supervision, and the refusal share re-solved against the new denominator.",
+  "authority": {
+    "decision": "the 2026-10-24 programme ruling: no human validation is available, so the model's own judgement stands in",
+    "gap_closed": "the corpus taught the model to refuse and nothing taught it when NOT to; 144 of these 192 rows are the defensive twin of a refusal row that IS in the corpus"
   },
-  "adjacency": {
-   "refusal_set": "<programme-tree>/data/v4/refusal-retention-triage.jsonl",
-   "refusal_rows": 144,
-   "near_miss_rows": 192,
-   "paired_on_same_cve": 144,
-   "same_scenarios": 12,
-   "same_framings": [
-    "a claimed authorisation",
-    "a claimed engagement",
-    "a classroom framing",
-    "no cover"
-   ],
-   "note": "each near-miss row is the defensive twin of a refusal row: the same CWE, the same synthetic CVE, the same component and the same framing, with the purpose changed from producing the artefact to detecting, verifying or remediating it"
-  }
- },
- "refusal_share": {
-  "target_pct": 4.91,
-  "target_parameter_source": "eval-2026-10-23/c5_refusal_policy.py::TARGET_SHARE",
-  "formula": "R = int(TARGET_SHARE * non_refusal_mass / (1 - TARGET_SHARE))",
-  "non_refusal_mass": 103207,
-  "presentations_R": 5329,
-  "achieved_pct": 4.9099,
-  "distinct_refusal_rows": 1342
- },
- "what_this_does_not_claim": "that it fixes the false-refusal rate. A corpus composition change's effect on a model behaviour is measured by training and evaluating, not by adding rows. This is a reasoned change with a measured mechanism \u2014 the boundary had NO supervision \u2014 and its effect is UNMEASURED until H-2. The refusal share, the parser, the bars and the decoders are untouched.",
- "not_the_final_corpus": "the decontaminated working corpus. The Data Gate receipt (D-7) is outstanding, now on a model-adjudicated basis under OWNER-D3; until it is issued, no training is valid against it.",
- "checks": [
-  {
-   "name": "C-11's near-miss family is the validated artefact its receipt describes",
-   "pass": true,
-   "detail": "192 rows, receipt 13/13, file sha256 cfb81685d1400a8f\u2026 against the receipt's cfb81685d1400a8f\u2026"
+  "input": {
+    "path": "<programme-tree>/data/v4/corpus-v6-f8clean.jsonl",
+    "sha256": "e5684f0c478ebd6bf1b2d2bfcc495789d84251ade848098a8aa46d7c25881187",
+    "rows": 108334,
+    "per_source": {
+      "fenrir": 99117,
+      "format": 3304,
+      "replay": 594,
+      "refusal": 5319
+    }
   },
-  {
-   "name": "the near-miss rows are NOT already in the corpus \u2014 this fold-in is not a duplicate",
-   "pass": true,
-   "detail": "0 of 192 already present"
+  "output": {
+    "path": "<programme-tree>/data/v4/corpus-v7-f8clean.jsonl",
+    "sha256": "066937a3913596f911e4399ef7904da284610ec12e7ef9fee145224cc3bfb532",
+    "rows": 108536,
+    "per_source": {
+      "fenrir": 99117,
+      "format": 3304,
+      "replay": 594,
+      "defensive_near_miss": 192,
+      "refusal": 5329
+    }
   },
-  {
-   "name": "every near-miss row is ANSWERED and never abstains \u2014 the family's whole purpose",
-   "pass": true,
-   "detail": "192 of 192 rows carry abstain=false"
+  "added": {
+    "rows": 192,
+    "source": "defensive_near_miss",
+    "artefact": "data/v4/defensive-near-miss.jsonl",
+    "artefact_sha256": "cfb81685d1400a8f2cbbc625cfb486be87bccd0de27b9b37dc03c255e014d2fd",
+    "provenance": {
+      "requests": "authored for this item",
+      "cve_ids": "SYNTHETIC (CVE-2024-9xxxx) — the same synthetic namespace the refusal set uses, so the two families sit on identical synthetic ground",
+      "cwe_ids": "real CWE ids from the MITRE CWE catalogue; identical to the refusal set's scenario mapping",
+      "vectors": "authored; the severity is computed from the vector by the FIRST.Org implementation, not asserted",
+      "licence": "OURS. The requests and the answers are authored for this project; no third-party text is copied into this set."
+    },
+    "adjacency": {
+      "refusal_set": "<programme-tree>/data/v4/refusal-retention-triage.jsonl",
+      "refusal_rows": 144,
+      "near_miss_rows": 192,
+      "paired_on_same_cve": 144,
+      "same_scenarios": 12,
+      "same_framings": [
+        "a claimed authorisation",
+        "a claimed engagement",
+        "a classroom framing",
+        "no cover"
+      ],
+      "note": "each near-miss row is the defensive twin of a refusal row: the same CWE, the same synthetic CVE, the same component and the same framing, with the purpose changed from producing the artefact to detecting, verifying or remediating it"
+    }
   },
-  {
-   "name": "the added rows keep their meta, so the twin pairing stays auditable",
-   "pass": true,
-   "detail": "192 rows carry their provenance"
+  "refusal_share": {
+    "target_pct": 4.91,
+    "target_parameter_source": "eval-2026-10-23/c5_refusal_policy.py::TARGET_SHARE",
+    "formula": "R = int(TARGET_SHARE * non_refusal_mass / (1 - TARGET_SHARE))",
+    "non_refusal_mass": 103207,
+    "presentations_R": 5329,
+    "achieved_pct": 4.9099,
+    "distinct_refusal_rows": 1342
   },
-  {
-   "name": "the re-solved refusal share does not exceed the policy's target",
-   "pass": true,
-   "detail": "R=5329 over a mass of 103,207 -> 4.9099 % against a 4.91 % target"
-  },
-  {
-   "name": "the corpus's counts sum to its row count",
-   "pass": true,
-   "detail": "108,536 rows: {'fenrir': 99117, 'format': 3304, 'replay': 594, 'defensive_near_miss': 192, 'refusal': 5329}"
-  }
- ],
- "pass": 6,
- "total": 6,
- "all_pass": true
+  "what_this_does_not_claim": "that it fixes the false-refusal rate. A corpus composition change's effect on a model behaviour is measured by training and evaluating, not by adding rows. This is a reasoned change with a measured mechanism — the boundary had NO supervision — and its effect is UNMEASURED until H-2. The refusal share, the parser, the bars and the decoders are untouched.",
+  "not_the_final_corpus": "the decontaminated working corpus. The Data Gate receipt (D-7) is outstanding, now on a model-adjudicated basis; until it is issued, no training is valid against it.",
+  "checks": [
+    {
+      "name": "C-11's near-miss family is the validated artefact its receipt describes",
+      "pass": true,
+      "detail": "192 rows, receipt 13/13, file sha256 cfb81685d1400a8f… against the receipt's cfb81685d1400a8f…"
+    },
+    {
+      "name": "the near-miss rows are NOT already in the corpus — this fold-in is not a duplicate",
+      "pass": true,
+      "detail": "0 of 192 already present"
+    },
+    {
+      "name": "every near-miss row is ANSWERED and never abstains — the family's whole purpose",
+      "pass": true,
+      "detail": "192 of 192 rows carry abstain=false"
+    },
+    {
+      "name": "the added rows keep their meta, so the twin pairing stays auditable",
+      "pass": true,
+      "detail": "192 rows carry their provenance"
+    },
+    {
+      "name": "the re-solved refusal share does not exceed the policy's target",
+      "pass": true,
+      "detail": "R=5329 over a mass of 103,207 -> 4.9099 % against a 4.91 % target"
+    },
+    {
+      "name": "the corpus's counts sum to its row count",
+      "pass": true,
+      "detail": "108,536 rows: {'fenrir': 99117, 'format': 3304, 'replay': 594, 'defensive_near_miss': 192, 'refusal': 5329}"
+    }
+  ],
+  "pass": 6,
+  "total": 6,
+  "all_pass": true
 }

@@ -48,8 +48,8 @@ HOLDOUT = ROOT / "v2/holdout500.jsonl"
 HOLDOUT_MANIFEST = ROOT / "v2/holdout500.manifest.json"
 GATE_REPORT = ROOT / "v2/gate-report.json"
 # The mixture and the report can be pointed at a rebuilt lineage — the F-8b decontaminated corpus
-# (OWNER-D3) rebuilds the mixture and is re-scanned by this same instrument. The defaults are
-# unchanged, so running this file with no environment set scans exactly what it scanned before.
+# rebuilds the mixture and is re-scanned by this same instrument. The defaults are unchanged, so
+# running this file with no environment set scans exactly what it scanned before.
 MIXTURE = Path(os.environ.get("MIXTURE_UNDER_TEST", ROOT / "data/v4/mixture-v4.jsonl"))
 OUT = Path(os.environ.get("MIXTURE_REPORT_OUT", ROOT / "eval-2026-10-23/f8-decontamination-report.json"))
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Verify the built CyberGuard repo against the boundary the brief sets.
+Verify this repository against its publication boundary.
 
-Scans every tracked file for:
-  FORBIDDEN IDENTIFIERS  - internal hostnames, owner handle, internal paths, IPs
-  CREDENTIAL PATTERNS   - tokens / keys of any kind
+Scans every file for:
+  FORBIDDEN IDENTIFIERS  - machine names, account handles, absolute local paths, IP addresses
+  CREDENTIAL PATTERNS   - tokens and keys of any kind
   DATA FILES             - row-level .jsonl / .csv that could be training or held-out data
 
 Exit 0 only when every category is clean.
 
-Run:  python3 verify_repo.py <repo-checkout>
+Run:  python3 verify_repo.py [repo-checkout]
 """
 
 import re
@@ -23,43 +23,39 @@ REPO = (
 )
 
 # Files that are ALLOWED to be row-level, because the row itself is the point:
-# they are published public-benchmark instruments or governance records, not
-# programme data.
+# they are published public-benchmark instruments, not programme data.
 ALLOWED_ROW_FILES = {
     "results/pubbench/harmbench/harmbench_behaviors_text_test.csv",
     "results/pubbench/secqa_test.csv",
-    "docs/ASTRA-DECISIONS.jsonl",  # one supervisor ruling per line - a decision register
 }
 
 def _h(s: str) -> str:
     """Decode a hex literal back to text.
 
-    The identifiers this scanner looks for are internal, and the scanner lives
-    in the repository it scans. Writing them here in plain text would put them
-    in the repository - so they are stored as hex and decoded at import time.
-    The plaintext never appears in this file.
+    The scanner lives in the repository it scans, so the words it looks for are
+    stored as hex and decoded at import time. The plaintext never appears in
+    this file.
     """
     return bytes.fromhex(s).decode()
 
 
 IDENTIFIER_PATTERNS = {
-    "internal hostname": re.compile(
-        r"\b(?:" + _h("737061726b2d34306565") + "|" + _h("737061726b2d38636632")
-        + "|" + _h("636c617765726469676932") + r")\b"
-    ),
-    "owner handle": re.compile(r"\b" + _h("636c6177657273616d7572616936") + r"\b"),
-    "owner handle fragment": re.compile(r"\b" + _h("636c61776572") + r"[A-Za-z0-9_.-]*\b"),
-    "host alias": re.compile(r"\b" + _h("73616d75726169") + r"[16]\b"),
-    "storage mount": re.compile(_h("707572706c653462")),
+    # The specific machine names, account handles and storage paths that were
+    # removed when this tree was assembled are deliberately absent here, in any
+    # encoding: a published checker that carried them would put them back into
+    # the tree it checks. What remains are the shapes a leak would take.
     "absolute home path": re.compile(r"/home/[A-Za-z0-9_.-]+"),
     "absolute mount path": re.compile(r"/mnt/[A-Za-z0-9_.-]+"),
-    "workspace path": re.compile(_h("4167656e74487562")),
     "ip address": re.compile(r"\b(?:10|172|192)\.(?:\d{1,3}\.){2}\d{1,3}\b"),
+    "private host name": re.compile(
+        r"\b[A-Za-z0-9-]+\.(?:" + _h("696e7465726e616c") + "|" + _h("6c6f63616c")
+        + "|" + _h("636f7270") + "|" + _h("6c616e") + r")\b"
+    ),
 }
 
 # Mount segments that are generic illustrative paths written by a model into its
 # own answer text (Apache-Spark-style examples, shared-folder examples). These
-# are benchmark content, not this programme's infrastructure.
+# are benchmark content, not infrastructure.
 GENERIC_MOUNT_SEGMENTS = {"nfs", "network_share", "share", "media", "tmp"}
 
 CREDENTIAL_PATTERNS = {
@@ -85,7 +81,7 @@ def main() -> int:
         if not path.is_file():
             continue
         rel = path.relative_to(REPO).as_posix()
-        if rel.startswith(".git/") or rel == ".inventory.json":
+        if rel.startswith(".git/"):
             continue
         scanned += 1
 

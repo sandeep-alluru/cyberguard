@@ -9,7 +9,7 @@ the `fenrir` stream — and that the v2 admission gate never scanned Fenrir, bec
 fetched later (2026-09-29) for the v3 build, and the holdout split had been applied only to the
 Trendyol copy of the same dataset family.
 
-That finding is about an **internal, retired** battery. It says nothing by itself about the
+That finding is about a **retired** battery. It says nothing by itself about the
 **public** benchmarks, which are the only class of evidence this programme admits. So the public
 benchmarks are checked here, on the rebuilt mixture, with the same instrument family (exact
 normalised prompt identity, then the 13-gram Jaccard/containment scan).
@@ -179,9 +179,9 @@ def main() -> int:
                    "the Fenrir copy (AlicanKiraz0/Cybersecurity-Dataset-Fenrir-v2.1), which was "
                    "fetched on 2026-09-29 for the v3 build and never passed through the v2 "
                    "admission gate",
-            "scope": "the held-out set is an INTERNAL battery. It is retired under the owner's "
-                     "evidence rule, and no public number rests on it. The public benchmarks are "
-                     "measured separately in this file",
+            "scope": "the held-out set is a retired battery. It is retired under the "
+                     "programme's evidence rule, and no public number rests on it. The public "
+                     "benchmarks are measured separately in this file",
             "fenrir_own_report_gap": "data/v3/fenrir-v2.1/CONTAMINATION_REPORT.md reports "
                                      "'contaminated rows: 0' over 99,870 rows, and also reports "
                                      "that its SecQA fingerprint file was a failed-download "

@@ -58,8 +58,8 @@ def main() -> int:
         "comparator": {
             "hub_id": "athena129/CyberSecQwen-4B",
             "size_class": "4B",
-            "role": "the bar sheet's reference point and a peer in the same size class; NOT a "
-                    "release candidate",
+            "role": "the bar sheet's reference point and a peer in the same size class; "
+                    "measured here, never trained here",
         },
         "identity": {
             "how_the_bytes_were_obtained": "the hub id resolves OFFLINE to a local cache; the "
@@ -109,7 +109,7 @@ def main() -> int:
                     "ALL-BENCHMARKS population (2,500 MCQ items sharing batches with 3,500 foreign "
                     "items). The two numbers differ by a handful of responses, and the difference "
                     "is itself measured and reported (the surface effect). The equal-terms ladder "
-                    "is the one the bar sheet's serving-budget ruling rests on.",
+                    "is the one the bar sheet's serving-budget decision rests on.",
         },
         "artefact": str(EQT.relative_to(ROOT)),
         "ladder": {

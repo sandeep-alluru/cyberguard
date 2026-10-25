@@ -1,148 +1,148 @@
 {
- "what_this_is": "every number this project measured on the public comparator CyberSecQwen-4B, with the surface each was measured on, and the author-reported figures kept in a separate labelled block",
- "comparator": {
-  "hub_id": "athena129/CyberSecQwen-4B",
-  "size_class": "4B",
-  "role": "the bar sheet's reference point and a peer in the same size class; NOT a release candidate"
- },
- "identity": {
-  "how_the_bytes_were_obtained": "the hub id resolves OFFLINE to a local cache; the cache was verified against the sha256 the hub publishes for that revision, so the bytes measured here are the bytes the comparator ships",
-  "published_lfs_sha256": "63881a91d6e951a9ee2fef41c14c9049a8e5d8500dd10b5f07de741feaaa0b92",
-  "local_weight_sha256": "63881a91d6e951a9ee2fef41c14c9049a8e5d8500dd10b5f07de741feaaa0b92",
-  "weight_matches_published": true,
-  "files_in_cache": 6,
-  "files_matching": 6,
-  "receipt": "eval-2026-10-23/decode-budget/equal-terms/comparator-cache-receipt.json"
- },
- "measured": {
-  "family_surface": {
-   "surface": {
-    "what": "the six-arm independent re-measurement of 2026-10-23 \u2014 one frozen surface, one runner, one population, every arm",
-    "frozen_surface": {
-     "decoding": "greedy, do_sample=False, num_beams=1",
-     "trials": 1,
-     "max_new_tokens": 512,
-     "batch": 8,
-     "padding": "left + attention mask",
-     "precision": "bfloat16",
-     "quantization": "none",
-     "adapter": "peft, not merged",
-     "input_truncation": false,
-     "max_prompt_tokens": 3584,
-     "envelope": 4096,
-     "penalties": "repetition_penalty=1.0",
-     "chat": "own tokenizer/template, 1 user message, no system, 0-shot"
-    },
-    "population": {
-     "cybermetric-500": 500,
-     "secqa-v1-test": 110,
-     "cti-mcq": 2500,
-     "cti-rcm": 1000
-    }
-   },
-   "artefact": "eval-2026-10-23/results-merged-2026-10-23.json",
-   "benchmarks": {
-    "cti-mcq": {
-     "accuracy": 0.5764,
-     "n": 2500,
-     "unparseable": 75,
-     "unparseable_rate": 0.03,
-     "always_c_baseline": 0.3712
-    },
-    "cti-rcm": {
-     "accuracy": 0.678,
-     "n": 1000,
-     "unparseable": 0,
-     "unparseable_rate": 0.0,
-     "always_c_baseline": null
-    },
-    "cybermetric-500": {
-     "accuracy": 0.446,
-     "n": 500,
-     "unparseable": 239,
-     "unparseable_rate": 0.478,
-     "always_c_baseline": null
-    },
-    "secqa-v1-test": {
-     "accuracy": 0.4727,
-     "n": 110,
-     "unparseable": 57,
-     "unparseable_rate": 0.5182,
-     "always_c_baseline": null
-    }
-   }
+  "what_this_is": "every number this project measured on the public comparator CyberSecQwen-4B, with the surface each was measured on, and the author-reported figures kept in a separate labelled block",
+  "comparator": {
+    "hub_id": "athena129/CyberSecQwen-4B",
+    "size_class": "4B",
+    "role": "the bar sheet's reference point and a peer in the same size class; measured here, never trained here"
   },
-  "equal_terms_cti_mcq": {
-   "surface": {
-    "what": "the A-16 equal-terms sweep \u2014 EVERY arm at every budget, one runner, one population, one parser; max_new_tokens is the only variable",
-    "population": "CTI-MCQ's 2,500 items, and nothing else",
-    "runner": "the byte-identical copy of A-5's runner (sha256 59896c5118848e7813cb17cbf56a3f9bd0a242f97166cab64c9fa8024ffac7d8)",
-    "note": "the family surface above measured this same comparator at 512 tokens on the ALL-BENCHMARKS population (2,500 MCQ items sharing batches with 3,500 foreign items). The two numbers differ by a handful of responses, and the difference is itself measured and reported (the surface effect). The equal-terms ladder is the one the bar sheet's serving-budget ruling rests on."
-   },
-   "artefact": "eval-2026-10-23/decode-budget/equal-terms/equal-terms-table.json",
-   "ladder": {
-    "max_new_tokens=512": {
-     "accuracy": 0.5768,
-     "unparseable_rate": 0.0296,
-     "n": 2500
+  "identity": {
+    "how_the_bytes_were_obtained": "the hub id resolves OFFLINE to a local cache; the cache was verified against the sha256 the hub publishes for that revision, so the bytes measured here are the bytes the comparator ships",
+    "published_lfs_sha256": "63881a91d6e951a9ee2fef41c14c9049a8e5d8500dd10b5f07de741feaaa0b92",
+    "local_weight_sha256": "63881a91d6e951a9ee2fef41c14c9049a8e5d8500dd10b5f07de741feaaa0b92",
+    "weight_matches_published": true,
+    "files_in_cache": 6,
+    "files_matching": 6,
+    "receipt": "eval-2026-10-23/decode-budget/equal-terms/comparator-cache-receipt.json"
+  },
+  "measured": {
+    "family_surface": {
+      "surface": {
+        "what": "the six-arm independent re-measurement of 2026-10-23 — one frozen surface, one runner, one population, every arm",
+        "frozen_surface": {
+          "decoding": "greedy, do_sample=False, num_beams=1",
+          "trials": 1,
+          "max_new_tokens": 512,
+          "batch": 8,
+          "padding": "left + attention mask",
+          "precision": "bfloat16",
+          "quantization": "none",
+          "adapter": "peft, not merged",
+          "input_truncation": false,
+          "max_prompt_tokens": 3584,
+          "envelope": 4096,
+          "penalties": "repetition_penalty=1.0",
+          "chat": "own tokenizer/template, 1 user message, no system, 0-shot"
+        },
+        "population": {
+          "cybermetric-500": 500,
+          "secqa-v1-test": 110,
+          "cti-mcq": 2500,
+          "cti-rcm": 1000
+        }
+      },
+      "artefact": "eval-2026-10-23/results-merged-2026-10-23.json",
+      "benchmarks": {
+        "cti-mcq": {
+          "accuracy": 0.5764,
+          "n": 2500,
+          "unparseable": 75,
+          "unparseable_rate": 0.03,
+          "always_c_baseline": 0.3712
+        },
+        "cti-rcm": {
+          "accuracy": 0.678,
+          "n": 1000,
+          "unparseable": 0,
+          "unparseable_rate": 0.0,
+          "always_c_baseline": null
+        },
+        "cybermetric-500": {
+          "accuracy": 0.446,
+          "n": 500,
+          "unparseable": 239,
+          "unparseable_rate": 0.478,
+          "always_c_baseline": null
+        },
+        "secqa-v1-test": {
+          "accuracy": 0.4727,
+          "n": 110,
+          "unparseable": 57,
+          "unparseable_rate": 0.5182,
+          "always_c_baseline": null
+        }
+      }
     },
-    "max_new_tokens=1024": {
-     "accuracy": 0.5776,
-     "unparseable_rate": 0.0284,
-     "n": 2500
+    "equal_terms_cti_mcq": {
+      "surface": {
+        "what": "the A-16 equal-terms sweep — EVERY arm at every budget, one runner, one population, one parser; max_new_tokens is the only variable",
+        "population": "CTI-MCQ's 2,500 items, and nothing else",
+        "runner": "the byte-identical copy of A-5's runner (sha256 59896c5118848e7813cb17cbf56a3f9bd0a242f97166cab64c9fa8024ffac7d8)",
+        "note": "the family surface above measured this same comparator at 512 tokens on the ALL-BENCHMARKS population (2,500 MCQ items sharing batches with 3,500 foreign items). The two numbers differ by a handful of responses, and the difference is itself measured and reported (the surface effect). The equal-terms ladder is the one the bar sheet's serving-budget ruling rests on."
+      },
+      "artefact": "eval-2026-10-23/decode-budget/equal-terms/equal-terms-table.json",
+      "ladder": {
+        "max_new_tokens=512": {
+          "accuracy": 0.5768,
+          "unparseable_rate": 0.0296,
+          "n": 2500
+        },
+        "max_new_tokens=1024": {
+          "accuracy": 0.5776,
+          "unparseable_rate": 0.0284,
+          "n": 2500
+        },
+        "max_new_tokens=2048": {
+          "accuracy": 0.5776,
+          "unparseable_rate": 0.0284,
+          "n": 2500
+        }
+      }
     },
-    "max_new_tokens=2048": {
-     "accuracy": 0.5776,
-     "unparseable_rate": 0.0284,
-     "n": 2500
+    "equal_terms_cti_vsp": {
+      "surface": {
+        "what": "the A-16 CTI-VSP budget ladder — the same runner and the same ladder, on CTI-VSP's 1,000 items",
+        "metric": "mean absolute deviation of the CVSS v3.1 base score (points; LOWER IS BETTER), scored by CTI-Bench's own compute_vsp_mad, imported from reference_eval.py",
+        "denominator": "the responses whose vector the reference's scorer could parse — the reference SKIPS unparseable responses rather than scoring them wrong, so the denominator is not the population when a model fails to format"
+      },
+      "artefact": "eval-2026-10-23/decode-budget/equal-terms/equal-terms-table.json",
+      "ladder": {}
+    },
+    "safety": {
+      "surface": {
+        "what": "the two safety instruments, each on its own frozen population",
+        "harmbench": "HarmBench standard-test, direct-request harmful compliance; the OFFICIAL HarmBench classifier; n=159; LOWER IS BETTER",
+        "mitre_frr": "CyberSecEval MITRE-FRR heuristic refusal rate on DECODED CONTENT (the B8 repair); n=750; LOWER IS BETTER unless the prompt asks for a refusal"
+      },
+      "artefacts": [
+        "eval-2026-10-23/safety/harmbench-results-D6-repair.json",
+        "eval-2026-10-23/safety/frr-results.json"
+      ],
+      "harmbench": {
+        "n": 159,
+        "yes": 3,
+        "rate_pct": 1.89,
+        "wilson95": [
+          0.0064,
+          0.054
+        ],
+        "invalid_labels": 0,
+        "overflow": 0
+      },
+      "mitre_frr": {
+        "n": 750,
+        "refusal_count": 8,
+        "FRR_pct": 1.07,
+        "wilson95": [
+          0.0054,
+          0.0209
+        ],
+        "empty_responses": 0
+      }
     }
-   }
   },
-  "equal_terms_cti_vsp": {
-   "surface": {
-    "what": "the A-16 CTI-VSP budget ladder \u2014 the same runner and the same ladder, on CTI-VSP's 1,000 items",
-    "metric": "mean absolute deviation of the CVSS v3.1 base score (points; LOWER IS BETTER), scored by CTI-Bench's own compute_vsp_mad, imported from reference_eval.py",
-    "denominator": "the responses whose vector the reference's scorer could parse \u2014 the reference SKIPS unparseable responses rather than scoring them wrong, so the denominator is not the population when a model fails to format"
-   },
-   "artefact": "eval-2026-10-23/decode-budget/equal-terms/equal-terms-table.json",
-   "ladder": {}
-  },
-  "safety": {
-   "surface": {
-    "what": "the two safety instruments, each on its own frozen population",
-    "harmbench": "HarmBench standard-test, direct-request harmful compliance; the OFFICIAL HarmBench classifier; n=159; LOWER IS BETTER",
-    "mitre_frr": "CyberSecEval MITRE-FRR heuristic refusal rate on DECODED CONTENT (the B8 repair); n=750; LOWER IS BETTER unless the prompt asks for a refusal"
-   },
-   "artefacts": [
-    "eval-2026-10-23/safety/harmbench-results-D6-repair.json",
-    "eval-2026-10-23/safety/frr-results.json"
-   ],
-   "harmbench": {
-    "n": 159,
-    "yes": 3,
-    "rate_pct": 1.89,
-    "wilson95": [
-     0.0064,
-     0.054
-    ],
-    "invalid_labels": 0,
-    "overflow": 0
-   },
-   "mitre_frr": {
-    "n": 750,
-    "refusal_count": 8,
-    "FRR_pct": 1.07,
-    "wilson95": [
-     0.0054,
-     0.0209
-    ],
-    "empty_responses": 0
-   }
+  "author_reported": {
+    "label": "AUTHOR-REPORTED — these are the comparator's own paper's figures, on the authors' surface and protocol. They are NOT measurements by this project and are never used as a baseline. The house rule: never quote an author's published number as our measurement.",
+    "source": "eval-2026-10-23/decode-budget/equal-terms/mcq-comparator-b512/run_pubbench_decode.py",
+    "block": "AUTHOR_REPORTED = {\n    \"cybersecqwen-4b/cti-mcq\": {\"value\": 0.5868, \"sd_pp\": 0.29,\n                                \"label\": \"author-reported, five sampled trials, mean +/- standard deviation\"}"
   }
- },
- "author_reported": {
-  "label": "AUTHOR-REPORTED \u2014 these are the comparator's own paper's figures, on the authors' surface and protocol. They are NOT measurements by this project and are never used as a baseline. The house rule: never quote an author's published number as our measurement.",
-  "source": "eval-2026-10-23/decode-budget/equal-terms/mcq-comparator-b512/run_pubbench_decode.py",
-  "block": "AUTHOR_REPORTED = {\n    \"cybersecqwen-4b/cti-mcq\": {\"value\": 0.5868, \"sd_pp\": 0.29,\n                                \"label\": \"author-reported, five sampled trials, mean +/- standard deviation\"}"
- }
 }

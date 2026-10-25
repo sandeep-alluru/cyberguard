@@ -1,6 +1,6 @@
 # OUTPUT-CONTRACT — what the service emits, how it is parsed, and what that buys
 
-**Raised:** 2026-10-23 · **Ledger item:** G-3 (step 8b of `NEXT-STEPS.md`) · **Status:** the contract
+**Date:** 2026-10-23 · **Programme item:** G-3 (step 8b) · **Status:** the contract
 is **shipped**; mechanism (a) is measured and mechanism (b)'s parse stage is measured.
 
 > **The strict headline is reported alongside the served configuration, never instead of it.**
@@ -22,8 +22,8 @@ Two output contracts exist in this programme, and they are not the same thing.
 
 The product's contract is the one the release is judged on. The evaluation surfaces' contract
 exists because **the programme's published numbers were produced under a parsing rule, and that
-rule is now measured against the alternative a service could ship** — step 8b's question, which
-was *"a serving-template change and a measurement"* with *"no training, no new data"*.
+rule is now measured against the alternative a service could ship** — the scope set for step 8b:
+*"a serving-template change and a measurement"* with *"no training, no new data"*.
 
 ---
 
@@ -49,7 +49,7 @@ happens when the instruction is made to match the surface.
 
 ## 3. The served configuration — the three-stage ladder
 
-The proposal is a **parse-and-retry wrapper**:
+It is a **parse-and-retry wrapper**:
 
 1. **Strict.** Parse with the frozen rule above. If it yields an answer, **use it**.
 2. **Fallback.** If it does not, apply the project's own permissive extractor —
@@ -76,7 +76,7 @@ Instrument: `eval-2026-10-23/g3_output_contract_measurement.py` →
 `eval-2026-10-23/g3-output-contract-measurement.json` (**3/3 PASS**).
 
 **The instrument is checked against the record**: all **24** arm × benchmark cells reproduce
-EVALUATION.md §5.3.1's published unparseable counts **exactly**, and the strict accuracies
+the evaluation record §5.3.1's published unparseable counts **exactly**, and the strict accuracies
 reproduce the published accuracies exactly. The measurement is of the same surface the published
 numbers were produced on.
 
@@ -118,8 +118,8 @@ real, contract-conforming answers plus 0.0790 of permissive picks.
 **This is stated here rather than smoothed over because it is the decision's substance.** A bar
 met by a fallback whose picks are right 40 % of the time is a different fact from a bar met by
 the model's own answers. **The strict surface remains the headline**; the served surface is
-reported beside it; and **whether a served configuration is what a bar is measured against is a
-ruling's question, not this document's.**
+reported beside it; and **whether a served configuration is what a bar is measured against is an
+open product question, not this document's.**
 
 ---
 
@@ -169,10 +169,10 @@ Its measurement is a separate run and its result is reported in
 
 ## 7. What this document does **not** settle
 
-- **It does not decide the release.** The release is ledger **H-3**, and a bar met is one
+- **It does not decide the release.** The release is programme item **H-3**, and a bar met is one
   condition of one.
-- **It does not say a served configuration is what a bar should be measured against.** That is a
-  ruling's question. The strict surface is the headline and stays the headline.
+- **It does not say a served configuration is what a bar should be measured against.** That is an
+  open product question. The strict surface is the headline and stays the headline.
 - **It does not claim the fallback's rescued answers are knowledge.** They are picks, and §5
   reports how good the picks are.
 - **It does not cover the knowledge surfaces' retry stage.** The retry set is measured

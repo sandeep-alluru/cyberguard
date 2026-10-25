@@ -1,100 +1,100 @@
 {
- "what_this_is": "F-8b's receipt: the rebuilt corpus with the 604 held-out-contaminated fenrir rows removed, and the refusal share re-solved against the new denominator.",
- "authority": {
-  "decision": "OWNER-D3 (docs/OWNER-DECISIONS.md, 2026-10-24) \u2014 no human validation is available; the programme must reach the goal; the next steps were asked for.",
-  "treatment": "A of docs/ESCALATION-F8-HELDOUT-CONTAMINATION.md \u2014 remove the rows and re-derive.",
-  "why_a": "only A decontaminates the corpus; B retires the only internal instrument instead of fixing the data; C measures without fixing. A changes no bar, metric, parser, sample size, decode budget or label, and it is reversible in one command \u2014 the removal set names every removed row by its normalised prompt hash."
- },
- "input": {
-  "path": "<programme-tree>/data/v4/corpus-v4-r3.jsonl",
-  "sha256": "7798c4f589b855caa32dc9d6335926e856f78fe649419dd9e516b7ba1a6413ff",
-  "rows": 108978,
-  "per_source": {
-   "fenrir": 99730,
-   "format": 3304,
-   "replay": 594,
-   "refusal": 5350
-  }
- },
- "output": {
-  "path": "<programme-tree>/data/v4/corpus-v5-f8clean.jsonl",
-  "sha256": "c80603b05e7953a3200a7a90c71ae6ae23f7d48bc05809a55f0c7968fdca3e8c",
-  "rows": 108343,
-  "per_source": {
-   "fenrir": 99126,
-   "format": 3304,
-   "replay": 594,
-   "refusal": 5319
-  }
- },
- "removal": {
-  "rows_removed": 604,
-  "source": "fenrir",
-  "instrument": "f8_decontaminate_mixture.py::norm_hash \u2014 IMPORTED, not re-implemented",
-  "cross_check": "the count is asserted against f8-decontamination-report.json's own holdout_rows_present_by_prompt_hash",
-  "set": "<programme-tree>/data/v4/removal-set-f8.jsonl",
-  "set_sha256": "3c6eaa59f6144542f73a12c8c519d35a47f01457523ab2bedb212c8462f6ba0e",
-  "reversible": "re-running this script without the removal restores the input corpus byte-for-byte; the removal set names every removed row's normalised prompt hash"
- },
- "refusal_share": {
-  "target_pct": 4.91,
-  "target_parameter_source": "eval-2026-10-23/c5_refusal_policy.py::TARGET_SHARE, read from the file, not restated here",
-  "formula": "R = int(TARGET_SHARE * non_refusal_mass / (1 - TARGET_SHARE))",
-  "non_refusal_mass": 103024,
-  "presentations_R": 5319,
-  "achieved_pct": 4.9094,
-  "policy": "docs/REFUSAL-POLICY.md (decision W-3) \u2014 the SHARE is the invariant, not the presentation count",
-  "distinct_refusal_rows": 1342
- },
- "not_the_final_corpus": "this is the decontaminated WORKING corpus. The Data Gate receipt (D-7) is still outstanding, now on a model-adjudicated basis under OWNER-D3; until it is issued, no training is valid against it.",
- "checks": [
-  {
-   "name": "the holdout's prompt hashes are F-8's own, computed by F-8's own norm_hash",
-   "pass": true,
-   "detail": "500 holdout rows -> 500 distinct prompt hashes"
+  "what_this_is": "F-8b's receipt: the rebuilt corpus with the 604 held-out-contaminated fenrir rows removed, and the refusal share re-solved against the new denominator.",
+  "authority": {
+    "decision": "the 2026-10-24 programme ruling: no human validation is available, so the model's own judgement stands in; the programme must reach the goal.",
+    "treatment": "A of docs/ESCALATION-F8-HELDOUT-CONTAMINATION.md — remove the rows and re-derive.",
+    "why_a": "only A decontaminates the corpus; B retires the only programme-owned instrument instead of fixing the data; C measures without fixing. A changes no bar, metric, parser, sample size, decode budget or label, and it is reversible in one command — the removal set names every removed row by its normalised prompt hash."
   },
-  {
-   "name": "exactly 604 corpus rows carry a held-out prompt's hash",
-   "pass": true,
-   "detail": "604 found"
+  "input": {
+    "path": "<programme-tree>/data/v4/corpus-v4-r3.jsonl",
+    "sha256": "7798c4f589b855caa32dc9d6335926e856f78fe649419dd9e516b7ba1a6413ff",
+    "rows": 108978,
+    "per_source": {
+      "fenrir": 99730,
+      "format": 3304,
+      "replay": 594,
+      "refusal": 5350
+    }
   },
-  {
-   "name": "every removed row is in the source F-8 named",
-   "pass": true,
-   "detail": "Counter({'fenrir': 604})"
+  "output": {
+    "path": "<programme-tree>/data/v4/corpus-v5-f8clean.jsonl",
+    "sha256": "c80603b05e7953a3200a7a90c71ae6ae23f7d48bc05809a55f0c7968fdca3e8c",
+    "rows": 108343,
+    "per_source": {
+      "fenrir": 99126,
+      "format": 3304,
+      "replay": 594,
+      "refusal": 5319
+    }
   },
-  {
-   "name": "the count agrees with F-8's own report",
-   "pass": true,
-   "detail": "F-8 reported 604, this pass found 604"
+  "removal": {
+    "rows_removed": 604,
+    "source": "fenrir",
+    "instrument": "f8_decontaminate_mixture.py::norm_hash — IMPORTED, not re-implemented",
+    "cross_check": "the count is asserted against f8-decontamination-report.json's own holdout_rows_present_by_prompt_hash",
+    "set": "<programme-tree>/data/v4/removal-set-f8.jsonl",
+    "set_sha256": "3c6eaa59f6144542f73a12c8c519d35a47f01457523ab2bedb212c8462f6ba0e",
+    "reversible": "re-running this script without the removal restores the input corpus byte-for-byte; the removal set names every removed row's normalised prompt hash"
   },
-  {
-   "name": "the refusal pool's distinct rows are recovered",
-   "pass": true,
-   "detail": "5350 presentations -> 1342 distinct rows"
+  "refusal_share": {
+    "target_pct": 4.91,
+    "target_parameter_source": "eval-2026-10-23/c5_refusal_policy.py::TARGET_SHARE, read from the file, not restated here",
+    "formula": "R = int(TARGET_SHARE * non_refusal_mass / (1 - TARGET_SHARE))",
+    "non_refusal_mass": 103024,
+    "presentations_R": 5319,
+    "achieved_pct": 4.9094,
+    "policy": "docs/REFUSAL-POLICY.md (decision W-3) — the SHARE is the invariant, not the presentation count",
+    "distinct_refusal_rows": 1342
   },
-  {
-   "name": "the re-solved refusal share does not exceed the policy's target",
-   "pass": true,
-   "detail": "R=5319 over a mass of 103,024 -> 4.9094 % against a 4.91 % target"
-  },
-  {
-   "name": "every distinct refusal row survives, presented round-robin",
-   "pass": true,
-   "detail": "1342 of 1342 distinct rows, 3-4 presentations each"
-  },
-  {
-   "name": "the removal set is written, one record per removed row",
-   "pass": true,
-   "detail": "removal-set-f8.jsonl: 604 records"
-  },
-  {
-   "name": "the cleaned corpus's counts sum to its row count",
-   "pass": true,
-   "detail": "108,343 rows: {'fenrir': 99126, 'format': 3304, 'replay': 594, 'refusal': 5319}"
-  }
- ],
- "pass": 9,
- "total": 9,
- "all_pass": true
+  "not_the_final_corpus": "this is the decontaminated WORKING corpus. The Data Gate receipt (D-7) is still outstanding, now on a model-adjudicated basis; until it is issued, no training is valid against it.",
+  "checks": [
+    {
+      "name": "the holdout's prompt hashes are F-8's own, computed by F-8's own norm_hash",
+      "pass": true,
+      "detail": "500 holdout rows -> 500 distinct prompt hashes"
+    },
+    {
+      "name": "exactly 604 corpus rows carry a held-out prompt's hash",
+      "pass": true,
+      "detail": "604 found"
+    },
+    {
+      "name": "every removed row is in the source F-8 named",
+      "pass": true,
+      "detail": "Counter({'fenrir': 604})"
+    },
+    {
+      "name": "the count agrees with F-8's own report",
+      "pass": true,
+      "detail": "F-8 reported 604, this pass found 604"
+    },
+    {
+      "name": "the refusal pool's distinct rows are recovered",
+      "pass": true,
+      "detail": "5350 presentations -> 1342 distinct rows"
+    },
+    {
+      "name": "the re-solved refusal share does not exceed the policy's target",
+      "pass": true,
+      "detail": "R=5319 over a mass of 103,024 -> 4.9094 % against a 4.91 % target"
+    },
+    {
+      "name": "every distinct refusal row survives, presented round-robin",
+      "pass": true,
+      "detail": "1342 of 1342 distinct rows, 3-4 presentations each"
+    },
+    {
+      "name": "the removal set is written, one record per removed row",
+      "pass": true,
+      "detail": "removal-set-f8.jsonl: 604 records"
+    },
+    {
+      "name": "the cleaned corpus's counts sum to its row count",
+      "pass": true,
+      "detail": "108,343 rows: {'fenrir': 99126, 'format': 3304, 'replay': 594, 'refusal': 5319}"
+    }
+  ],
+  "pass": 9,
+  "total": 9,
+  "all_pass": true
 }
