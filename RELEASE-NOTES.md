@@ -15,7 +15,7 @@ corpus qualification and gate discipline, and the tooling that produces all of i
 | **The contamination trace** | 604 rows carrying a held-out identity inside a training file, covering 499 of the 500 held-out rows, with byte-identical prompts — published, because a check that catches something is part of the record. |
 | **The receipts** | Every published figure names the artefact it was read from, and the artefact is in this repository. |
 | **Three checkers** | `verify_repo.py` checks the tree against its publication boundary; `tools/language_audit.py` checks the public files for banned vocabulary; `tools/reproduce_headline.py` rebuilds the headline table from the receipts and cross-checks the two. All three run on a fresh clone with the standard library alone. |
-| **The media** | The wordmark, a social preview, the hero poster, two comparison charts with the threshold marked, poster thumbnails, and a 45 s teaser cut from the 19 min 39 s walkthrough. |
+| **The media** | The wordmark, a social preview, the hero poster, two comparison charts with the threshold marked, poster thumbnails, and a 45 s teaser cut from the 19 min 5 s walkthrough. |
 
 ### The numbers
 

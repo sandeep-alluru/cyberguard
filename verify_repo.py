@@ -83,6 +83,11 @@ def main() -> int:
         rel = path.relative_to(REPO).as_posix()
         if rel.startswith(".git/"):
             continue
+        # Python's own byproducts are not part of the published surface, and
+        # counting them would make the file count differ between a fresh clone
+        # and a working tree that has run the other checkers.
+        if "__pycache__/" in rel or rel.endswith(".pyc"):
+            continue
         scanned += 1
 
         if path.suffix.lower() in DATA_SUFFIXES or path.suffix.lower() in ROW_SUFFIXES:

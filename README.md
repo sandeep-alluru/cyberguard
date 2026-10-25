@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="assets/hero-poster.png"><img src="assets/hero-poster.png" alt="CyberGuard VulnTriage — the benchmark table, the contamination trace, and the boundary check" width="760"></a>
-  <br><em>19 min 39 s walkthrough — <a href="assets/teaser.mp4">45 s teaser</a> · <a href="#watch">all clips</a></em>
+  <br><em>19 min 5 s walkthrough — <a href="assets/teaser.mp4">45 s teaser</a> · <a href="#watch">all clips</a></em>
 </p>
 
 ---
@@ -27,10 +27,13 @@ Four models on one scoreboard, every figure read from a receipt in this reposito
 
 | model | CTI-RCM ↑<br>CVE → CWE | CTI-MCQ ↑<br>2,500 MCQs | CTI-VSP ↓<br>CVSS MAD | MITRE-FRR ↓<br>false refusal | HarmBench ↓<br>harmful / 159 | CyberMetric-500 ↑ | SecQA ↑ |
 |---|---|---|---|---|---|---|---|
+| **the bar**<br><small>fixed in advance</small> | **> 0.6780** | — | **≤ 1.223** | **≤ 5.13 %** | **≤ 1/159** | — | — |
 | Qwen3-4B-Instruct-2507<br><small>base, untrained</small> | 0.4100 **F** | 0.4444 **F** | 1.32 **F** | 4.13 % **F** | 1/159 **F** | 0.4680 **F** | 0.6818 **F** |
 | **CyberSecQwen-4B**<br><small>the direct twin</small> | 0.6664 **P**<br>0.6780 **F** | 0.5868 **P**<br>0.5764 **F** | 1.223 **F** | 1.07 % **F** | 3/159 **F** | 0.4460 **F** | 0.4727 **F** |
 | **Cisco Foundation-Sec-8B-Instruct**<br><small>the reference specialist</small> | 0.692 **P** | 0.644 **P** | 0.802 **P** ⚠ | not measured | not comparable ⚠ | not measured | not measured |
 | **CyberGuard VulnTriage v3**<br><small>the arm of record</small> | **0.6360 F** | 0.4648 **F** | not measured | **29.07 % F** | **0/159 F** | **0.8000 F** | **0.9364 F** |
+
+The bar row is the threshold the arm of record is measured against, and it is a number rather than a verdict: CTI-RCM above the comparator's re-measured 0.6780, CVSS error no worse than the comparator's 1.223, false refusals no worse than the untrained base plus 1.0 pp, and no more harmful completions than the base's 1 of 159. The full statements, with each instrument's population and provenance, are in [`docs/BAR-SHEET.md`](docs/BAR-SHEET.md).
 
 Every number above carries its population, its scored fraction and its unparseable count in the receipts. Four notes that the cells cannot carry:
 
@@ -126,7 +129,7 @@ The comparator is re-measured on this programme's frozen surface — one runner,
 
 | clip | what it shows |
 |---|---|
-| [19 min 39 s — the full walkthrough](assets/teaser.mp4) | The product, the results table, the pre-registered thresholds, the arm of record's measurements, the corpus qualification, the contamination trace, the path ahead, and the boundary check — all recorded from the published repository. |
+| **19 min 5 s — the full walkthrough** <br><small>a local asset, not published here</small> | The product, the results table, the pre-registered thresholds, the arm of record's measurements, the corpus qualification, the contamination trace, the path ahead, and the boundary check — all recorded from the published repository. |
 | [45 s teaser](assets/teaser.mp4) | The results table and the method, cut from the walkthrough. |
 | [The results table](assets/watch-benchmarks.png) | Four models, seven benchmarks, every figure labelled published or first-party. |
 | [The contamination trace](assets/watch-contamination.png) | 604 rows, 499 of 500 held-out rows, stage by stage. |
@@ -178,7 +181,7 @@ Three layers, and you can run the first two yourself in under a second.
 
 | | |
 |---|---|
-| **The corpus qualification** | The confirmation draw is the next measurement. It produces the three registered limits — unsafe, off-topic and shallow — and the re-issued gate that the next arm trains against. |
+| **The corpus qualification** | The earlier confirmation draw found 604 rows carrying a held-out identity inside a training file, so the corpus is qualified again before the next arm trains on it. The confirmation draw is the next measurement: it produces the three registered limits — unsafe, off-topic and shallow — and the re-issued gate that the next arm trains against. |
 | **The next arm** | Trains from the base checkpoint, with the refusal weight as the single controlled variable and the epoch never truncated. A 30-step throughput pilot has already measured the machine at **2.506 samples/s**. |
 | **The release artefacts** | Merged bf16 weights, GGUF, Q4_K_M, `generation_config.json`, the model card, and a hash-frozen bundle — in pipeline order. |
 | **The serving party** | Named as the final step of that pipeline, so a published release can be served as well as downloaded. |
