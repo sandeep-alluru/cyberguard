@@ -1,0 +1,201 @@
+{
+  "what_this_is": "The BLINDED, MIXED-ORDER review views of cohort 4. Each reviewer sees control_id, system, user and assistant only — no dimension, no expected label, no kind, no reason — in its own deterministic order.",
+  "ruling": "ASTRA-D30 (b); ASTRA-D31; ASTRA-D32",
+  "truth_path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4.jsonl",
+  "truth_sha256": "1ecdf614a0568882eb5fea62c3ee589f0f0aedc7b142256f860ccec9612a37bf",
+  "fields_kept": [
+    "control_id",
+    "system",
+    "user",
+    "assistant"
+  ],
+  "fields_stripped": [
+    "dimension",
+    "expect",
+    "kind",
+    "reason"
+  ],
+  "rows": 300,
+  "views": {
+    "A": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-A.jsonl",
+      "seed": 20261101,
+      "first_ten_control_ids": [
+        "C4-UNS-N07",
+        "C4-UNS-P38",
+        "C4-OFF-N44",
+        "C4-SHA-N23",
+        "C4-OFF-N23",
+        "C4-OFF-N04",
+        "C4-UNS-N26",
+        "C4-OFF-N42",
+        "C4-UNS-N48",
+        "C4-SHA-N17"
+      ],
+      "permutation_sha256": "17a8962f71cc2be9d00fb8e38e8256ec446fe5e7c4d1b9827d85ce96f2f3e45d",
+      "sha256": "12a19cc5c6c06ad6dc2681f38a5df6e221093c591efe6d1d52e4ff4d1bd03025"
+    },
+    "W2": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-W2.jsonl",
+      "seed": 20261102,
+      "first_ten_control_ids": [
+        "C4-UNS-P35",
+        "C4-SHA-N48",
+        "C4-OFF-N14",
+        "C4-SHA-N10",
+        "C4-UNS-P06",
+        "C4-SHA-N26",
+        "C4-OFF-N42",
+        "C4-UNS-N25",
+        "C4-UNS-N11",
+        "C4-SHA-N04"
+      ],
+      "permutation_sha256": "94b41854d15a89d8740f3a3254d0beacc464f9d0ee7d9861d6e25a0d64fcd0ca",
+      "sha256": "ce654c24958164af6014368071f5a3fc49a9bb4c8a5f30681436c03de22ea01e"
+    },
+    "O": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-O.jsonl",
+      "seed": 20261103,
+      "first_ten_control_ids": [
+        "C4-UNS-P07",
+        "C4-OFF-N04",
+        "C4-SHA-P22",
+        "C4-OFF-N07",
+        "C4-UNS-N32",
+        "C4-UNS-P04",
+        "C4-OFF-P36",
+        "C4-UNS-P02",
+        "C4-UNS-P26",
+        "C4-SHA-P45"
+      ],
+      "permutation_sha256": "609b8d0641849b56af96ab1e25a57cf76334b95237f8a15af6f4a9a748f699dc",
+      "sha256": "0d72f99a34132e6fdb1bc733831ca8d87bf2e522ccdecf28f9174c30e27567f4"
+    },
+    "S": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-S.jsonl",
+      "seed": 20261104,
+      "first_ten_control_ids": [
+        "C4-UNS-P47",
+        "C4-OFF-P31",
+        "C4-UNS-P48",
+        "C4-UNS-P06",
+        "C4-UNS-P49",
+        "C4-OFF-P29",
+        "C4-SHA-P02",
+        "C4-SHA-N19",
+        "C4-UNS-N13",
+        "C4-UNS-P14"
+      ],
+      "permutation_sha256": "8e6de5f4f31614436cddc39e9c9791332b5edc4dbda5e77960b8514be8d0429f",
+      "sha256": "2e8e952272cc9181a817ab5f9884a455092761df8f10b4861c590ece6fff2229"
+    },
+    "L": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-L.jsonl",
+      "seed": 20261105,
+      "first_ten_control_ids": [
+        "C4-UNS-N11",
+        "C4-SHA-N45",
+        "C4-SHA-N33",
+        "C4-UNS-P44",
+        "C4-OFF-P25",
+        "C4-OFF-P23",
+        "C4-UNS-P45",
+        "C4-OFF-N30",
+        "C4-OFF-P31",
+        "C4-SHA-P07"
+      ],
+      "permutation_sha256": "f227cef6c7175fd5a188e2fe586ec5ba1957608f3aa7c6c2dcf01e6cad82c245",
+      "sha256": "be2e35bf3293a99d1c7faa942f8cd0d3944b3c4426691342d19d0a240bb490cf"
+    },
+    "M3": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-M3.jsonl",
+      "seed": 20261106,
+      "first_ten_control_ids": [
+        "C4-SHA-P46",
+        "C4-SHA-P03",
+        "C4-UNS-P01",
+        "C4-OFF-N42",
+        "C4-UNS-N37",
+        "C4-OFF-P47",
+        "C4-SHA-P37",
+        "C4-OFF-N19",
+        "C4-OFF-P33",
+        "C4-SHA-P07"
+      ],
+      "permutation_sha256": "707aa901682b687ea20bc8c6159c6219d9648c1b95acc93ae93ddbca2be634a3",
+      "sha256": "508699872a8bc50fff1a617c410772ad596f8c3f08d948a683a0fe823beff0f6"
+    },
+    "B": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-B.jsonl",
+      "seed": 20261107,
+      "first_ten_control_ids": [
+        "C4-UNS-N42",
+        "C4-OFF-N04",
+        "C4-SHA-P25",
+        "C4-OFF-P27",
+        "C4-SHA-P09",
+        "C4-SHA-N41",
+        "C4-SHA-P14",
+        "C4-SHA-N08",
+        "C4-OFF-P26",
+        "C4-OFF-P32"
+      ],
+      "permutation_sha256": "320388a10516c0add151d39b8f5763735e9dcc6b8f66394882f1b6f52779ac90",
+      "sha256": "8f7c661e38e9736e4a460c4ea0bdd57edcfcf978a62d81a1733bb7bdda87abb6"
+    },
+    "M2": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-M2.jsonl",
+      "seed": 20261108,
+      "first_ten_control_ids": [
+        "C4-UNS-P30",
+        "C4-UNS-P09",
+        "C4-OFF-P12",
+        "C4-OFF-N29",
+        "C4-SHA-N12",
+        "C4-SHA-N33",
+        "C4-UNS-P22",
+        "C4-SHA-P23",
+        "C4-UNS-N22",
+        "C4-SHA-N17"
+      ],
+      "permutation_sha256": "282ad62cd9954f4ad9a232ef6a11be090d9febcaf533cf911e5390fb97027be4",
+      "sha256": "54e4bcb6b315abd467a548e6805831dcf5e0895f51a562b1622c705d76376a4b"
+    },
+    "C": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-C.jsonl",
+      "seed": 20261109,
+      "first_ten_control_ids": [
+        "C4-SHA-N46",
+        "C4-OFF-N23",
+        "C4-SHA-N32",
+        "C4-UNS-N20",
+        "C4-OFF-N04",
+        "C4-SHA-N14",
+        "C4-UNS-N31",
+        "C4-OFF-N36",
+        "C4-UNS-P21",
+        "C4-UNS-N29"
+      ],
+      "permutation_sha256": "97796550fa539a5da39c6e974e0fe3561d645f6a8146cde14201e4669db88e92",
+      "sha256": "3b2c6de394d2a535e96902e20cb4acdd19a746f89398902f68924bfd450e5afc"
+    },
+    "N": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4-view-N.jsonl",
+      "seed": 20261110,
+      "first_ten_control_ids": [
+        "C4-SHA-P24",
+        "C4-OFF-P39",
+        "C4-SHA-N07",
+        "C4-UNS-P23",
+        "C4-OFF-P33",
+        "C4-SHA-P28",
+        "C4-OFF-P05",
+        "C4-OFF-N44",
+        "C4-SHA-P10",
+        "C4-UNS-N38"
+      ],
+      "permutation_sha256": "636d1701df37dc360e5ab45f1f4e38a1fbc30698a9609c91b4d3e1b976bb8a3d",
+      "sha256": "71860867dbc581df4e89cb64aa006e81d3235681e8ed4b8cba23e7b2610e819a"
+    }
+  }
+}

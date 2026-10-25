@@ -1,0 +1,253 @@
+{
+ "what_this_is": "F-8's decontamination report: the rebuilt mixture against the certified 500-row held-out set, using the v2 admission gate's own instrument.",
+ "instrument": {
+  "name": "v2/gate_v2.py::overlap_scan (13-gram Jaccard + verbatim-span containment)",
+  "imported_not_reimplemented": true,
+  "file": "<programme-tree>/v2/gate_v2.py",
+  "ngram": 13,
+  "overlap_reject_threshold": 0.6,
+  "containment_reject_threshold": 0.8,
+  "containment_min_shared": 3,
+  "gate_version": "v2-gate-1",
+  "the_fast_pass": "an inverted index over the holdout's 13-grams, which visits only the held-out documents that share a gram with the row; it is validated against the imported scan on the same 2,000-row sample for every source, and the validation is in this report"
+ },
+ "holdout": {
+  "path": "<programme-tree>/v2/holdout500.jsonl",
+  "rows": 500,
+  "manifest": {
+   "corpus": "<peer-home>/cyberguard/data/trendyol-cybersec/CyberSec-Dataset_escaped.jsonl",
+   "corpus_sha256": "2b08b09c41da22c94507ae7a2e9cbbe6d653e8b0c798ef817e96539b18c78268",
+   "rows_total_after_audit": 52284,
+   "rows_train": 51784,
+   "rows_eval": 500,
+   "seed": 0,
+   "out": "<peer-home>/cyberguard/v2/holdout500.jsonl",
+   "out_sha256": "874217b1bc8b71bfc306e7f4eb0ff36ec12cb29f5bdee36124d5e888cac06b6b"
+  },
+  "certified_by": "the v1 benchmark's own 500-row split, exported by v2/export_holdout.py, which refuses to write a file that is not exactly 500 rows"
+ },
+ "bar": {
+  "source": "v2/gate-report.json \u2014 the maximum residual overlap the gate recorded across its admitted candidates",
+  "gate_max_overlap": 0.0266,
+  "gate_max_containment": 0.0723,
+  "admitted_candidates": 8,
+  "rule": "no source's residual overlap exceeds the gate's recorded maximum"
+ },
+ "per_source": {
+  "fenrir": {
+   "rows": 99117,
+   "reference_sample_rows": 2000,
+   "reference_instrument": {
+    "jaccard_max": 0.0176,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0451,
+    "containment_docs_ge": 0
+   },
+   "indexed_full_population": {
+    "jaccard_max": 0.0265,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0683,
+    "containment_docs_ge": 0
+   },
+   "holdout_rows_present_by_prompt_hash": 0,
+   "within_the_gate_recorded_maximum": true
+  },
+  "format": {
+   "rows": 3304,
+   "reference_sample_rows": 2000,
+   "reference_instrument": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "indexed_full_population": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "holdout_rows_present_by_prompt_hash": 0,
+   "within_the_gate_recorded_maximum": true
+  },
+  "refusal": {
+   "rows": 17997,
+   "reference_sample_rows": 2000,
+   "reference_instrument": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "indexed_full_population": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "holdout_rows_present_by_prompt_hash": 0,
+   "within_the_gate_recorded_maximum": true
+  },
+  "replay": {
+   "rows": 594,
+   "reference_sample_rows": 594,
+   "reference_instrument": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "indexed_full_population": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "holdout_rows_present_by_prompt_hash": 0,
+   "within_the_gate_recorded_maximum": true
+  },
+  "triage": {
+   "rows": 245273,
+   "reference_sample_rows": 2000,
+   "reference_instrument": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "indexed_full_population": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "holdout_rows_present_by_prompt_hash": 0,
+   "within_the_gate_recorded_maximum": true
+  },
+  "triage_salvage": {
+   "rows": 268,
+   "reference_sample_rows": 268,
+   "reference_instrument": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "indexed_full_population": {
+    "jaccard_max": 0.0,
+    "jaccard_docs_ge": 0,
+    "containment_max": 0.0,
+    "containment_docs_ge": 0
+   },
+   "holdout_rows_present_by_prompt_hash": 0,
+   "within_the_gate_recorded_maximum": true
+  }
+ },
+ "worst_residual_overlap": 0.0265,
+ "within_the_bar": true,
+ "checks": [
+  {
+   "name": "the held-out set is the certified 500-row split, and it is the v1 benchmark's",
+   "pass": true,
+   "detail": "500 rows, corpus sha256 2b08b09c41da22c9\u2026, seed 0, out sha256 874217b1bc8b71bf\u2026"
+  },
+  {
+   "name": "the v2 gate's own recorded maximum residual overlap is read from its report",
+   "pass": true,
+   "detail": "max overlap across 8 admitted candidates = 0.0266 (containment 0.0723); the gate's n-gram is 13, its reject thresholds are overlap 0.6 and containment 0.8"
+  },
+  {
+   "name": "fenrir: the indexed pass reproduces the imported gate's own scan on the same 2000-row sample",
+   "pass": true,
+   "detail": "reference overlap 0.0176 / containment 0.0451 vs indexed 0.0176 / 0.0451"
+  },
+  {
+   "name": "fenrir: no row of the mixture IS a held-out row (excluded by construction)",
+   "pass": true,
+   "detail": "0 of 99117 rows share a held-out prompt's hash"
+  },
+  {
+   "name": "fenrir: the residual overlap does not exceed the v2 gate's recorded maximum",
+   "pass": true,
+   "detail": "jaccard_max 0.0265 against the gate's recorded 0.0266; containment 0.0683 against its recorded 0.0723"
+  },
+  {
+   "name": "format: the indexed pass reproduces the imported gate's own scan on the same 2000-row sample",
+   "pass": true,
+   "detail": "reference overlap 0.0 / containment 0.0 vs indexed 0.0 / 0.0"
+  },
+  {
+   "name": "format: no row of the mixture IS a held-out row (excluded by construction)",
+   "pass": true,
+   "detail": "0 of 3304 rows share a held-out prompt's hash"
+  },
+  {
+   "name": "format: the residual overlap does not exceed the v2 gate's recorded maximum",
+   "pass": true,
+   "detail": "jaccard_max 0.0 against the gate's recorded 0.0266; containment 0.0 against its recorded 0.0723"
+  },
+  {
+   "name": "refusal: the indexed pass reproduces the imported gate's own scan on the same 2000-row sample",
+   "pass": true,
+   "detail": "reference overlap 0.0 / containment 0.0 vs indexed 0.0 / 0.0"
+  },
+  {
+   "name": "refusal: no row of the mixture IS a held-out row (excluded by construction)",
+   "pass": true,
+   "detail": "0 of 17997 rows share a held-out prompt's hash"
+  },
+  {
+   "name": "refusal: the residual overlap does not exceed the v2 gate's recorded maximum",
+   "pass": true,
+   "detail": "jaccard_max 0.0 against the gate's recorded 0.0266; containment 0.0 against its recorded 0.0723"
+  },
+  {
+   "name": "replay: the indexed pass reproduces the imported gate's own scan on the same 594-row sample",
+   "pass": true,
+   "detail": "reference overlap 0.0 / containment 0.0 vs indexed 0.0 / 0.0"
+  },
+  {
+   "name": "replay: no row of the mixture IS a held-out row (excluded by construction)",
+   "pass": true,
+   "detail": "0 of 594 rows share a held-out prompt's hash"
+  },
+  {
+   "name": "replay: the residual overlap does not exceed the v2 gate's recorded maximum",
+   "pass": true,
+   "detail": "jaccard_max 0.0 against the gate's recorded 0.0266; containment 0.0 against its recorded 0.0723"
+  },
+  {
+   "name": "triage: the indexed pass reproduces the imported gate's own scan on the same 2000-row sample",
+   "pass": true,
+   "detail": "reference overlap 0.0 / containment 0.0 vs indexed 0.0 / 0.0"
+  },
+  {
+   "name": "triage: no row of the mixture IS a held-out row (excluded by construction)",
+   "pass": true,
+   "detail": "0 of 245273 rows share a held-out prompt's hash"
+  },
+  {
+   "name": "triage: the residual overlap does not exceed the v2 gate's recorded maximum",
+   "pass": true,
+   "detail": "jaccard_max 0.0 against the gate's recorded 0.0266; containment 0.0 against its recorded 0.0723"
+  },
+  {
+   "name": "triage_salvage: the indexed pass reproduces the imported gate's own scan on the same 268-row sample",
+   "pass": true,
+   "detail": "reference overlap 0.0 / containment 0.0 vs indexed 0.0 / 0.0"
+  },
+  {
+   "name": "triage_salvage: no row of the mixture IS a held-out row (excluded by construction)",
+   "pass": true,
+   "detail": "0 of 268 rows share a held-out prompt's hash"
+  },
+  {
+   "name": "triage_salvage: the residual overlap does not exceed the v2 gate's recorded maximum",
+   "pass": true,
+   "detail": "jaccard_max 0.0 against the gate's recorded 0.0266; containment 0.0 against its recorded 0.0723"
+  }
+ ],
+ "pass": 20,
+ "total": 20,
+ "all_pass": true
+}

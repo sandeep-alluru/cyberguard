@@ -1,0 +1,108 @@
+{
+ "what_this_is": "Receipt for data/v4/corpus-v4-r1.jsonl (ledger item C-2): ASTRA-D5's exclusion executed.",
+ "authority": {
+  "id": "ASTRA-D5",
+  "date": "2026-10-03",
+  "ruling": "Rejection only for this pilot; no meaning-recovery repair. Primus and the merged reasoning corpus stay excluded."
+ },
+ "instrument": {
+  "removal_set": "data/v4/removal-set-d5.jsonl (ledger item C-1)",
+  "script": "eval-2026-10-23/c2_execute_d5_removal.py",
+  "detectors": "imported from eval-2026-10-23/corpus_hygiene_targets.py (THINKING_TOKEN, ANY_RESERVED, STOCK_PREAMBLE) \u2014 not re-implemented"
+ },
+ "source": {
+  "path": "<programme-tree>/data/v3/mixture/mixture-v3-no-trail.jsonl",
+  "sha256_before": "75b5099c568313f2ceada6f79746e51840b5240d943e952c2f2ebe3c3318fc90",
+  "sha256_after": "75b5099c568313f2ceada6f79746e51840b5240d943e952c2f2ebe3c3318fc90",
+  "unchanged": true,
+  "rows": 140545,
+  "written": false
+ },
+ "output": {
+  "path": "<programme-tree>/data/v4/corpus-v4-r1.jsonl",
+  "sha256": "4a2efaa7b4c8776d3c08474e1611cb79d73943a45f8a0798892648ed54462a3a",
+  "rows": 112508,
+  "per_source": {
+   "fenrir": 99730,
+   "format": 2600,
+   "refusal": 9584,
+   "replay": 594
+  }
+ },
+ "removed": {
+  "rows": 28037,
+  "per_source": {
+   "primus": 4891,
+   "merged": 23146
+  }
+ },
+ "contamination_scan": {
+  "before": {
+   "rows": 140545,
+   "thinking_token_rows": 4891,
+   "thinking_token_leading_rows": 4891,
+   "any_reserved_rows": 5269,
+   "stock_preamble_rows": 18074
+  },
+  "after": {
+   "rows": 112508,
+   "thinking_token_rows": 0,
+   "thinking_token_leading_rows": 0,
+   "any_reserved_rows": 378,
+   "stock_preamble_rows": 0
+  },
+  "definitions": {
+   "thinking_control_token": "literal <|reserved_special_token_N|> in the assistant target",
+   "leading": "token occurs within the first 120 characters of the target",
+   "stock_preamble": "first non-empty line matches 'First, the user (is asking|wants|needs|has asked)'",
+   "any_reserved": "the reference ANY_RESERVED pattern (any reserved/control marker)"
+  }
+ },
+ "residual_any_reserved": {
+  "rows": 378,
+  "by_src": {
+   "fenrir": 378
+  },
+  "status": "NOT zero \u2014 D5 does not cover these rows",
+  "note": "ASTRA-D5 excludes Primus and the merged reasoning corpus. The residual any-reserved rows are in a source D5 does not name, so removing them is NOT authorised by D5 and is not done here. Reported as a gap, not as a pass. See ledger item C-3."
+ },
+ "checks": [
+  {
+   "name": "removal-set-has-28037-row-ids",
+   "pass": true,
+   "detail": "28037 row_ids"
+  },
+  {
+   "name": "source-mixture-unchanged-read-only",
+   "pass": true,
+   "detail": "sha256 75b5099c568313f2\u2026 before and after the write"
+  },
+  {
+   "name": "exactly-28037-rows-dropped",
+   "pass": true,
+   "detail": "28037 dropped"
+  },
+  {
+   "name": "retained-count-is-112508",
+   "pass": true,
+   "detail": "112508 retained (140,545 \u2212 28,037)"
+  },
+  {
+   "name": "output-has-zero-leading-thinking-control-tokens",
+   "pass": true,
+   "detail": "0 leading (source had 4891)"
+  },
+  {
+   "name": "output-has-zero-stock-preamble-opening-targets",
+   "pass": true,
+   "detail": "0 (source had 18074)"
+  },
+  {
+   "name": "output-per-source-counts-are-exactly-the-retained-four",
+   "pass": true,
+   "detail": "{'fenrir': 99730, 'format': 2600, 'refusal': 9584, 'replay': 594} (expected {'fenrir': 99730, 'refusal': 9584, 'format': 2600, 'replay': 594})"
+  }
+ ],
+ "pass": 7,
+ "total": 7
+}

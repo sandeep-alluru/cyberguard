@@ -1,0 +1,125 @@
+{
+ "what_this_is": "Receipt for data/v4/corpus-v4-r3.jsonl (ledger item C-10): the working corpus with C-7's triage-format family and C-8's triage-refusal family folded in, and the refusal share re-solved onto the policy target.",
+ "inputs": {
+  "corpus_v4_r1": {
+   "path": "<programme-tree>/data/v4/corpus-v4-r1.jsonl",
+   "sha256": "4a2efaa7b4c8776d3c08474e1611cb79d73943a45f8a0798892648ed54462a3a",
+   "rows": 112508
+  },
+  "corpus_v4_r2": {
+   "path": "<programme-tree>/data/v4/corpus-v4-r2.jsonl",
+   "sha256": "c2598f20025778dc9d426e148d4b7ff0c3f1fcb380c47cb87cdf3d351aed1ffd",
+   "rows": 108238
+  },
+  "triage_format": {
+   "path": "<programme-tree>/data/v4/format-compliance-triage.jsonl",
+   "sha256": "e754e18e6abf4cec02ccfc2ee21b5e6b1c49882a845faa180794ece2576ed73a",
+   "rows": 352
+  },
+  "triage_refusal": {
+   "path": "<programme-tree>/data/v4/refusal-retention-triage.jsonl",
+   "sha256": "aad2b98d4074ca6d4bdc7d012b94f968f58d67dd15f99c210fbbce28b47e9b6e",
+   "rows": 144
+  }
+ },
+ "output": {
+  "path": "<programme-tree>/data/v4/corpus-v4-r3.jsonl",
+  "sha256": "7798c4f589b855caa32dc9d6335926e856f78fe649419dd9e516b7ba1a6413ff",
+  "rows": 108978,
+  "per_source": {
+   "fenrir": 99730,
+   "format": 3304,
+   "replay": 594,
+   "refusal": 5350
+  },
+  "measured_refusal_share_pct": 4.9092
+ },
+ "rules": {
+  "fenrir_and_replay": "carried through byte-identically",
+  "format": "the parent's 2,600 presentations unchanged; the new triage-format family enters at the stream's existing weight x2",
+  "refusal": "the parent's 1,198 distinct rows and C-8's 144 distinct rows pooled into 1,342 distinct rows, presented at a uniform round-robin weight so no refusal family is over-represented",
+  "share": "solved against the FINAL denominator: R / (non_refusal_mass + R) = target"
+ },
+ "solved": {
+  "non_refusal_mass": 103628,
+  "presentations_R": 5350,
+  "final_rows": 108978,
+  "policy_target_pct": 4.91,
+  "weight_over_distinct_rows": 3.9866
+ },
+ "policy": {
+  "document": "docs/REFUSAL-POLICY.md",
+  "decision": "W-3",
+  "note": "the policy's invariant is the SHARE, so adding families re-solves the presentation count rather than moving the share"
+ },
+ "contamination_scan": {
+  "leading_thinking_control_tokens": 0,
+  "stock_preamble_targets": 0,
+  "note": "measured with the reference detectors, imported"
+ },
+ "not_the_final_corpus": "this is the working corpus. Phase D's removals (D-3, D-4, D-5) and D-7's Data Gate receipt produce data/v4/corpus-final.jsonl, and no training is valid before that receipt exists.",
+ "checks": [
+  {
+   "name": "parent-corpus-shape-is-as-expected",
+   "pass": true,
+   "detail": "fenrir 99730, replay 594, format 2600, refusal 9584 presentations / 1198 distinct"
+  },
+  {
+   "name": "new-families-are-the-counts-c7-and-c8-stated",
+   "pass": true,
+   "detail": "352 triage-format, 144 triage-refusal"
+  },
+  {
+   "name": "non-refusal-mass-is-computed-before-the-refusal-weight",
+   "pass": true,
+   "detail": "103628 = fenrir 99,730 + format 3304 + replay 594"
+  },
+  {
+   "name": "re-solved-share-does-not-exceed-the-policy-target",
+   "pass": true,
+   "detail": "5350 presentations -> 4.9092 % against 4.91 %"
+  },
+  {
+   "name": "refusal-pool-holds-1342-distinct-rows",
+   "pass": true,
+   "detail": "1342 rows, 1342 distinct (1198 parent + 144 triage)"
+  },
+  {
+   "name": "every-distinct-refusal-row-survives",
+   "pass": true,
+   "detail": "all 1342 distinct rows present, 3-4 presentations each"
+  },
+  {
+   "name": "output-row-count-matches-the-solution",
+   "pass": true,
+   "detail": "108978 rows (non-refusal 103628 + refusal 5350)"
+  },
+  {
+   "name": "measured-refusal-share-equals-the-policy-target",
+   "pass": true,
+   "detail": "measured 4.9092 %, policy 4.91 %"
+  },
+  {
+   "name": "output-per-source-counts-are-exactly-the-four-streams",
+   "pass": true,
+   "detail": "{'fenrir': 99730, 'format': 3304, 'replay': 594, 'refusal': 5350}"
+  },
+  {
+   "name": "all-1342-distinct-refusal-rows-are-in-the-output",
+   "pass": true,
+   "detail": "1342 distinct refusal rows"
+  },
+  {
+   "name": "contamination-classes-are-still-zero",
+   "pass": true,
+   "detail": "leading thinking-control tokens 0, stock-preamble targets 0"
+  },
+  {
+   "name": "fenrir-and-replay-are-carried-through-byte-identically",
+   "pass": true,
+   "detail": "100324 parent rows compared, 100324 in the output, 0 differing"
+  }
+ ],
+ "pass": 12,
+ "total": 12
+}

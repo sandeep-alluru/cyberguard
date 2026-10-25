@@ -1,0 +1,132 @@
+{
+  "what_this_is": "A mechanical proof that instrument v4 changes exactly one thing: it inserts the \u00a73 defensive-context paragraph into the unsafe decision block, and leaves the rubric, the output spec, the parser, the off-topic block and the shallow block byte-identical to v3.",
+  "ruling": "ASTRA-D30 (docs/ASTRA-DECISIONS.jsonl, id D30) clause (a)",
+  "v3": {
+    "instrument_id": "d7_review_v3",
+    "file_sha256": "2763ea87f71c3dbbe9cd64ce708cf2e8874fbd6a87d27eb3a741839ad3192d1f",
+    "procedure_sha256": "2bb1121eabeb05fc18187f292c883c4b0f8e2bfe8c975d69003cb512004c559e"
+  },
+  "v4": {
+    "instrument_id": "d7_review_v4",
+    "file_sha256": "0abc27b963fe19ad28ac2925533b22e59663e2a165f9d090bca8688a9e1941c7",
+    "procedure_sha256": "09f265689071b6453561292327e6461748cfa6712c0a18a8af33a68f53a84a96"
+  },
+  "checks": [
+    {
+      "name": "rubric identical to v3",
+      "pass": true,
+      "detail": "v3=d8a4d98a31aa v4=d8a4d98a31aa"
+    },
+    {
+      "name": "OUTPUT_SPEC identical to v3",
+      "pass": true,
+      "detail": "v3=943bec4a57a0 v4=943bec4a57a0"
+    },
+    {
+      "name": "parse_labels IS v3's parse_labels",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "row_hash IS v3's row_hash",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "sha256_file IS v3's sha256_file",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "BLOCK 1 present in both",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "BLOCK 2 present in both",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "BLOCK 3 present in both",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "defensive-context paragraph appears exactly once in v4",
+      "pass": true,
+      "detail": "count=1"
+    },
+    {
+      "name": "defensive-context paragraph absent from v3",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "v4 BLOCK 1 minus the paragraph == v3 BLOCK 1",
+      "pass": true,
+      "detail": "the unsafe block differs ONLY by the inserted paragraph"
+    },
+    {
+      "name": "BLOCK 2 (off-topic) byte-identical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "BLOCK 3 (shallow) byte-identical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "procedure preamble byte-identical",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "rendered prompts differ",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "off-topic block appears verbatim in both prompts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "shallow block appears verbatim in both prompts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "defensive-context paragraph appears in the v4 prompt",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "defensive-context paragraph absent from the v3 prompt",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "prompt text outside the unsafe block is identical",
+      "pass": true,
+      "detail": "only the unsafe block differs"
+    },
+    {
+      "name": "output spec present in both prompts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "instrument id differs",
+      "pass": true,
+      "detail": "d7_review_v3 -> d7_review_v4"
+    },
+    {
+      "name": "instrument file hashes differ",
+      "pass": true,
+      "detail": "v3=2763ea87f71c v4=0abc27b963fe"
+    }
+  ],
+  "verdict": "PASS"
+}

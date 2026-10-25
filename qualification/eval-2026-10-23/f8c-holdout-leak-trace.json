@@ -1,0 +1,284 @@
+{
+  "what_this_is": "F-8c — the path by which the 500-row held-out set enters the rebuilt mixture, measured stage by stage with the project's own identity key.",
+  "identity_key": {
+    "definition": "sha256(' '.join(user.lower().split()))[:16]",
+    "source": "v2/export_holdout.py (the exporter that wrote the held-out file), whose own comment states it must match gate_v2.prompt_hash_of and the dedupe key",
+    "cross_checked_against": "v2/gate_v2.py::prompt_hash_of, imported not re-implemented",
+    "cross_check_rows": 100,
+    "cross_check_agreement": 100
+  },
+  "no_new_data": "every file read is already on disk; this script downloads nothing",
+  "stages": {
+    "fenrir_bundle_raw": {
+      "file": "data/v3/fenrir-v2.1/220426-CyberSec-Dataset_escaped.jsonl",
+      "rows_total": 99870,
+      "rows_sharing_a_holdout_identity": 605,
+      "distinct_holdout_rows_covered": 500,
+      "distinct_holdout_rows_covered_of_500": 1.0,
+      "multiplicity_histogram": {
+        "1": 401,
+        "2": 93,
+        "3": 6
+      },
+      "rows_with_a_byte_identical_prompt": 605,
+      "rows_with_an_exactly_equal_reference_answer": 500,
+      "rows_carrying_the_same_answer_content": 500,
+      "rows_where_an_answer_was_comparable": 605,
+      "answer_relationship_histogram": {
+        "identical_raw": 500,
+        "different_text": 105
+      },
+      "source_labels_present": {},
+      "source_labels_carrying_a_holdout_identity": []
+    },
+    "fenrir_clean": {
+      "file": "data/v3/fenrir-v2.1/clean/fenrir-v2.1.clean.jsonl",
+      "rows_total": 99852,
+      "rows_sharing_a_holdout_identity": 605,
+      "distinct_holdout_rows_covered": 500,
+      "distinct_holdout_rows_covered_of_500": 1.0,
+      "multiplicity_histogram": {
+        "1": 401,
+        "2": 93,
+        "3": 6
+      },
+      "rows_with_a_byte_identical_prompt": 605,
+      "rows_with_an_exactly_equal_reference_answer": 500,
+      "rows_carrying_the_same_answer_content": 500,
+      "rows_where_an_answer_was_comparable": 605,
+      "answer_relationship_histogram": {
+        "identical_raw": 500,
+        "different_text": 105
+      },
+      "source_labels_present": {},
+      "source_labels_carrying_a_holdout_identity": []
+    },
+    "v3_sft_fenrir": {
+      "file": "data/v3/sft/fenrir.jsonl",
+      "rows_total": 99730,
+      "rows_sharing_a_holdout_identity": 604,
+      "distinct_holdout_rows_covered": 499,
+      "distinct_holdout_rows_covered_of_500": 0.998,
+      "multiplicity_histogram": {
+        "1": 400,
+        "2": 93,
+        "3": 6
+      },
+      "rows_with_a_byte_identical_prompt": 604,
+      "rows_with_an_exactly_equal_reference_answer": 25,
+      "rows_carrying_the_same_answer_content": 499,
+      "rows_where_an_answer_was_comparable": 604,
+      "answer_relationship_histogram": {
+        "identical_after_escape_normalisation": 474,
+        "identical_raw": 25,
+        "different_text": 105
+      },
+      "source_labels_present": {},
+      "source_labels_carrying_a_holdout_identity": []
+    },
+    "v3_mixture": {
+      "file": "data/v3/mixture/mixture-v3-no-trail.jsonl",
+      "rows_total": 140545,
+      "rows_sharing_a_holdout_identity": 604,
+      "distinct_holdout_rows_covered": 499,
+      "distinct_holdout_rows_covered_of_500": 0.998,
+      "multiplicity_histogram": {
+        "1": 400,
+        "2": 93,
+        "3": 6
+      },
+      "rows_with_a_byte_identical_prompt": 604,
+      "rows_with_an_exactly_equal_reference_answer": 25,
+      "rows_carrying_the_same_answer_content": 499,
+      "rows_where_an_answer_was_comparable": 604,
+      "answer_relationship_histogram": {
+        "identical_after_escape_normalisation": 474,
+        "different_text": 105,
+        "identical_raw": 25
+      },
+      "source_labels_present": {
+        "fenrir": 99730,
+        "merged": 23146,
+        "refusal": 9584,
+        "format": 2600,
+        "primus": 4891,
+        "replay": 594
+      },
+      "source_labels_carrying_a_holdout_identity": [
+        "fenrir"
+      ]
+    },
+    "corpus_v4_r3": {
+      "file": "data/v4/corpus-v4-r3.jsonl",
+      "rows_total": 108978,
+      "rows_sharing_a_holdout_identity": 604,
+      "distinct_holdout_rows_covered": 499,
+      "distinct_holdout_rows_covered_of_500": 0.998,
+      "multiplicity_histogram": {
+        "1": 400,
+        "2": 93,
+        "3": 6
+      },
+      "rows_with_a_byte_identical_prompt": 604,
+      "rows_with_an_exactly_equal_reference_answer": 25,
+      "rows_carrying_the_same_answer_content": 499,
+      "rows_where_an_answer_was_comparable": 604,
+      "answer_relationship_histogram": {
+        "identical_after_escape_normalisation": 474,
+        "different_text": 105,
+        "identical_raw": 25
+      },
+      "source_labels_present": {
+        "fenrir": 99730,
+        "format": 3304,
+        "replay": 594,
+        "refusal": 5350
+      },
+      "source_labels_carrying_a_holdout_identity": [
+        "fenrir"
+      ]
+    },
+    "mixture_v4": {
+      "file": "data/v4/mixture-v4.jsonl",
+      "rows_total": 367198,
+      "rows_sharing_a_holdout_identity": 604,
+      "distinct_holdout_rows_covered": 499,
+      "distinct_holdout_rows_covered_of_500": 0.998,
+      "multiplicity_histogram": {
+        "1": 400,
+        "2": 93,
+        "3": 6
+      },
+      "rows_with_a_byte_identical_prompt": 604,
+      "rows_with_an_exactly_equal_reference_answer": 25,
+      "rows_carrying_the_same_answer_content": 499,
+      "rows_where_an_answer_was_comparable": 604,
+      "answer_relationship_histogram": {
+        "identical_after_escape_normalisation": 474,
+        "identical_raw": 25,
+        "different_text": 105
+      },
+      "source_labels_present": {
+        "triage": 245273,
+        "fenrir": 99730,
+        "refusal": 18029,
+        "format": 3304,
+        "triage_salvage": 268,
+        "replay": 594
+      },
+      "source_labels_carrying_a_holdout_identity": [
+        "fenrir"
+      ]
+    }
+  },
+  "the_chain": {
+    "fenrir_bundle_raw": 605,
+    "fenrir_clean": 605,
+    "v3_sft_fenrir": 604,
+    "v3_mixture": 604,
+    "corpus_v4_r3": 604,
+    "mixture_v4": 604,
+    "reading": "the contamination is present in the fenrir download itself and is carried forward by every later stage — including v3's own training file and training mixture; no stage in this project introduced it"
+  },
+  "the_gate_record": {
+    "candidates_gated": 9,
+    "candidate_ids": [
+      "Trendyol/Trendyol-Cybersecurity-Instruction-Tuning-Dataset",
+      "ethanolivertroy/nist-cybersecurity-training",
+      "mitre-attack/attack-stix-data",
+      "nvd-cve-json-feeds",
+      "AUTHORED-refusal-retention-set",
+      "AUTHORED-format-compliance-set",
+      "chairulridjal/arcspan-cyber-ner",
+      "zefang-liu/secqa",
+      "HuggingFaceH4/ultrachat_200k"
+    ],
+    "fenrir_was_gated": false,
+    "reading": "the v2 admission gate never saw fenrir, so the held-out set's exclusion was never established for the source that actually carries it"
+  },
+  "the_v3_record": {
+    "file": "data/v3/fenrir-v2.1/CONTAMINATION_REPORT.md",
+    "names_the_holdout_set": false,
+    "reading": "the v3 contamination report's zero covers CyberMetric-500 (and SecQA, whose fingerprint file was a failed-download placeholder and was excluded). It covers neither the 500-row held-out set nor the Trendyol corpus it came from"
+  },
+  "checks": [
+    {
+      "name": "the held-out set is the certified 500-row split, and the identity key is the project's own",
+      "pass": true,
+      "detail": "500 rows, 500 distinct canonical identities (sha256 of the lowercased, whitespace-normalised prompt, first 16 hex)"
+    },
+    {
+      "name": "the identity key agrees with the v2 gate's own prompt_hash_of on the first 100 rows",
+      "pass": true,
+      "detail": "100/100 agree; the gate's own function is used, not re-implemented"
+    },
+    {
+      "name": "the leak is present in the fenrir bundle as downloaded, before any of this project's own processing",
+      "pass": true,
+      "detail": "605 rows of 220426-CyberSec-Dataset_escaped.jsonl already carry a held-out identity — the contamination predates this project"
+    },
+    {
+      "name": "the leak survives the v3 cleaning step",
+      "pass": true,
+      "detail": "605 rows of the cleaned fenrir file carry a held-out identity"
+    },
+    {
+      "name": "the leak reaches v3's own SFT training file",
+      "pass": true,
+      "detail": "604 rows of data/v3/sft/fenrir.jsonl carry a held-out identity — v3 was trained on 0.998 of the 500 held-out questions"
+    },
+    {
+      "name": "the leak reaches v3's training mixture",
+      "pass": true,
+      "detail": "604 rows of data/v3/mixture/mixture-v3-no-trail.jsonl carry a held-out identity"
+    },
+    {
+      "name": "the leak reaches the rebuilt corpus",
+      "pass": true,
+      "detail": "604 rows of data/v4/corpus-v4-r3.jsonl carry a held-out identity"
+    },
+    {
+      "name": "the leak reaches the rebuilt mixture",
+      "pass": true,
+      "detail": "604 rows of data/v4/mixture-v4.jsonl carry a held-out identity"
+    },
+    {
+      "name": "the leak is confined to the fenrir stream in the mixture",
+      "pass": true,
+      "detail": "source labels carrying a held-out identity: ['fenrir']"
+    },
+    {
+      "name": "the answers that leak are the held-out reference answers themselves",
+      "pass": true,
+      "detail": "499 of 604 comparable rows carry the held-out row's own answer CONTENT; 25 of them are byte-identical and the rest differ only in JSON escaping depth"
+    },
+    {
+      "name": "the leaked prompts are byte-identical to the held-out prompts, not paraphrases",
+      "pass": true,
+      "detail": "604 of 604 leaked rows carry a byte-identical prompt string; the identity match is not an artefact of normalisation"
+    },
+    {
+      "name": "the answer relationship is reported as a measured histogram",
+      "pass": true,
+      "detail": "answer relationship: identical_after_escape_normalisation 474, identical_raw 25, different_text 105"
+    },
+    {
+      "name": "the fenrir source was never a candidate in the v2 admission gate",
+      "pass": true,
+      "detail": "9 candidates were gated; none names fenrir. The gated candidates are: ['Trendyol/Trendyol-Cybersecurity-Instruction-Tuning-Dataset', 'ethanolivertroy/nist-cybersecurity-training', 'mitre-attack/attack-stix-data', 'nvd-cve-json-feeds', 'AUTHORED-refusal-retention-set', 'AUTHORED-format-compliance-set', 'chairulridjal/arcspan-cyber-ner', 'zefang-liu/secqa', 'HuggingFaceH4/ultrachat_200k']"
+    },
+    {
+      "name": "the held-out set's own source corpus was gated and admitted",
+      "pass": true,
+      "detail": "the Trendyol corpus — the corpus the held-out split was taken from — is candidate 0 and was admitted, with overlap_max 0.0266"
+    },
+    {
+      "name": "the v3 fenrir contamination report's zero does NOT cover the held-out set",
+      "pass": true,
+      "detail": "CONTAMINATION_REPORT.md names the held-out set: False. It reports 'contaminated rows: 0' against the populations it names (CyberMetric-500, SecQA; SecQA's fingerprint file was a failed-download placeholder and was excluded) — a different population from the 500-row held-out set, so its zero does not contradict this finding"
+    }
+  ],
+  "pass": 15,
+  "total": 15,
+  "all_pass": true
+}

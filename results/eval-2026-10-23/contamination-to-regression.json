@@ -1,0 +1,143 @@
+{
+ "claim": "the A1 corpus contamination is reproduced by v3 at inference time and is what breaks its last-line parse on the two CTI benchmarks",
+ "a_corpus": {
+  "artifact": "<programme-tree>/data/v3/mixture/mixture-v3-no-trail.jsonl",
+  "rows": 140545,
+  "rows_with_the_literal_token_anywhere": 4891,
+  "rows_with_it_in_LEADING_position": 4891,
+  "pct_leading": 3.48,
+  "src_counts": {
+   "fenrir": 99730,
+   "merged": 23146,
+   "refusal": 9584,
+   "format": 2600,
+   "primus": 4891,
+   "replay": 594
+  },
+  "note": "the token is a plain STRING in the assistant text, not a special-token id"
+ },
+ "b_model_responses": {
+  "base": {
+   "cti-mcq": {
+    "n": 2500,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "cti-rcm": {
+    "n": 1000,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "cybermetric-500": {
+    "n": 500,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "secqa-v1-test": {
+    "n": 110,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   }
+  },
+  "v3": {
+   "cti-mcq": {
+    "n": 2500,
+    "responses_containing_token": 2500,
+    "responses_with_token_leading": 2500,
+    "pct": 100.0
+   },
+   "cti-rcm": {
+    "n": 1000,
+    "responses_containing_token": 1000,
+    "responses_with_token_leading": 1000,
+    "pct": 100.0
+   },
+   "cybermetric-500": {
+    "n": 500,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "secqa-v1-test": {
+    "n": 110,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   }
+  },
+  "cybersecqwen-4b": {
+   "cti-mcq": {
+    "n": 2500,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "cti-rcm": {
+    "n": 1000,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "cybermetric-500": {
+    "n": 500,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   },
+   "secqa-v1-test": {
+    "n": 110,
+    "responses_containing_token": 0,
+    "responses_with_token_leading": 0,
+    "pct": 0.0
+   }
+  }
+ },
+ "c_mechanism": {
+  "cti-mcq": {
+   "unparseable_rows": 1022,
+   "parseable_rows": 1478,
+   "last_line_shape_when_unparseable": {
+    "last_line_does_not_match": 1022
+   },
+   "last_line_shape_when_parseable": {
+    "last_line_matches": 1478
+   },
+   "median_chars_unparseable": 2399,
+   "median_chars_parseable": 1882
+  },
+  "cti-rcm": {
+   "unparseable_rows": 187,
+   "parseable_rows": 813,
+   "last_line_shape_when_unparseable": {
+    "last_line_does_not_match": 187
+   },
+   "last_line_shape_when_parseable": {
+    "last_line_matches": 813
+   },
+   "median_chars_unparseable": 2387,
+   "median_chars_parseable": 1839
+  }
+ },
+ "d_recoverable": {
+  "cti-mcq": {
+   "unparseable": 1022,
+   "answer_present_anywhere": 922,
+   "genuinely_absent": 100
+  },
+  "cti-rcm": {
+   "unparseable": 187,
+   "answer_present_anywhere": 187,
+   "genuinely_absent": 0
+  }
+ },
+ "verdict": {
+  "chain": "corpus string (3.48 % of rows, leading position) -> v3 emits it on 100 % of CTI responses and 0 % of CyberMetric/SecQA responses -> on CTI it reverts to the long reasoning template -> its answer no longer sits alone on the last line -> the frozen last-line parser rejects it -> v3 loses the headline on the two benchmarks it is otherwise ahead on",
+  "base_and_comparator_emit_the_token": false,
+  "the_answer_is_present_in_the_rejected_responses": true,
+  "fix_location": "the corpus (strip the contaminated rows) and, immediately, the serving layer (an output contract) \u2014 NOT a capability gap in the model"
+ }
+}

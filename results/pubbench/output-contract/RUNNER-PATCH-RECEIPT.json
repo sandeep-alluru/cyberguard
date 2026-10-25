@@ -1,0 +1,51 @@
+{
+  "what_this_is": "G-3 — the patch record for the constrained-instruction runner (mechanism (a)). The frozen public runner is NOT modified.",
+  "frozen_runner": {
+    "path": "pubbench/run_pubbench.py",
+    "sha256_expected": "669936a39271d88f27b6b863de2120428bfa2b03908a29ce7d6a97708640d02d",
+    "sha256_now": "669936a39271d88f27b6b863de2120428bfa2b03908a29ce7d6a97708640d02d",
+    "unmodified": true
+  },
+  "built_on": {
+    "path": "pubbench/cti-vsp/run_pubbench_vsp.py",
+    "sha256": "120a49b672e6f01df34b11c1394f13ac756212eb991daaeb0c77eec39635e6bd",
+    "why": "it already carries the host paths, the gate precondition, the checkpoint/resume hardening and the standard outputs; starting from it keeps the two patched runners from drifting apart"
+  },
+  "patched_copy": {
+    "path": "pubbench/output-contract/run_pubbench_contract.py",
+    "sha256": "7b74c3b180e6ac346d7a757ee52e7a240e4ed7857f508842d058e22b043a0f4c",
+    "bytes": 40886,
+    "diff": "pubbench/output-contract/PATCH-RECORD.diff",
+    "diff_lines": 366
+  },
+  "patches": [
+    "the contract table is defined next to the instruction it supplements",
+    "CTI-VSP is not a surface of this runner: it has its own instrument and its own reference",
+    "the CTI-VSP population is not loaded by this runner",
+    "the CTI-VSP reference import is optional here, and required only when that benchmark is run",
+    "CyberMetric-500's prompt carries the contract immediately before the answer cue",
+    "SecQA-v1-test's prompt carries the contract immediately before the answer cue",
+    "CTI-MCQ's prompt carries the contract at the tail, after the question",
+    "CTI-RCM's prompt carries the contract at the tail, after the CVE description"
+  ],
+  "mechanism_a": {
+    "what": "a per-surface output contract APPENDED to the benchmark's own prompt, in the imperative, at the tail so it sits adjacent to the generation point",
+    "why_not_just_state_it": "the CTI prompts ALREADY state the contract in their head (CTI-MCQ: 'The last line of your answer should contain only the single letter...'; CTI-RCM: 'Ensure the last line of your response contains only the CWE ID'). The models do not comply. So the change is the constraint's STRENGTH and POSITION, not its content.",
+    "what_is_not_changed": [
+      "the questions, the options and the CVE descriptions",
+      "the ground truth",
+      "the parser (the frozen runner's own parse_reply)",
+      "the decoder, the batch size, the padding side and the precision",
+      "the chat template, the 0-shot setting and the input-truncation setting",
+      "the populations and their sizes"
+    ]
+  },
+  "unchanged_by_design": [
+    "the population of every benchmark",
+    "the greedy decoder (do_sample=False, num_beams=1, repetition_penalty=1.0)",
+    "the batch size (8) and the left-padding/attention-mask surface",
+    "bfloat16, no quantization, PEFT adapter NOT merged",
+    "parse_whole_mcq and parse_last_line, byte for byte",
+    "summarize()'s accuracy logic and the paired statistics"
+  ]
+}

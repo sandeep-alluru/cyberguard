@@ -1,0 +1,62 @@
+{
+ "ledger": "<programme-tree>/docs/DATA-LEDGER.md",
+ "rows": 26,
+ "distinct_source_ids": 26,
+ "unknown_sources": [
+  "CTI-Bench MCQ",
+  "CTI-Bench RCM",
+  "CyberMetric-500",
+  "MITRE-FRR",
+  "HarmBench behaviours"
+ ],
+ "unknown_count": 5,
+ "checks": [
+  {
+   "name": "no-source-id-appears-twice",
+   "pass": true,
+   "detail": "26 rows, 26 distinct source ids"
+  },
+  {
+   "name": "every-row-carries-licence-notice-ship-and-source",
+   "pass": true,
+   "detail": "all 26 rows complete"
+  },
+  {
+   "name": "every-candidates-json-source-appears-exactly-once",
+   "pass": true,
+   "detail": "9 candidates, all present exactly once"
+  },
+  {
+   "name": "mixture-v2-source-table-matches-candidates-json",
+   "pass": true,
+   "detail": "9 source rows in MIXTURE-V2.md match the 9 candidates"
+  },
+  {
+   "name": "every-mixture-v2-source-appears-exactly-once",
+   "pass": true,
+   "detail": "all present exactly once"
+  },
+  {
+   "name": "every-licence-receipt-source-appears-exactly-once",
+   "pass": true,
+   "detail": "3 receipt sources, all present exactly once"
+  },
+  {
+   "name": "all-three-licence-receipts-exist-and-parsed",
+   "pass": true,
+   "detail": "3 of 3 receipts parsed"
+  },
+  {
+   "name": "unknown-marking-agrees-with-licence-source-in-both-directions",
+   "pass": true,
+   "detail": "5 UNKNOWN rows, each with NONE ON DISK, and no NONE-ON-DISK row carries a licence"
+  },
+  {
+   "name": "ledger-text-states-the-measured-unknown-count",
+   "pass": true,
+   "detail": "text says five, table has 5 UNKNOWN rows"
+  }
+ ],
+ "pass": 9,
+ "total": 9
+}

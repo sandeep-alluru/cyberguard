@@ -1,0 +1,105 @@
+{
+ "what_this_is": "Receipt for corpus-v8-f8clean.jsonl - the \u00a76 qualification candidate after the ASTRA-D29 removal of the confirmed-unsafe rows.",
+ "ruling": "ASTRA-D29",
+ "output": {
+  "path": "<programme-tree>/data/v4/corpus-v8-f8clean.jsonl",
+  "rows": 108442,
+  "sha256": "e4eeed7f118e0bfeca92cddb53b348e5a28e421c29b08ffff9b8bdd777975edb"
+ },
+ "source": {
+  "path": "<programme-tree>/data/v4/corpus-v7-f8clean.jsonl",
+  "rows": 108536,
+  "sha256": "066937a3913596f911e4399ef7904da284610ec12e7ef9fee145224cc3bfb532",
+  "unchanged": true
+ },
+ "removed_rows": 94,
+ "removal_set": {
+  "path": "<programme-tree>/data/v4/removal-set-d29.jsonl",
+  "sha256": "609ac40f5434d1475cc5118bd309ec04b0a2f2d2a1cf11d96c915885a4289d14"
+ },
+ "source_mix": {
+  "fenrir": 99023,
+  "refusal": 5329,
+  "format": 3304,
+  "replay": 594,
+  "defensive_near_miss": 192
+ },
+ "checks": [
+  {
+   "name": "corpus-v7 line count matches its receipt",
+   "ok": true,
+   "detail": "108,536 lines"
+  },
+  {
+   "name": "every confirmed row's source attribution is confirmed from the source file",
+   "ok": true,
+   "detail": "0 mismatches"
+  },
+  {
+   "name": "every confirmed row maps into the mixture via the proven content-hash map",
+   "ok": true,
+   "detail": "0 unmapped"
+  },
+  {
+   "name": "all removal row ids are distinct",
+   "ok": true,
+   "detail": "94 rows"
+  },
+  {
+   "name": "all removal line hashes are distinct",
+   "ok": true,
+   "detail": "94 distinct"
+  },
+  {
+   "name": "the removal set covers rows in BOTH lineages",
+   "ok": true,
+   "detail": "94 corpus rows, 94 mixture rows"
+  },
+  {
+   "name": "corpus rebuild dropped exactly the removal set",
+   "ok": true,
+   "detail": "dropped 94, expected 94"
+  },
+  {
+   "name": "mixture rebuild dropped exactly the removal set",
+   "ok": true,
+   "detail": "dropped 94, expected 94"
+  },
+  {
+   "name": "corpus-v8 row count is exact",
+   "ok": true,
+   "detail": "108,442 rows"
+  },
+  {
+   "name": "mixture-v8 row count is exact",
+   "ok": true,
+   "detail": "366,661 rows"
+  },
+  {
+   "name": "every kept corpus row is byte-identical and in the same order",
+   "ok": true,
+   "detail": "108,442 rows compared"
+  },
+  {
+   "name": "every kept mixture row is byte-identical and in the same order",
+   "ok": true,
+   "detail": "366,661 rows compared"
+  },
+  {
+   "name": "corpus-v7 was NOT modified",
+   "ok": true,
+   "detail": "sha256 066937a3913596f9..."
+  },
+  {
+   "name": "mixture-v7 was NOT modified",
+   "ok": true,
+   "detail": "sha256 f2485d853400c482..."
+  },
+  {
+   "name": "no removed row survives in corpus-v8",
+   "ok": true,
+   "detail": "0 survivors"
+  }
+ ],
+ "verdict": "PASS"
+}

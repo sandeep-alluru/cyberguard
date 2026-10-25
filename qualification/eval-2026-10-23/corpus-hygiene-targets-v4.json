@@ -1,0 +1,211 @@
+{
+ "what_this_is": "CORPUS FORENSICS on the v3 training targets. Not an evaluation, not a public benchmark, not a release gate. Used only to attribute cause for findings already measured on public benchmarks.",
+ "corpus": {
+  "path": "data/v4/mixture-v4.jsonl",
+  "rows": 367198,
+  "sha256_note": "file hashed at run time below",
+  "sha256": "81c5b2b2d1ececdfe76fd83054923d48c5f211f0d764d3e19a3a2139107b6df9"
+ },
+ "definitions": {
+  "thinking_control_token": "literal <|reserved_special_token_N|> strings anywhere in the assistant target",
+  "stock_preamble": "first non-empty line of the assistant target matches 'First, the user (is asking|wants|needs|has asked)'",
+  "leading": "token occurs within the first 120 characters of the target"
+ },
+ "total": {
+  "rows": 367198,
+  "thinking_token_rows": 0,
+  "thinking_token_pct": 0.0,
+  "thinking_token_leading_rows": 0,
+  "thinking_token_leading_pct": 0.0,
+  "any_reserved_rows": 647,
+  "any_reserved_pct": 0.176,
+  "stock_preamble_rows": 0,
+  "stock_preamble_pct": 0.0,
+  "empty_rows": 0,
+  "mean_first_line_chars": 516.0
+ },
+ "by_src": {
+  "triage": {
+   "rows": 245273,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 1,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 542.9
+  },
+  "fenrir": {
+   "rows": 99730,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 378,
+   "any_reserved_pct": 0.379,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 474.0
+  },
+  "refusal": {
+   "rows": 18029,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 463.1
+  },
+  "format": {
+   "rows": 3304,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 137.4
+  },
+  "replay": {
+   "rows": 594,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 267.1
+  },
+  "triage_salvage": {
+   "rows": 268,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 268,
+   "any_reserved_pct": 100.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 312.2
+  }
+ },
+ "examples": {
+  "thinking_token": [],
+  "stock_preamble": []
+ },
+ "top_openings": [
+  {
+   "text": "{\"cwe\": \"CWE-79\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L",
+   "n": 13163
+  },
+  {
+   "text": "{\"cwe\": \"CWE-79\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:C/C:L",
+   "n": 12743
+  },
+  {
+   "text": "{\"cwe\": \"CWE-89\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H",
+   "n": 6936
+  },
+  {
+   "text": "{\"cwe\": \"CWE-352\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:",
+   "n": 5510
+  },
+  {
+   "text": "{\"cwe\": \"CWE-862\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:",
+   "n": 4763
+  },
+  {
+   "text": "{\"cwe\": \"CWE-79\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L",
+   "n": 4044
+  },
+  {
+   "text": "{\"cwe\": \"CWE-862\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 3238
+  },
+  {
+   "text": "{\"cwe\": \"CWE-787\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 3110
+  },
+  {
+   "text": "{\"cwe\": \"CWE-787\", \"cvss_vector\": \"CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:",
+   "n": 2995
+  },
+  {
+   "text": "{\"cwe\": \"CWE-89\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H",
+   "n": 2984
+  },
+  {
+   "text": "## Causal Analysis",
+   "n": 2719
+  },
+  {
+   "text": "{\"cwe\": \"CWE-476\", \"cvss_vector\": \"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:",
+   "n": 2325
+  },
+  {
+   "text": "{\"cwe\": \"CWE-125\", \"cvss_vector\": \"CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:",
+   "n": 2213
+  },
+  {
+   "text": "{\"cwe\": \"CWE-416\", \"cvss_vector\": \"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:",
+   "n": 2196
+  },
+  {
+   "text": "{\"cwe\": \"CWE-200\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 2173
+  },
+  {
+   "text": "{\"cwe\": \"CWE-22\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H",
+   "n": 2048
+  },
+  {
+   "text": "{\"cwe\": \"CWE-79\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:L",
+   "n": 1990
+  },
+  {
+   "text": "{\"cwe\": \"CWE-400\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 1879
+  },
+  {
+   "text": "{\"cwe\": \"CWE-287\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 1854
+  },
+  {
+   "text": "{\"cwe\": \"CWE-787\", \"cvss_vector\": \"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:",
+   "n": 1831
+  },
+  {
+   "text": "{\"cwe\": \"CWE-125\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 1826
+  },
+  {
+   "text": "{\"cwe\": \"CWE-306\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 1774
+  },
+  {
+   "text": "{\"cwe\": \"CWE-284\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:",
+   "n": 1639
+  },
+  {
+   "text": "{\"cwe\": \"CWE-416\", \"cvss_vector\": \"CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:",
+   "n": 1620
+  },
+  {
+   "text": "{\"cwe\": \"CWE-125\", \"cvss_vector\": \"CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:",
+   "n": 1585
+  }
+ ],
+ "corroboration": {
+  "output_side_finding": "contamination-to-regression.json: v3 emits <|reserved_special_token_0|> on 2500/2500 cti-mcq and 1000/1000 cti-rcm, 0/500 cybermetric, 0/110 secqa; base and comparator 0 % everywhere.",
+  "reading": "If the token is present in the training targets, the output-side emission is learned behaviour, and the per-benchmark 100 %/0 % split tracks which training sources carry it."
+ }
+}

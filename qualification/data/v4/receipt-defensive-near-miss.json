@@ -1,0 +1,127 @@
+{
+ "what_this_is": "Receipt for data/v4/defensive-near-miss.jsonl (ledger item C-11): the negative examples for the false-refusal boundary \u2014 defensive requests that superficially resemble attack requests and must be ANSWERED.",
+ "output": {
+  "path": "<programme-tree>/data/v4/defensive-near-miss.jsonl",
+  "rows": 192,
+  "distinct_rows": 192,
+  "distinct_requests": 192,
+  "sha256": "cfb81685d1400a8f2cbbc625cfb486be87bccd0de27b9b37dc03c255e014d2fd"
+ },
+ "counts": {
+  "rows": 192,
+  "distinct_rows": 192,
+  "distinct_requests": 192,
+  "scenarios": 12,
+  "framings": {
+   "no cover": 48,
+   "a claimed authorisation": 48,
+   "a claimed engagement": 48,
+   "a classroom framing": 48
+  },
+  "severities": {
+   "CRITICAL": 60,
+   "HIGH": 84,
+   "MEDIUM": 36,
+   "NONE": 12
+  },
+  "priorities": {
+   "patch_now": 144,
+   "schedule": 36,
+   "monitor": 12
+  }
+ },
+ "adjacency_to_the_refusal_set": {
+  "refusal_set": "<programme-tree>/data/v4/refusal-retention-triage.jsonl",
+  "refusal_rows": 144,
+  "near_miss_rows": 192,
+  "paired_on_same_cve": 144,
+  "same_scenarios": 12,
+  "same_framings": [
+   "a claimed authorisation",
+   "a claimed engagement",
+   "a classroom framing",
+   "no cover"
+  ],
+  "note": "each near-miss row is the defensive twin of a refusal row: the same CWE, the same synthetic CVE, the same component and the same framing, with the purpose changed from producing the artefact to detecting, verifying or remediating it"
+ },
+ "content_provenance": {
+  "requests": "authored for this item",
+  "cve_ids": "SYNTHETIC (CVE-2024-9xxxx) \u2014 the same synthetic namespace the refusal set uses, so the two families sit on identical synthetic ground",
+  "cwe_ids": "real CWE ids from the MITRE CWE catalogue; identical to the refusal set's scenario mapping",
+  "vectors": "authored; the severity is computed from the vector by the FIRST.Org implementation, not asserted",
+  "licence": "OURS. The requests and the answers are authored for this project; no third-party text is copied into this set."
+ },
+ "posture": {
+  "source": "docs/PRODUCT-CONTRACT.md \u00a73 and \u00a76",
+  "why": "the contract's triage task is to answer defensive analysis requests; a false refusal of a legitimate defensive request is a product defect, and the corpus must carry the negative examples that teach the boundary"
+ },
+ "checks": [
+  {
+   "name": "every-row-is-answered-not-refused",
+   "pass": true,
+   "detail": "192 rows, every target abstains: false"
+  },
+  {
+   "name": "no-row-escalates",
+   "pass": true,
+   "detail": "every priority is patch_now / schedule / monitor"
+  },
+  {
+   "name": "every-target-is-a-valid-triage-1-record",
+   "pass": true,
+   "detail": "192/192 records validated against TRIAGE-1"
+  },
+  {
+   "name": "every-request-contains-its-own-defensive-ask",
+   "pass": true,
+   "detail": "192 requests each contain their scenario's distinctive term (4 distinct markers over 16 scenarios)"
+  },
+  {
+   "name": "every-request-superficially-resembles-an-attack-request",
+   "pass": true,
+   "detail": "every request names a CVE and a component, in the same shape as the refusal twin"
+  },
+  {
+   "name": "the-two-families-share-the-same-framings",
+   "pass": true,
+   "detail": "near-miss {'no cover': 48, 'a claimed authorisation': 48, 'a claimed engagement': 48, 'a classroom framing': 48} vs refusal {'no cover': 36, 'a claimed authorisation': 36, 'a claimed engagement': 36, 'a classroom framing': 36}"
+  },
+  {
+   "name": "the-two-families-share-the-same-scenarios-one-for-one",
+   "pass": true,
+   "detail": "12 twin scenarios, 144 near-miss rows against 144 refusal rows"
+  },
+  {
+   "name": "every-near-miss-row-has-a-refusal-twin-with-the-same-cve",
+   "pass": true,
+   "detail": "144/144 twin rows pair with a refusal row on the same CVE"
+  },
+  {
+   "name": "the-near-miss-and-its-twin-share-vocabulary",
+   "pass": true,
+   "detail": "144/144 twin pairs share their scenario's surface terms"
+  },
+  {
+   "name": "the-families-are-opposed-on-the-same-shape",
+   "pass": true,
+   "detail": "192 answered near-miss rows against 144 refused rows, on the same 12 scenarios and 4 framings"
+  },
+  {
+   "name": "every-row-and-every-request-is-distinct",
+   "pass": true,
+   "detail": "192 distinct targets of 192; 192 distinct requests of 192"
+  },
+  {
+   "name": "no-row-asserts-a-real-cve",
+   "pass": true,
+   "detail": "the CVE ids are synthetic; no real CVE is triaged by this set"
+  },
+  {
+   "name": "the-set-covers-multiple-severities-and-priorities",
+   "pass": true,
+   "detail": "severities {'CRITICAL': 60, 'HIGH': 84, 'MEDIUM': 36, 'NONE': 12}, priorities {'patch_now': 144, 'schedule': 36, 'monitor': 12}"
+  }
+ ],
+ "pass": 13,
+ "total": 13
+}

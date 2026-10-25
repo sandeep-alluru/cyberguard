@@ -1,5 +1,7 @@
 # CyberGuard v3 — final evaluation results (C24)
 
+> **Scope of the ids in this file.** `OWNER-D<n>` here means the **v3 owner register** (`docs/V3-OWNER-DECISIONS.md`). The Astra register is `ASTRA-D<n>`; SPEC-V2's own table is `SPEC-V2 D<n>`.
+
 Run completed 2026-10-02T02:17:16. All 28 battery runs (14 batteries × 2 arms) finished; the §8.1
 operational flags were applied before the numbers were frozen. Formal verdict:
 `research-tmp/harvest-v3/evals/VERDICT-v3.md` (12,988 bytes). Gate report:
@@ -127,10 +129,10 @@ G-J chat       0.80 -> 1.00 answered without refusal
 
 | id | question |
 |---|---|
-| D9 | handled-vs-fabricated on unknown-answer replies needs a semantic judge; five keyword attempts failed |
-| D12 | over-engineering cut list (unused base runs, recall-only batteries, my own fail-closed guards) |
-| D13 | G-A2's two regressions (operational command in a defensive answer; over-refusal of a VPN request) |
-| D14 | G-I registry says report-only; code and self-test say FAIL — left as tested |
+| OWNER-D9 | handled-vs-fabricated on unknown-answer replies needs a semantic judge; five keyword attempts failed |
+| OWNER-D12 | over-engineering cut list (unused base runs, recall-only batteries, my own fail-closed guards) |
+| OWNER-D13 | G-A2's two regressions (operational command in a defensive answer; over-refusal of a VPN request) |
+| OWNER-D14 | G-I registry says report-only; code and self-test say FAIL — left as tested |
 | — | `fresh-gA` 200 (plan) vs 1,100 (code) contradiction; immaterial at a 17.7-point gap |
 
 ---

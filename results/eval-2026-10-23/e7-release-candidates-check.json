@@ -1,0 +1,199 @@
+{
+ "status": "MEASUREMENT \u2014 the release-candidate decision is checked against the artefacts; every figure it cites is re-read from the artefact it names.",
+ "decision_record": "<programme-tree>/eval-2026-10-23/release-candidates.json",
+ "decision_id": "W-4",
+ "statuses": {
+  "base": "reference \u2014 not a candidate",
+  "cybersecqwen-4b": "reference \u2014 not a candidate",
+  "v1": "not carried forward",
+  "v2armA": "not carried forward",
+  "v2armB": "not carried forward",
+  "v3": "not carried forward as a release candidate; retained as the arm of record",
+  "new": "the arm to be trained \u2014 H-1 is OWNER GO"
+ },
+ "checks": [
+  {
+   "check": "the decision record exists",
+   "pass": true
+  },
+  {
+   "check": "the record names its decision id and its authority",
+   "pass": true
+  },
+  {
+   "check": "the record states that the ship decision is NOT this record's",
+   "pass": true
+  },
+  {
+   "check": "the record names every arm, including the new arm",
+   "pass": true
+  },
+  {
+   "check": "every arm carries a status from the closed vocabulary",
+   "pass": true
+  },
+  {
+   "check": "v1's status is named",
+   "pass": true
+  },
+  {
+   "check": "v1's status is 'not carried forward'",
+   "pass": true
+  },
+  {
+   "check": "base: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "base: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "base: the FRR figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "cybersecqwen-4b: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "cybersecqwen-4b: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "the comparator: the Wilson upper equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v1: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "v1: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "v1: the FRR figure in the reason equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v1: the HarmBench figure in the reason equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v1: the CTI-RCM figure in the reason equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v1: the CTI-MCQ figure in the reason equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v1: the always-C floor the reason cites is the measured one",
+   "pass": true
+  },
+  {
+   "check": "v2armA: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "v2armA: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "v2 arm A: the FRR figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v2 arm A: the CTI-RCM figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v2 arm A: the CTI-MCQ figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v2armB: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "v2armB: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "v2 arm B: the FRR figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v2 arm B: the CTI-RCM figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v3: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "v3: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "v3: the FRR figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "v3: the CTI-RCM figure equals the artefact's",
+   "pass": true
+  },
+  {
+   "check": "new: the reason cites at least one measured figure",
+   "pass": true
+  },
+  {
+   "check": "new: the reason names evidence that exists",
+   "pass": true
+  },
+  {
+   "check": "v1: the multiple of B3's ceiling is arithmetically right",
+   "pass": true
+  },
+  {
+   "check": "v2armA: the multiple of B3's ceiling is arithmetically right",
+   "pass": true
+  },
+  {
+   "check": "v2armB: the multiple of B3's ceiling is arithmetically right",
+   "pass": true
+  },
+  {
+   "check": "v3: the multiple of B3's ceiling is arithmetically right",
+   "pass": true
+  },
+  {
+   "check": "the bar sheet carries the release table",
+   "pass": true
+  },
+  {
+   "check": "every status in the record appears in the bar sheet's release table",
+   "pass": true
+  },
+  {
+   "check": "the bar sheet's release table names v1's status",
+   "pass": true
+  },
+  {
+   "check": "the bar sheet says the release table is not the ship decision",
+   "pass": true
+  },
+  {
+   "check": "the record does not claim to ship",
+   "pass": true
+  },
+  {
+   "check": "the record states it changes no bar, metric, parser, sample size, decode budget or label",
+   "pass": true
+  }
+ ],
+ "checks_passed": 45,
+ "checks_total": 45,
+ "status_line": "45/45 checks PASS"
+}

@@ -1,0 +1,31 @@
+{
+ "status": "DIAGNOSTIC support for \u00a75.3.14's use of the stored historical artifact",
+ "argument": "greedy decoding (do_sample=False, num_beams=1) on the same checkpoint, the same prompts and the same surface should reproduce the same responses; if it does, the stored artifact's per-response generated_tokens/termination describe this phase's run too",
+ "row_level_identity": {
+  "rows_compared": 128,
+  "byte_identical_responses": 1,
+  "identical_first_60_chars_only": 125,
+  "materially_different": 2,
+  "materially_different_rows": [
+   627,
+   1083
+  ],
+  "byte_identical_pct": 0.78
+ },
+ "population_level": {
+  "historical_run": {
+   "unparseable": 1022,
+   "n": 2500,
+   "rate_pct": 40.88
+  },
+  "this_phase_run": {
+   "unparseable": 1032,
+   "n": 2500,
+   "rate_pct": 41.28
+  },
+  "absolute_difference_items": 10,
+  "absolute_difference_pp": 0.4,
+  "expected_batch_nondeterminism": "greedy decoding is not bit-deterministic across batch compositions, so a small number of differing items is expected rather than a defect"
+ },
+ "verdict": "The transfer holds, but it rests on the POPULATION agreement, not on byte-identity: only 1 of 128 regenerated responses (0.78 %) are byte-identical to the stored ones, yet 126 of 128 share their first 60 characters (2 differ from the start), and the two 2,500-item runs' unparseable rates differ by only 0.4 pp (1022 vs 1032). Greedy decoding over a 512-token generation is not bit-stable - one flipped token diverges the rest - so exact byte-identity is NOT expected and its absence is not evidence of a different run. The stored per-response generated_tokens/termination fields therefore transfer to the truncation question at the population level."
+}

@@ -1,9 +1,0 @@
-{
-  "rows": 300,
-  "sha256": "e1e0c11a98f655babb61b1a39c7fd069cc355898c46c74d0fbda9deb45e931c0",
-  "seed": 0,
-  "gate": "G-B triage",
-  "kind": "triage-one-word",
-  "source": "v2/data/format-compliance.jsonl",
-  "note": "SPEC needs >=300 with >=200 negatives and >=100 positives"
-}

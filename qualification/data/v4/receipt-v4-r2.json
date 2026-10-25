@@ -1,0 +1,160 @@
+{
+ "what_this_is": "Receipt for data/v4/corpus-v4-r2.jsonl (ledger item C-5): the refusal stream reweighted to the policy target.",
+ "policy": {
+  "document": "<programme-tree>/docs/REFUSAL-POLICY.md",
+  "target_share_pct": 4.91,
+  "target_share_basis": "v2 arm B's measured refusal share \u2014 the lowest share for which the programme has a measured FRR and a measured harmful-compliance count on the same instrument",
+  "decision": "W-3, a worker decision under the owner's 2026-10-23 approval, recorded with its reversal path in docs/OWNER-DECISIONS.md",
+  "note": "the programme record also calls the target weight an owner decision (NEXT-STEPS.md \u00a72 and the open-decision list); the target is therefore one parameter away from being changed, and the alternatives' row counts are computed below."
+ },
+ "input": {
+  "path": "<programme-tree>/data/v4/corpus-v4-r1.jsonl",
+  "sha256": "4a2efaa7b4c8776d3c08474e1611cb79d73943a45f8a0798892648ed54462a3a",
+  "rows": 112508,
+  "refusal_presentations": 9584,
+  "refusal_distinct_rows": 1198,
+  "non_refusal_rows": 102924,
+  "written": false
+ },
+ "output": {
+  "path": "<programme-tree>/data/v4/corpus-v4-r2.jsonl",
+  "sha256": "c2598f20025778dc9d426e148d4b7ff0c3f1fcb380c47cb87cdf3d351aed1ffd",
+  "rows": 108238,
+  "refusal_presentations": 5314,
+  "refusal_distinct_rows": 1198,
+  "measured_refusal_share_pct": 4.9096
+ },
+ "solved": {
+  "equation": "R / (non_refusal_mass + R) = target_share",
+  "non_refusal_mass": 102924,
+  "presentations_R": 5314,
+  "final_rows": 108238,
+  "weight_over_distinct_rows": 4.4357,
+  "why_the_denominator_matters": "D5's removal shrank the corpus from 140,545 to 112,508 rows while the refusal stream stayed at 9,584 presentations, so the refusal share ROSE from 6.82 % to 8.52 %. A share is a ratio, so the reweight is solved against the FINAL denominator."
+ },
+ "selection_rule": "every distinct refusal row is kept at least once; the remaining presentations are spread evenly over the distinct rows in a deterministic round-robin, so no refusal family is over-represented",
+ "dose_response_measured": [
+  {
+   "arm": "base (no refusal training)",
+   "share_pct": null,
+   "frr_pct": 4.13,
+   "harmful": "1/159"
+  },
+  {
+   "arm": "v2 arm B",
+   "share_pct": 4.91,
+   "frr_pct": 17.47,
+   "harmful": "5/159"
+  },
+  {
+   "arm": "v3",
+   "share_pct": 6.82,
+   "frr_pct": 29.07,
+   "harmful": "0/159"
+  },
+  {
+   "arm": "v2 arm A",
+   "share_pct": 11.82,
+   "frr_pct": 35.33,
+   "harmful": "2/159"
+  }
+ ],
+ "controlled_pair": {
+  "arms": "v2 arm A vs v2 arm B (identical mixtures, one stream swapped)",
+  "frr_delta_pp": -17.87,
+  "mcnemar_p": 5.1e-22,
+  "harmful_side_delta": "2/159 -> 5/159 (+1.89 pp)",
+  "harmful_side_p": 0.375,
+  "reading": "the false-refusal movement is certain and large; the harmful-side movement on the same pair is not statistically significant",
+  "caveat": "one swapped stream is not one changed property \u2014 inside the substituted rows the content type, the prompt diversity and the answer length all move together (docs/DISPOSITIONS.md \u00a7B-7 and EVALUATION.md \u00a75.3.9)"
+ },
+ "expected_at_this_target": {
+  "frr_pct": 17.47,
+  "frr_basis": "MEASURED \u2014 arm B's rate at this share",
+  "harmful_compliance": "5/159",
+  "harmful_basis": "MEASURED \u2014 arm B's count",
+  "wilson_upper_5_of_159": 0.0715,
+  "public_comparator_3_of_159": {
+   "wilson_upper": 0.054,
+   "frr_pct": 1.07
+  },
+  "programme_release_bar": "at most 1/159 harmful, two-sided 95 % Wilson upper at most 3.5 % \u2014 the public comparator fails this bar too (3/159, upper 0.0540), so the bar as written excludes the market comparator. This is EVALUATION.md \u00a78 Q11 and it is an owner decision, not one this policy can settle.",
+  "base_model_floor": "the untrained base model is at 4.13 % FRR with 1/159 \u2014 no corpus reweighting can reach the comparator's 1.07 %"
+ },
+ "alternatives_if_the_owner_chooses_otherwise": {
+  "arm B's 4.91 %": {
+   "presentations": 5314,
+   "final_rows": 108238,
+   "share_pct": 4.91
+  },
+  "v3's 6.82 %": {
+   "presentations": 7533,
+   "final_rows": 110457,
+   "share_pct": 6.82
+  },
+  "arm A's 11.82 %": {
+   "presentations": 13796,
+   "final_rows": 116720,
+   "share_pct": 11.82
+  },
+  "no refusal stream": {
+   "presentations": 0,
+   "final_rows": 102924,
+   "share_pct": 0.0
+  }
+ },
+ "checks": [
+  {
+   "name": "input-corpus-has-the-expected-shape",
+   "pass": true,
+   "detail": "9584 refusal presentations from 1198 distinct rows; 102924 non-refusal rows"
+  },
+  {
+   "name": "solved-share-does-not-exceed-the-target",
+   "pass": true,
+   "detail": "5314 presentations -> 4.9096 % against a 4.91 % target"
+  },
+  {
+   "name": "every-distinct-refusal-row-survives-the-cut",
+   "pass": true,
+   "detail": "1198 distinct rows, each kept at least once (min 4, max 5 presentations each)"
+  },
+  {
+   "name": "output-row-count-matches-the-solution",
+   "pass": true,
+   "detail": "108238 rows (non-refusal 102924 + refusal 5314)"
+  },
+  {
+   "name": "measured-refusal-share-equals-the-stated-share",
+   "pass": true,
+   "detail": "measured 4.9096 %, stated 4.91 % (row count 5314)"
+  },
+  {
+   "name": "all-distinct-refusal-rows-survive",
+   "pass": true,
+   "detail": "1198 distinct refusal rows (unchanged from 1198)"
+  },
+  {
+   "name": "non-refusal-rows-are-byte-identical-to-the-input",
+   "pass": true,
+   "detail": "102924 rows compared, 0 differing"
+  },
+  {
+   "name": "contamination-classes-are-still-zero",
+   "pass": true,
+   "detail": "leading thinking-control tokens 0, stock-preamble targets 0"
+  },
+  {
+   "name": "policy-document-states-the-same-figures-as-the-receipt",
+   "pass": true,
+   "detail": "target share, presentation count, final rows and measured share all match"
+  },
+  {
+   "name": "policy-document-alternatives-match-the-computed-row-counts",
+   "pass": true,
+   "detail": "every alternative's presentation count appears in the policy"
+  }
+ ],
+ "pass": 10,
+ "total": 10
+}

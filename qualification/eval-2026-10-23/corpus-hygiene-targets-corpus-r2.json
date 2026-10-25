@@ -1,0 +1,328 @@
+{
+ "what_this_is": "CORPUS FORENSICS on the v3 training targets. Not an evaluation, not a public benchmark, not a release gate. Used only to attribute cause for findings already measured on public benchmarks.",
+ "corpus": {
+  "path": "<workspace>/<other-workspace>/cyberguard-v4/data/corpus/corpus-r2.jsonl",
+  "rows": 135503,
+  "sha256_note": "file hashed at run time below",
+  "sha256": "c29907c1e67d85214ace384ef6df7e273cab786f0093a5f33b00bef84ca6f228"
+ },
+ "definitions": {
+  "thinking_control_token": "literal <|reserved_special_token_N|> strings anywhere in the assistant target",
+  "stock_preamble": "first non-empty line of the assistant target matches 'First, the user (is asking|wants|needs|has asked)'",
+  "leading": "token occurs within the first 120 characters of the target"
+ },
+ "total": {
+  "rows": 135503,
+  "thinking_token_rows": 4891,
+  "thinking_token_pct": 3.61,
+  "thinking_token_leading_rows": 4891,
+  "thinking_token_leading_pct": 3.61,
+  "any_reserved_rows": 5269,
+  "any_reserved_pct": 3.888,
+  "stock_preamble_rows": 18074,
+  "stock_preamble_pct": 13.338,
+  "empty_rows": 0,
+  "mean_first_line_chars": 412.3
+ },
+ "by_src": {
+  "fenrir": {
+   "rows": 99730,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 378,
+   "any_reserved_pct": 0.379,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 474.0
+  },
+  "merged": {
+   "rows": 23146,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 18074,
+   "stock_preamble_pct": 78.087,
+   "mean_first_line_chars": 232.8
+  },
+  "primus": {
+   "rows": 4891,
+   "thinking_token_rows": 4891,
+   "thinking_token_pct": 100.0,
+   "thinking_token_leading_rows": 4891,
+   "thinking_token_leading_pct": 100.0,
+   "any_reserved_rows": 4891,
+   "any_reserved_pct": 100.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 177.3
+  },
+  "refusal": {
+   "rows": 4887,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 428.4
+  },
+  "format": {
+   "rows": 2255,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 42.7
+  },
+  "replay": {
+   "rows": 594,
+   "thinking_token_rows": 0,
+   "thinking_token_pct": 0.0,
+   "thinking_token_leading_rows": 0,
+   "thinking_token_leading_pct": 0.0,
+   "any_reserved_rows": 0,
+   "any_reserved_pct": 0.0,
+   "stock_preamble_rows": 0,
+   "stock_preamble_pct": 0.0,
+   "mean_first_line_chars": 267.1
+  }
+ },
+ "examples": {
+  "thinking_token": [
+   {
+    "src": "primus",
+    "token": "<|reserved_special_token_0|>",
+    "head": "<|reserved_special_token_0|>**Initial CVE Analysis**\\nReviewing the provided CVE description: The Auth0 Next.js SDK before version 1.6.2 does not filter out cert"
+   },
+   {
+    "src": "primus",
+    "token": "<|reserved_special_token_0|>",
+    "head": "<|reserved_special_token_0|>**Initial Vulnerability Analysis**\\nWe are analyzing a use-after-free vulnerability in the Linux kernel's AMD power management driver"
+   },
+   {
+    "src": "primus",
+    "token": "<|reserved_special_token_0|>",
+    "head": "<|reserved_special_token_0|>Okay, let's tackle this CVE analysis. The task is to map the given CVE description to the appropriate CWE. The description mentions "
+   },
+   {
+    "src": "primus",
+    "token": "<|reserved_special_token_0|>",
+    "head": "<|reserved_special_token_0|>**Initial CVE Analysis**\\nI begin by carefully reading the CVE description to understand the vulnerability. The CVE states: \"In MuPDF"
+   },
+   {
+    "src": "primus",
+    "token": "<|reserved_special_token_0|>",
+    "head": "<|reserved_special_token_0|>**Initial Analysis of the CVE Description**\\nThe CVE describes a vulnerability in the WCFM Marketplace plugin for WordPress versions "
+   },
+   {
+    "src": "primus",
+    "token": "<|reserved_special_token_0|>",
+    "head": "<|reserved_special_token_0|>**Recalling NIST Incident Response Plan Components**\\nTo answer the question, I need to recall the elements that NIST explicitly ment"
+   }
+  ],
+  "stock_preamble": [
+   {
+    "src": "merged",
+    "head": "First, the user is asking about CWE-319: Cleartext Transmission of Sensitive Information. I need to analyze this vulnerability, explain its root cause"
+   },
+   {
+    "src": "merged",
+    "head": "First, the user is asking about the potential consequences of not addressing the vulnerability. The vulnerability is CWE-319: Cleartext Transmission o"
+   },
+   {
+    "src": "merged",
+    "head": "First, the user is asking about the potential consequences of not addressing the vulnerability. The vulnerability is CWE-798: Use of Hard-coded Creden"
+   },
+   {
+    "src": "merged",
+    "head": "First, the user is asking about the potential consequences of not addressing the vulnerability. The system prompt instructs me to create a simple, one"
+   },
+   {
+    "src": "merged",
+    "head": "First, the user is asking about the potential consequences of not addressing the vulnerability. The system prompt instructs me to create a simple, one"
+   },
+   {
+    "src": "merged",
+    "head": "First, the user is asking about the potential consequences of not addressing a vulnerability. The vulnerability details are:"
+   }
+  ]
+ },
+ "top_openings": [
+  {
+   "text": "First, the user is asking about the potential consequences of not addr",
+   "n": 6091
+  },
+  {
+   "text": "First, the user is asking for a concise response to \"why it is vulnera",
+   "n": 3559
+  },
+  {
+   "text": "First, the user is asking how to fix the issue based on the details pr",
+   "n": 3190
+  },
+  {
+   "text": "## Causal Analysis",
+   "n": 2719
+  },
+  {
+   "text": "First, the user is asking \"why it is vulnerability?\" based on the prov",
+   "n": 1281
+  },
+  {
+   "text": "First, the user is asking \"How to fix this?\" based on the provided det",
+   "n": 1220
+  },
+  {
+   "text": "<|reserved_special_token_0|>Okay, let's tackle this CVE analysis. The ",
+   "n": 795
+  },
+  {
+   "text": "First, the user is asking \"How to fix this?\" based on the details prov",
+   "n": 695
+  },
+  {
+   "text": "malicious",
+   "n": 670
+  },
+  {
+   "text": "<|reserved_special_token_0|>**Initial Analysis of CVE Description**",
+   "n": 534
+  },
+  {
+   "text": "**Initial Analysis of CVE Description**",
+   "n": 534
+  },
+  {
+   "text": "benign",
+   "n": 530
+  },
+  {
+   "text": "I can't confirm that identifier, and I won't invent one. Identifiers i",
+   "n": 517
+  },
+  {
+   "text": "First, the user is asking: \"How to fix this?\" based on the details pro",
+   "n": 488
+  },
+  {
+   "text": "I don't know that value with confidence, so the honest answer is that ",
+   "n": 447
+  },
+  {
+   "text": "I don't have a verifiable value for that, so I won't guess. Identifier",
+   "n": 440
+  },
+  {
+   "text": "I can't give you that ID because I can't verify it, and an invented id",
+   "n": 424
+  },
+  {
+   "text": "That specific detail isn't something I can verify, so I'm not going to",
+   "n": 413
+  },
+  {
+   "text": "First, the user is asking: \"How to fix this?\" based on the provided de",
+   "n": 345
+  },
+  {
+   "text": "<think>",
+   "n": 342
+  },
+  {
+   "text": "<|reserved_special_token_0|>**Initial Analysis of the CVE Description*",
+   "n": 240
+  },
+  {
+   "text": "**Initial Analysis of the CVE Description**",
+   "n": 240
+  },
+  {
+   "text": "First, the user is asking about CWE-319: Cleartext Transmission of Sen",
+   "n": 205
+  },
+  {
+   "text": "<|reserved_special_token_0|>**Initial CVE Analysis**",
+   "n": 184
+  },
+  {
+   "text": "**Initial CVE Analysis**",
+   "n": 184
+  }
+ ],
+ "corroboration": {
+  "output_side_finding": "contamination-to-regression.json: v3 emits <|reserved_special_token_0|> on 2500/2500 cti-mcq and 1000/1000 cti-rcm, 0/500 cybermetric, 0/110 secqa; base and comparator 0 % everywhere.",
+  "reading": "If the token is present in the training targets, the output-side emission is learned behaviour, and the per-benchmark 100 %/0 % split tracks which training sources carry it."
+ },
+ "reference_comparison": {
+  "reference_path": "<programme-tree>/research-tmp/harvest-v3/evals/mixture-v3-no-trail.jsonl",
+  "reference_sha256": "75b5099c568313f2ceada6f79746e51840b5240d943e952c2f2ebe3c3318fc90",
+  "method": "full-line SHA-256 per source; a row counts as identical when its full line hash appears in the reference corpus. Row counts are ROWS; the identical count is DISTINCT full-line hashes, so a source that contains internal duplicates shows fewer identical lines than rows.",
+  "per_source": {
+   "fenrir": {
+    "reference_rows": 99730,
+    "reference_unique_lines": 99730,
+    "corpus_rows": 99730,
+    "corpus_unique_lines": 99730,
+    "byte_identical_to_reference": 99730,
+    "corpus_only_unique_lines": 0,
+    "reference_only_unique_lines": 0
+   },
+   "format": {
+    "reference_rows": 2600,
+    "reference_unique_lines": 1300,
+    "corpus_rows": 2255,
+    "corpus_unique_lines": 1300,
+    "byte_identical_to_reference": 1300,
+    "corpus_only_unique_lines": 0,
+    "reference_only_unique_lines": 0
+   },
+   "merged": {
+    "reference_rows": 23146,
+    "reference_unique_lines": 23146,
+    "corpus_rows": 23146,
+    "corpus_unique_lines": 23146,
+    "byte_identical_to_reference": 23146,
+    "corpus_only_unique_lines": 0,
+    "reference_only_unique_lines": 0
+   },
+   "primus": {
+    "reference_rows": 4891,
+    "reference_unique_lines": 4891,
+    "corpus_rows": 4891,
+    "corpus_unique_lines": 4891,
+    "byte_identical_to_reference": 4891,
+    "corpus_only_unique_lines": 0,
+    "reference_only_unique_lines": 0
+   },
+   "refusal": {
+    "reference_rows": 9584,
+    "reference_unique_lines": 1198,
+    "corpus_rows": 4887,
+    "corpus_unique_lines": 1198,
+    "byte_identical_to_reference": 1198,
+    "corpus_only_unique_lines": 0,
+    "reference_only_unique_lines": 0
+   },
+   "replay": {
+    "reference_rows": 594,
+    "reference_unique_lines": 594,
+    "corpus_rows": 594,
+    "corpus_unique_lines": 594,
+    "byte_identical_to_reference": 594,
+    "corpus_only_unique_lines": 0,
+    "reference_only_unique_lines": 0
+   }
+  }
+ }
+}

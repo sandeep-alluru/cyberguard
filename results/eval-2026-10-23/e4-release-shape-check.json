@@ -1,0 +1,147 @@
+{
+ "status": "MEASUREMENT \u2014 the decision's structure and every host fact it asserts are re-verified at check time.",
+ "decision": "<programme-tree>/docs/RELEASE-SHAPE.md",
+ "branch": "serving party UNRESOLVED",
+ "blocked_items_found": 4,
+ "host_facts_reverified": {
+  "base_model_present": true,
+  "adapter_present": true,
+  "llama_cpp_present": true,
+  "llama_server_built": true,
+  "llama_quantize_built": false,
+  "serve_script_hardcoded_path_exists": false,
+  "cyberguard_env_exists": false,
+  "gguf_files_present": 0,
+  "host_ssh_returncode": 255,
+  "host_ssh_output": "Host key verification failed."
+ },
+ "checks": [
+  {
+   "check": "the decision document exists",
+   "pass": true
+  },
+  {
+   "check": "the decision names all six shape components",
+   "pass": true
+  },
+  {
+   "check": "the decision states the pipeline order",
+   "pass": true
+  },
+  {
+   "check": "the decision names the serving parameter that matters (512 new tokens, not the default)",
+   "pass": true
+  },
+  {
+   "check": "the decision states where the merge and the conversion happen",
+   "pass": true
+  },
+  {
+   "check": "the decision either names a serving party or records it as unresolved",
+   "pass": true
+  },
+  {
+   "check": "the decision's status line states which branch it takes",
+   "pass": true
+  },
+  {
+   "check": "the decision names at least three specific things the unresolved serving party blocks",
+   "pass": true
+  },
+  {
+   "check": "the blocked list names the release decision (H-3) as blocked from ship-and-serve",
+   "pass": true
+  },
+  {
+   "check": "the blocked list names the DSH registration as blocked",
+   "pass": true
+  },
+  {
+   "check": "the base model the decision names is present at the path it names",
+   "pass": true
+  },
+  {
+   "check": "the adapter the decision names is present at the path it names",
+   "pass": true
+  },
+  {
+   "check": "the llama.cpp tree the decision names is present at the commit it names",
+   "pass": true
+  },
+  {
+   "check": "the llama.cpp commit the decision names is the tree's current commit",
+   "pass": true
+  },
+  {
+   "check": "the python `gguf` module is importable, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "`llama-server` is built on this host, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "`llama-quantize` is NOT built on this host, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "the decision states that `llama-quantize` is not built",
+   "pass": true
+  },
+  {
+   "check": "the `llama-quantize` build target is nonetheless available locally, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "the path `serve-cyberguard-local.sh` hard-codes does not exist, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "`serve-cyberguard-local.sh` exists and does hard-code that path",
+   "pass": true
+  },
+  {
+   "check": "`~/.cyberguard-env` does not exist, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "`cyberguard-merge-gguf.sh` exists and does source `~/.cyberguard-env`",
+   "pass": true
+  },
+  {
+   "check": "the `gguf/` directory holds no GGUF, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "that host is not reachable from this host, as the decision states",
+   "pass": true
+  },
+  {
+   "check": "the decision names that host as unreachable and quotes the observed failure",
+   "pass": true
+  },
+  {
+   "check": "the record makes no affirmative claim that the release ships",
+   "pass": true
+  },
+  {
+   "check": "the record says so explicitly",
+   "pass": true
+  },
+  {
+   "check": "the record does not claim any bar is met",
+   "pass": true
+  },
+  {
+   "check": "the record names the untaken remedies as not launched",
+   "pass": true
+  },
+  {
+   "check": "the record names the corpus-receipt dependency (D-7) as blocking the manifest",
+   "pass": true
+  }
+ ],
+ "checks_passed": 31,
+ "checks_total": 31,
+ "status_line": "31/31 checks PASS"
+}

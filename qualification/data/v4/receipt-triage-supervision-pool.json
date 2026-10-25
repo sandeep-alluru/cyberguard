@@ -1,0 +1,104 @@
+{
+ "what_this_is": "Receipt for data/v4/triage-supervision-pool.jsonl (ledger item C-6): the clean Primus-sourced CVE\u2192CWE reasoning traces, salvaged for the triage corpus.",
+ "sources_read": {
+  "prompts": {
+   "path": "<programme-tree>/data/v3/trails-30/prompts-7k.jsonl",
+   "sha256": "ed72c6ee008c4d0e3bfdc64d2d082222d36d001832f83b317cac4f32d6060c1a",
+   "rows": 7000,
+   "written": false
+  },
+  "trails": {
+   "path": "<programme-tree>/data/v3/trails-30/trails_deepseek_7k.jsonl",
+   "sha256": "b2248b8236baa385dae0539898dae74bb51f2ff9a237c5394e5ea7072275a54f",
+   "rows": 7000,
+   "written": false
+  }
+ },
+ "output": {
+  "path": "<programme-tree>/data/v4/triage-supervision-pool.jsonl",
+  "sha256": "1188a9509e624d63ff6393e09f3cbf74cdd4907de3be29b9bb99ecdcfcb3848b",
+  "rows": 268
+ },
+ "never_trained_on": "the v3 build is `mixture-v3-no-trail` \u2014 no trail row entered any training mixture, so this pool is not contaminated by having been trained on",
+ "contract": {
+  "prompt": "asks for a CVE\u2192CWE mapping and instructs that the last line contain only the CWE id",
+  "target": "a reasoning trail ending with the CWE id",
+  "ends_with_cwe_rows": 133,
+  "contains_cwe_rows": 158
+ },
+ "other_subsets_measured_but_not_pooled": {
+  "merged.jsonl": {
+   "rows": 1268,
+   "thinking_control_token_rows": 0,
+   "stock_preamble_rows_reference": 0,
+   "stock_preamble_rows_broad": 7,
+   "contains_cwe_rows": 1155,
+   "ends_with_cwe_rows": 170,
+   "in_the_pool": false,
+   "why_not": "these prompts are derived from `merged.jsonl`, which ASTRA-D5 excludes, and 7 of them open with a stock preamble"
+  },
+  "fenrir.jsonl": {
+   "rows": 5464,
+   "thinking_control_token_rows": 0,
+   "stock_preamble_rows_reference": 0,
+   "stock_preamble_rows_broad": 87,
+   "contains_cwe_rows": 5,
+   "ends_with_cwe_rows": 0,
+   "in_the_pool": false,
+   "why_not": "only 5 of 5464 contain a CWE id at all \u2014 these are not CVE\u2192CWE supervision"
+  }
+ },
+ "licence_condition": {
+  "status": "INHERITS FROM PRIMUS \u2014 not resolved by this item",
+  "detail": "ODC-By requires attribution and the upstream repository is gated. The trails are DERIVED from Primus prompts, so they inherit the condition exactly as `NEXT-STEPS.md` \u00a75 question 6 says. This item measures and assembles the pool; it does not decide whether the release stack carries Primus attribution. See `docs/DATA-LEDGER.md` \u00a72 (Primus: HOLD)."
+ },
+ "checks": [
+  {
+   "name": "prompts-and-trails-are-paired",
+   "pass": true,
+   "detail": "7000 prompts, 7000 trails, ids match: True"
+  },
+  {
+   "name": "prompt-source-distribution-is-as-recorded",
+   "pass": true,
+   "detail": "{'merged.jsonl': 1268, 'fenrir.jsonl': 5464, 'primus.jsonl': 268}"
+  },
+  {
+   "name": "pool-has-268-rows",
+   "pass": true,
+   "detail": "268 Primus-sourced rows"
+  },
+  {
+   "name": "every-row-source-attribution-matches-prompts-7k",
+   "pass": true,
+   "detail": "268 rows checked against prompts-7k.jsonl's src field"
+  },
+  {
+   "name": "every-row-prompt-matches-the-prompt-file",
+   "pass": true,
+   "detail": "268/268 prompts identical"
+  },
+  {
+   "name": "zero-rows-contain-the-thinking-control-token",
+   "pass": true,
+   "detail": "0 of 268 (reference detector: <|reserved_special_token_N|>)"
+  },
+  {
+   "name": "zero-rows-open-with-a-stock-preamble-reference-detector",
+   "pass": true,
+   "detail": "0 of 268 (the corpus forensics' detector)"
+  },
+  {
+   "name": "zero-rows-open-with-a-stock-preamble-broader-detector",
+   "pass": true,
+   "detail": "0 of 268 (the programme probe's broader detector)"
+  },
+  {
+   "name": "cwe-ending-count-matches-the-recorded-133",
+   "pass": true,
+   "detail": "133 of 268 end with a CWE id (49.63 %); 158 contain one somewhere"
+  }
+ ],
+ "pass": 9,
+ "total": 9
+}

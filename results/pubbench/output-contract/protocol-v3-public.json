@@ -1,0 +1,61 @@
+{
+ "metric": "strict format-constrained accuracy, local protocol",
+ "surface": {
+  "decoding": "greedy, do_sample=False, num_beams=1",
+  "trials": 1,
+  "max_new_tokens": 512,
+  "batch": 8,
+  "padding": "left + attention mask",
+  "precision": "bfloat16",
+  "quantization": "none",
+  "adapter": "peft, not merged",
+  "input_truncation": false,
+  "max_prompt_tokens": 3584,
+  "envelope": 4096,
+  "penalties": "repetition_penalty=1.0",
+  "chat": "own tokenizer/template, 1 user message, no system, 0-shot"
+ },
+ "population": {
+  "cybermetric-500": 500,
+  "secqa-v1-test": 110,
+  "cti-mcq": 2500,
+  "cti-rcm": 1000
+ },
+ "expected_n": {
+  "cybermetric-500": 500,
+  "secqa-v1-test": 110,
+  "cti-mcq": 2500,
+  "cti-rcm": 1000
+ },
+ "inputs_sha256": {
+  "<programme-tree>/pubbench/output-contract/cybermetric-500.json": "b0dcf5cb0b51792e3134bec8cecadfe9c5ecc543fb5abfcece99f041066701a5",
+  "<programme-tree>/pubbench/output-contract/secqa_test.csv": "9a333f23d89d0d3d6e883e5ab3be474327d4f57d2684c3d1ada787d510738bfd",
+  "<programme-tree>/research-tmp/ctibench/cti-mcq.tsv": "11e0af8db2dae9706c6e79901d2390bcdf9746e8feccbd9ba10682df649bcc6a",
+  "<programme-tree>/research-tmp/ctibench/cti-rcm.tsv": "ed7d7fa79fc912c627f96e229eaa38b3c4b6be813d834d434580be6d4703d700",
+  "<programme-tree>/research-tmp/ctibench/cti-vsp.tsv": "43d4ceefe042236a7d0885cb8506bf6537426cf2359eddb2450dd151864a498b"
+ },
+ "models": {
+  "base": {
+   "base": "<model-cache>/cyberguard-eval/Qwen3-4B-Instruct-2507",
+   "adapter": null,
+   "identity": {
+    "kind": "local_path",
+    "path": "<model-cache>/cyberguard-eval/Qwen3-4B-Instruct-2507",
+    "config_sha256": "5beea1a4a34c62782bfb2f911c606741a3bab8f92d80a118fa053c28af12e8ba"
+   }
+  }
+ },
+ "author_reported_reference": {
+  "cybersecqwen-4b/cti-mcq": {
+   "value": 0.5868,
+   "sd_pp": 0.29,
+   "label": "author-reported, five sampled trials, mean +/- standard deviation"
+  },
+  "cybersecqwen-4b/cti-rcm": {
+   "value": 0.6664,
+   "sd_pp": 0.23,
+   "label": "author-reported, five sampled trials, mean +/- standard deviation"
+  }
+ },
+ "option_order_robustness": "UNMEASURED"
+}

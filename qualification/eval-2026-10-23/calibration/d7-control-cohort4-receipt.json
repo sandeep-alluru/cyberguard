@@ -1,0 +1,121 @@
+{
+  "what_this_is": "The D-7 FRESH reference-control cohort 4: 300 rows, 100 per dimension, 50 positive and 50 negative each, each with its expected label, its kind and a row-level reason.",
+  "status": "FROZEN — this is the set the panel is QUALIFIED on under instrument v4 (d7_review_v4.py). It is independent of cohorts 1, 2 and 3 and of the D4-50 reference set, and that independence is proved mechanically below.",
+  "ruling": "ASTRA-D30 (b); ASTRA-D31; ASTRA-D32",
+  "why_a_fourth_cohort": "cohort 1 was the set instrument v2 was developed against; cohort 2 was consumed by the v2 qualification and read for v3's diagnosis; cohort 3 was read during the v3 qualification and MiniCPM failed §4 bar 1 on it. A qualification set the instrument was read against is not independent of it.",
+  "purpose": "(1) find a SECOND, INDEPENDENT, QUALIFIED reviewer, since instrument v4 makes the defensive-context carve-out operative and the models that failed cohort 3 partly by over-flagging defensive content have a real chance now; (2) requalify adjudicator C, MiniCPM-V-4.7-35B, which failed §4 bar 1 on cohort 3 and whose shallow labels moved 1.6 pp from reviewer A.",
+  "authorship": {
+    "cohort_4_modules": "Codex (gpt-6.1-sol), a lineage that is NOT a panel candidate, NOT the adjudicator and NOT the comparator.",
+    "d4_50_reference_set": "the working agent's own model (MiniMax M3.1), because Codex refused that specific job; the refusal is recorded in ASTRA-D32 (4).",
+    "different_authors": true,
+    "not_silent": "every row here and in the D4-50 set is MODEL-AUTHORED. Nothing in this programme may describe either set as human reference."
+  },
+  "protocol_version": "P2-CALIBRATION-PROTOCOL.md, approved 2026-10-23 (ledger D-1); rubric = §3; confirmation = §6; scorer procedure = §4",
+  "composition": {
+    "unsafe": {
+      "total": 100,
+      "DEFECT": 50,
+      "NO_DEFECT": 50
+    },
+    "off_topic": {
+      "total": 100,
+      "DEFECT": 50,
+      "NO_DEFECT": 50
+    },
+    "shallow": {
+      "total": 100,
+      "DEFECT": 50,
+      "NO_DEFECT": 50
+    }
+  },
+  "kind_families": {
+    "unsafe/DEFECT": {
+      "genuinely-offensive-request": 25,
+      "refuse-then-comply": 15,
+      "defensive-frame-with-artefact": 10
+    },
+    "unsafe/NO_DEFECT": {
+      "dual-use-defensive": 20,
+      "clean-defensive-command": 10,
+      "detection-signature": 10,
+      "defensive-forensics": 10
+    },
+    "off_topic/DEFECT": {
+      "security-term-elsewhere": 25,
+      "non-security-task": 25
+    },
+    "off_topic/NO_DEFECT": {
+      "genuine-security-task": 30,
+      "terse-security-answer": 10,
+      "security-adjacent-in-scope": 10
+    },
+    "shallow/DEFECT": {
+      "generic-list": 20,
+      "named-and-stopped": 15,
+      "unfounded-certainty": 10,
+      "slogan-programme": 5
+    },
+    "shallow/NO_DEFECT": {
+      "specific-grounded": 25,
+      "terse-specific": 15,
+      "legitimate-short-form": 10
+    }
+  },
+  "kind_histogram": {
+    "clean-defensive-command": 10,
+    "defensive-forensics": 10,
+    "defensive-frame-with-artefact": 10,
+    "detection-signature": 10,
+    "dual-use-defensive": 20,
+    "generic-list": 20,
+    "genuine-security-task": 30,
+    "genuinely-offensive-request": 25,
+    "legitimate-short-form": 10,
+    "named-and-stopped": 15,
+    "non-security-task": 25,
+    "refuse-then-comply": 15,
+    "security-adjacent-in-scope": 10,
+    "security-term-elsewhere": 25,
+    "slogan-programme": 5,
+    "specific-grounded": 25,
+    "terse-security-answer": 10,
+    "terse-specific": 15,
+    "unfounded-certainty": 10
+  },
+  "checks": {
+    "rows": 300,
+    "rows_with_reason": 300,
+    "control_ids_unique": true,
+    "control_id_prefix": "C4-",
+    "distinct_user_texts": 296,
+    "distinct_assistant_texts": 300,
+    "contrast_pairs_shared_stem": 4,
+    "reasons_shared_over_limit": [],
+    "prior_cohort_rows": 900,
+    "ref50_rows": 50,
+    "exact_overlap_with_prior": [],
+    "near_duplicate_with_prior": [],
+    "max_jaccard_vs_prior": 0.0556,
+    "max_jaccard_location": "C4-UNS-N31/assistant",
+    "similarity_threshold": 0.5,
+    "ngram_size": 6,
+    "max_reason_shared_in_a_group": 2
+  },
+  "errors": [],
+  "verdict": "PASS",
+  "generator": {
+    "path": "<programme-tree>/eval-2026-10-23/calibration/d7_controls_cohort4.py",
+    "sha256": "bd318a950459837280645d8d8efce47e456569c5c09a39114122dc0a7dbab4c0",
+    "content_modules": {
+      "d7_c4_unsafe.py": "8de2615874fae144b73a01e51be78d586b8c6878cabeebbecaad89873fb39d52",
+      "d7_c4_offtopic.py": "ce0618d19206a9ecda13aee4014ba65196987ad6ac7ba09ccb7e0a8751b3c74e",
+      "d7_c4_shallow.py": "3a8a8bb80acc5a79441527d9a3957ad81ba266f94814db79a5facfb05d565926"
+    },
+    "reference_set": {
+      "path": "<programme-tree>/eval-2026-10-23/calibration/d7-reference-unsafe-50.jsonl",
+      "sha256": "57317c1e478555ea041cd99f660be5e0b0e0f6a9fd49bb5a596569bfbe4af140"
+    }
+  },
+  "rows_path": "<programme-tree>/eval-2026-10-23/calibration/d7-control-cohort4.jsonl",
+  "rows_sha256": "1ecdf614a0568882eb5fea62c3ee589f0f0aedc7b142256f860ccec9612a37bf"
+}

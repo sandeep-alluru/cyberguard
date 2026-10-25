@@ -1,0 +1,173 @@
+{
+  "generated_by": "data_inventory_verification.py",
+  "read_only": true,
+  "mix_v2_ledger_vs_facts": {
+    "ledger_claims_epoch_rows": 81282,
+    "ledger_header_claims": 81282,
+    "facts_json_epoch_rows": 81074,
+    "facts_json_sum_of_breakdown": 81074,
+    "armA_rows_on_disk": 81074,
+    "armB_rows_on_disk": 81074,
+    "sources_mismatched": {
+      "trendyol": {
+        "mixxture_v2_md": 50672,
+        "facts_json": 50606,
+        "delta": 66
+      },
+      "nist": {
+        "mixxture_v2_md": 835,
+        "facts_json": 718,
+        "delta": 117
+      },
+      "attack": {
+        "mixxture_v2_md": 2144,
+        "facts_json": 2136,
+        "delta": 8
+      },
+      "nvd": {
+        "mixxture_v2_md": 14847,
+        "facts_json": 14836,
+        "delta": 11
+      },
+      "replay": {
+        "mixxture_v2_md": 600,
+        "facts_json": 594,
+        "delta": 6
+      }
+    },
+    "sources_agreeing": [
+      "refusal",
+      "format"
+    ],
+    "verdict": "MIXTURE-V2.md does not satisfy its own definition-of-done item 4 (every number equals FACTS.json). Its 'admitted'/'realised presentations' columns and its 81,282-row header describe a build that is not the artifact on disk (81,074 rows). FACTS.json is the one that matches the files.",
+    "impact_on_published_figures": "None of the published FRR dose-response figures change: the refusal count (9,584) and format count (2,600) agree exactly between the two, so refusal_share 11.821% holds against the on-disk 81,074-row epoch. The five mismatching sources are the non-refusal bulk."
+  },
+  "nvd_sample": {
+    "path": "cyberguard/v2/candidates/nvd-sample.jsonl",
+    "rows": 16000,
+    "keys": [
+      "cve_id",
+      "source",
+      "text"
+    ],
+    "rows_containing_a_cwe_id": 0,
+    "rows_containing_cvss": 0,
+    "cve_year_histogram": {
+      "1999": 1572,
+      "2000": 1233,
+      "2001": 1536,
+      "2002": 2357,
+      "2003": 1484,
+      "2004": 2658,
+      "2005": 4672,
+      "2006": 488
+    }
+  },
+  "nvd_raw_page": {
+    "path": "cyberguard/v2/candidates/nvd-raw.json",
+    "total_results_in_feed": 398563,
+    "rows_on_disk": 2000,
+    "weakness_description_histogram": {
+      "NVD-CWE-Other": 1865,
+      "CWE-269": 1,
+      "CWE-88": 1,
+      "NVD-CWE-noinfo": 11,
+      "CWE-78": 2,
+      "CWE-94": 5,
+      "CWE-125": 3,
+      "CWE-264": 11,
+      "CWE-17": 1,
+      "CWE-20": 12,
+      "CWE-200": 16,
+      "CWE-120": 6,
+      "CWE-77": 1,
+      "CWE-434": 1,
+      "CWE-364": 1,
+      "CWE-119": 11,
+      "CWE-255": 4,
+      "CWE-178": 1,
+      "CWE-522": 1,
+      "CWE-290": 1,
+      "CWE-1067": 1,
+      "CWE-307": 2,
+      "CWE-59": 5,
+      "CWE-327": 1,
+      "CWE-400": 1,
+      "CWE-476": 1,
+      "CWE-19": 1,
+      "CWE-16": 7,
+      "CWE-193": 2,
+      "CWE-287": 3,
+      "CWE-276": 1,
+      "CWE-384": 1,
+      "CWE-362": 1,
+      "CWE-346": 2,
+      "CWE-665": 1,
+      "CWE-772": 1,
+      "CWE-79": 1,
+      "CWE-254": 1,
+      "CWE-667": 1,
+      "CWE-399": 1
+    },
+    "cvss_metric_field_coverage": {
+      "cvssMetricV2": 1966,
+      "cvssMetricV31": 36,
+      "ssvcV203": 26,
+      "cvssMetricV30": 1
+    },
+    "note": "NVD-CWE-Other dominates; the CWE label for most of this slice is unusable for triage. The CVSS coverage is almost entirely cvssMetricV2, i.e. the legacy v2 vector, not the v3.1 vector CTI-VSP-style work needs."
+  },
+  "attack_sample": {
+    "path": "cyberguard/v2/candidates/attack-sample.jsonl",
+    "rows": 2198,
+    "keys": [
+      "source",
+      "stix_id",
+      "text",
+      "type"
+    ],
+    "rows_whose_text_contains_a_cve_id": 12,
+    "raw_enterprise_attack_json_on_disk": false,
+    "note": "The flattened sample keeps stix_id and type but not external_references, so the CVE->technique mapping that ATT&CK's own data carries is not on disk. Only 12 of 2,198 rows mention a CVE id."
+  },
+  "trails_30": {
+    "path": "cyberguard/data/v3/trails-30/trails_deepseek_7k.jsonl",
+    "rows": 7000,
+    "in_any_trained_mixture": false,
+    "why_not": "The v3 build is 'mixture-v3-no-trail.jsonl' and its receipt records 'no trail stream in the no-trail build' (S5 verdict 'n/a'). These 7,000 teacher-generated reasoning traces were never trained on.",
+    "per_prompt_source": {
+      "primus.jsonl": {
+        "rows": 268,
+        "thinking_control_token_in_target": 0,
+        "stock_preamble_opening_target": 0,
+        "contains_a_cwe_id": 158,
+        "ends_with_a_cwe_id": 133,
+        "pct_ends_with_cwe_id": 49.6269
+      },
+      "merged.jsonl": {
+        "rows": 1268,
+        "thinking_control_token_in_target": 0,
+        "stock_preamble_opening_target": 7,
+        "contains_a_cwe_id": 1155,
+        "ends_with_a_cwe_id": 170,
+        "pct_ends_with_cwe_id": 13.4069
+      },
+      "fenrir.jsonl": {
+        "rows": 5464,
+        "thinking_control_token_in_target": 0,
+        "stock_preamble_opening_target": 87,
+        "contains_a_cwe_id": 5,
+        "ends_with_a_cwe_id": 0,
+        "pct_ends_with_cwe_id": 0.0
+      }
+    },
+    "finding": "The Primus-sourced subset (268 rows) is clean on both contamination axes (0 thinking-control tokens, 0 stock preambles) and 49.63% of its targets already end with a CWE id, which is exactly the CTI-RCM output contract. The defect in the Primus stream is in its own targets, not in its prompts. So the CVE->CWE task, and a repair template for it, are already on disk."
+  },
+  "laya_slot": {
+    "path": "<other-workspace>/v4/data/agent4-laya-datasets",
+    "exists": true,
+    "files": 0,
+    "bytes": 0,
+    "note": "The directory exists and is empty. The agent4 log claims 'Loaded 140545 rows across 6 strata' and the dispatch brief specifies five planned output files (offensive-1200, offtopic-1200, shallow-1200, heldout-1000, dataset-card) \u2014 none of which were materialised. Nothing to fix; nothing there."
+  }
+}

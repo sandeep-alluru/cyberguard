@@ -1,0 +1,75 @@
+{
+ "what_this_is": "Receipt for data/v4/refusal-retention-triage.jsonl (ledger item C-8): the triage-shaped harmful requests the refusal stream did not contain.",
+ "output": {
+  "path": "<programme-tree>/data/v4/refusal-retention-triage.jsonl",
+  "rows": 144,
+  "distinct_rows": 144,
+  "distinct_requests": 144,
+  "sha256": "aad2b98d4074ca6d4bdc7d012b94f968f58d67dd15f99c210fbbce28b47e9b6e"
+ },
+ "counts": {
+  "distinct_rows": 144,
+  "total_presentations_if_weighted_as_the_parent_set": 144,
+  "note": "the refusal stream is weighted by presentation count, not by distinct rows (the parent's 1,198 distinct rows are presented 9,584 times at weight 8). This set's contribution to the corpus is set by the refusal-share policy (docs/REFUSAL-POLICY.md), not by this item."
+ },
+ "content_provenance": {
+  "requests": "authored for this item",
+  "cve_ids": "SYNTHETIC (CVE-2024-9xxxx). A real CVE would assert a triage this project has not measured, and would be a false claim if the mapping were wrong.",
+  "cwe_ids": "real CWE ids from the MITRE CWE catalogue",
+  "vectors": "authored; the severity is computed from the vector",
+  "licence": "ours + curated public refusal data (per-source gate) \u2014 the parent set's provenance, retained as the item requires (docs/MIXTURE-V2.md \u00a71; docs/DATA-LEDGER.md \u00a71)"
+ },
+ "posture": {
+  "source": "docs/PRODUCT-CONTRACT.md \u00a76 \u2014 refuse-and-surface",
+  "why": "the product triages a feed, so a refusal must be a visible, schema-shaped record rather than a dropped item; and a refusal over a real CVE still carries the triage the analyst is entitled to"
+ },
+ "checks": [
+  {
+   "name": "every-new-row-is-a-triage-shaped-harmful-request",
+   "pass": true,
+   "detail": "144 rows, each naming a CVE and asking for the harmful artefact"
+  },
+  {
+   "name": "every-request-asks-for-an-offensive-artefact",
+   "pass": true,
+   "detail": "144 requests each contain their scenario's own harmful-artefact phrasing"
+  },
+  {
+   "name": "every-target-is-a-valid-triage-1-record",
+   "pass": true,
+   "detail": "144/144 records validated against TRIAGE-1"
+  },
+  {
+   "name": "every-record-declines-and-escalates",
+   "pass": true,
+   "detail": "every record abstains and escalates"
+  },
+  {
+   "name": "every-rationale-states-what-was-declined-and-what-is-offered",
+   "pass": true,
+   "detail": "every rationale names the declined part and the alternative offered"
+  },
+  {
+   "name": "every-record-is-distinct",
+   "pass": true,
+   "detail": "144 distinct targets of 144"
+  },
+  {
+   "name": "every-request-is-distinct",
+   "pass": true,
+   "detail": "144 distinct requests of 144"
+  },
+  {
+   "name": "the-set-covers-requests-with-and-without-a-legitimate-sounding-cover",
+   "pass": true,
+   "detail": "{'no cover': 36, 'a claimed authorisation': 36, 'a claimed engagement': 36, 'a classroom framing': 36}"
+  },
+  {
+   "name": "no-row-asserts-a-real-cve",
+   "pass": true,
+   "detail": "the CVE ids are synthetic; no real CVE is triaged by this set"
+  }
+ ],
+ "pass": 9,
+ "total": 9
+}

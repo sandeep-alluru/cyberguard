@@ -1,0 +1,118 @@
+{
+ "what_this_is": "F-7's receipt: the rebuilt VulnTriage mixture, every source's realised presentation count, the epoch total, the re-solved refusal share, and the weight rationale.",
+ "status": "PROVISIONAL \u2014 NOT A TRAINING SET. Phase D's removals (D-3, D-4) and D-7's freeze and Data Gate are outstanding, and all three are blocked on humans. This mixture is assembled so that the decontamination and hygiene gates (F-8, F-9) can be measured on it; the Data Gate is what makes a corpus trainable, and it is not issued here.",
+ "output": {
+  "path": "<programme-tree>/data/v4/mixture-v6-f8clean.jsonl",
+  "rows": 366553,
+  "sha256": "4e475b7c40622b6afac5934acef8d4cd2c7d21068b0a801d1930de7dce2d9f2c"
+ },
+ "epoch_total": 366553,
+ "shuffle": {
+  "seed": 0,
+  "method": "random.Random(seed).shuffle(rows), then written in order; the trainer consumes in order"
+ },
+ "per_source": {
+  "fenrir": {
+   "unique": 99117,
+   "weight": 1,
+   "presentations": 99117,
+   "licence": "Fenrir \u2014 the project's own general cyber-instruction corpus; see docs/DATA-LEDGER.md"
+  },
+  "format": {
+   "unique": 3304,
+   "weight": 1,
+   "presentations": 3304,
+   "licence": "ours, from public rule schemas (SigmaHQ attribution retained); see docs/DATA-LEDGER.md"
+  },
+  "replay": {
+   "unique": 594,
+   "weight": 1,
+   "presentations": 594,
+   "licence": "the project's own replay set; see docs/DATA-LEDGER.md"
+  },
+  "triage": {
+   "unique": 245273,
+   "weight": 1,
+   "presentations": 245273,
+   "licence": "NVD 2.0 API \u2014 US Government work, public domain; the CVE(R) notice applies \u2014 see data/vuln/nvd/NVD-LICENCE-NOTE.md"
+  },
+  "triage_salvage": {
+   "unique": 268,
+   "weight": 1,
+   "presentations": 268,
+   "licence": "ours, salvaged from the trails-30 reasoning traces; see data/v4/receipt-triage-supervision-pool.json"
+  },
+  "refusal": {
+   "unique": 1342,
+   "weight": 13.4106,
+   "presentations": 17997,
+   "licence": "the project's own refusal stream; the target share is W-3 in docs/REFUSAL-POLICY.md"
+  }
+ },
+ "counts_sum_to_the_epoch_total": 366553,
+ "refusal_share": {
+  "target_pct": 4.91,
+  "target_parameter_source": "eval-2026-10-23/c5_refusal_policy.py::TARGET_SHARE, read from the file, not restated here",
+  "formula": "R = int(TARGET_SHARE * non_refusal_mass / (1 - TARGET_SHARE))",
+  "non_refusal_mass": 348556,
+  "presentations_R": 17997,
+  "achieved_pct": 4.9098,
+  "policy": "docs/REFUSAL-POLICY.md (decision W-3) \u2014 the SHARE is the invariant, not the presentation count, so adding families re-solves the count"
+ },
+ "row_share_pct": {
+  "fenrir": 27.04,
+  "format": 0.9,
+  "refusal": 4.91,
+  "replay": 0.16,
+  "triage": 66.91,
+  "triage_salvage": 0.07
+ },
+ "character_share_pct": {
+  "fenrir": 49.14,
+  "format": 0.25,
+  "refusal": 1.77,
+  "replay": 0.14,
+  "triage": 48.61,
+  "triage_salvage": 0.09
+ },
+ "character_share_note": "characters, not tokens \u2014 a token share would need the trainer's tokeniser, and the two are not the same number because the triage rows carry a long prompt",
+ "weight_rationale": [
+  "**Every source is at weight 1, so every row is seen once per epoch.** The triage corpus is not up-weighted: each of its 245,273 rows is a distinct CVE, and re-presenting some of them would make a handful of CVEs better taught than the rest.",
+  "**The mixture becomes a majority-triage mixture by ROWS, and that is the approved direction \u2014 but the CHARACTER share has to be stated separately, and the distinction matters.** The v3 mixture was 70.97 % general cyber instruction (fenrir) by rows. Here the triage corpus is the larger half **by rows** (66.91 %), and it carries 48.61 % **by characters** against fenrir's 49.14 %, because each triage row carries a full CVE description in its prompt and again in its rationale. **A token share will sit between the two.** The honest statement is: the mixture is majority-triage **by rows** and **a near tie by characters** \u2014 the two streams are roughly equal in the token stream, so the row share overstates the triage supervision the model will actually see. Both numbers are in the receipt, and neither is a claim about what the model will learn.",
+  "**The refusal share is re-solved, not preserved.** Adding the triage corpus changes the denominator, so the presentation count moves to hold the share at the policy's target. The share is the causal quantity; the count is arithmetic. The reversal path is one parameter: `TARGET_SHARE` in `eval-2026-10-23/c5_refusal_policy.py`.",
+  "**The refusal rows are presented round-robin over their distinct pool**, so no refusal family is over-represented \u2014 the same mechanism C-10 used, and the same reason.",
+  "**C-5's, C-7's and C-8's families are taken from the rebuilt corpus, not added again.** C-10 already folded them in and recorded that in its receipt. Adding them a second time would silently double them.",
+  "**The two triage sources teach two different output shapes, and that is stated rather than hidden.** F-5's corpus teaches the `TRIAGE-1` JSON contract; C-6's salvage pool teaches the CTI-RCM shape (a reasoning trace whose last line is the CWE). Their prompts differ, so the shapes are distinguishable, and a model that follows the requested shape is the behaviour the product needs. The mixture's character share (not its row share) says how much of the token stream each shape takes.",
+  "**Nothing was dropped to make the numbers work.** Every source's rows are carried through byte-for-byte."
+ ],
+ "checks": [
+  {
+   "name": "the rebuilt corpus is in the expected shape",
+   "pass": true,
+   "detail": "fenrir 99117, format 3304, replay 594, refusal 5319 presentations \u2014 against the corpus receipt's own counts ({'fenrir': 99117, 'format': 3304, 'replay': 594, 'refusal': 5319})"
+  },
+  {
+   "name": "the refusal pool's distinct rows are recovered from the corpus's presentations",
+   "pass": true,
+   "detail": "5319 presentations -> 1342 distinct rows (the parent's 1,198 + C-8's 144, as C-10 pooled them)"
+  },
+  {
+   "name": "the non-refusal mass is computed before the refusal weight is solved",
+   "pass": true,
+   "detail": "348,556 = fenrir 99,117 + format 3,304 + replay 594 + triage 245,273 + salvage 268"
+  },
+  {
+   "name": "the re-solved refusal share does not exceed the policy's target",
+   "pass": true,
+   "detail": "17997 presentations -> 4.9098 % against a 4.91 % target (the policy's own formula, on the policy's own parameter)"
+  },
+  {
+   "name": "every distinct refusal row survives, presented round-robin",
+   "pass": true,
+   "detail": "1342 of 1342 distinct rows present, 13-14 presentations each"
+  }
+ ],
+ "pass": 5,
+ "total": 5,
+ "all_pass": true
+}

@@ -1,0 +1,49 @@
+{
+ "what_this_is": "Completeness audit of EVALUATION.md against the brief: the four deliverables are present and substantive, every artefact the report cites exists on disk, every \u00a75.3 subsection is either measured or explicitly UNMEASURED with the artefact it would come from, and every executive-summary finding is numbered in sequence.",
+ "document": "<programme-tree>/EVALUATION.md",
+ "checks": [
+  {
+   "name": "the brief's four deliverables all have a section",
+   "pass": true,
+   "detail": "all four present"
+  },
+  {
+   "name": "every deliverable section is substantive, not a stub",
+   "pass": true,
+   "detail": "all four carry real content"
+  },
+  {
+   "name": "every artefact the report cites exists on disk",
+   "pass": true,
+   "detail": "272 cited paths checked against 99962 files in the project trees, all present"
+  },
+  {
+   "name": "every \u00a75.3 subsection is either measured or explicitly UNMEASURED",
+   "pass": true,
+   "detail": "17 subsections, each one carries a measurement or an explicit UNMEASURED"
+  },
+  {
+   "name": "every UNMEASURED measurement in \u00a75.3 says what would resolve it",
+   "pass": true,
+   "detail": "each \u00a75.3 UNMEASURED names its source or states why it cannot be produced"
+  },
+  {
+   "name": "the ledger has no item still marked open without a stated blocker",
+   "pass": true,
+   "detail": "every ledger item is done or explicitly blocked"
+  },
+  {
+   "name": "the executive summary's findings are consecutive from 1",
+   "pass": true,
+   "detail": "22 findings, numbered 1..22"
+  },
+  {
+   "name": "the three in-flight measurements have their own generated subsection",
+   "pass": true,
+   "detail": "present: ['decode-budget sweep', 'output contract', 'public adversarial suite']"
+  }
+ ],
+ "pass": 8,
+ "total": 8,
+ "all_pass": true
+}

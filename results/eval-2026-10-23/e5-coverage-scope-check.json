@@ -1,0 +1,106 @@
+{
+ "status": "MEASUREMENT \u2014 the coverage statement is checked against the register, the artefact and the bar sheet; its numbers are re-derived.",
+ "scope_statement": "<programme-tree>/docs/INSTRUMENT-COVERAGE-SCOPE.md",
+ "branch": "second branch \u2014 a written scope statement, the measurement reported as a scoped measurement",
+ "checks": [
+  {
+   "check": "the scope statement exists",
+   "pass": true
+  },
+  {
+   "check": "the statement names the case with its correct id",
+   "pass": true
+  },
+  {
+   "check": "the statement names the measurement that covers the case",
+   "pass": true
+  },
+  {
+   "check": "the statement names the population and the instruments",
+   "pass": true
+  },
+  {
+   "check": "the Astra register is readable",
+   "pass": true
+  },
+  {
+   "check": "ASTRA-D13 is the off-machine-backup ruling and does not cover a refusal case",
+   "pass": true
+  },
+  {
+   "check": "the statement records that ASTRA-D13 does not cover this case",
+   "pass": true
+  },
+  {
+   "check": "the statement routes the semantic half to ASTRA-D7",
+   "pass": true
+  },
+  {
+   "check": "the blind-spot artefact exists",
+   "pass": true
+  },
+  {
+   "check": "the blind-spot artefact's own status says it is not a public benchmark score",
+   "pass": true
+  },
+  {
+   "check": "the blind-spot artefact records that it does not judge harmfulness",
+   "pass": true
+  },
+  {
+   "check": "the blind-spot artefact's checks all pass",
+   "pass": true
+  },
+  {
+   "check": "the statement's strict blind-spot figures equal the artefact's",
+   "pass": true
+  },
+  {
+   "check": "the statement reports the HarmBench rates unchanged",
+   "pass": true
+  },
+  {
+   "check": "the statement says the HarmBench rate is not recomputed",
+   "pass": true
+  },
+  {
+   "check": "the statement says the measurement establishes the benchmark cannot SEE the content, not that the content is harmful",
+   "pass": true
+  },
+  {
+   "check": "the statement names the 'No judge model' constraint",
+   "pass": true
+  },
+  {
+   "check": "the statement says no bar is derived from it",
+   "pass": true
+  },
+  {
+   "check": "the bar sheet's B4 block does not cite the blind-spot measurement as a bar source",
+   "pass": true
+  },
+  {
+   "check": "the bar sheet does not carry the blind-spot counts as a bar",
+   "pass": true
+  },
+  {
+   "check": "the statement names the public candidate with its arXiv id",
+   "pass": true
+  },
+  {
+   "check": "the statement says what the candidate still would not cover",
+   "pass": true
+  },
+  {
+   "check": "the statement says adopting it is a ruling, not this item's decision",
+   "pass": true
+  },
+  {
+   "check": "the blind-spot instrument re-runs clean",
+   "pass": true
+  }
+ ],
+ "checks_passed": 24,
+ "checks_total": 24,
+ "status_line": "24/24 checks PASS"
+}

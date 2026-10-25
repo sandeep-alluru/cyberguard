@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "/home/clawer-samurai-1/AgentHub/cyberguard/train_cyberguard.py", line 32, in <module>
-    ROOT = Path(os.environ["CYBERGUARD_ROOT"])
-                ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
-  File "<frozen os>", line 685, in __getitem__
-KeyError: 'CYBERGUARD_ROOT'

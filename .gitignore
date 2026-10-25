@@ -1,31 +1,44 @@
-# heavy / binary artifacts: they live in the durable archive, not in git
-research-tmp/harvest-*/adapters/
-research-tmp/session-*.jsonl
-research-tmp/*.pdf
-resbench/*.pdf
-**/__pycache__/
-v2/.selftest/
-*.zstd
+# --- build artefacts -------------------------------------------------------
+__pycache__/
+*.pyc
+.inventory.json.tmp
+
+# --- NEVER commit model weights or checkpoints -----------------------------
+# These are the release artefact, not the evaluation record. If a tool drops one
+# here, it stays out of the repository.
 *.safetensors
 *.gguf
-v2/data/mixture/
-v2/data/corpus/
-
-# review-round scratch: the rebuilt mixtures and change dumps each round produced. They are ~200 MB apiece and were
-# being committed on every `git add -A`, which is why .git reached 726 MB. The EVIDENCE for those rounds (their
-# receipts, logs and diffs) stays tracked; the regenerable bulk does not, matching the convention stated above.
-research-tmp/reviews/*_rebuild/
-research-tmp/reviews/*_changes.json
-
-# Same convention for the v2 terminal state (2026-09-29): harvest-v2/mixture is 387 MB of training mixtures and
-# data/v3 is 894 MB of regenerable bulk; both were untracked-but-addable, so one `git add -A` would have committed
-# ~1.3 GB. harvest-v2/adapters is already covered by the `research-tmp/harvest-*/adapters/` rule above and the
-# adapter bytes by `*.safetensors`. The EVIDENCE stays tracked: harvest-v2/{evals,receipts,logs}, MANIFEST.sha256.
-research-tmp/harvest-v2/mixture/
-data/v3/
-# The trained adapters themselves: the safetensors are already ignored by `*.safetensors`, which left two 11 MB
-# tokenizer.json files (22 MB) as the only addable part. They are regenerable copies of the base tokenizer, not
-# evidence — the adapter bytes live on both hosts and in harvest-v2/adapters, and their receipts are tracked.
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.h5
+*.msgpack
 adapters/
-research-tmp/
-v2/candidates/attack-stix.json
+models/
+
+# --- NEVER commit row-level data -------------------------------------------
+# Training corpora, held-out sets, mixtures and probe sets are out of bounds.
+# The three exceptions below are published public-benchmark or governance files
+# that are already tracked; the negations keep a fresh clone consistent.
+*.jsonl
+*.parquet
+*.arrow
+*.npz
+!docs/ASTRA-DECISIONS.jsonl
+!results/pubbench/harmbench/harmbench_behaviors_text_test.csv
+!results/pubbench/secqa_test.csv
+
+# --- never commit credentials or environment ------------------------------
+.env
+.env.*
+*.pem
+*.key
+credentials.json
+cyberguard-env
+
+# --- local scratch ---------------------------------------------------------
+scratch/
+tmp/
+.venv/
+venv/

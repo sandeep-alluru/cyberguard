@@ -1,0 +1,162 @@
+{
+ "checks": {
+  "replication_d17_vs_main_frr_v3": {
+   "rows_compared": 250,
+   "identical_labels": 249,
+   "agreement_rate": 0.996,
+   "d17_refusals": 92,
+   "main_frr_refusals": 91,
+   "d17_pct": 36.8,
+   "main_pct": 36.4,
+   "verdict": "1 label(s) differ \u2014 investigate before using either"
+  },
+  "v2_armA_vs_armB_single_variable": {
+   "rows_compared": 750,
+   "paired_counts_00_01_10_11": {
+    "00": 449,
+    "01": 36,
+    "10": 170,
+    "11": 95
+   },
+   "armA_refusals": 265,
+   "armB_refusals": 131,
+   "armA_pct": 35.33,
+   "armB_pct": 17.47,
+   "delta_pp": 17.87,
+   "mcnemar_exact_p": 5.097690039105802e-22,
+   "mcnemar_stats": {
+    "b": 36,
+    "c": 170,
+    "n_discordant": 206,
+    "test": "exact binomial McNemar, two-sided"
+   },
+   "interpretation": "A refuses significantly more benign requests than B, on the same rows, with the refusal stream as the only difference: the corpus's refusal weight is CAUSAL."
+  },
+  "merged_vs_historical": {
+   "rows_compared": 12,
+   "max_abs_delta_pp": 0.91,
+   "rows": [
+    {
+     "model": "base",
+     "benchmark": "secqa-v1-test",
+     "re_measured": 0.6818,
+     "historical": 0.6909,
+     "delta_pp": -0.91
+    },
+    {
+     "model": "cybersecqwen-4b",
+     "benchmark": "secqa-v1-test",
+     "re_measured": 0.4727,
+     "historical": 0.4818,
+     "delta_pp": -0.91
+    },
+    {
+     "model": "cybersecqwen-4b",
+     "benchmark": "cybermetric-500",
+     "re_measured": 0.446,
+     "historical": 0.454,
+     "delta_pp": -0.8
+    },
+    {
+     "model": "v3",
+     "benchmark": "cybermetric-500",
+     "re_measured": 0.8,
+     "historical": 0.806,
+     "delta_pp": -0.6
+    },
+    {
+     "model": "base",
+     "benchmark": "cti-mcq",
+     "re_measured": 0.4444,
+     "historical": 0.4396,
+     "delta_pp": 0.48
+    },
+    {
+     "model": "base",
+     "benchmark": "cybermetric-500",
+     "re_measured": 0.468,
+     "historical": 0.472,
+     "delta_pp": -0.4
+    },
+    {
+     "model": "base",
+     "benchmark": "cti-rcm",
+     "re_measured": 0.41,
+     "historical": 0.406,
+     "delta_pp": 0.4
+    },
+    {
+     "model": "v3",
+     "benchmark": "cti-mcq",
+     "re_measured": 0.4648,
+     "historical": 0.468,
+     "delta_pp": -0.32
+    },
+    {
+     "model": "v3",
+     "benchmark": "cti-rcm",
+     "re_measured": 0.636,
+     "historical": 0.633,
+     "delta_pp": 0.3
+    },
+    {
+     "model": "cybersecqwen-4b",
+     "benchmark": "cti-mcq",
+     "re_measured": 0.5764,
+     "historical": 0.5776,
+     "delta_pp": -0.12
+    },
+    {
+     "model": "cybersecqwen-4b",
+     "benchmark": "cti-rcm",
+     "re_measured": 0.678,
+     "historical": 0.679,
+     "delta_pp": -0.1
+    },
+    {
+     "model": "v3",
+     "benchmark": "secqa-v1-test",
+     "re_measured": 0.9364,
+     "historical": 0.9364,
+     "delta_pp": 0.0
+    }
+   ],
+   "verdict": "REPRODUCES"
+  },
+  "contamination_replication_on_re_measurement": {
+   "per_model_per_benchmark": {
+    "v3": {
+     "cti-mcq": {
+      "n": 2500,
+      "with_token": 2500,
+      "with_token_pct": 100.0,
+      "unparseable": 1032,
+      "unparseable_pct": 41.28
+     },
+     "cti-rcm": {
+      "n": 1000,
+      "with_token": 1000,
+      "with_token_pct": 100.0,
+      "unparseable": 197,
+      "unparseable_pct": 19.7
+     },
+     "cybermetric-500": {
+      "n": 500,
+      "with_token": 0,
+      "with_token_pct": 0.0,
+      "unparseable": 58,
+      "unparseable_pct": 11.6
+     },
+     "secqa-v1-test": {
+      "n": 110,
+      "with_token": 0,
+      "with_token_pct": 0.0,
+      "unparseable": 4,
+      "unparseable_pct": 3.64
+     }
+    }
+   },
+   "verdict": "REPLICATES \u2014 the re-measured v3 run shows the same contamination pattern"
+  }
+ }
+}

@@ -1,0 +1,93 @@
+{
+ "what_this_is": "F-8c's receipt: the rebuilt corpus with the residual near-duplicate rows removed (the rows that overlap a held-out row more than the v2 gate's own recorded maximum), and the refusal share re-solved.",
+ "authority": {
+  "decision": "OWNER-D3 (docs/OWNER-DECISIONS.md, 2026-10-24)",
+  "treatment": "A of docs/ESCALATION-F8-HELDOUT-CONTAMINATION.md \u2014 remove the rows and re-derive"
+ },
+ "input": {
+  "path": "<programme-tree>/data/v4/corpus-v5-f8clean.jsonl",
+  "sha256": "c80603b05e7953a3200a7a90c71ae6ae23f7d48bc05809a55f0c7968fdca3e8c",
+  "rows": 108343,
+  "per_source": {
+   "fenrir": 99126,
+   "format": 3304,
+   "replay": 594,
+   "refusal": 5319
+  }
+ },
+ "output": {
+  "path": "<programme-tree>/data/v4/corpus-v6-f8clean.jsonl",
+  "sha256": "e5684f0c478ebd6bf1b2d2bfcc495789d84251ade848098a8aa46d7c25881187",
+  "rows": 108334,
+  "per_source": {
+   "fenrir": 99117,
+   "format": 3304,
+   "replay": 594,
+   "refusal": 5319
+  }
+ },
+ "bar": {
+  "overlap": 0.0266,
+  "containment": 0.0723,
+  "source": "v2/gate-report.json \u2014 the maximum over the gate's ADMITted candidates, read from the file, not restated here",
+  "ngram": 13,
+  "reject_thresholds": {
+   "overlap": 0.6,
+   "containment": 0.8
+  }
+ },
+ "removal": {
+  "rows_removed": 9,
+  "by_source": {
+   "fenrir": 9
+  },
+  "instrument": "v2/gate_v2.py's doc_text / tokens / ngrams \u2014 IMPORTED, not re-implemented",
+  "set": "<programme-tree>/data/v4/removal-set-f8c.jsonl",
+  "set_sha256": "da14452f7e6015e2bccf7000d51492b655edb7cf4bd1948041ec4dda81966309"
+ },
+ "refusal_share": {
+  "target_pct": 4.91,
+  "target_parameter_source": "eval-2026-10-23/c5_refusal_policy.py::TARGET_SHARE, read from the file",
+  "formula": "R = int(TARGET_SHARE * non_refusal_mass / (1 - TARGET_SHARE))",
+  "non_refusal_mass": 103015,
+  "presentations_R": 5319,
+  "achieved_pct": 4.9098,
+  "distinct_refusal_rows": 1342
+ },
+ "not_the_final_corpus": "this is the decontaminated WORKING corpus. The Data Gate receipt (D-7) is still outstanding, now on a model-adjudicated basis under OWNER-D3; until it is issued, no training is valid against it.",
+ "checks": [
+  {
+   "name": "the residual-overlap bar is the v2 gate's own recorded maximum, read from its report",
+   "pass": true,
+   "detail": "overlap 0.0266, containment 0.0723 across 8 admitted candidates; the gate's n-gram is 13, its reject thresholds are overlap 0.6 and containment 0.8"
+  },
+  {
+   "name": "the holdout index is built from the gate's own tokeniser and n-grams",
+   "pass": true,
+   "detail": "500 holdout documents indexed"
+  },
+  {
+   "name": "the corpus rows exceeding the gate's recorded residual maximum are identified",
+   "pass": true,
+   "detail": "9 of 108,343 rows exceed overlap 0.0266 or containment 0.0723"
+  },
+  {
+   "name": "the flagged rows are the near-duplicates the failed check was about",
+   "pass": true,
+   "detail": "worst flagged: jaccard 0.0614, containment 0.1276"
+  },
+  {
+   "name": "the re-solved refusal share does not exceed the policy's target",
+   "pass": true,
+   "detail": "R=5319 over a mass of 103,015 -> 4.9098 % against a 4.91 % target"
+  },
+  {
+   "name": "the cleaned corpus's counts sum to its row count",
+   "pass": true,
+   "detail": "108,334 rows: {'fenrir': 99117, 'format': 3304, 'replay': 594, 'refusal': 5319}"
+  }
+ ],
+ "pass": 6,
+ "total": 6,
+ "all_pass": true
+}

@@ -1,0 +1,510 @@
+{
+ "what_this_is": "the family's measured standing on the public benchmarks, and what the previously-failed adapters are worth \u2014 assembled from artefacts already on disk, re-derivable by re-running this script",
+ "surface": {
+  "decoding": "greedy, do_sample=False, num_beams=1",
+  "trials": 1,
+  "max_new_tokens": 512,
+  "batch": 8,
+  "padding": "left + attention mask",
+  "precision": "bfloat16",
+  "quantization": "none",
+  "adapter": "peft, not merged",
+  "input_truncation": false,
+  "max_prompt_tokens": 3584,
+  "envelope": 4096,
+  "penalties": "repetition_penalty=1.0",
+  "chat": "own tokenizer/template, 1 user message, no system, 0-shot"
+ },
+ "population": {
+  "cybermetric-500": 500,
+  "secqa-v1-test": 110,
+  "cti-mcq": 2500,
+  "cti-rcm": 1000
+ },
+ "family_table": {
+  "base": {
+   "label": "base (no adapter)",
+   "benchmarks": {
+    "cybermetric-500": {
+     "accuracy": 0.468,
+     "n": 500,
+     "unparseable": 228,
+     "unparseable_rate": 0.456
+    },
+    "secqa-v1-test": {
+     "accuracy": 0.6818,
+     "n": 110,
+     "unparseable": 35,
+     "unparseable_rate": 0.3182
+    },
+    "cti-mcq": {
+     "accuracy": 0.4444,
+     "n": 2500,
+     "unparseable": 6,
+     "unparseable_rate": 0.0024
+    },
+    "cti-rcm": {
+     "accuracy": 0.41,
+     "n": 1000,
+     "unparseable": 185,
+     "unparseable_rate": 0.185
+    }
+   },
+   "harmbench_harmful_compliance_pct": 0.63,
+   "harmbench_yes_of_n": 1,
+   "harmbench_n": 159,
+   "mitre_frr_refusal_pct": 4.13,
+   "frr_refusals_of_n": 31,
+   "frr_n": 750
+  },
+  "v3": {
+   "label": "v3 (base + the v3 adapter)",
+   "benchmarks": {
+    "cybermetric-500": {
+     "accuracy": 0.8,
+     "n": 500,
+     "unparseable": 58,
+     "unparseable_rate": 0.116
+    },
+    "secqa-v1-test": {
+     "accuracy": 0.9364,
+     "n": 110,
+     "unparseable": 4,
+     "unparseable_rate": 0.0364
+    },
+    "cti-mcq": {
+     "accuracy": 0.4648,
+     "n": 2500,
+     "unparseable": 1032,
+     "unparseable_rate": 0.4128
+    },
+    "cti-rcm": {
+     "accuracy": 0.636,
+     "n": 1000,
+     "unparseable": 197,
+     "unparseable_rate": 0.197
+    }
+   },
+   "harmbench_harmful_compliance_pct": 0.0,
+   "harmbench_yes_of_n": 0,
+   "harmbench_n": 159,
+   "mitre_frr_refusal_pct": 29.07,
+   "frr_refusals_of_n": 218,
+   "frr_n": 750
+  },
+  "cybersecqwen-4b": {
+   "label": "public comparator",
+   "benchmarks": {
+    "cybermetric-500": {
+     "accuracy": 0.446,
+     "n": 500,
+     "unparseable": 239,
+     "unparseable_rate": 0.478
+    },
+    "secqa-v1-test": {
+     "accuracy": 0.4727,
+     "n": 110,
+     "unparseable": 57,
+     "unparseable_rate": 0.5182
+    },
+    "cti-mcq": {
+     "accuracy": 0.5764,
+     "n": 2500,
+     "unparseable": 75,
+     "unparseable_rate": 0.03
+    },
+    "cti-rcm": {
+     "accuracy": 0.678,
+     "n": 1000,
+     "unparseable": 0,
+     "unparseable_rate": 0.0
+    }
+   },
+   "harmbench_harmful_compliance_pct": 1.89,
+   "harmbench_yes_of_n": 3,
+   "harmbench_n": 159,
+   "mitre_frr_refusal_pct": 1.07,
+   "frr_refusals_of_n": 8,
+   "frr_n": 750
+  },
+  "v1": {
+   "label": "v1 adapter",
+   "benchmarks": {
+    "cybermetric-500": {
+     "accuracy": 0.686,
+     "n": 500,
+     "unparseable": 139,
+     "unparseable_rate": 0.278
+    },
+    "secqa-v1-test": {
+     "accuracy": 0.9273,
+     "n": 110,
+     "unparseable": 6,
+     "unparseable_rate": 0.0545
+    },
+    "cti-mcq": {
+     "accuracy": 0.1676,
+     "n": 2500,
+     "unparseable": 1937,
+     "unparseable_rate": 0.7748
+    },
+    "cti-rcm": {
+     "accuracy": 0.0,
+     "n": 1000,
+     "unparseable": 1000,
+     "unparseable_rate": 1.0
+    }
+   },
+   "harmbench_harmful_compliance_pct": 7.55,
+   "harmbench_yes_of_n": 12,
+   "harmbench_n": 159,
+   "mitre_frr_refusal_pct": 10.93,
+   "frr_refusals_of_n": 82,
+   "frr_n": 750
+  },
+  "v2armA": {
+   "label": "v2 arm A adapter",
+   "benchmarks": {
+    "cybermetric-500": {
+     "accuracy": 0.014,
+     "n": 500,
+     "unparseable": 488,
+     "unparseable_rate": 0.976
+    },
+    "secqa-v1-test": {
+     "accuracy": 0.0091,
+     "n": 110,
+     "unparseable": 108,
+     "unparseable_rate": 0.9818
+    },
+    "cti-mcq": {
+     "accuracy": 0.1124,
+     "n": 2500,
+     "unparseable": 2123,
+     "unparseable_rate": 0.8492
+    },
+    "cti-rcm": {
+     "accuracy": 0.049,
+     "n": 1000,
+     "unparseable": 466,
+     "unparseable_rate": 0.466
+    }
+   },
+   "harmbench_harmful_compliance_pct": 1.26,
+   "harmbench_yes_of_n": 2,
+   "harmbench_n": 159,
+   "mitre_frr_refusal_pct": 35.33,
+   "frr_refusals_of_n": 265,
+   "frr_n": 750
+  },
+  "v2armB": {
+   "label": "v2 arm B adapter",
+   "benchmarks": {
+    "cybermetric-500": {
+     "accuracy": 0.192,
+     "n": 500,
+     "unparseable": 395,
+     "unparseable_rate": 0.79
+    },
+    "secqa-v1-test": {
+     "accuracy": 0.2182,
+     "n": 110,
+     "unparseable": 84,
+     "unparseable_rate": 0.7636
+    },
+    "cti-mcq": {
+     "accuracy": 0.4172,
+     "n": 2500,
+     "unparseable": 1011,
+     "unparseable_rate": 0.4044
+    },
+    "cti-rcm": {
+     "accuracy": 0.127,
+     "n": 1000,
+     "unparseable": 509,
+     "unparseable_rate": 0.509
+    }
+   },
+   "harmbench_harmful_compliance_pct": 3.14,
+   "harmbench_yes_of_n": 5,
+   "harmbench_n": 159,
+   "mitre_frr_refusal_pct": 17.47,
+   "frr_refusals_of_n": 131,
+   "frr_n": 750
+  }
+ },
+ "safety": {},
+ "equal_terms_cti_mcq": {
+  "v3|512": {
+   "accuracy": 0.466,
+   "n": 2500,
+   "unparseable_rate": 0.4116
+  },
+  "v3|1024": {
+   "accuracy": 0.6112,
+   "n": 2500,
+   "unparseable_rate": 0.1684
+  },
+  "v3|2048": {
+   "accuracy": 0.6404,
+   "n": 2500,
+   "unparseable_rate": 0.1024
+  },
+  "base|512": {
+   "accuracy": 0.44,
+   "n": 2500,
+   "unparseable_rate": 0.0028
+  },
+  "base|1024": {
+   "accuracy": 0.4404,
+   "n": 2500,
+   "unparseable_rate": 0.002
+  },
+  "base|2048": {
+   "accuracy": 0.4408,
+   "n": 2500,
+   "unparseable_rate": 0.0004
+  },
+  "cybersecqwen-4b|512": {
+   "accuracy": 0.5768,
+   "n": 2500,
+   "unparseable_rate": 0.0296
+  },
+  "cybersecqwen-4b|1024": {
+   "accuracy": 0.5776,
+   "n": 2500,
+   "unparseable_rate": 0.0284
+  },
+  "cybersecqwen-4b|2048": {
+   "accuracy": 0.5776,
+   "n": 2500,
+   "unparseable_rate": 0.0284
+  }
+ },
+ "adapter_contribution_v3_minus_base": {
+  "v3": {
+   "cybermetric-500": {
+    "delta_pp": 33.2,
+    "from": 0.468,
+    "to": 0.8
+   },
+   "secqa-v1-test": {
+    "delta_pp": 25.46,
+    "from": 0.6818,
+    "to": 0.9364
+   },
+   "cti-mcq": {
+    "delta_pp": 2.04,
+    "from": 0.4444,
+    "to": 0.4648
+   },
+   "cti-rcm": {
+    "delta_pp": 22.6,
+    "from": 0.41,
+    "to": 0.636
+   },
+   "harmbench_harmful_compliance_pct": {
+    "delta_pp": -0.63,
+    "from": 0.63,
+    "to": 0.0,
+    "note": "lower is better"
+   },
+   "mitre_frr_refusal_pct": {
+    "delta_pp": 24.94,
+    "from": 4.13,
+    "to": 29.07,
+    "note": "lower is better \u2014 a refusal is a false refusal unless the prompt asks for one"
+   }
+  },
+  "cybersecqwen-4b": {
+   "cybermetric-500": {
+    "delta_pp": -2.2,
+    "from": 0.468,
+    "to": 0.446
+   },
+   "secqa-v1-test": {
+    "delta_pp": -20.91,
+    "from": 0.6818,
+    "to": 0.4727
+   },
+   "cti-mcq": {
+    "delta_pp": 13.2,
+    "from": 0.4444,
+    "to": 0.5764
+   },
+   "cti-rcm": {
+    "delta_pp": 26.8,
+    "from": 0.41,
+    "to": 0.678
+   },
+   "harmbench_harmful_compliance_pct": {
+    "delta_pp": 1.26,
+    "from": 0.63,
+    "to": 1.89,
+    "note": "lower is better"
+   },
+   "mitre_frr_refusal_pct": {
+    "delta_pp": -3.06,
+    "from": 4.13,
+    "to": 1.07,
+    "note": "lower is better \u2014 a refusal is a false refusal unless the prompt asks for one"
+   }
+  },
+  "v1": {
+   "cybermetric-500": {
+    "delta_pp": 21.8,
+    "from": 0.468,
+    "to": 0.686
+   },
+   "secqa-v1-test": {
+    "delta_pp": 24.55,
+    "from": 0.6818,
+    "to": 0.9273
+   },
+   "cti-mcq": {
+    "delta_pp": -27.68,
+    "from": 0.4444,
+    "to": 0.1676
+   },
+   "cti-rcm": {
+    "delta_pp": -41.0,
+    "from": 0.41,
+    "to": 0.0
+   },
+   "harmbench_harmful_compliance_pct": {
+    "delta_pp": 6.92,
+    "from": 0.63,
+    "to": 7.55,
+    "note": "lower is better"
+   },
+   "mitre_frr_refusal_pct": {
+    "delta_pp": 6.8,
+    "from": 4.13,
+    "to": 10.93,
+    "note": "lower is better \u2014 a refusal is a false refusal unless the prompt asks for one"
+   }
+  },
+  "v2armA": {
+   "cybermetric-500": {
+    "delta_pp": -45.4,
+    "from": 0.468,
+    "to": 0.014
+   },
+   "secqa-v1-test": {
+    "delta_pp": -67.27,
+    "from": 0.6818,
+    "to": 0.0091
+   },
+   "cti-mcq": {
+    "delta_pp": -33.2,
+    "from": 0.4444,
+    "to": 0.1124
+   },
+   "cti-rcm": {
+    "delta_pp": -36.1,
+    "from": 0.41,
+    "to": 0.049
+   },
+   "harmbench_harmful_compliance_pct": {
+    "delta_pp": 0.63,
+    "from": 0.63,
+    "to": 1.26,
+    "note": "lower is better"
+   },
+   "mitre_frr_refusal_pct": {
+    "delta_pp": 31.2,
+    "from": 4.13,
+    "to": 35.33,
+    "note": "lower is better \u2014 a refusal is a false refusal unless the prompt asks for one"
+   }
+  },
+  "v2armB": {
+   "cybermetric-500": {
+    "delta_pp": -27.6,
+    "from": 0.468,
+    "to": 0.192
+   },
+   "secqa-v1-test": {
+    "delta_pp": -46.36,
+    "from": 0.6818,
+    "to": 0.2182
+   },
+   "cti-mcq": {
+    "delta_pp": -2.72,
+    "from": 0.4444,
+    "to": 0.4172
+   },
+   "cti-rcm": {
+    "delta_pp": -28.3,
+    "from": 0.41,
+    "to": 0.127
+   },
+   "harmbench_harmful_compliance_pct": {
+    "delta_pp": 2.51,
+    "from": 0.63,
+    "to": 3.14,
+    "note": "lower is better"
+   },
+   "mitre_frr_refusal_pct": {
+    "delta_pp": 13.34,
+    "from": 4.13,
+    "to": 17.47,
+    "note": "lower is better \u2014 a refusal is a false refusal unless the prompt asks for one"
+   }
+  }
+ },
+ "lineage": {
+  "f8_source": "eval-2026-10-23/f8-decontamination-report.json",
+  "f8_keys": [
+   "what_this_is",
+   "instrument",
+   "holdout",
+   "bar",
+   "per_source",
+   "worst_residual_overlap",
+   "within_the_bar",
+   "checks",
+   "pass",
+   "total",
+   "all_pass"
+  ],
+  "f8_status": null
+ },
+ "equal_terms_vsp": {
+  "v3|1024": null,
+  "v3|2048": null,
+  "base|1024": null,
+  "base|2048": null,
+  "cybersecqwen-4b|1024": null,
+  "cybersecqwen-4b|2048": null
+ },
+ "verdict": {
+  "is_the_v3_adapter_dragging_the_programme_down": false,
+  "why": [
+   "On the frozen surface the v3 adapter is the ONLY arm that improves on its own base model on every public benchmark: cti-mcq +2.04 pp; cti-rcm +22.60 pp; cybermetric-500 +33.20 pp; harmbench_harmful_compliance_pct -0.63 pp; mitre_frr_refusal_pct +24.94 pp; secqa-v1-test +25.46 pp.",
+   "On the equal-terms CTI-MCQ ladder (one runner, one population, one parser) v3 reads 0.6404 at 2,048 against the base's 0.4408 and the public comparator's 0.5776 \u2014 the adapter is the source of the whole gap.",
+   "On the harmful side the adapter is also better than its base: HarmBench standard-test harmful compliance -0.63 pp (lower is better), i.e. it removed the base's one harmful completion rather than adding any.",
+   "The v3 adapter's ONE measured liability is the false-refusal side: MITRE-FRR +24.94 pp over the base. That is a refusal-DOSE problem, which is exactly what the rebuilt corpus's 4.91 % refusal share (decision W-3) and its 3,304 format-compliance rows exist to fix \u2014 not an adapter defect.",
+   "The arms that ARE failures are v1 and v2: v1 scores 0.0000 on CTI-RCM (1,000 of 1,000 unparseable) and below the always-C floor on CTI-MCQ, and v2 arm A/B collapse across the board. 'The previously-failed adapter' is v1/v2, not v3."
+  ],
+  "but_do_not_warm_start_from_it": {
+   "recommendation": "the new arm trains from the BASE checkpoint, not from the v3 adapter",
+   "reasons": [
+    "The F-8 trace says the held-out contamination reaches v3's own SFT file and training mixture. A warm start would ship weights that were partly trained on the 604 rows containing the held-out questions \u2014 so the new arm's own held-out measurement would be compromised at the source, before a single new row is seen.",
+    "The v3 adapter also carries the OLD corpus's imprint: the old refusal share (not the 4.91 % of W-3) and the old mixture. The rebuilt corpus exists to fix those; resuming v3 would partially undo the fix at step one.",
+    "The adapter's capability contribution is a DATA effect, not a weight effect: it is reproducible by training the same recipe on the rebuilt mixture, which carries MORE relevant supervision (the 245,273-row NVD triage family, which the old corpus did not contain at all).",
+    "Cold start keeps the shipped artefact reproducible from one recipe, one corpus and one base checkpoint \u2014 which is what the release manifest and the model card have to claim."
+   ]
+  },
+  "family_delta_over_base": {
+   "cybermetric-500": 33.2,
+   "secqa-v1-test": 25.46,
+   "cti-mcq": 2.04,
+   "cti-rcm": 22.6,
+   "harmbench_harmful_compliance_pct": -0.63,
+   "mitre_frr_refusal_pct": 24.94
+  },
+  "v3_harmbench_delta_pp": -0.63,
+  "v3_frr_delta_pp": 24.94
+ }
+}

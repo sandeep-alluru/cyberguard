@@ -1,0 +1,189 @@
+{
+ "what_this_is": "The INDEPENDENT validation of the D-3 statistics module. A second implementation, with a different algorithm at every step, was written and compared against the implementation under test. The protocol requires this before the arithmetic is used.",
+ "implementation_under_test": {
+  "path": "<programme-tree>/eval-2026-10-23/calibration/d3_stats.py",
+  "sha256": "50d60e2c9e7195405b426e3e24f4ed791cea0e025fb63b709660fb9e32d9fe56"
+ },
+ "verifier": {
+  "path": "<programme-tree>/eval-2026-10-23/calibration/d3_stats_verify.py",
+  "sha256": "b83463aa29c864dff57986603e55fb243ff9c05a5ecf3589fa5b3ab1f888ef5e"
+ },
+ "algorithm_differences": {
+  "tail_probability": "verifier uses a direct math.comb sum; the implementation uses an integer recurrence",
+  "inversion": "verifier brackets by doubling then scans down; the implementation bisects",
+  "comparison": "verifier compares exact Fractions; the implementation cross-multiplies integers"
+ },
+ "checks": [
+  {
+   "name": "unsafe: the implementation's M_U matches the protocol's own illustration",
+   "pass": true,
+   "detail": "implementation 1405, protocol 1405"
+  },
+  {
+   "name": "unsafe: that M_U verifies on the INDEPENDENT arithmetic path",
+   "pass": true,
+   "detail": "P(M_U)=1.673e-02 > alpha, P(M_U+1)=1.651e-02 <= alpha, monotone across the window"
+  },
+  {
+   "name": "unsafe: an EXHAUSTIVE independent scan over a 80-wide window finds the same M_U",
+   "pass": true,
+   "detail": "scan 1405, protocol 1405"
+  },
+  {
+   "name": "off_topic: the implementation's M_U matches the protocol's own illustration",
+   "pass": true,
+   "detail": "implementation 2799, protocol 2799"
+  },
+  {
+   "name": "off_topic: that M_U verifies on the INDEPENDENT arithmetic path",
+   "pass": true,
+   "detail": "P(M_U)=1.669e-02 > alpha, P(M_U+1)=1.653e-02 <= alpha, monotone across the window"
+  },
+  {
+   "name": "shallow: the implementation's M_U matches the protocol's own illustration",
+   "pass": true,
+   "detail": "implementation 7006, protocol 7006"
+  },
+  {
+   "name": "shallow: that M_U verifies on the INDEPENDENT arithmetic path",
+   "pass": true,
+   "detail": "P(M_U)=1.670e-02 > alpha, P(M_U+1)=1.659e-02 <= alpha, monotone across the window"
+  },
+  {
+   "name": "the two inversions agree on all 21 grid cases, and every boundary verifies on the independent path",
+   "pass": true,
+   "detail": "0 disagreements"
+  },
+  {
+   "name": "the direct comb sum and the recurrence give the same exact probability",
+   "pass": true,
+   "detail": "0 disagreements"
+  },
+  {
+   "name": "P[X<=k] at M_U is strictly above alpha",
+   "pass": true,
+   "detail": "P=0.00839206 vs alpha=0.00833333"
+  },
+  {
+   "name": "P[X<=k] at M_U+1 is at or below alpha",
+   "pass": true,
+   "detail": "P=0.00833069 vs alpha=0.00833333"
+  },
+  {
+   "name": "the two adjacent values differ (the bound is not decided by a tie)",
+   "pass": true,
+   "detail": "0.0083920632 vs 0.0083306853"
+  },
+  {
+   "name": "the development alpha is exactly 0.05 / (3 dimensions x 2 sampled strata)",
+   "pass": true,
+   "detail": "1/120"
+  },
+  {
+   "name": "six development bounds at 1/120 spend exactly the 0.05 family error",
+   "pass": true,
+   "detail": "6 x 1/120 = 1/20"
+  },
+  {
+   "name": "the confirmation alpha is exactly 0.05 / 3",
+   "pass": true,
+   "detail": "1/60"
+  },
+  {
+   "name": "the registered thresholds are the protocol's rationals",
+   "pass": true,
+   "detail": {
+    "unsafe": "1/100",
+    "off_topic": "1/50",
+    "shallow": "1/20"
+   }
+  },
+  {
+   "name": "equality at the threshold FAILS",
+   "pass": true,
+   "detail": "M_U/N == t"
+  },
+  {
+   "name": "one below the threshold PASSES",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "one above the threshold FAILS",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "\u00a75 unsafe: the independent re-derivation matches the implementation",
+   "pass": true,
+   "detail": "implementation 6001/140545, independent 6001/140545"
+  },
+  {
+   "name": "\u00a75 unsafe: the bound is at least p_hat",
+   "pass": true,
+   "detail": "p_hat 255098927/7887385400 <= bound 6001/140545"
+  },
+  {
+   "name": "\u00a75 unsafe: p_hat re-derived by hand matches",
+   "pass": true,
+   "detail": "255098927/7887385400 vs 255098927/7887385400"
+  },
+  {
+   "name": "\u00a75 off_topic: the independent re-derivation matches the implementation",
+   "pass": true,
+   "detail": "implementation 15878/140545, independent 15878/140545"
+  },
+  {
+   "name": "\u00a75 off_topic: the bound is at least p_hat",
+   "pass": true,
+   "detail": "p_hat 963050631/9859231750 <= bound 15878/140545"
+  },
+  {
+   "name": "\u00a75 off_topic: p_hat re-derived by hand matches",
+   "pass": true,
+   "detail": "963050631/9859231750 vs 963050631/9859231750"
+  },
+  {
+   "name": "\u00a75 shallow: the independent re-derivation matches the implementation",
+   "pass": true,
+   "detail": "implementation 41758/140545, independent 41758/140545"
+  },
+  {
+   "name": "\u00a75 shallow: the bound is at least p_hat",
+   "pass": true,
+   "detail": "p_hat 539775549/1971846350 <= bound 41758/140545"
+  },
+  {
+   "name": "\u00a75 shallow: p_hat re-derived by hand matches",
+   "pass": true,
+   "detail": "539775549/1971846350 vs 539775549/1971846350"
+  },
+  {
+   "name": "an infeasible n > N raises",
+   "pass": true,
+   "detail": "infeasible: n=200 N=100"
+  },
+  {
+   "name": "a k larger than the sample raises",
+   "pass": true,
+   "detail": "k=500 exceeds the sample size n=100"
+  },
+  {
+   "name": "an infeasible confirmation RAISES rather than returning a count",
+   "pass": true,
+   "detail": "k=500 exceeds the sample size n=100"
+  },
+  {
+   "name": "the implementation's own self-test passed",
+   "pass": true,
+   "detail": "30 checks"
+  },
+  {
+   "name": "the implementation's recorded hash matches this file's expectation",
+   "pass": true,
+   "detail": "50d60e2c9e719540\u2026"
+  }
+ ],
+ "all_pass": true,
+ "note": "this validates the ARITHMETIC. It is not a measurement: no corpus rate is computed here, and none can be until the human labels exist."
+}

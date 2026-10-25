@@ -1,0 +1,2033 @@
+{
+ "status": "MEASUREMENT \u2014 the CTI arms of the A-1 sweep, scored by the frozen runner's own summarize(). The scorer is imported, never re-implemented.",
+ "scorer": {
+  "imported_from": "<programme-tree>/eval-2026-10-23/cti-sweep/run_pubbench_extra.py",
+  "function": "summarize",
+  "note": "byte-identical to cti-sweep-b/run_pubbench_extra.py apart from the directory name (verified by diff)",
+  "termination_field": "the frozen summarize() sets termination to the literal 'UNMEASURED'; the withdrawn generated_tokens/termination fields are not read for any number reported here"
+ },
+ "arms": {
+  "v1": {
+   "v1/cti-mcq": {
+    "model": "v1",
+    "benchmark": "cti-mcq",
+    "n": 2500,
+    "correct": 419,
+    "accuracy": 0.1676,
+    "wilson95": [
+     0.1535,
+     0.1827
+    ],
+    "unparseable": 1937,
+    "unparseable_rate": 0.7748,
+    "always_c_baseline": 0.3712,
+    "termination": "UNMEASURED",
+    "paired_pp_vs_base": null,
+    "paired_n": 0,
+    "paired_support_complete": null,
+    "prediction_mix": {
+     "?": 1937,
+     "A": 133,
+     "D": 153,
+     "C": 144,
+     "B": 133
+    },
+    "accuracy_by_gold": {
+     "A": {
+      "n": 374,
+      "correct": 86,
+      "accuracy": 0.2299
+     },
+     "B": {
+      "n": 813,
+      "correct": 124,
+      "accuracy": 0.1525
+     },
+     "C": {
+      "n": 928,
+      "correct": 119,
+      "accuracy": 0.1282
+     },
+     "D": {
+      "n": 385,
+      "correct": 90,
+      "accuracy": 0.2338
+     }
+    },
+    "metric": "strict format-constrained accuracy, local protocol"
+   },
+   "v1/cti-rcm": {
+    "model": "v1",
+    "benchmark": "cti-rcm",
+    "n": 1000,
+    "correct": 0,
+    "accuracy": 0.0,
+    "wilson95": [
+     0.0,
+     0.0038
+    ],
+    "unparseable": 1000,
+    "unparseable_rate": 1.0,
+    "always_c_baseline": null,
+    "termination": "UNMEASURED",
+    "paired_pp_vs_base": null,
+    "paired_n": 0,
+    "paired_support_complete": null,
+    "prediction_mix": {
+     "?": 1000
+    },
+    "accuracy_by_gold": {
+     "CWE-1021": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-116": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-119": {
+      "n": 16,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-120": {
+      "n": 19,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-121": {
+      "n": 21,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-122": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-1236": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-125": {
+      "n": 21,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-131": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-1321": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-190": {
+      "n": 17,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-191": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-193": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-20": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-200": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-203": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-209": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-215": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-22": {
+      "n": 29,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-24": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-252": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-257": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-269": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-272": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-273": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-276": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-281": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-284": {
+      "n": 9,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-287": {
+      "n": 11,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-290": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-294": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-295": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-300": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-306": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-307": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-311": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-319": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-321": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-326": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-327": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-330": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-345": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-346": {
+      "n": 9,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-347": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-352": {
+      "n": 48,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-354": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-362": {
+      "n": 10,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-369": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-400": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-401": {
+      "n": 8,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-404": {
+      "n": 16,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-415": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-416": {
+      "n": 30,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-426": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-427": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-434": {
+      "n": 32,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-436": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-451": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-470": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-476": {
+      "n": 18,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-494": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-502": {
+      "n": 14,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-521": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-522": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-525": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-532": {
+      "n": 7,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-552": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-59": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-601": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-610": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-611": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-613": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-614": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-639": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-640": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-665": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-668": {
+      "n": 7,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-670": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-672": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-674": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-681": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-697": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-73": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-732": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-74": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-754": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-755": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-77": {
+      "n": 20,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-770": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-776": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-78": {
+      "n": 30,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-787": {
+      "n": 66,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-79": {
+      "n": 229,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-798": {
+      "n": 10,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-829": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-835": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-843": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-862": {
+      "n": 22,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-863": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-89": {
+      "n": 84,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-908": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-913": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-918": {
+      "n": 11,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-94": {
+      "n": 14,
+      "correct": 0,
+      "accuracy": 0.0
+     }
+    },
+    "metric": "strict format-constrained accuracy, local protocol"
+   }
+  },
+  "v2armA": {
+   "v2armA/cti-mcq": {
+    "model": "v2armA",
+    "benchmark": "cti-mcq",
+    "n": 2500,
+    "correct": 281,
+    "accuracy": 0.1124,
+    "wilson95": [
+     0.1006,
+     0.1254
+    ],
+    "unparseable": 2123,
+    "unparseable_rate": 0.8492,
+    "always_c_baseline": 0.3712,
+    "termination": "UNMEASURED",
+    "paired_pp_vs_base": null,
+    "paired_n": 0,
+    "paired_support_complete": null,
+    "prediction_mix": {
+     "?": 2123,
+     "C": 266,
+     "D": 40,
+     "A": 55,
+     "B": 16
+    },
+    "accuracy_by_gold": {
+     "A": {
+      "n": 374,
+      "correct": 34,
+      "accuracy": 0.0909
+     },
+     "B": {
+      "n": 813,
+      "correct": 15,
+      "accuracy": 0.0185
+     },
+     "C": {
+      "n": 928,
+      "correct": 202,
+      "accuracy": 0.2177
+     },
+     "D": {
+      "n": 385,
+      "correct": 30,
+      "accuracy": 0.0779
+     }
+    },
+    "metric": "strict format-constrained accuracy, local protocol"
+   },
+   "v2armA/cti-rcm": {
+    "model": "v2armA",
+    "benchmark": "cti-rcm",
+    "n": 1000,
+    "correct": 49,
+    "accuracy": 0.049,
+    "wilson95": [
+     0.0373,
+     0.0642
+    ],
+    "unparseable": 466,
+    "unparseable_rate": 0.466,
+    "always_c_baseline": null,
+    "termination": "UNMEASURED",
+    "paired_pp_vs_base": null,
+    "paired_n": 0,
+    "paired_support_complete": null,
+    "prediction_mix": {
+     "?": 466,
+     "CWE-107": 2,
+     "CWE-703": 31,
+     "CWE-193": 28,
+     "CWE-105": 17,
+     "CWE-472": 1,
+     "CWE-404": 17,
+     "CWE-787": 13,
+     "CWE-200": 18,
+     "CWE-294": 10,
+     "CWE-20": 54,
+     "CWE-284": 36,
+     "CWE-113": 1,
+     "CWE-2002": 1,
+     "CWE-119": 66,
+     "CWE-795": 43,
+     "CWE-109": 1,
+     "CWE-796": 3,
+     "CWE-285": 8,
+     "CWE-287": 18,
+     "CWE-1190": 9,
+     "CWE-1150": 1,
+     "CWE-190": 31,
+     "CWE-515": 1,
+     "CWE-785": 1,
+     "CWE-434": 3,
+     "CWE-78": 4,
+     "CWE-134": 2,
+     "CWE-611": 13,
+     "CWE-312": 6,
+     "CWE-414": 1,
+     "CWE-1902": 1,
+     "CWE-702": 10,
+     "CWE-1056": 4,
+     "CWE-351": 1,
+     "CWE-203": 3,
+     "CWE-1256": 1,
+     "CWE-120": 11,
+     "CWE-410": 2,
+     "CWE-20030": 1,
+     "CWE-400": 3,
+     "CWE-327": 5,
+     "CWE-502": 8,
+     "CWE-762": 1,
+     "CWE-564": 1,
+     "CWE-2034": 1,
+     "CWE-321": 1,
+     "CWE-71": 5,
+     "CWE-470": 1,
+     "CWE-1210": 1,
+     "CWE-510": 1,
+     "CWE-399": 3,
+     "CWE-89": 1,
+     "CWE-476": 6,
+     "CWE-450": 1,
+     "CWE-1053": 1,
+     "CWE-501": 1,
+     "CWE-252": 1,
+     "CWE-1054": 1,
+     "CWE-732": 2,
+     "CWE-794": 2,
+     "CWE-1136": 1,
+     "CWE-1062": 1,
+     "CWE-295": 1,
+     "CWE-234": 1,
+     "CWE-4002": 1,
+     "CWE-504": 2,
+     "CWE-467": 1,
+     "CWE-464": 1,
+     "CWE-315": 1,
+     "CWE-1204": 1,
+     "CWE-1132": 1,
+     "CWE-2099": 1
+    },
+    "accuracy_by_gold": {
+     "CWE-1021": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-116": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-119": {
+      "n": 16,
+      "correct": 3,
+      "accuracy": 0.1875
+     },
+     "CWE-120": {
+      "n": 19,
+      "correct": 1,
+      "accuracy": 0.0526
+     },
+     "CWE-121": {
+      "n": 21,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-122": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-1236": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-125": {
+      "n": 21,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-131": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-1321": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-190": {
+      "n": 17,
+      "correct": 13,
+      "accuracy": 0.7647
+     },
+     "CWE-191": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-193": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-20": {
+      "n": 3,
+      "correct": 2,
+      "accuracy": 0.6667
+     },
+     "CWE-200": {
+      "n": 2,
+      "correct": 2,
+      "accuracy": 1.0
+     },
+     "CWE-203": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-209": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-215": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-22": {
+      "n": 29,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-24": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-252": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-257": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-269": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-272": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-273": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-276": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-281": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-284": {
+      "n": 9,
+      "correct": 4,
+      "accuracy": 0.4444
+     },
+     "CWE-287": {
+      "n": 11,
+      "correct": 5,
+      "accuracy": 0.4545
+     },
+     "CWE-290": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-294": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-295": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-300": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-306": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-307": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-311": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-319": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-321": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-326": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-327": {
+      "n": 4,
+      "correct": 2,
+      "accuracy": 0.5
+     },
+     "CWE-330": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-345": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-346": {
+      "n": 9,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-347": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-352": {
+      "n": 48,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-354": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-362": {
+      "n": 10,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-369": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-400": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-401": {
+      "n": 8,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-404": {
+      "n": 16,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-415": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-416": {
+      "n": 30,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-426": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-427": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-434": {
+      "n": 32,
+      "correct": 2,
+      "accuracy": 0.0625
+     },
+     "CWE-436": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-451": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-470": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-476": {
+      "n": 18,
+      "correct": 3,
+      "accuracy": 0.1667
+     },
+     "CWE-494": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-502": {
+      "n": 14,
+      "correct": 8,
+      "accuracy": 0.5714
+     },
+     "CWE-521": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-522": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-525": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-532": {
+      "n": 7,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-552": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-59": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-601": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-610": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-611": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-613": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-614": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-639": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-640": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-665": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-668": {
+      "n": 7,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-670": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-672": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-674": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-681": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-697": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-73": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-732": {
+      "n": 3,
+      "correct": 1,
+      "accuracy": 0.3333
+     },
+     "CWE-74": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-754": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-755": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-77": {
+      "n": 20,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-770": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-776": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-78": {
+      "n": 30,
+      "correct": 2,
+      "accuracy": 0.0667
+     },
+     "CWE-787": {
+      "n": 66,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-79": {
+      "n": 229,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-798": {
+      "n": 10,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-829": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-835": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-843": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-862": {
+      "n": 22,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-863": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-89": {
+      "n": 84,
+      "correct": 1,
+      "accuracy": 0.0119
+     },
+     "CWE-908": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-913": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-918": {
+      "n": 11,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-94": {
+      "n": 14,
+      "correct": 0,
+      "accuracy": 0.0
+     }
+    },
+    "metric": "strict format-constrained accuracy, local protocol"
+   }
+  },
+  "v2armB": {
+   "v2armB/cti-mcq": {
+    "model": "v2armB",
+    "benchmark": "cti-mcq",
+    "n": 2500,
+    "correct": 1043,
+    "accuracy": 0.4172,
+    "wilson95": [
+     0.398,
+     0.4366
+    ],
+    "unparseable": 1011,
+    "unparseable_rate": 0.4044,
+    "always_c_baseline": 0.3712,
+    "termination": "UNMEASURED",
+    "paired_pp_vs_base": null,
+    "paired_n": 0,
+    "paired_support_complete": null,
+    "prediction_mix": {
+     "?": 1011,
+     "C": 712,
+     "D": 280,
+     "A": 256,
+     "B": 241
+    },
+    "accuracy_by_gold": {
+     "A": {
+      "n": 374,
+      "correct": 145,
+      "accuracy": 0.3877
+     },
+     "B": {
+      "n": 813,
+      "correct": 218,
+      "accuracy": 0.2681
+     },
+     "C": {
+      "n": 928,
+      "correct": 512,
+      "accuracy": 0.5517
+     },
+     "D": {
+      "n": 385,
+      "correct": 168,
+      "accuracy": 0.4364
+     }
+    },
+    "metric": "strict format-constrained accuracy, local protocol"
+   },
+   "v2armB/cti-rcm": {
+    "model": "v2armB",
+    "benchmark": "cti-rcm",
+    "n": 1000,
+    "correct": 127,
+    "accuracy": 0.127,
+    "wilson95": [
+     0.1078,
+     0.1491
+    ],
+    "unparseable": 509,
+    "unparseable_rate": 0.509,
+    "always_c_baseline": null,
+    "termination": "UNMEASURED",
+    "paired_pp_vs_base": null,
+    "paired_n": 0,
+    "paired_support_complete": null,
+    "prediction_mix": {
+     "?": 509,
+     "CWE-284": 39,
+     "CWE-79": 82,
+     "CWE-119": 84,
+     "CWE-105": 45,
+     "CWE-404": 14,
+     "CWE-200": 6,
+     "CWE-113": 4,
+     "CWE-20": 63,
+     "CWE-327": 5,
+     "CWE-203": 2,
+     "CWE-794": 8,
+     "CWE-795": 2,
+     "CWE-190": 20,
+     "CWE-312": 4,
+     "CWE-287": 12,
+     "CWE-510": 1,
+     "CWE-2002": 1,
+     "CWE-193": 5,
+     "CWE-1132": 4,
+     "CWE-78": 10,
+     "CWE-1052": 1,
+     "CWE-399": 16,
+     "CWE-703": 5,
+     "CWE-120": 3,
+     "CWE-1193": 1,
+     "CWE-285": 6,
+     "CWE-1056": 4,
+     "CWE-351": 4,
+     "CWE-294": 4,
+     "CWE-2036": 1,
+     "CWE-400": 2,
+     "CWE-1147": 1,
+     "CWE-1190": 11,
+     "CWE-0007": 1,
+     "CWE-410": 1,
+     "CWE-1094": 2,
+     "CWE-232": 2,
+     "CWE-787": 1,
+     "CWE-1342": 1,
+     "CWE-314": 1,
+     "CWE-702": 1,
+     "CWE-1203": 1,
+     "CWE-295": 1,
+     "CWE-252": 1,
+     "CWE-732": 1,
+     "CWE-434": 1,
+     "CWE-70": 1,
+     "CWE-476": 2,
+     "CWE-502": 1,
+     "CWE-315": 1,
+     "CWE-1093": 1
+    },
+    "accuracy_by_gold": {
+     "CWE-1021": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-116": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-119": {
+      "n": 16,
+      "correct": 5,
+      "accuracy": 0.3125
+     },
+     "CWE-120": {
+      "n": 19,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-121": {
+      "n": 21,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-122": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-1236": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-125": {
+      "n": 21,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-131": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-1321": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-190": {
+      "n": 17,
+      "correct": 15,
+      "accuracy": 0.8824
+     },
+     "CWE-191": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-193": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-20": {
+      "n": 3,
+      "correct": 2,
+      "accuracy": 0.6667
+     },
+     "CWE-200": {
+      "n": 2,
+      "correct": 2,
+      "accuracy": 1.0
+     },
+     "CWE-203": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-209": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-215": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-22": {
+      "n": 29,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-24": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-252": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-257": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-269": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-272": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-273": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-276": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-281": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-284": {
+      "n": 9,
+      "correct": 7,
+      "accuracy": 0.7778
+     },
+     "CWE-287": {
+      "n": 11,
+      "correct": 2,
+      "accuracy": 0.1818
+     },
+     "CWE-290": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-294": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-295": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-300": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-306": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-307": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-311": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-319": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-321": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-326": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-327": {
+      "n": 4,
+      "correct": 1,
+      "accuracy": 0.25
+     },
+     "CWE-330": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-345": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-346": {
+      "n": 9,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-347": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-352": {
+      "n": 48,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-354": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-362": {
+      "n": 10,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-369": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-400": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-401": {
+      "n": 8,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-404": {
+      "n": 16,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-415": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-416": {
+      "n": 30,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-426": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-427": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-434": {
+      "n": 32,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-436": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-451": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-470": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-476": {
+      "n": 18,
+      "correct": 2,
+      "accuracy": 0.1111
+     },
+     "CWE-494": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-502": {
+      "n": 14,
+      "correct": 1,
+      "accuracy": 0.0714
+     },
+     "CWE-521": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-522": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-525": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-532": {
+      "n": 7,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-552": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-59": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-601": {
+      "n": 6,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-610": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-611": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-613": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-614": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-639": {
+      "n": 5,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-640": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-665": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-668": {
+      "n": 7,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-670": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-672": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-674": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-681": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-697": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-73": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-732": {
+      "n": 3,
+      "correct": 1,
+      "accuracy": 0.3333
+     },
+     "CWE-74": {
+      "n": 3,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-754": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-755": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-77": {
+      "n": 20,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-770": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-776": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-78": {
+      "n": 30,
+      "correct": 7,
+      "accuracy": 0.2333
+     },
+     "CWE-787": {
+      "n": 66,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-79": {
+      "n": 229,
+      "correct": 82,
+      "accuracy": 0.3581
+     },
+     "CWE-798": {
+      "n": 10,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-829": {
+      "n": 1,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-835": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-843": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-862": {
+      "n": 22,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-863": {
+      "n": 4,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-89": {
+      "n": 84,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-908": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-913": {
+      "n": 2,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-918": {
+      "n": 11,
+      "correct": 0,
+      "accuracy": 0.0
+     },
+     "CWE-94": {
+      "n": 14,
+      "correct": 0,
+      "accuracy": 0.0
+     }
+    },
+    "metric": "strict format-constrained accuracy, local protocol"
+   }
+  }
+ },
+ "validation_against_the_runner_s_own_published_numbers": {
+  "arm": "v2armB, v1, v2armA",
+  "rows_compared": 6,
+  "fields_per_row": [
+   "n",
+   "correct",
+   "accuracy",
+   "unparseable",
+   "unparseable_rate",
+   "always_c_baseline",
+   "wilson95",
+   "prediction_mix",
+   "accuracy_by_gold",
+   "termination"
+  ]
+ },
+ "arms_source_note": "each arm is re-scored here AND published by the runner itself; the two agree field for field",
+ "checks": [
+  {
+   "check": "v2armB/cti-mcq: re-scoring v2armB reproduces the runner's own published row",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-mcq: every reported field equals the runner's own published value",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-rcm: re-scoring v2armB reproduces the runner's own published row",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-rcm: every reported field equals the runner's own published value",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-mcq: re-scoring v1 reproduces the runner's own published row",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-mcq: every reported field equals the runner's own published value",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-rcm: re-scoring v1 reproduces the runner's own published row",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-rcm: every reported field equals the runner's own published value",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-mcq: re-scoring v2armA reproduces the runner's own published row",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-mcq: every reported field equals the runner's own published value",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-rcm: re-scoring v2armA reproduces the runner's own published row",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-rcm: every reported field equals the runner's own published value",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-mcq: scored with n at the expected population size",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-mcq: the frozen scorer reports termination as UNMEASURED",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-rcm: scored with n at the expected population size",
+   "pass": true
+  },
+  {
+   "check": "v1/cti-rcm: the frozen scorer reports termination as UNMEASURED",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-mcq: scored with n at the expected population size",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-mcq: the frozen scorer reports termination as UNMEASURED",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-rcm: scored with n at the expected population size",
+   "pass": true
+  },
+  {
+   "check": "v2armA/cti-rcm: the frozen scorer reports termination as UNMEASURED",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-mcq: scored with n at the expected population size",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-mcq: the frozen scorer reports termination as UNMEASURED",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-rcm: scored with n at the expected population size",
+   "pass": true
+  },
+  {
+   "check": "v2armB/cti-rcm: the frozen scorer reports termination as UNMEASURED",
+   "pass": true
+  }
+ ],
+ "checks_passed": 24,
+ "checks_total": 24
+}
