@@ -158,7 +158,8 @@ The comparator's published hash was verified against the bytes measured here: th
 
 | asset | what it is |
 |---|---|
-| `assets/logo.svg`, `assets/logo.png` | the Rottweiler mark and the wordmark, for a light page |
+| `assets/logo.svg` | the Rottweiler mark and the wordmark, for a light page |
+| `assets/logo.png` | the Rottweiler mark alone as a full square tile (512×512) — the form profile and landing pages use |
 | `assets/logo-dark.svg`, `assets/logo-dark.png` | the same mark and wordmark, for a dark page — the README picks between them by the reader's theme |
 | `assets/social-preview.png` | the link preview |
 | `assets/hero-poster.png` | the hero poster |
